@@ -3,13 +3,51 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Brand colors - matching portfolio design */
+  --navy-dark: #1a1d3a;
+  --purple-deep: #3d2645;
+  --burgundy: #6b2737;
+  --cream: #F8EFDE;
+  --navy-text: #1a1a3e;
+  
+  /* Primary brand gradient */
+  --gradient-primary: linear-gradient(to right, var(--navy-dark), var(--purple-deep), var(--burgundy));
+  
+  /* Animation easing functions - matching design document */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+  --ease-spring: cubic-bezier(0.37, 1.61, 0.58, 0.89);
+  
+  /* Animation durations - matching design document */
+  --duration-instant: 100ms;
+  --duration-fast: 250ms;
+  --duration-normal: 500ms;
+  --duration-slow: 1000ms;
+  --duration-slower: 2000ms;
+  
+  /* Animation timing values for consistency */
+  --stagger-delay: 0.1s;
+  --hero-duration: 1.2s;
+  --fade-duration: 0.8s;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-bricolage);
   --font-mono: var(--font-geist-mono);
+  
+  /* Custom animation utilities - Tailwind-compatible */
+  --animate-fade-up: fadeUp var(--duration-normal) var(--ease-out-expo);
+  --animate-fade-down: fadeDown var(--duration-normal) var(--ease-out-expo);
+  --animate-fade-left: fadeLeft var(--duration-normal) var(--ease-out-expo);
+  --animate-fade-right: fadeRight var(--duration-normal) var(--ease-out-expo);
+  --animate-scale: scale var(--duration-normal) var(--ease-out-expo);
+  --animate-hero: hero var(--hero-duration) var(--ease-out-expo);
+  
+  /* Utility classes for animations */
+  --transition-smooth: all var(--duration-fast) var(--ease-out-expo);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +57,210 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-bricolage), sans-serif;
+}
+
+/* Animation keyframes - matching design document variants */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hero {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotateX(-15deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotateX(0deg);
+  }
+}
+
+/* Utility classes for common animation patterns */
+.animate-fade-in {
+  animation: fadeUp var(--fade-duration) var(--ease-out-expo);
+}
+
+.animate-stagger {
+  animation-delay: calc(var(--stagger-index, 0) * var(--stagger-delay));
+}
+
+/* Performance optimization utilities */
+/* Requirements: 1.2 - Apply will-change to animated elements */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+.will-change-transform-opacity {
+  will-change: transform, opacity;
+}
+
+/* Remove will-change after animation completes to free up resources */
+.will-change-auto {
+  will-change: auto;
+}
+
+/* Apply will-change sparingly for performance */
+@media (prefers-reduced-motion: no-preference) {
+  /* Only apply will-change when animations are enabled */
+  .animate-on-scroll {
+    will-change: transform, opacity;
+  }
+  
+  .animate-on-scroll.animation-complete {
+    will-change: auto;
+  }
+}
+
+/* Screen reader only utility - for accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus,
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee2 {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 120s linear infinite;
+}
+
+.animate-marquee2 {
+  animation: marquee2 120s linear infinite;
+}
+
+.animate-marquee-slow {
+  animation: marquee 150s linear infinite;
+}
+
+.animate-marquee2-slow {
+  animation: marquee2 150s linear infinite;
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes marquee2-reverse {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 120s linear infinite;
+}
+
+.animate-marquee2-reverse {
+  animation: marquee2-reverse 120s linear infinite;
 }
