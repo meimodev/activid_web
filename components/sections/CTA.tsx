@@ -73,7 +73,7 @@ export function CTA() {
                         variants={fadeUpVariant}
                         className="text-lg sm:text-xl text-[#F8EFDE]/80 leading-relaxed max-w-2xl mb-12"
                     >
-                        Let's collaborate to bring your vision to life. Whether you need a new website, branding, or social media management, we're here to help.
+                        Mari berkolaborasi untuk mewujudkan visi Anda. Apakah Anda membutuhkan website baru, branding, atau manajemen media sosial, kami siap membantu.
                     </motion.p>
 
                     <motion.div

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { Metadata } from "next";
 
+import { CTA } from "@/components/sections/CTA";
+
 export const metadata: Metadata = {
   title: "Project | Food and Beverage Photography",
   description: "Showcase of food and beverage photography for DNA Cafe & Resto.",
@@ -10,13 +12,13 @@ export default function ProjectPage() {
   return (
     <main className="min-h-screen w-full bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81] text-[#F8EFDE] overflow-hidden">
       <div className="container mx-auto px-4 py-12 lg:py-24 h-full flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24">
-        
+
         {/* Left Content Section */}
         <div className="w-full lg:w-5/12 flex flex-col justify-center space-y-8 animate-fade-right">
           <h1 className="text-8xl lg:text-9xl font-bold tracking-tighter text-[#F8EFDE] font-sans">
             Project
           </h1>
-          
+
           <div className="space-y-2">
             <h2 className="text-3xl lg:text-4xl font-medium leading-tight">
               Food and Beverage <br /> Photography
@@ -37,7 +39,7 @@ export default function ProjectPage() {
         {/* Right Image Grid Section */}
         <div className="w-full lg:w-7/12 h-[600px] lg:h-[800px] p-4">
           <div className="grid grid-cols-3 grid-rows-3 gap-4 h-full w-full animate-fade-left">
-            
+
             {/* Tall Drink Image - Spans 2 rows */}
             <div className="col-span-1 row-span-2 relative rounded-2xl overflow-hidden shadow-2xl group">
               <Image
@@ -88,8 +90,8 @@ export default function ProjectPage() {
               />
             </div>
 
-             {/* Small Food Image - Bottom Middle */}
-             <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden shadow-2xl group">
+            {/* Small Food Image - Bottom Middle */}
+            <div className="col-span-1 row-span-1 relative rounded-2xl overflow-hidden shadow-2xl group">
               <Image
                 src="https://images.unsplash.com/photo-1563729768-b692965b7cf4?auto=format&fit=crop&w=400&h=400"
                 alt="Dessert"
@@ -101,6 +103,7 @@ export default function ProjectPage() {
           </div>
         </div>
       </div>
+      <CTA />
     </main>
   );
 }

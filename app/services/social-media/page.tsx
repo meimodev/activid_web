@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Metadata } from "next";
+import { CTA } from "@/components/sections/CTA";
 
 export const metadata: Metadata = {
     title: "Social Media Management | Activid Services",
@@ -108,6 +109,7 @@ export default function SocialMediaPage() {
                     ))}
                 </div>
             </div>
+            <CTA />
         </main>
     );
 }

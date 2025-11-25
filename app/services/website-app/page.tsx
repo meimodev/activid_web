@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Metadata } from "next";
+import { CTA } from "@/components/sections/CTA";
 
 export const metadata: Metadata = {
     title: "Website & App Development | Activid Services",
@@ -192,6 +193,7 @@ export default function WebsiteAppPage() {
                 </div>
 
             </div>
+            <CTA />
         </main>
     );
 }

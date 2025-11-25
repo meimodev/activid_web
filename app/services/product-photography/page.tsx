@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Metadata } from "next";
+import { CTA } from "@/components/sections/CTA";
 
 export const metadata: Metadata = {
     title: "Product Photography | Activid Services",
@@ -213,32 +214,15 @@ export default function ProductPhotographyPage() {
             {/* Overview & CTA Section */}
             <section className="bg-[#F8EFDE] text-[#1a1a3e] py-24 lg:py-32">
                 <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-                        <div className="lg:col-span-8 space-y-8">
-                            <h2 className="text-3xl lg:text-4xl font-bold font-sans">Overview</h2>
-                            <p className="text-lg text-[#1a1a3e]/80 leading-relaxed">
-                                Foto produk yang baik dapat meningkatkan nilai jual secara signifikan. Kami menggunakan teknik pencahayaan dan styling profesional untuk menonjolkan fitur terbaik produk Anda, membuatnya terlihat menggoda dan premium di mata calon pelanggan.
-                            </p>
-                        </div>
-
-                        {/* Sidebar / CTA */}
-                        <div className="lg:col-span-4">
-                            <div className="bg-[#1a1a3e] text-[#F8EFDE] p-8 rounded-3xl">
-                                <h3 className="text-2xl font-bold mb-4">Interested in this service?</h3>
-                                <p className="text-[#F8EFDE]/80 mb-8">
-                                    Let's discuss how we can help you achieve your goals with our Product Photography services.
-                                </p>
-                                <a
-                                    href="/contact"
-                                    className="block w-full py-4 px-6 bg-[#F8EFDE] text-[#1a1a3e] text-center font-bold rounded-xl hover:bg-white transition-colors duration-300"
-                                >
-                                    Start a Project
-                                </a>
-                            </div>
-                        </div>
+                    <div className="max-w-4xl mx-auto text-center space-y-8">
+                        <h2 className="text-3xl lg:text-4xl font-bold font-sans">Overview</h2>
+                        <p className="text-lg text-[#1a1a3e]/80 leading-relaxed">
+                            Foto produk yang baik dapat meningkatkan nilai jual secara signifikan. Kami menggunakan teknik pencahayaan dan styling profesional untuk menonjolkan fitur terbaik produk Anda, membuatnya terlihat menggoda dan premium di mata calon pelanggan.
+                        </p>
                     </div>
                 </div>
             </section>
+            <CTA />
         </main>
     );
 }

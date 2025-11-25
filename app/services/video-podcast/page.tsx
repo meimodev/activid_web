@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Metadata } from "next";
+import { CTA } from "@/components/sections/CTA";
 
 export const metadata: Metadata = {
     title: "Video & Podcast Production | Activid Services",
@@ -145,24 +146,7 @@ export default function VideoPodcastPage() {
 
             <div className="container mx-auto px-4">
 
-                {/* CTA Section */}
-                <div className="mt-32 bg-[#1a1a3e] text-[#F8EFDE] p-12 lg:p-24 rounded-[3rem] text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                        <div className="absolute top-[-50%] left-[-20%] w-[800px] h-[800px] rounded-full bg-[#F8EFDE] blur-[100px]" />
-                    </div>
-                    <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-                        <h2 className="text-4xl lg:text-6xl font-black tracking-tight">Ready to start your podcast?</h2>
-                        <p className="text-xl text-[#F8EFDE]/80">
-                            Let's create high-quality content that resonates with your audience.
-                        </p>
-                        <a
-                            href="/contact"
-                            className="inline-block py-4 px-12 bg-[#F8EFDE] text-[#1a1a3e] text-lg font-bold rounded-full hover:scale-105 transition-transform duration-300"
-                        >
-                            Start Production
-                        </a>
-                    </div>
-                </div>
+                <CTA />
 
             </div>
         </main>
