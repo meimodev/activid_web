@@ -1,32 +1,15 @@
 import Image from "next/image";
 import { Metadata } from "next";
 import { CTA } from "@/components/sections/CTA";
+import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-    title: "Event & Documentation | Activid Services",
-    description: "Menangkap momen terbaik dari setiap acara Anda dengan kualitas visual yang hidup.",
+    title: `${siteContent.servicePages.eventDocumentation.header.title} | Activid Services`,
+    description: siteContent.servicePages.eventDocumentation.header.description,
 };
 
 export default function EventDocumentationPage() {
-
-
-    const projects = [
-        {
-            title: "Pertamina Geothermal Energy Tbk",
-            description: "Kami memproduksi video company profile PT Pertamina Geothermal yang menampilkan operasi panas bumi, teknologi dan komitmen terhadap energi bersih dalam visual yang profesional dan terstruktur, untuk memperkuat citra perusahaan sebagai pemimpin di sektor energi terbarukan.",
-            image: "https://images.unsplash.com/photo-1565610222536-ef125c59da2e?auto=format&fit=crop&q=80&w=800"
-        },
-        {
-            title: "PT. Bank Rakyat Indonesia (Persero) Tbk",
-            description: "Kami mendokumentasikan dan memproduksi video event BRI Peduli - Srikandi BRI dengan fokus pada penyampaian momen penting, nilai sosial, serta semangat pemberdayaan perempuan yang menjadi inti acara.",
-            image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800"
-        },
-        {
-            title: "Wedding of Toar & Taya",
-            description: "Kami memproduksi video wedding cinematic yang menangkap setiap momen dengan sentuhan visual artistik, alur cerita yang emosional, dan pengambilan gambar yang dramatis.",
-            image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800"
-        }
-    ];
+    const { header, projects, overview } = siteContent.servicePages.eventDocumentation;
 
     return (
         <main className="min-h-screen w-full bg-[#F8EFDE] text-[#1a1a3e] overflow-hidden">
@@ -39,25 +22,23 @@ export default function EventDocumentationPage() {
                             Our Services
                         </div>
                         <h1 className="text-5xl lg:text-7xl font-black tracking-tight font-sans leading-tight">
-                            Event & Documentation
+                            {header.title}
                         </h1>
                         <p className="text-xl lg:text-2xl text-[#1a1a3e]/80 leading-relaxed font-sans">
-                            Menangkap momen terbaik dari setiap acara Anda dari event perusahaan, pernikahan, hingga konser musik dengan kualitas visual yang hidup dan emosional.
+                            {header.description}
                         </p>
                     </div>
 
                     <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
                         <Image
-                            src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop"
-                            alt="Event & Documentation"
+                            src={header.image}
+                            alt={header.title}
                             fill
                             className="object-cover hover:scale-105 transition-transform duration-700"
                             priority
                         />
                     </div>
                 </div>
-
-
 
             </div>
 
@@ -102,9 +83,9 @@ export default function EventDocumentationPage() {
 
             <div className="container mx-auto px-4 py-24 lg:py-32">
                 <div className="max-w-4xl mx-auto text-center space-y-8">
-                    <h2 className="text-3xl lg:text-4xl font-bold font-sans">Overview</h2>
+                    <h2 className="text-3xl lg:text-4xl font-bold font-sans">{overview.title}</h2>
                     <p className="text-lg text-[#1a1a3e]/80 leading-relaxed">
-                        Setiap momen berharga layak untuk diabadikan dengan sempurna. Tim fotografer dan videografer kami berpengalaman dalam menangkap emosi dan atmosfer acara, memastikan setiap detik penting terekam dengan kualitas sinematik yang tinggi.
+                        {overview.content}
                     </p>
                 </div>
             </div>

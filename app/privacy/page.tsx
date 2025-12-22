@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import { siteContent } from '@/lib/site-content';
 
 export const metadata: Metadata = {
     title: 'Privacy Policy | Activid',
@@ -67,7 +68,7 @@ export default function PrivacyPolicyPage() {
                         <p>
                             If you have any questions about this privacy policy or our privacy practices, please contact us at:
                             <br />
-                            Email: hello@activid.com
+                            Email: {siteContent.contactPage.methods.email.value}
                         </p>
                     </section>
                 </div>

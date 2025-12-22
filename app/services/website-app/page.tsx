@@ -1,13 +1,15 @@
 import Image from "next/image";
 import { Metadata } from "next";
 import { CTA } from "@/components/sections/CTA";
+import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-    title: "Website & App Development | Activid Services",
-    description: "Membangun platform digital yang elegan, cepat, dan user friendly.",
+    title: `${siteContent.servicePages.websiteApp.header.title} | Activid Services`,
+    description: siteContent.servicePages.websiteApp.header.description[0],
 };
 
 export default function WebsiteAppPage() {
+    const { header, mockups, techStack: techStackSection } = siteContent.servicePages.websiteApp;
     const techStack = [
         {
             name: "Flutter",
@@ -95,18 +97,19 @@ export default function WebsiteAppPage() {
                             <h1 className="text-7xl lg:text-9xl font-black tracking-tighter text-[#F8EFDE] leading-none mb-4">
                                 Project
                             </h1>
-                            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-                                Website & App<br />Development
+                            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6 whitespace-pre-line">
+                                {header.title.replace(" & ", "\n& ")}
                             </h2>
                         </div>
 
                         <div className="space-y-6 text-lg text-gray-300 leading-relaxed">
-                            <p>
-                                Activid akan merancang dan mengembangkan desain aplikasi yang fokus pada pengalaman pengguna, tampilan yang modern, serta alur yang efisien, menciptakan solusi digital yang fungsional, menarik, dan mudah digunakan di berbagai industri.
-                            </p>
-                            <p>
-                                Kami memastikan setiap detail visual dan interaksi dalam aplikasi dirancang dengan tepat, agar terlihat profesional tetapi juga memberikan pengalaman yang nyaman dan intuitif bagi pengguna.
-                            </p>
+                            {Array.isArray(header.description) ? (
+                                header.description.map((desc, i) => (
+                                    <p key={i}>{desc}</p>
+                                ))
+                            ) : (
+                                <p>{header.description}</p>
+                            )}
                         </div>
                     </div>
 
@@ -117,7 +120,7 @@ export default function WebsiteAppPage() {
                             {/* Left Phone (Behind) */}
                             <div className="absolute left-0 lg:left-10 top-1/2 -translate-y-1/2 w-[280px] h-[550px] bg-gray-800 rounded-[3rem] border-8 border-gray-900 shadow-2xl transform -rotate-6 scale-90 opacity-60 z-0 overflow-hidden">
                                 <Image
-                                    src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=800&auto=format&fit=crop"
+                                    src={mockups[0]}
                                     alt="App Screen 1"
                                     fill
                                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -128,7 +131,7 @@ export default function WebsiteAppPage() {
                             {/* Right Phone (Behind) */}
                             <div className="absolute right-0 lg:right-10 top-1/2 -translate-y-1/2 w-[280px] h-[550px] bg-gray-800 rounded-[3rem] border-8 border-gray-900 shadow-2xl transform rotate-6 scale-90 opacity-60 z-0 overflow-hidden">
                                 <Image
-                                    src="https://images.unsplash.com/photo-1551650975-87deedd944c3?q=80&w=800&auto=format&fit=crop"
+                                    src={mockups[1]}
                                     alt="App Screen 3"
                                     fill
                                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -137,14 +140,14 @@ export default function WebsiteAppPage() {
                             </div>
 
                             {/* Center Phone (Main) */}
-                            <div className="relative w-[320px] h-[650px] bg-gray-900 rounded-[3.5rem] border-[10px] border-gray-800 shadow-2xl z-10 overflow-hidden">
+                            <div className="relative w-[320px] h-[650px] bg-gray-900 rounded-[3.5rem] border-10 border-gray-800 shadow-2xl z-10 overflow-hidden">
                                 {/* Notch */}
                                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-gray-800 rounded-b-3xl z-20" />
 
                                 {/* Screen Content */}
                                 <div className="relative w-full h-full bg-[#0f172a]">
                                     <Image
-                                        src="https://images.unsplash.com/photo-1555421689-491a97ff2040?q=80&w=800&auto=format&fit=crop"
+                                        src={mockups[2]}
                                         alt="App Main Screen"
                                         fill
                                         sizes="(max-width: 768px) 100vw, 33vw"
@@ -152,7 +155,7 @@ export default function WebsiteAppPage() {
                                     />
 
                                     {/* UI Overlay Simulation */}
-                                    <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent text-white">
+                                    <div className="absolute bottom-0 w-full p-6 bg-linear-to-t from-black/80 to-transparent text-white">
                                         <div className="w-full bg-[#F8EFDE] py-3 rounded-xl text-center font-bold text-[#1a1a3e] mb-4 shadow-lg">
                                             Proceed to Checkout
                                         </div>
@@ -167,10 +170,10 @@ export default function WebsiteAppPage() {
                 <div className="w-full">
                     <div className="text-center mb-16 space-y-4">
                         <h3 className="text-4xl lg:text-6xl font-black tracking-tight text-[#F8EFDE]">
-                            Our Tech Stack
+                            {techStackSection.title}
                         </h3>
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-                            We use the latest and most reliable technologies to build scalable and high-performance applications.
+                            {techStackSection.description}
                         </p>
                     </div>
 
@@ -180,7 +183,7 @@ export default function WebsiteAppPage() {
                                 key={index}
                                 className="group relative p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10 flex flex-col items-center justify-center gap-4"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                                <div className="absolute inset-0 bg-linear-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
                                 <div className="relative z-10 transform group-hover:scale-110 transition-transform duration-300">
                                     {tech.icon}
                                 </div>

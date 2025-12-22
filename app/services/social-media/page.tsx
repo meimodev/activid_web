@@ -1,55 +1,15 @@
 import Image from "next/image";
 import { Metadata } from "next";
 import { CTA } from "@/components/sections/CTA";
+import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-    title: "Social Media Management | Activid Services",
-    description: "Mengelola dan mengembangkan citra brand Anda di media sosial.",
+    title: `${siteContent.servicePages.socialMedia.header.title} | Activid Services`,
+    description: siteContent.servicePages.socialMedia.header.description,
 };
 
 export default function SocialMediaPage() {
-    const showcases = [
-        {
-            category: "Coffee Shop",
-            colors: ["#2C4A3B", "#E8DCCA", "#5C4033"],
-            image: "/images/social-media/coffee-grid.jpg",
-            description: (
-                <>
-                    Kami <strong>merancang visual yang hangat, estetis, dan mengundang</strong> yang menangkap suasana unik kedai kopi Anda, membuat merek Anda terasa nyaman, modern, dan sulit ditolak.
-                </>
-            )
-        },
-        {
-            category: "Beauty",
-            colors: ["#FFB7B2", "#FFFFFF", "#C08552"],
-            image: "/images/social-media/beauty-grid.png",
-            description: (
-                <>
-                    Kami <strong>menciptakan desain media sosial yang bersih, elegan, dan terlihat premium</strong> yang meningkatkan nilai produk kecantikan Anda, membuatnya tampak lebih terpercaya, menarik, dan berkelas.
-                </>
-            )
-        },
-        {
-            category: "F&B",
-            colors: ["#E67E22", "#1A1A1A", "#F1C40F"],
-            image: "/images/social-media/fnb-grid.png",
-            description: (
-                <>
-                    Kami <strong>membuat desain media sosial</strong> yang mengubah setiap hidangan menjadi pengalaman visual yang menggugah selera, membantu restoran Anda menonjol, menarik perhatian, dan membangkitkan selera makan bahkan sebelum pelanggan masuk.
-                </>
-            )
-        },
-        {
-            category: "Automotive",
-            colors: ["#C0392B", "#000000", "#922B21"],
-            image: "/images/social-media/automotive-grid.png",
-            description: (
-                <>
-                    Kami <strong>menciptakan visual yang berani, tajam, dan berdampak tinggi</strong> yang mencerminkan kekuatan dan keandalan, sempurna untuk merek otomotif dan bengkel yang menginginkan tampilan modern, profesional, dan berorientasi performa.
-                </>
-            )
-        }
-    ];
+    const { header, showcases } = siteContent.servicePages.socialMedia;
 
     return (
         <main className="min-h-screen w-full bg-[#0B0F19] text-white overflow-hidden relative">
@@ -67,10 +27,10 @@ export default function SocialMediaPage() {
                             Our Services
                         </div>
                         <h1 className="text-5xl lg:text-7xl font-black tracking-tight font-sans leading-tight text-[#F8EFDE]">
-                            Social Media Management
+                            {header.title}
                         </h1>
                         <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed font-sans">
-                            Mengelola dan mengembangkan citra brand Anda di media sosial. Mulai dari strategi konten, desain, copywriting, hingga analisis performa.
+                            {header.description}
                         </p>
                     </div>
                 </div>

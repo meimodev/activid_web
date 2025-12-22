@@ -1,14 +1,15 @@
 import Image from "next/image";
 import { Metadata } from "next";
 import { CTA } from "@/components/sections/CTA";
+import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-    title: "Video & Podcast Production | Activid Services",
-    description: "Cerita yang baik layak disampaikan dengan kualitas visual dan audio yang maksimal.",
+    title: `${siteContent.servicePages.videoPodcast.header.title} | Activid Services`,
+    description: siteContent.servicePages.videoPodcast.header.description,
 };
 
 export default function VideoPodcastPage() {
-    // No features list needed for this specific layout anymore
+    const { header, mainProject, thumbnails } = siteContent.servicePages.videoPodcast;
 
     return (
         <main className="min-h-screen w-full bg-[#F8EFDE] text-[#1a1a3e] overflow-x-hidden">
@@ -21,17 +22,17 @@ export default function VideoPodcastPage() {
                             Our Services
                         </div>
                         <h1 className="text-5xl lg:text-7xl font-black tracking-tight font-sans leading-tight">
-                            Video & Podcast Production
+                            {header.title}
                         </h1>
                         <p className="text-xl lg:text-2xl text-[#1a1a3e]/80 leading-relaxed font-sans">
-                            Cerita yang baik layak disampaikan dengan kualitas visual dan audio yang maksimal. Dari konsep, shooting, editing, hingga final rendering, kami siap bantu Anda bercerita lewat video promosi, company profile, hingga podcast profesional.
+                            {header.description}
                         </p>
                     </div>
 
                     <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
                         <Image
-                            src="https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&h=600&fit=crop"
-                            alt="Video & Podcast Production"
+                            src={header.image}
+                            alt={header.title}
                             fill
                             className="object-cover hover:scale-105 transition-transform duration-700"
                             priority
@@ -45,7 +46,7 @@ export default function VideoPodcastPage() {
             <div className="w-full mb-24">
                 <div className="container mx-auto px-4 mb-16">
                     <h2 className="text-6xl lg:text-8xl font-black tracking-tighter text-[#1a1a3e] mb-2">Project</h2>
-                    <p className="text-2xl lg:text-3xl font-medium text-[#1a1a3e]/80">Video & Podcast Production</p>
+                    <p className="text-2xl lg:text-3xl font-medium text-[#1a1a3e]/80">{header.title}</p>
                 </div>
 
                 <div className="w-screen ml-[calc(50%-50vw)] bg-[#1a1a3e]/5 py-24 overflow-hidden relative">
@@ -55,15 +56,14 @@ export default function VideoPodcastPage() {
                             <div className="lg:col-span-7 space-y-8">
                                 <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-[#1a1a3e]">
                                     <Image
-                                        src="https://images.unsplash.com/photo-1581368135153-a506cf13b1e1?w=1200&h=800&fit=crop"
-                                        alt="Tou Minaesa Podcast Studio"
+                                        src={mainProject.image}
+                                        alt={mainProject.title}
                                         fill
                                         className="object-cover"
                                     />
-                                    {/* Play Button Overlay */}
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 group hover:bg-black/10 transition-colors">
                                         <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50">
-                                            <div className="w-0 h-0 border-t-[15px] border-t-transparent border-l-[25px] border-l-white border-b-[15px] border-b-transparent ml-2" />
+                                            <div className="w-0 h-0 border-t-15 border-t-transparent border-l-25 border-l-white border-b-15 border-b-transparent ml-2" />
                                         </div>
                                     </div>
                                     {/* UI Mockup Elements */}
@@ -84,10 +84,10 @@ export default function VideoPodcastPage() {
                                 {/* Thumbnails Grid */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-4">
-                                        <div className="relative aspect-[9/16] rounded-2xl overflow-hidden shadow-lg border-2 border-[#1a1a3e]/20">
+                                        <div className="relative aspect-9/16 rounded-2xl overflow-hidden shadow-lg border-2 border-[#1a1a3e]/20">
                                             <Image
-                                                src="https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&h=600&fit=crop"
-                                                alt="Short Video 1"
+                                                src={thumbnails[0].src}
+                                                alt={thumbnails[0].alt}
                                                 fill
                                                 className="object-cover"
                                             />
@@ -97,16 +97,16 @@ export default function VideoPodcastPage() {
                                     <div className="space-y-4">
                                         <div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg border-2 border-[#1a1a3e]/20">
                                             <Image
-                                                src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=300&fit=crop"
-                                                alt="Short Video 2"
+                                                src={thumbnails[1].src}
+                                                alt={thumbnails[1].alt}
                                                 fill
                                                 className="object-cover"
                                             />
                                         </div>
                                         <div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg border-2 border-[#1a1a3e]/20">
                                             <Image
-                                                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=300&fit=crop"
-                                                alt="Short Video 3"
+                                                src={thumbnails[2].src}
+                                                alt={thumbnails[2].alt}
                                                 fill
                                                 className="object-cover"
                                             />
@@ -116,15 +116,15 @@ export default function VideoPodcastPage() {
 
                                 {/* Project Details */}
                                 <div className="relative">
-                                    <h3 className="text-3xl lg:text-4xl font-bold text-[#1a1a3e] mb-4">Tou Minaesa Project</h3>
+                                    <h3 className="text-3xl lg:text-4xl font-bold text-[#1a1a3e] mb-4">{mainProject.title}</h3>
                                     <p className="text-[#1a1a3e]/80 leading-relaxed mb-6">
-                                        Kami bantu klien membangun identitas digital podcast dari nol, mulai dari proses produksi video, set up studio, pengambilan gambar, desain thumbnail, hingga pengemasan ulang konten menjadi reels yang menarik di berbagai platform.
+                                        {mainProject.description}
                                     </p>
 
                                     <div className="bg-white/60 p-6 rounded-2xl border border-[#1a1a3e]/10 backdrop-blur-sm relative z-10">
                                         <span className="font-bold text-[#1a1a3e] block mb-2">Result:</span>
                                         <p className="text-[#1a1a3e]/90 text-sm leading-relaxed">
-                                            Dalam 6 bulan pengelolaan oleh Activid, podcast tumbuh pesat dari 0 subscriber menjadi 600 di YouTube, 2.7K di TikTok, dan 1K followers di Instagram. Dan sekarang sudah ada 3 Segmen turunan dari Tou Minaesa Project.
+                                            {mainProject.result}
                                         </p>
                                     </div>
 

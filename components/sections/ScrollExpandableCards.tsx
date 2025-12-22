@@ -24,6 +24,7 @@ export interface CardData {
  */
 export interface ScrollExpandableCardsProps {
   cards: CardData[];
+  title: string;
   className?: string;
 }
 
@@ -33,7 +34,7 @@ export interface ScrollExpandableCardsProps {
  * Displays services in a responsive grid layout with premium hover effects.
  * Removed scroll hijacking for better accessibility and user experience.
  */
-export function ScrollExpandableCards({ cards, className = '' }: ScrollExpandableCardsProps) {
+export function ScrollExpandableCards({ cards, title, className = '' }: ScrollExpandableCardsProps) {
   return (
     <section id="services" className={`relative py-24 overflow-hidden ${className}`}>
       {/* Background Elements */}
@@ -55,8 +56,8 @@ export function ScrollExpandableCards({ cards, className = '' }: ScrollExpandabl
           className="text-center mb-16"
         >
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#F8EFDE] mb-6 font-[family-name:var(--font-bricolage)]">
-            Our Services
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#F8EFDE] mb-6 font-(family-name:--font-bricolage)">
+            {title}
           </h2>
         </motion.div>
 
@@ -81,7 +82,7 @@ export function ScrollExpandableCards({ cards, className = '' }: ScrollExpandabl
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   {/* Overlay Gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1a1d3a] via-[#1a1d3a]/80 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-70" />
+                  <div className="absolute inset-0 bg-linear-to-t from-[#1a1d3a] via-[#1a1d3a]/80 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-70" />
                 </div>
 
                 {/* Card Content */}
@@ -94,7 +95,7 @@ export function ScrollExpandableCards({ cards, className = '' }: ScrollExpandabl
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-2xl font-bold text-[#F8EFDE] mb-3 transform translate-y-4 transition-transform duration-500 group-hover:translate-y-0 font-[family-name:var(--font-bricolage)]">
+                  <h3 className="text-2xl font-bold text-[#F8EFDE] mb-3 transform translate-y-4 transition-transform duration-500 group-hover:translate-y-0 font-(family-name:--font-bricolage)">
                     {card.title}
                   </h3>
 

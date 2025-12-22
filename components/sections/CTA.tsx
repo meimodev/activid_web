@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { siteContent } from '@/lib/site-content';
 
 export function CTA() {
     const fadeUpVariant = {
@@ -62,7 +63,7 @@ export function CTA() {
                         variants={fadeUpVariant}
                         className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[#F8EFDE] font-sans tracking-tight mb-8"
                     >
-                        Ready to Start Your Project?
+                        {siteContent.ctaSection.title}
                     </motion.h2>
 
                     <motion.p
@@ -73,7 +74,7 @@ export function CTA() {
                         variants={fadeUpVariant}
                         className="text-lg sm:text-xl text-[#F8EFDE]/80 leading-relaxed max-w-2xl mb-12"
                     >
-                        Mari berkolaborasi untuk mewujudkan visi Anda. Apakah Anda membutuhkan website baru, branding, atau manajemen media sosial, kami siap membantu.
+                        {siteContent.ctaSection.description}
                     </motion.p>
 
                     <motion.div
@@ -83,14 +84,14 @@ export function CTA() {
                         viewport={{ once: true, margin: "-100px" }}
                         variants={fadeUpVariant}
                     >
-                        <Link href="/contact" passHref>
+                        <Link href={siteContent.ctaSection.buttonLink} passHref>
                             <motion.button
                                 whileHover={{ scale: 1.02, backgroundColor: "#ffffff" }}
                                 whileTap={{ scale: 0.98 }}
                                 transition={{ duration: 0.3 }}
                                 className="px-12 py-6 bg-[#F8EFDE] text-[#1a1a3e] text-lg font-bold rounded-full shadow-[0_0_20px_rgba(248,239,222,0.1)] hover:shadow-[0_0_40px_rgba(248,239,222,0.4)] focus:outline-none focus:ring-2 focus:ring-[#F8EFDE] focus:ring-offset-2 focus:ring-offset-[#1a1a3e] font-sans"
                             >
-                                Get in Touch
+                                {siteContent.ctaSection.buttonText}
                             </motion.button>
                         </Link>
                     </motion.div>

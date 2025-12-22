@@ -3,35 +3,14 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
-
-
+import { siteContent } from '@/lib/site-content';
 
 export interface OurClientsProps {
   className?: string;
 }
 
-const clients = [
-  { name: 'Client 1', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/1_PGE%20LAHENDONG.png?updatedAt=1763786723964' },
-  { name: 'Client 2', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/2_BRI_PEDULI.png?updatedAt=1763786723909' },
-  { name: 'Client 3', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/3_UNFORGETTABLE_MINAHASA.png?updatedAt=1763786722690' },
-  { name: 'Client 4', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/4_BADAN_PROMOSI_PARIWISATA_DAERAH_%20MINAAHASA.png?updatedAt=1763786722582' },
-  { name: 'Client 5', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/5_STRATA_KITCHEN.png?updatedAt=1763786723954' },
-  { name: 'Client 6', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/6_YAMA_RESORT.png?updatedAt=1763786723863' },
-  { name: 'Client 7', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/7_MEIMO%20SOFTWARE_DEVELOPER.png?updatedAt=1763786722638' },
-  { name: 'Client 8', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/8_BOOST_SNACK.png?updatedAt=1763786722825' },
-  { name: 'Client 9', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/9_NIKE_TOLEJO.png?updatedAt=1763786724023' },
-  { name: 'Client 10', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/10_MAPALUS_E-COMMERCE.png?updatedAt=1763786724070' },
-  { name: 'Client 11', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/11_KLAND.png?updatedAt=1763786724129' },
-  { name: 'Client 12', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/12_FOUREVER_GIFTS.png?updatedAt=1763786723929' },
-  { name: 'Client 13', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/13_BAKSO_DENNY.png?updatedAt=1763786725645' },
-  { name: 'Client 14', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/14_ITAEWON%20KOREAN_GRILL.png?updatedAt=1763786722576' },
-  { name: 'Client 15', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/15_ESSPECTO_COFFEE.png?updatedAt=1763786722809' },
-  { name: 'Client 16', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/16_BBOLD.png?updatedAt=1763786722953' },
-  { name: 'Client 17', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/17_MARS_FOOD_&_DRINK.png?updatedAt=1763786724077' },
-  { name: 'Client 18', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/18_DONATO.png?updatedAt=1763786724059' },
-];
-
 export function OurClients({ className = '' }: OurClientsProps) {
+  const { items: clients, title, subtitlePart1 } = siteContent.clients;
   const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -175,12 +154,13 @@ export function OurClients({ className = '' }: OurClientsProps) {
           style={{ y, opacity }}
           className="text-center"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[#F8EFDE] mb-6 font-[family-name:var(--font-bricolage)] drop-shadow-lg">
-            Our Clients
+          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[#F8EFDE] mb-6 font-(family-name:--font-bricolage) drop-shadow-lg">
+            {title}
           </h2>
 
-          <p className="text-2xl text-[#F8EFDE] mb-6 font-[family-name:var(--font-bricolage)] drop-shadow-lg">
-            <span className="font-black">{clients.length}</span>  endeavours and still counting up          </p>
+          <p className="text-2xl text-[#F8EFDE] mb-6 font-(family-name:--font-bricolage) drop-shadow-lg">
+            <span className="font-black">{clients.length}</span> {subtitlePart1}
+          </p>
 
         </motion.div>
       </div>
