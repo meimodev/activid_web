@@ -163,7 +163,7 @@ export default function Navigation({
       <div className="flex items-center justify-between p-4 bg-[#F8EFDE]/70 backdrop-blur-md border-b border-[#1a1a3e]/10 shadow-sm">
         <Link
           href="/"
-          className="flex items-center gap-2 text-xl font-bold text-[#1a1a3e] focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 rounded font-[family-name:var(--font-bricolage)]"
+          className="flex items-center gap-2 text-xl font-bold text-[#1a1a3e] focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 rounded font-sans"
           aria-label="Activid Portfolio - Home"
           onClick={() => trackNavigation.logoClick()}
         >
@@ -260,7 +260,7 @@ export default function Navigation({
           >
             {/* Drawer header */}
             <div className="flex items-center justify-between p-6 border-b border-[#1a1a3e]/10">
-              <h2 className="text-xl font-bold text-[#1a1a3e] font-[family-name:var(--font-bricolage)]">
+              <h2 className="text-xl font-bold text-[#1a1a3e] font-sans">
                 Menu
               </h2>
               <button
@@ -298,7 +298,7 @@ export default function Navigation({
                       setIsOpen(false);
                       trackNavigation.linkClick(item.label, item.href);
                     }}
-                    className="block px-4 py-3 text-lg font-medium text-[#1a1a3e] hover:bg-[#1a1a3e]/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 font-[family-name:var(--font-bricolage)]"
+                    className="block px-4 py-3 text-lg font-medium text-[#1a1a3e] hover:bg-[#1a1a3e]/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 font-sans"
                     role="menuitem"
                     tabIndex={0}
                   >
