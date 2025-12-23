@@ -9,7 +9,7 @@ export const siteContent: SiteContent = {
     { label: 'Contact', href: '/contact' },
   ],
   hero: {
-    title: 'ACTIVID\nPORTFOLIO',
+    title: 'Get it together',
     subtitle: 'Activid ',
     description: 'Create stunning, high-performance websites with sophisticated animations that captivate your audience and elevate your brand.',
     cta: {
