@@ -9,7 +9,7 @@ export const siteContent: SiteContent = {
     { label: 'Contact', href: '/contact' },
   ],
   hero: {
-    title: 'Get it together',
+    title: 'Lets get it\nTOGETHER',
     subtitle: 'Activid ',
     description: 'Create stunning, high-performance websites with sophisticated animations that captivate your audience and elevate your brand.',
     cta: {
@@ -81,7 +81,7 @@ export const siteContent: SiteContent = {
         id: 'event-documentation',
         title: 'Event & Documentation',
         description: 'Menangkap momen terbaik dari setiap acara Anda dari event perusahaan, pernikahan, hingga konser musik dengan kualitas visual yang hidup dan emosional.',
-        image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_cover_2.jpg',
+        image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop',
         imageAlt: 'Event and Documentation',
         color: '#5a5a8d',
         buttonText: 'View Project',
@@ -111,7 +111,7 @@ export const siteContent: SiteContent = {
         id: 'product-photography',
         title: 'Product Photography',
         description: 'Menampilkan produk Anda dengan visual yang tajam, estetik, dan profesional setiap detail difoto untuk menarik perhatian dan memperkuat identitas brand.',
-        image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=600&fit=crop',
+        image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_cover_2.jpg',
         imageAlt: 'Product Photography',
         color: '#5a5a8d',
         buttonText: 'View Project',
