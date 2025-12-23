@@ -154,11 +154,11 @@ export function OurClients({ className = '' }: OurClientsProps) {
           style={{ y, opacity }}
           className="text-center"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[#F8EFDE] mb-6 font-(family-name:--font-bricolage) drop-shadow-lg">
+          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[#F8EFDE] mb-6 font-sans drop-shadow-lg">
             {title}
           </h2>
 
-          <p className="text-2xl text-[#F8EFDE] mb-6 font-(family-name:--font-bricolage) drop-shadow-lg">
+          <p className="text-2xl text-[#F8EFDE] mb-6 font-sans drop-shadow-lg">
             <span className="font-black">{clients.length}</span> {subtitlePart1}
           </p>
 

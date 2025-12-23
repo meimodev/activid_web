@@ -5,7 +5,9 @@ import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
     title: `${siteContent.servicePages.branding.header.title} | Activid Services`,
-    description: siteContent.servicePages.branding.header.description,
+    description: Array.isArray(siteContent.servicePages.branding.header.description)
+        ? siteContent.servicePages.branding.header.description.join(' ')
+        : siteContent.servicePages.branding.header.description,
 };
 
 export default function BrandingPage() {
@@ -30,13 +32,15 @@ export default function BrandingPage() {
                     </div>
 
                     <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
-                        <Image
-                            src={header.image}
-                            alt={header.title}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-700"
-                            priority
-                        />
+                        {header.image && (
+                            <Image
+                                src={header.image}
+                                alt={header.title}
+                                fill
+                                className="object-cover hover:scale-105 transition-transform duration-700"
+                                priority
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -53,12 +57,14 @@ export default function BrandingPage() {
                                 {/* Image Card */}
                                 <div className="lg:col-span-5 relative aspect-4/3 rounded-3xl overflow-hidden shadow-2xl group">
                                     <div className="absolute inset-0 bg-[#1a1a3e]/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
-                                    <Image
-                                        src={project.image}
-                                        alt={project.client}
-                                        fill
-                                        className="object-cover hover:scale-105 transition-transform duration-700"
-                                    />
+                                    {project.image && (
+                                        <Image
+                                            src={project.image}
+                                            alt={project.client || 'Project Image'}
+                                            fill
+                                            className="object-cover hover:scale-105 transition-transform duration-700"
+                                        />
+                                    )}
                                     {/* Mockup Overlay Effect */}
                                     <div className="absolute inset-0 border-12 border-[#1a1a3e] rounded-3xl pointer-events-none opacity-10" />
                                 </div>

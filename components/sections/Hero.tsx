@@ -75,7 +75,7 @@ export function Hero({ content, className = '' }: HeroProps) {
       {/* Main Content - Right Aligned Title with Parallax */}
       <div className="flex-1 flex items-center justify-center relative z-10 px-4">
         <motion.h1
-          className="w-full pr-12 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-right text-[#F8EFDE] tracking-tight leading-none font-(family-name:--font-bricolage)"
+          className="w-full pr-12 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-right text-[#F8EFDE] tracking-tight leading-none font-sans"
           variants={ANIMATION_VARIANTS.hero}
           initial="initial"
           animate="animate"
@@ -94,14 +94,14 @@ export function Hero({ content, className = '' }: HeroProps) {
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="flex items-center gap-6">
-            <div className="text-4xl md:text-6xl font-black text-[#1a1a3e] font-(family-name:--font-bricolage)">
+            <div className="text-4xl md:text-6xl font-black text-[#1a1a3e] font-sans">
               {new Date().getFullYear()}
             </div>
             <div>
-              <h2 className="text-xl md:text-2xl font-bold text-[#1a1a3e] mb-1 font-(family-name:--font-bricolage)">
+              <h2 className="text-xl md:text-2xl font-bold text-[#1a1a3e] mb-1 font-sans">
                 {subtitle}
               </h2>
-              <p className="text-sm md:text-base text-[#1a1a3e]/70 font-(family-name:--font-bricolage)">
+              <p className="text-sm md:text-base text-[#1a1a3e]/70 font-sans">
                 Creative Agency | Manado - Tondano
               </p>
             </div>
@@ -110,7 +110,7 @@ export function Hero({ content, className = '' }: HeroProps) {
             href="/contact"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-[#1a1a3e] text-[#F8EFDE] font-bold rounded-lg transition-colors hover:bg-[#2d1b4e] focus:outline-none focus:ring-2 focus:ring-[#1a1a3e] focus:ring-offset-2 font-(family-name:--font-bricolage)"
+            className="px-8 py-4 bg-[#1a1a3e] text-[#F8EFDE] font-bold rounded-lg transition-colors hover:bg-[#2d1b4e] focus:outline-none focus:ring-2 focus:ring-[#1a1a3e] focus:ring-offset-2 font-sans"
           >
             Get in Touch
           </motion.a>

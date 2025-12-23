@@ -79,7 +79,7 @@ export function Testimonials({ title, testimonials, className = '' }: Testimonia
       <div className="container mx-auto max-w-7xl">
         {/* Section Header */}
         <ScrollReveal direction="up" className="text-left mb-16">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-black text-[#1a1a3e] font-(family-name:--font-bricolage)">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-black text-[#1a1a3e] font-sans">
             {title}
           </h2>
         </ScrollReveal>

@@ -56,7 +56,7 @@ export function ScrollExpandableCards({ cards, title, className = '' }: ScrollEx
           className="text-center mb-16"
         >
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#F8EFDE] mb-6 font-(family-name:--font-bricolage)">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-[#F8EFDE] mb-6 font-sans">
             {title}
           </h2>
         </motion.div>
@@ -95,7 +95,7 @@ export function ScrollExpandableCards({ cards, title, className = '' }: ScrollEx
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-2xl font-bold text-[#F8EFDE] mb-3 transform translate-y-4 transition-transform duration-500 group-hover:translate-y-0 font-(family-name:--font-bricolage)">
+                  <h3 className="text-2xl font-bold text-[#F8EFDE] mb-3 transform translate-y-4 transition-transform duration-500 group-hover:translate-y-0 font-sans">
                     {card.title}
                   </h3>
 

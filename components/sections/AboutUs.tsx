@@ -52,7 +52,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-6xl md:text-7xl lg:text-8xl font-black text-[#1a1a3e] leading-none font-(family-name:--font-bricolage) whitespace-pre-line"
+                  className="text-6xl md:text-7xl lg:text-8xl font-black text-[#1a1a3e] leading-none font-sans whitespace-pre-line"
                 >
                   {siteContent.aboutUs.title}
                 </motion.h2>
@@ -66,11 +66,11 @@ export function AboutUs({ className = '' }: AboutUsProps) {
                   className="flex justify-between pt-30"
                 >
                   <div >
-                    <p className="text-sm font-bold text-[#1a1a3e] font-(family-name:--font-bricolage)">
+                    <p className="text-sm font-bold text-[#1a1a3e] font-sans">
                       {siteContent.aboutUs.tagline}
                     </p>
                   </div>
-                  <div className="text-sm font-black text-[#1a1a3e] font-(family-name:--font-bricolage)">
+                  <div className="text-sm font-black text-[#1a1a3e] font-sans">
                     {new Date().getFullYear()}
                   </div>
                 </motion.div>
@@ -92,7 +92,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
                 transition={{ duration: 0.6 }}
 
               >
-                <h3 className="text-right text-2xl md:text-3xl font-bold text-[#1a1a3e] font-(family-name:--font-bricolage)">
+                <h3 className="text-right text-2xl md:text-3xl font-bold text-[#1a1a3e] font-sans">
                   {siteContent.aboutUs.heading}
                 </h3>
                 <div className="absolute border-b-2 border-[#1a1a3e] w-60 md:w-80 ml-auto -right-8">
@@ -118,7 +118,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
                       <div className="w-0 h-0 border-l-12 border-l-transparent border-r-12 border-r-transparent border-t-16 border-t-[#1a1a3e] -rotate-90" />
                     </div>
                     <div>
-                      <p className="text-base md:text-lg text-[#1a1a3e] leading-relaxed text-justify font-(family-name:--font-bricolage)">
+                      <p className="text-base md:text-lg text-[#1a1a3e] leading-relaxed text-justify font-sans">
                         {point.text} <span className="font-bold text-[#c41e3a]">{point.highlight}</span> {point.suffix}{' '}
                         {point.highlight2 && <span className="font-bold text-[#c41e3a]">{point.highlight2}</span>}
                         {point.suffix2 && <span> {point.suffix2}</span>}
