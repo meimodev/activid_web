@@ -6,6 +6,7 @@ import Navigation from "@/components/layouts/Navigation";
 import PageTransition from "@/components/layouts/PageTransition";
 import { ProgressIndicator } from "@/components/animations/ProgressIndicator";
 import { Footer } from "@/components/sections/Footer";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,6 +69,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <GoogleAnalytics />
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${bricolageGrotesque.variable} antialiased`}
       >

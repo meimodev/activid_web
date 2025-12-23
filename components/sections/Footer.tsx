@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { siteContent } from '@/lib/site-content';
+import { trackFooter } from '@/lib/analytics';
 
 export interface FooterProps {
   className?: string;
@@ -59,6 +60,7 @@ export function Footer({ className = '' }: FooterProps) {
                   <li key={link.href}>
                     <Link
                       href={link.href}
+                      onClick={() => trackFooter.navLinkClick(link.label)}
                       className="text-sm text-white/70 hover:text-[#F8EFDE] transition-colors duration-200 font-sans block w-fit"
                     >
                       {link.label}
@@ -85,6 +87,7 @@ export function Footer({ className = '' }: FooterProps) {
                     href={location.mapLink}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackFooter.officeClick(location.name)}
                     className="block hover:opacity-80 transition-opacity"
                   >
                     <h5 className="text-white font-semibold mb-1 text-sm">{location.name}</h5>
@@ -118,12 +121,14 @@ export function Footer({ className = '' }: FooterProps) {
           <div className="flex gap-6 text-xs font-sans text-white/50">
             <Link
               href={footer.legal.privacy.href}
+              onClick={() => trackFooter.legalLinkClick('privacy')}
               className="hover:text-[#F8EFDE] transition-colors duration-200"
             >
               {footer.legal.privacy.label}
             </Link>
             <Link
               href={footer.legal.terms.href}
+              onClick={() => trackFooter.legalLinkClick('terms')}
               className="hover:text-[#F8EFDE] transition-colors duration-200"
             >
               {footer.legal.terms.label}

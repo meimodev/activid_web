@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { siteContent } from '@/lib/site-content';
+import { trackCTA } from '@/lib/analytics';
 
 export function CTA() {
     const fadeUpVariant = {
@@ -89,6 +90,7 @@ export function CTA() {
                                 whileHover={{ scale: 1.02, backgroundColor: "#ffffff" }}
                                 whileTap={{ scale: 0.98 }}
                                 transition={{ duration: 0.3 }}
+                                onClick={() => trackCTA.ctaSectionClick()}
                                 className="px-12 py-6 bg-[#F8EFDE] text-[#1a1a3e] text-lg font-bold rounded-full shadow-[0_0_20px_rgba(248,239,222,0.1)] hover:shadow-[0_0_40px_rgba(248,239,222,0.4)] focus:outline-none focus:ring-2 focus:ring-[#F8EFDE] focus:ring-offset-2 focus:ring-offset-[#1a1a3e] font-sans"
                             >
                                 {siteContent.ctaSection.buttonText}

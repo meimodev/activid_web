@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 import { useScrollProgress } from '@/hooks';
 import { useReducedMotion } from '@/hooks';
 import { EASING, DURATION } from '@/lib/animation-config';
+import { trackNavigation } from '@/lib/analytics';
 
 export interface NavigationItem {
   label: string;
@@ -164,6 +165,7 @@ export default function Navigation({
           href="/"
           className="flex items-center gap-2 text-xl font-bold text-[#1a1a3e] focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 rounded font-[family-name:var(--font-bricolage)]"
           aria-label="Activid Portfolio - Home"
+          onClick={() => trackNavigation.logoClick()}
         >
           <motion.div
             animate={{ rotate: 360 }}
@@ -199,7 +201,11 @@ export default function Navigation({
 
         {/* Menu icon button */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            const newState = !isOpen;
+            setIsOpen(newState);
+            trackNavigation.mobileMenuToggle(newState);
+          }}
           className="p-2 text-[#1a1a3e] hover:bg-[#1a1a3e]/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2"
           aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
           aria-expanded={isOpen}
@@ -288,7 +294,10 @@ export default function Navigation({
                 <motion.li key={index} variants={menuItemVariants} role="none">
                   <Link
                     href={item.href}
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      setIsOpen(false);
+                      trackNavigation.linkClick(item.label, item.href);
+                    }}
                     className="block px-4 py-3 text-lg font-medium text-[#1a1a3e] hover:bg-[#1a1a3e]/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 font-[family-name:var(--font-bricolage)]"
                     role="menuitem"
                     tabIndex={0}

@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { SplitText } from '@/components/animations/SplitText';
 import { ANIMATION_VARIANTS } from '@/lib/animation-config';
 import type { HeroContent } from '@/types/hero.types';
+import { trackCTA } from '@/lib/analytics';
 
 export interface HeroProps {
   content: HeroContent;
@@ -110,6 +111,7 @@ export function Hero({ content, className = '' }: HeroProps) {
             href="/contact"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => trackCTA.getInTouch('hero_section')}
             className="px-8 py-4 bg-[#1a1a3e] text-[#F8EFDE] font-bold rounded-lg transition-colors hover:bg-[#2d1b4e] focus:outline-none focus:ring-2 focus:ring-[#1a1a3e] focus:ring-offset-2 font-sans"
           >
             Get in Touch

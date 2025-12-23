@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { Metadata } from "next";
 import { CTA } from "@/components/sections/CTA";
 import { siteContent } from "@/lib/site-content";
@@ -33,13 +34,20 @@ export default function VideoPodcastPage() {
 
                     <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
                         {header.image && (
-                            <Image
-                                src={header.image}
-                                alt={header.title}
-                                fill
-                                className="object-cover hover:scale-105 transition-transform duration-700"
-                                priority
-                            />
+                            header.image.endsWith(".mp4") ? (
+                                <VideoPlayer
+                                    src={header.image}
+                                    className="absolute inset-0 hover:scale-105 transition-transform duration-700"
+                                />
+                            ) : (
+                                <Image
+                                    src={header.image}
+                                    alt={header.title}
+                                    fill
+                                    className="object-cover hover:scale-105 transition-transform duration-700"
+                                    priority
+                                />
+                            )
                         )}
                     </div>
                 </div>
@@ -59,27 +67,19 @@ export default function VideoPodcastPage() {
                             {/* Left Column - Main Video Preview */}
                             <div className="lg:col-span-7 space-y-8">
                                 <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-[#1a1a3e]">
-                                    <Image
-                                        src={mainProject.image}
-                                        alt={mainProject.title}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group hover:bg-black/10 transition-colors">
-                                        <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/50">
-                                            <div className="w-0 h-0 border-t-15 border-t-transparent border-l-25 border-l-white border-b-15 border-b-transparent ml-2" />
-                                        </div>
-                                    </div>
-                                    {/* UI Mockup Elements */}
-                                    <div className="absolute bottom-6 left-6 right-6 flex items-center gap-4">
-                                        <div className="h-2 flex-1 bg-white/30 rounded-full overflow-hidden">
-                                            <div className="h-full w-1/3 bg-red-600 rounded-full" />
-                                        </div>
-                                        <div className="flex gap-2 text-white/80">
-                                            <div className="w-6 h-6 rounded-full border border-white/50" />
-                                            <div className="w-6 h-6 rounded-full border border-white/50" />
-                                        </div>
-                                    </div>
+                                    {mainProject.image.endsWith(".mp4") ? (
+                                        <VideoPlayer
+                                            src={mainProject.image}
+                                            className="absolute inset-0"
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={mainProject.image}
+                                            alt={mainProject.title}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    )}
                                 </div>
                             </div>
 

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { trackService } from '@/lib/analytics';
 
 /**
  * Data structure for individual card content
@@ -72,7 +73,11 @@ export function ScrollExpandableCards({ cards, title, className = '' }: ScrollEx
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group relative h-[400px] rounded-2xl overflow-hidden cursor-pointer"
             >
-              <Link href={card.buttonLink || '#'} className="block h-full w-full">
+              <Link
+                href={card.buttonLink || '#'}
+                className="block h-full w-full"
+                onClick={() => trackService.viewService(card.title, card.id)}
+              >
                 {/* Card Background Image */}
                 <div className="absolute inset-0">
                   <Image

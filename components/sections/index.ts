@@ -20,3 +20,4 @@ export type { ProjectShowcaseProps } from '@/types/project-showcase.types';
 export { OurClients } from './OurClients';
 export type { OurClientsProps } from './OurClients';
 export { CTA } from './CTA';
+export { ContactMethods } from './ContactMethods';
