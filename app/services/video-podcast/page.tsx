@@ -5,7 +5,9 @@ import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
     title: `${siteContent.servicePages.videoPodcast.header.title} | Activid Services`,
-    description: siteContent.servicePages.videoPodcast.header.description,
+    description: Array.isArray(siteContent.servicePages.videoPodcast.header.description)
+        ? siteContent.servicePages.videoPodcast.header.description.join(' ')
+        : siteContent.servicePages.videoPodcast.header.description,
 };
 
 export default function VideoPodcastPage() {
@@ -30,13 +32,15 @@ export default function VideoPodcastPage() {
                     </div>
 
                     <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
-                        <Image
-                            src={header.image}
-                            alt={header.title}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-700"
-                            priority
-                        />
+                        {header.image && (
+                            <Image
+                                src={header.image}
+                                alt={header.title}
+                                fill
+                                className="object-cover hover:scale-105 transition-transform duration-700"
+                                priority
+                            />
+                        )}
                     </div>
                 </div>
 

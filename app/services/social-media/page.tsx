@@ -5,7 +5,9 @@ import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
     title: `${siteContent.servicePages.socialMedia.header.title} | Activid Services`,
-    description: siteContent.servicePages.socialMedia.header.description,
+    description: Array.isArray(siteContent.servicePages.socialMedia.header.description)
+        ? siteContent.servicePages.socialMedia.header.description.join(' ')
+        : siteContent.servicePages.socialMedia.header.description,
 };
 
 export default function SocialMediaPage() {

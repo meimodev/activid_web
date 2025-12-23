@@ -5,7 +5,9 @@ import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
     title: `${siteContent.servicePages.productPhotography.header.title} | Activid Services`,
-    description: siteContent.servicePages.productPhotography.header.description,
+    description: Array.isArray(siteContent.servicePages.productPhotography.header.description)
+        ? siteContent.servicePages.productPhotography.header.description.join(' ')
+        : siteContent.servicePages.productPhotography.header.description,
 };
 
 export default function ProductPhotographyPage() {
@@ -30,13 +32,15 @@ export default function ProductPhotographyPage() {
                         </div>
 
                         <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
-                            <Image
-                                src={header.image}
-                                alt={header.title}
-                                fill
-                                className="object-cover hover:scale-105 transition-transform duration-700"
-                                priority
-                            />
+                            {header.image && (
+                                <Image
+                                    src={header.image}
+                                    alt={header.title}
+                                    fill
+                                    className="object-cover hover:scale-105 transition-transform duration-700"
+                                    priority
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -70,7 +74,7 @@ export default function ProductPhotographyPage() {
 
                             {/* Image Grid - Adapted for Dynamic Data */}
                             <div className="w-full lg:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[200px]">
-                                {project.images.map((img, i) => {
+                                {project.images?.map((img, i) => {
                                     let gridClass = "relative rounded-2xl overflow-hidden group";
                                     // Use consistent bento grid logic
                                     if (i === 0) gridClass += " row-span-2";

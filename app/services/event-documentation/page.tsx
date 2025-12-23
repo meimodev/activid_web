@@ -5,7 +5,9 @@ import { siteContent } from "@/lib/site-content";
 
 export const metadata: Metadata = {
     title: `${siteContent.servicePages.eventDocumentation.header.title} | Activid Services`,
-    description: siteContent.servicePages.eventDocumentation.header.description,
+    description: Array.isArray(siteContent.servicePages.eventDocumentation.header.description)
+        ? siteContent.servicePages.eventDocumentation.header.description.join(' ')
+        : siteContent.servicePages.eventDocumentation.header.description,
 };
 
 export default function EventDocumentationPage() {
@@ -30,13 +32,15 @@ export default function EventDocumentationPage() {
                     </div>
 
                     <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
-                        <Image
-                            src={header.image}
-                            alt={header.title}
-                            fill
-                            className="object-cover hover:scale-105 transition-transform duration-700"
-                            priority
-                        />
+                        {header.image && (
+                            <Image
+                                src={header.image}
+                                alt={header.title}
+                                fill
+                                className="object-cover hover:scale-105 transition-transform duration-700"
+                                priority
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -59,12 +63,14 @@ export default function EventDocumentationPage() {
                             {projects.map((project, index) => (
                                 <div key={index} className="group rounded-3xl overflow-hidden bg-white/5 hover:bg-white/10 transition-colors duration-300 border border-white/10">
                                     <div className="relative h-64 overflow-hidden">
-                                        <Image
-                                            src={project.image}
-                                            alt={project.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                        />
+                                        {project.image && (
+                                            <Image
+                                                src={project.image}
+                                                alt={project.title || 'Project Image'}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                            />
+                                        )}
                                     </div>
                                     <div className="p-8">
                                         <h3 className="text-xl font-bold text-[#F8EFDE] mb-4 font-sans">
