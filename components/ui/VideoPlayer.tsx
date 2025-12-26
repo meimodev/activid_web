@@ -5,9 +5,10 @@ import { Skeleton } from './Skeleton';
 
 interface VideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
     src: string;
+    fit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
 }
 
-export function VideoPlayer({ src, className, ...props }: VideoPlayerProps) {
+export function VideoPlayer({ src, className, fit = 'cover', ...props }: VideoPlayerProps) {
     const [isLoading, setIsLoading] = useState(true);
 
     return (
@@ -22,7 +23,7 @@ export function VideoPlayer({ src, className, ...props }: VideoPlayerProps) {
             )}
             <video
                 src={src}
-                className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
+                className={`w-full h-full object-${fit} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
                 onLoadedData={() => setIsLoading(false)}
                 autoPlay
                 muted

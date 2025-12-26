@@ -22,7 +22,7 @@ export interface HeroProps {
  * - Bottom info section with company name and year
  */
 export function Hero({ content, className = '' }: HeroProps) {
-  const { title, subtitle } = content;
+  const { title, subtitle, backgroundVideo } = content;
   const sectionRef = useRef<HTMLDivElement>(null);
 
   // Parallax effect setup
@@ -36,7 +36,6 @@ export function Hero({ content, className = '' }: HeroProps) {
   const logoOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const titleY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const borderScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
   return (
     <section
@@ -45,14 +44,23 @@ export function Hero({ content, className = '' }: HeroProps) {
     >
       {/* Animated Radial Gradient Background with Parallax - Removed as it is now global */}
 
-      {/* Border Container covering Logo and Title with Parallax */}
-      <motion.div
-        className="absolute top-4 left-4 bottom-4 -right-8 md:top-12 md:left-12 md:bottom-12 md:-right-12 lg:top-16 lg:left-16 lg:bottom-16 lg:-right-16 rounded-[4rem] border-2 border-white  z-10 pointer-events-none"
-        variants={ANIMATION_VARIANTS.hero}
-        initial="initial"
-        animate="animate"
-        style={{ scale: borderScale }}
-      />
+      {/* Video Background */}
+      {backgroundVideo && (
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src={backgroundVideo} type="video/mp4" />
+          </video>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-linear-to-b from-black/40 via-purple-900/20 to-[#1a1a3e]/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-linear-to-r from-[#1a1a3e]/80 via-transparent to-transparent" />
+        </div>
+      )}
 
       {/* Logo with Parallax */}
       <motion.div

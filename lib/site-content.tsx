@@ -9,7 +9,7 @@ export const siteContent: SiteContent = {
     { label: 'Contact', href: '/contact' },
   ],
   hero: {
-    title: 'Lets get it\nTOGETHER',
+    title: '',
     subtitle: 'Activid ',
     description: 'Create stunning, high-performance websites with sophisticated animations that captivate your audience and elevate your brand.',
     cta: {
@@ -22,6 +22,7 @@ export const siteContent: SiteContent = {
         href: '/#services',
       },
     },
+    backgroundVideo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/podcast-production.mp4',
     gradientOrbs: {
       count: 3,
       colors: ['#8B5CF6', '#EC4899', '#06B6D4'],
@@ -218,7 +219,7 @@ export const siteContent: SiteContent = {
           service: 're-branding',
           description: 'Kami bantu klien membangun kembali branding mulai dari logo, strategi konten kreatif, visual konsisten, dan tone komunikasi yang relevan.',
           result: 'Engagement naik 60% dalam 2 bulan, dengan citra brand yang lebih profesional.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_3-min.jpg',
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_bakso_denny.jpg',
           color: 'text-[#D9381E]',
         },
         {
@@ -227,7 +228,7 @@ export const siteContent: SiteContent = {
           service: 'Brand Kickstart & Social Media Setup',
           description: 'Kami mendampingi klien sejak awal membangun identitas digital mulai dari konsep visual, tone warna, hingga gaya komunikasi di media sosial agar tampil konsisten dan siap bersaing secara online.',
           result: 'Brand berhasil hadir dengan tampilan digital yang rapi, terarah, dan mudah dikenali audiens.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_2-min.jpg',
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_bbold.jpg',
           color: 'text-[#8B4513]',
         },
         {
@@ -236,7 +237,7 @@ export const siteContent: SiteContent = {
           service: 'Social Media Setup',
           description: 'Kami bantu klien mengembangkan tampilan media sosial yang menyesuaikan keinginan dan karakter owner dari pemilihan warna, dan tema visual.',
           result: 'Tujuan tercapai untuk pembuatan Feed yang ceria dan menarik, serta berhasil membangun kedekatan dengan audiens.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_1-min.jpg?updatedAt=1766404560044',
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_fourever.jpg',
           color: 'text-[#E91E63]',
         },
       ],
@@ -251,25 +252,25 @@ export const siteContent: SiteContent = {
           category: 'Coffee Shop',
           colors: ['#2C4A3B', '#E8DCCA', '#5C4033'],
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_2-min.jpg',
-          description: 'Kami merancang visual yang hangat, estetis, dan mengundang yang menangkap suasana unik kedai kopi Anda, membuat merek Anda terasa nyaman, modern, dan sulit ditolak.',
+          description: '',
         },
         {
           category: 'Beauty',
           colors: ['#FFB7B2', '#FFFFFF', '#C08552'],
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_3-min.jpg',
-          description: 'Kami menciptakan desain media sosial yang bersih, elegan, dan terlihat premium yang meningkatkan nilai produk kecantikan Anda, membuatnya tampak lebih terpercaya, menarik, dan berkelas.',
+          description: '',
         },
         {
           category: 'F&B',
           colors: ['#E67E22', '#1A1A1A', '#F1C40F'],
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_1-min.jpg',
-          description: 'Kami membuat desain media sosial yang mengubah setiap hidangan menjadi pengalaman visual yang menggugah selera, membantu restoran Anda menonjol, menarik perhatian, dan membangkitkan selera makan bahkan sebelum pelanggan masuk.',
+          description: '',
         },
         {
           category: 'Automotive',
           colors: ['#C0392B', '#000000', '#922B21'],
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_4-min.jpg',
-          description: 'Kami menciptakan visual yang berani, tajam, dan berdampak tinggi yang mencerminkan kekuatan dan keandalan, sempurna untuk merek otomotif dan bengkel yang menginginkan tampilan modern, profesional, dan berorientasi performa.',
+          description: '',
         },
       ],
     },
@@ -283,17 +284,17 @@ export const siteContent: SiteContent = {
         {
           title: 'Pertamina Geothermal Energy Tbk',
           description: 'Kami memproduksi video company profile PT Pertamina Geothermal yang menampilkan operasi panas bumi, teknologi dan komitmen terhadap energi bersih dalam visual yang profesional dan terstruktur, untuk memperkuat citra perusahaan sebagai pemimpin di sektor energi terbarukan.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_event_1-min.jpg',
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/pertamina.mp4',
         },
         {
           title: 'Universitas Gunung Klabat',
           description: 'Kami mengabadikan momen-momen berharga di Universitas Gunung Klabat, mulai dari kemegahan acara wisuda hingga dinamika kehidupan kampus, menyajikannya dalam dokumentasi visual yang profesional dan penuh inspirasi bagi seluruh civitas akademika.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_event_2-min.jpg',
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/unklab.mp4',
         },
         {
           title: 'Wedding of Toar & Taya',
           description: 'Kami memproduksi video wedding cinematic yang menangkap setiap momen dengan sentuhan visual artistik, alur cerita yang emosional, dan pengambilan gambar yang dramatis.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_event_3-min.jpg',
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/toar-taya.mp4',
         },
       ],
       overview: {
@@ -313,11 +314,7 @@ export const siteContent: SiteContent = {
         result: 'Dalam 6 bulan pengelolaan oleh Activid, podcast tumbuh pesat dari 0 subscriber menjadi 600 di YouTube, 2.7K di TikTok, dan 1K followers di Instagram. Dan sekarang sudah ada 3 Segmen turunan dari Tou Minaesa Project.',
         image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/podcast-production.mp4',
       },
-      thumbnails: [
-        { src: 'https://images.unsplash.com/photo-1598550476439-6847785fcea6?w=400&h=600&fit=crop', alt: 'Short Video 1' },
-        { src: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=300&fit=crop', alt: 'Short Video 2' },
-        { src: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=400&h=300&fit=crop', alt: 'Short Video 3' },
-      ],
+      thumbnails: [],
     },
     websiteApp: {
       header: {
@@ -342,7 +339,7 @@ export const siteContent: SiteContent = {
       header: {
         title: 'Product Photography',
         description: 'Menampilkan produk Anda dengan visual yang tajam, estetik, dan profesional setiap detail difoto untuk menarik perhatian dan memperkuat identitas brand.',
-        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop',
+        image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_photo_property_1-min.jpg',
       },
       projects: [
         {
@@ -385,8 +382,8 @@ export const siteContent: SiteContent = {
     methods: {
       whatsapp: {
         label: 'WhatsApp',
-        value: '+62 895-0316-2551',
-        href: 'https://wa.me/+6289503162551',
+        value: '+62 881‑0800‑88816',
+        href: 'https://wa.me/+62881080088816',
       },
       email: {
         label: 'Email',

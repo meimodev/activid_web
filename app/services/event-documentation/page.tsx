@@ -64,12 +64,23 @@ export default function EventDocumentationPage() {
                                 <div key={index} className="group rounded-3xl overflow-hidden bg-white/5 hover:bg-white/10 transition-colors duration-300 border border-white/10">
                                     <div className="relative h-64 overflow-hidden">
                                         {project.image && (
-                                            <Image
-                                                src={project.image}
-                                                alt={project.title || 'Project Image'}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                            />
+                                            project.image.toLowerCase().endsWith('.mp4') ? (
+                                                <video
+                                                    src={project.image}
+                                                    autoPlay
+                                                    loop
+                                                    muted
+                                                    playsInline
+                                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                                                />
+                                            ) : (
+                                                <Image
+                                                    src={project.image}
+                                                    alt={project.title || 'Project Image'}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                                />
+                                            )
                                         )}
                                     </div>
                                     <div className="p-8">
