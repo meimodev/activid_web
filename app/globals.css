@@ -37,6 +37,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-bricolage);
   --font-mono: var(--font-geist-mono);
+  --font-script: "Brown Sugar";
+  --font-heading: "Brown Sugar";
   
   /* Custom animation utilities - Tailwind-compatible */
   --animate-fade-up: fadeUp var(--duration-normal) var(--ease-out-expo);
@@ -71,6 +73,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-bricolage), sans-serif;
+}
+
+@font-face {
+  font-family: 'Brown Sugar';
+  src: url('/fonts/brown-sugar.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Explicit fallback class to force font usage if Tailwind config fails */
+.font-script, .font-heading {
+  font-family: 'Brown Sugar', cursive !important;
 }
 
 /* Animation keyframes - matching design document variants */

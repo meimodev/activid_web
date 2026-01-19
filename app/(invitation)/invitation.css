@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --invitation-bg: #F9F7F2; /* Soft Cream */
+  --invitation-bg-alt: #F4EFE5; /* Darker Cream */
+  --invitation-text: #4A4A4A; /* Soft Charcoal */
+  --invitation-text-light: #8E9196;
+  --invitation-accent: #800020; /* Deep Maroon */
+  --invitation-accent-light: #C5A059; /* Gold (Complementary) */
+  --invitation-dark: #2A1B1B; /* Dark Warm Brown/Black */
+}
+
+@theme inline {
+  --font-heading: var(--font-poppins);
+  --font-script: "Brown Sugar";
+  --font-body: var(--font-poppins);
+  
+  --color-wedding-bg: var(--invitation-bg);
+  --color-wedding-bg-alt: var(--invitation-bg-alt);
+  --color-wedding-text: var(--invitation-text);
+  --color-wedding-text-light: var(--invitation-text-light);
+  --color-wedding-accent: var(--invitation-accent);
+  --color-wedding-accent-light: var(--invitation-accent-light);
+  --color-wedding-dark: var(--invitation-dark);
+
+  --animate-reveal: reveal 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+@font-face {
+  font-family: 'Brown Sugar';
+  src: url('/fonts/brown-sugar.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.font-script { font-family: 'Brown Sugar', cursive !important; }
+.font-heading { font-family: var(--font-heading); }
+.font-body { font-family: var(--font-body); }
+
+/* Elegant text utilities - Updated gradient to Maroon/Gold logic */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #800020 0%, #A52A2A 50%, #800020 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
