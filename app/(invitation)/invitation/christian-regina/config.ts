@@ -171,38 +171,38 @@ export const TEXT = {
         author: "Kolose 3:14",
     },
     title: {
-        heading: "Yang berbahagia",
+        heading: "The Wedding",
     },
     countdown: {
-        heading: "Counting Down The Days",
+        heading: "The Count Down",
     },
     event: {
-        heading: "The Wedding Event",
+        heading: "The Event",
     },
     story: {
-        heading: "Our Love Story",
+        heading: "The Love Story",
     },
     gallery: {
-        heading: "Our Moments",
+        heading: "The Moments",
     },
     rsvp: {
         heading: "RSVP",
-        description: "We would be honored to have you celebrate with us.",
-        successMessage: "We have received your confirmation.",
-        alreadySubmittedMessage: "We have already received your confirmation.",
-        seeYouMessage: "See you at the event",
+        description: "Kehadiran anda sangat kami nantikan",
+        successMessage: "Terima kasih atas konfirmasi anda",
+        alreadySubmittedMessage: "Konfirmasi anda sudah kami terima",
+        seeYouMessage: "Sampai jumpa di acara kami",
     },
     gift: {
         heading: "Wedding Gift",
-        description: "Your love and prayers are the most precious gift to us.\nHowever, if you would like to give a token of appreciation,\nyou can transfer to the following accounts:",
+        description: "Kehadiran dan doa anda sangat berharga bagi kami.\nNamun, jika menjadi kerelaan anda untuk memberi lebih lagi,\nkami mempermudah niat berharga anda lewat nomor rekening berikut:",
     },
     wishes: {
         heading: "Wedding Wishes",
-        placeholder: "Write your beautiful message for the couple...",
-        thankYouMessage: "Your warm wishes have been received.",
+        placeholder: "Tuliskan pesanmu untuk pengantin yang berbahagia",
+        thankYouMessage: "Pesanmu sudah diterima dengan baik",
     },
     footer: {
-        message: "Thank you for celebrating with us",
+        message: "Terima kasih telah merayakan bersama Activid",
     },
 };
 
