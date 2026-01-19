@@ -13,6 +13,7 @@ interface RevealOnScrollProps {
     once?: boolean;
     scale?: number; // Starting scale (e.g. 0.9)
     fullHeight?: boolean;
+    distance?: number;
 }
 
 export function RevealOnScroll({
@@ -24,13 +25,13 @@ export function RevealOnScroll({
     className = "",
     once = true,
     scale = 0.95, // Default subtle scale up
-    fullHeight = false
+    fullHeight = false,
+    distance = 40 // Default subtle move
 }: RevealOnScrollProps) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once, margin: "-10%" });
 
     const getVariants = () => {
-        const distance = 40; // Slightly reduced distance for subtler move
         const variants = {
             hidden: { opacity: 0, x: 0, y: 0, scale: scale },
             visible: { opacity: 1, x: 0, y: 0, scale: 1 }

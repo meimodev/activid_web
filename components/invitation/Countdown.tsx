@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { SectionDivider, GoldLeafBorder, DiamondAccent } from "./Decorations";
 import { RevealOnScroll } from "./RevealOnScroll";
+import { FloatingParallax } from "./ParallaxText";
 
 interface CountdownProps {
     targetDate: string;
@@ -33,44 +34,54 @@ export function Countdown({ targetDate, photos }: CountdownProps) {
     }, [targetDate]);
 
     return (
-        <section className="py-24 bg-wedding-bg/30 backdrop-blur-sm border-b border-wedding-accent/30 relative">
+        <section className="py-24 bg-wedding-bg/90 backdrop-blur-md border-b border-wedding-accent/30 relative shadow-xl">
             <GoldLeafBorder position="top" />
             <div className="container mx-auto px-4 text-center mb-16">
                 <RevealOnScroll direction="down" width="100%">
                     <div className="flex flex-col items-center">
                         <DiamondAccent />
-                        <h2 className="font-heading text-xl mb-8 mt-4 text-wedding-text-light uppercase tracking-[0.3em] flex items-center justify-center gap-4">
-                            <span className="h-px w-12 bg-wedding-accent/50"></span>
-                            Counting Down The Days
-                            <span className="h-px w-12 bg-wedding-accent/50"></span>
-                        </h2>
+                        <FloatingParallax speed={-0.2}>
+                            <h2 className="font-heading text-xl mb-8 mt-4 text-wedding-text-light uppercase tracking-[0.3em] flex items-center justify-center gap-4">
+                                <span className="h-px w-12 bg-wedding-accent/50"></span>
+                                Counting Down The Days
+                                <span className="h-px w-12 bg-wedding-accent/50"></span>
+                            </h2>
+                        </FloatingParallax>
                     </div>
                 </RevealOnScroll>
 
                 <div className="flex justify-center gap-8 md:gap-16 font-heading text-wedding-dark">
                     <RevealOnScroll delay={0.1} direction="up">
-                        <div className="text-center group">
-                            <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500">{timeLeft.days}</span>
-                            <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Days</span>
-                        </div>
+                        <FloatingParallax speed={0.2}>
+                            <div className="text-center group">
+                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500">{timeLeft.days}</span>
+                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Days</span>
+                            </div>
+                        </FloatingParallax>
                     </RevealOnScroll>
                     <RevealOnScroll delay={0.2} direction="up">
-                        <div className="text-center group">
-                            <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-75">{timeLeft.hours}</span>
-                            <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Hours</span>
-                        </div>
+                        <FloatingParallax speed={0.3}>
+                            <div className="text-center group">
+                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-75">{timeLeft.hours}</span>
+                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Hours</span>
+                            </div>
+                        </FloatingParallax>
                     </RevealOnScroll>
                     <RevealOnScroll delay={0.3} direction="up">
-                        <div className="text-center group">
-                            <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-100">{timeLeft.minutes}</span>
-                            <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Mins</span>
-                        </div>
+                        <FloatingParallax speed={0.4}>
+                            <div className="text-center group">
+                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-100">{timeLeft.minutes}</span>
+                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Mins</span>
+                            </div>
+                        </FloatingParallax>
                     </RevealOnScroll>
                     <RevealOnScroll delay={0.4} direction="up">
-                        <div className="text-center group">
-                            <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-150">{timeLeft.seconds}</span>
-                            <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Secs</span>
-                        </div>
+                        <FloatingParallax speed={0.5}>
+                            <div className="text-center group">
+                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-150">{timeLeft.seconds}</span>
+                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Secs</span>
+                            </div>
+                        </FloatingParallax>
                     </RevealOnScroll>
                 </div>
             </div>

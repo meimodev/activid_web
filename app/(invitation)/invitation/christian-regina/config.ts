@@ -130,6 +130,9 @@ export const BACKGROUND_PHOTOS = [
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/18.jpg",
 ];
 
+// Hero Cover Photo
+export const HERO_PHOTO = "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/cover.jpg";
+
 // ============================================
 // BANK ACCOUNTS (for Wedding Gift)
 // ============================================
@@ -162,6 +165,10 @@ export const MUSIC = {
 export const TEXT = {
     hero: {
         subtitle: "The Wedding",
+    },
+    quote: {
+        text: "Dan di atas semuanya itu: kenakanlah kasih, sebagai pengikat yang mempersatukan dan menyempurnakan.",
+        author: "Kolose 3:14",
     },
     title: {
         heading: "Yang berbahagia",

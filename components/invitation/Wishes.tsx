@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionDivider, GoldLeafBorder, HeartDivider, DiamondAccent } from "./Decorations";
 import { RevealOnScroll } from "./RevealOnScroll";
+import { FloatingParallax } from "./ParallaxText";
 
 interface Wish {
     id: string;
@@ -112,15 +113,17 @@ export function Wishes({ invitationId }: WishesProps) {
     };
 
     return (
-        <section className="py-24 bg-wedding-bg/30 backdrop-blur-sm relative border-b border-wedding-accent/30">
+        <section className="section-curved py-24 bg-wedding-bg/30 backdrop-blur-sm relative border-b border-wedding-accent/30">
             <GoldLeafBorder position="top" />
             <div className="container mx-auto px-4 max-w-4xl">
                 <RevealOnScroll direction="down" width="100%">
                     <div className="flex flex-col items-center">
                         <DiamondAccent />
-                        <h2 className="text-center font-heading text-3xl md:text-4xl text-gold-gradient mb-4 mt-4 uppercase tracking-[0.2em]">
-                            Wedding Wishes
-                        </h2>
+                        <FloatingParallax speed={-0.2}>
+                            <h2 className="text-center font-heading text-3xl md:text-4xl text-gold-gradient mb-4 mt-4 uppercase tracking-[0.2em]">
+                                Wedding Wishes
+                            </h2>
+                        </FloatingParallax>
                         <HeartDivider />
                     </div>
                 </RevealOnScroll>
@@ -199,6 +202,7 @@ export function Wishes({ invitationId }: WishesProps) {
                 </RevealOnScroll>
             </div>
             <SectionDivider />
+            <GoldLeafBorder position="bottom" />
         </section>
     );
 }

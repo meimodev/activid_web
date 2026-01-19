@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { Hero } from "@/components/invitation/Hero";
 import { Countdown } from "@/components/invitation/Countdown";
+import { QuoteSection } from "@/components/invitation/QuoteSection";
 import { Gallery } from "@/components/invitation/Gallery";
 import { Wishes } from "@/components/invitation/Wishes";
 import { MusicPlayer } from "@/components/invitation/MusicPlayer";
@@ -25,7 +26,7 @@ import {
 } from "@/components/invitation/InfoSections";
 
 // Import centralized configuration
-import { MUSIC, INVITATION_ID, BACKGROUND_PHOTOS, CAROUSEL_PHOTOS, GALLERY_PHOTOS, COUPLE, WEDDING_DATE, EVENTS, STORY, BANK_ACCOUNTS, TEXT } from "./config";
+import { MUSIC, INVITATION_ID, BACKGROUND_PHOTOS, CAROUSEL_PHOTOS, GALLERY_PHOTOS, COUPLE, WEDDING_DATE, EVENTS, STORY, BANK_ACCOUNTS, TEXT, HERO_PHOTO } from "./config";
 
 export default function InvitationPage() {
     const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +52,7 @@ export default function InvitationPage() {
                     couple={COUPLE}
                     date={WEDDING_DATE.displayShort}
                     subtitle={TEXT.hero.subtitle}
+                    coverImage={HERO_PHOTO}
                 />
             </motion.div>
 
@@ -60,6 +62,7 @@ export default function InvitationPage() {
                 <div className={isOpen ? "" : "h-screen overflow-hidden"}>
                     <TitleSection couple={COUPLE} date={WEDDING_DATE.display} />
                     <Countdown targetDate={WEDDING_DATE.countdownTarget} photos={CAROUSEL_PHOTOS} />
+                    <QuoteSection quote={TEXT.quote} />
                     <CoupleSection couple={COUPLE} />
                     <StorySection stories={STORY} heading={TEXT.story.heading} />
                     <EventSection events={EVENTS} />

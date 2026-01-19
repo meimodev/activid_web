@@ -56,3 +56,44 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Curved Top & Bottom Section Mask */
+/* Curved Top & Bottom Section Mask */
+.section-curved {
+  mask-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 32' preserveAspectRatio='none'%3E%3Cpath d='M0 32 Q300 0 600 16 T1200 32 H 0 Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 32' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H1200 V32 Q900 32 600 16 Q300 0 0 32 Z' fill='black'/%3E%3C/svg%3E"),
+    linear-gradient(black, black);
+  mask-repeat: no-repeat;
+  mask-position: top, bottom, center; 
+  mask-size: 100% 32px, 100% 32px, 100% calc(100% - 64px); /* No overlap needed if perfect? 32+32=64. Use 63/62 for safety? Use 64 and mask-position center? */
+  -webkit-mask-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 32' preserveAspectRatio='none'%3E%3Cpath d='M0 32 Q300 0 600 16 T1200 32 H 0 Z' fill='black'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 32' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H1200 V32 Q900 32 600 16 Q300 0 0 32 Z' fill='black'/%3E%3C/svg%3E"),
+    linear-gradient(black, black);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: top, bottom, center; /* Center gradient */
+  -webkit-mask-size: 100% 32px, 100% 32px, 100% calc(100% - 62px); /* 1px overlap on each side? */
+}
+/* Note: mask-position for gradient should be 'center' or 'top 32px'. 
+If center: it centers the (100% - 62px) block vertically.
+Since 32 top + 32 bottom = 64. 62 leaves 2px slack.
+Centered, it leaves 1px gap at top and 1px gap at bottom.
+If the masks are exactly 32px...
+Top mask at 0. Gradient starts at 1?
+Overlap is safer.
+Top mask (32px) at Top.
+Bottom mask (32px) at Bottom.
+Gradient (height H - 62) at Center.
+Top mask covers 0-32.
+Gradient covers 1-31 from top? No.
+Gradient height is H-62. Centered in H.
+Top gap is (62)/2 = 31px.
+So Gradient starts at 31px.
+Top mask ends at 32px.
+Overlap = 32 - 31 = 1px. Good.
+Gradient ends at H - 31px.
+Bottom mask starts at H - 32px.
+Overlap = (H-31) - (H-32) = 1px. Good.
+So mask-size 100% cal(100% - 62px) and mask-position center works.
+*/

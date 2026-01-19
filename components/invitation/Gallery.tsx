@@ -41,7 +41,7 @@ export function Gallery({ photos }: GalleryProps) {
     }, [photos]);
 
     return (
-        <section className="py-24 px-4 bg-white/30 backdrop-blur-sm relative border-b border-wedding-accent/30">
+        <section className="section-curved py-24 px-4 bg-white/30 backdrop-blur-sm relative border-b border-wedding-accent/30">
             <GoldLeafBorder position="top" />
             <RevealOnScroll direction="down" width="100%">
                 <div className="flex flex-col items-center">
@@ -53,16 +53,16 @@ export function Gallery({ photos }: GalleryProps) {
                 </div>
             </RevealOnScroll>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-6xl mx-auto auto-rows-[250px] p-2 bg-white shadow-2xl border border-wedding-accent/10 mt-12 grid-flow-dense">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-6xl mx-auto auto-rows-[250px] p-2 bg-white shadow-2xl border border-wedding-accent/10 mt-12 grid-flow-dense rounded-xl">
                 {photos.map((photo, i) => (
                     <RevealOnScroll key={i} delay={i * 0.1} width="100%" className={spans[i] || photo.span} fullHeight={true}>
                         <motion.div
-                            className={`relative overflow-hidden cursor-pointer w-full h-full group`}
+                            className={`relative overflow-hidden cursor-pointer w-full h-full group rounded-lg`}
                             whileHover={{ scale: 0.98 }}
                             onClick={() => setSelectedPhoto(photo.src)}
                         >
-                            <div className="absolute inset-0 bg-wedding-accent/20 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <img src={photo.src} alt="Gallery" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-wedding-accent/20 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg"></div>
+                            <img src={photo.src} alt="Gallery" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-lg" />
                         </motion.div>
                     </RevealOnScroll>
                 ))}
@@ -96,6 +96,7 @@ export function Gallery({ photos }: GalleryProps) {
                 </div>,
                 document.body
             )}
+            <GoldLeafBorder position="bottom" />
         </section>
     );
 }
