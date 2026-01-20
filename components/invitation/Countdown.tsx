@@ -102,6 +102,7 @@ export function Countdown({ targetDate, photos }: CountdownProps) {
                         className="flex gap-4 pl-4"
                         animate={{ x: ["0%", "-50%"] }}
                         transition={{ repeat: Infinity, duration: 40, ease: "linear" }}
+                        style={{ willChange: "transform" }}
                     >
                         {[...photos, ...photos, ...photos].map((photo, i) => (
                             <div key={i} className="min-w-[160px] h-[240px] overflow-hidden shadow-xl transition-all duration-1000 ease-in-out border-4 border-white">

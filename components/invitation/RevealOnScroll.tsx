@@ -57,6 +57,7 @@ export function RevealOnScroll({
                     ease: [0.2, 0.65, 0.3, 0.9] // Custom "Ease Out Quart/Quint" blend for soft landing
                 }}
                 className={fullHeight ? 'h-full' : ''}
+                style={{ willChange: "opacity, transform" }}
             >
                 {children}
             </motion.div>

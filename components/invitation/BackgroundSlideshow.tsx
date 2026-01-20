@@ -30,6 +30,7 @@ export function BackgroundSlideshow({ photos }: BackgroundSlideshowProps) {
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
                         backgroundImage: `url(${photos[index]})`,
+                        willChange: "opacity, transform"
                     }}
                 />
             </AnimatePresence>

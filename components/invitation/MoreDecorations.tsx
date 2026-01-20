@@ -7,7 +7,10 @@ export function FloatingFlowers() {
     const [petals, setPetals] = useState<any[]>([]);
 
     useEffect(() => {
-        const newPetals = Array.from({ length: 20 }, (_, i) => ({
+        const isMobile = window.innerWidth < 768;
+        const count = isMobile ? 6 : 20;
+
+        const newPetals = Array.from({ length: count }, (_, i) => ({
             id: i,
             left: Math.random() * 100,
             duration: 15 + Math.random() * 10,
@@ -48,6 +51,7 @@ export function FloatingFlowers() {
                         left: `${petal.left}vw`,
                         width: `${petal.scale}rem`,
                         height: `${petal.scale}rem`,
+                        willChange: "transform"
                     }}
                 >
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
@@ -64,7 +68,9 @@ export function FloatingSparkles() {
     const [sparkles, setSparkles] = useState<number[]>([]);
 
     useEffect(() => {
-        setSparkles(Array.from({ length: 30 }, (_, i) => i));
+        const isMobile = window.innerWidth < 768;
+        const count = isMobile ? 10 : 30;
+        setSparkles(Array.from({ length: count }, (_, i) => i));
     }, []);
 
     return (
@@ -89,6 +95,7 @@ export function FloatingSparkles() {
                     style={{
                         left: `${Math.random() * 100}%`,
                         top: `${Math.random() * 100}%`,
+                        willChange: "transform, opacity"
                     }}
                     className="absolute w-1 h-1 md:w-2 md:h-2 bg-wedding-accent rounded-full"
                 >
@@ -103,7 +110,9 @@ export function FloatingHearts() {
     const [hearts, setHearts] = useState<number[]>([]);
 
     useEffect(() => {
-        setHearts(Array.from({ length: 8 }, (_, i) => i));
+        const isMobile = window.innerWidth < 768;
+        const count = isMobile ? 3 : 8;
+        setHearts(Array.from({ length: count }, (_, i) => i));
     }, []);
 
     return (
@@ -128,6 +137,9 @@ export function FloatingHearts() {
                         delay: Math.random() * 20,
                         ease: "easeOut",
                     }}
+                    style={{
+                        willChange: "transform"
+                    }}
                     className="absolute text-wedding-accent/40"
                 >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -147,11 +159,13 @@ export function GoldenRings() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
                 className="absolute -top-32 -left-32 w-64 h-64 border-2 border-wedding-accent/30 rounded-full"
+                style={{ willChange: "transform" }}
             />
             <motion.div
                 animate={{ rotate: -360 }}
                 transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
                 className="absolute -top-24 -left-24 w-48 h-48 border border-wedding-accent/20 rounded-full"
+                style={{ willChange: "transform" }}
             />
 
             {/* Bottom Right Ring */}
@@ -159,11 +173,13 @@ export function GoldenRings() {
                 animate={{ rotate: -360 }}
                 transition={{ duration: 70, repeat: Infinity, ease: "linear" }}
                 className="absolute -bottom-32 -right-32 w-64 h-64 border-2 border-wedding-accent/30 rounded-full"
+                style={{ willChange: "transform" }}
             />
             <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
                 className="absolute -bottom-24 -right-24 w-48 h-48 border border-wedding-accent/20 rounded-full"
+                style={{ willChange: "transform" }}
             />
 
             {/* Center decoration */}
@@ -171,6 +187,7 @@ export function GoldenRings() {
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-wedding-accent/10 rounded-full"
+                style={{ willChange: "transform" }}
             />
         </div>
     );
