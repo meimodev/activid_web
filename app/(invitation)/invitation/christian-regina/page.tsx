@@ -65,25 +65,25 @@ export default function InvitationPage() {
             <div className={`relative z-10 transition-opacity duration-1000 ${isOpen ? "opacity-100" : "opacity-0 fixed top-0 w-full"}`}>
                 {/* Only allow scrolling when open */}
                 <div className={isOpen ? "" : "h-screen overflow-hidden"}>
-                    <TitleSection couple={COUPLE} date={WEDDING_DATE.display} />
-                    <Countdown targetDate={WEDDING_DATE.countdownTarget} photos={CAROUSEL_PHOTOS} />
+                    <TitleSection couple={COUPLE} date={WEDDING_DATE.display} heading={TEXT.title.heading} />
+                    <Countdown targetDate={WEDDING_DATE.countdownTarget} photos={CAROUSEL_PHOTOS} heading={TEXT.countdown.heading} />
                     <QuoteSection quote={TEXT.quote} />
                     <CoupleSection couple={COUPLE} />
                     <StorySection stories={STORY} heading={TEXT.story.heading} />
-                    <EventSection events={EVENTS} />
-                    <Gallery photos={GALLERY_PHOTOS} />
+                    <EventSection events={EVENTS} heading={TEXT.event.heading} />
+                    <Gallery photos={GALLERY_PHOTOS} heading={TEXT.gallery.heading} />
 
                     <Suspense fallback={<div className="py-24 text-center text-wedding-text-light font-body italic">Loading RSVP...</div>}>
                         <ConfirmationSection invitationId={INVITATION_ID} rsvpDeadline={WEDDING_DATE.rsvpDeadline} />
                     </Suspense>
 
-                    <GiftSection bankAccounts={BANK_ACCOUNTS} />
+                    <GiftSection bankAccounts={BANK_ACCOUNTS} heading={TEXT.gift.heading} description={TEXT.gift.description} />
 
                     <Suspense fallback={<div className="py-24 text-center text-wedding-text-light font-body italic">Loading Wishes...</div>}>
-                        <Wishes invitationId={INVITATION_ID} />
+                        <Wishes invitationId={INVITATION_ID} heading={TEXT.wishes.heading} placeholder={TEXT.wishes.placeholder} thankYouMessage={TEXT.wishes.thankYouMessage} />
                     </Suspense>
 
-                    <FooterSection couple={COUPLE} />
+                    <FooterSection couple={COUPLE} message={TEXT.footer.message} />
                 </div>
             </div>
         </main>
