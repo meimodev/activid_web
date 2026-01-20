@@ -46,7 +46,7 @@ export function Hero({ onOpen, couple, date, subtitle, coverImage }: HeroProps) 
                     </FloatingParallax>
                     <FloatingParallax speed={-0.1}>
                         <h1 className="font-script text-7xl md:text-9xl lg:text-[10rem] mb-8 text-white drop-shadow-2xl opacity-90">
-                            {couple.groom.firstName} & {couple.bride.firstName}
+                            {couple.groom.firstName} {couple.bride.firstName}
                         </h1>
                     </FloatingParallax>
                     <FloatingParallax speed={0.1}>

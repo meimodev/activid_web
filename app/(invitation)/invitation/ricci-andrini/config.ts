@@ -15,7 +15,7 @@ export const COUPLE = {
         shortName: "Ricci",
         role: "The Groom",
         parents: "Putra dari Roberd Gerungan & Sermy Sangari",
-        photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/main_groom.png",
+        photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/hs1.jpg",
     },
     bride: {
         firstName: "Andrini",
@@ -23,7 +23,7 @@ export const COUPLE = {
         shortName: "Andrini",
         role: "The Bride",
         parents: "Putri dari Yunus Mokodaser & Suryati Kalensang",
-        photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/main-bride.png",
+        photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/hs2.jpg",
     },
 };
 
@@ -69,58 +69,46 @@ export const STORY = [
 // PHOTO GALLERY
 // ============================================
 export const GALLERY_PHOTOS = [
-
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/1.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/2.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/3.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/4.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/5.jpg", span: "row-span-1" },
-
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/6.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/7.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/8.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/9.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/10.jpg", span: "row-span-1" },
-
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/11.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/12.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/14.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/15.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/16.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/17.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/18.jpg", span: "row-span-1" },
-
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/9.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/8.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/7.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/6.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/5.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/4.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/3.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
 ];
 
 // Carousel photos (for countdown section)
 export const CAROUSEL_PHOTOS = [
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/1.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/2.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/3.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/4.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/5.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/6.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/7.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/8.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/9.jpg",
-   
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/9.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/8.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/7.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/6.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/5.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/4.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/3.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
 
 ];
 
 // Background slideshow photos
 export const BACKGROUND_PHOTOS = [
-     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/10.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/11.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/12.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/14.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/15.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/16.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/17.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/18.jpg",
+     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/9.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/8.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/7.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/6.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/5.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/4.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/3.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
 ];
 
 // Hero Cover Photo
-export const HERO_PHOTO = "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/cover.jpg";
+export const HERO_PHOTO = "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/cover_cropped";
 
 // ============================================
 // BANK ACCOUNTS (for Wedding Gift)
@@ -143,7 +131,7 @@ export const BANK_ACCOUNTS = [
 // ============================================
 export const MUSIC = {
     // Direct streaming URL (Dropbox with raw=1 or dl=1)
-    url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
+    url: "https://www.dropbox.com/scl/fi/0w731ekqg1wlpwp5qmhvv/Shane-Filan-Beautiful-In-White.mp3?rlkey=qo4agwhv931nrpozo7o4e95o1&st=t8sn8nt2&dl=1",
     autoPlay: true,
     loop: true,
 };
@@ -202,8 +190,8 @@ export const METADATA = {
         images: [
             {
                 url: HERO_PHOTO,
-                width: 1200,
-                height: 630,
+                width: 600,
+                height: 600,
                 alt: "The Wedding of Ricci & Andrini",
             },
         ],

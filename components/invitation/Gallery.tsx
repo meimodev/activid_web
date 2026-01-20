@@ -6,13 +6,8 @@ import { createPortal } from "react-dom";
 import { GoldLeafBorder, DiamondAccent, SectionOrnament } from "./Decorations";
 import { RevealOnScroll } from "./RevealOnScroll";
 
-interface GalleryPhoto {
-    src: string;
-    span: string;
-}
-
 interface GalleryProps {
-    photos: GalleryPhoto[];
+    photos: string[];
 }
 
 export function Gallery({ photos }: GalleryProps) {
@@ -22,7 +17,7 @@ export function Gallery({ photos }: GalleryProps) {
     useEffect(() => {
         photos.forEach((photo, index) => {
             const img = new Image();
-            img.src = photo.src;
+            img.src = photo;
             img.onload = () => {
                 const ratio = img.width / img.height;
                 let spanClass = "col-span-1 row-span-1";
@@ -55,14 +50,14 @@ export function Gallery({ photos }: GalleryProps) {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-6xl mx-auto auto-rows-[250px] p-2 bg-white shadow-2xl border border-wedding-accent/10 mt-12 grid-flow-dense rounded-xl">
                 {photos.map((photo, i) => (
-                    <RevealOnScroll key={i} delay={i * 0.1} width="100%" className={spans[i] || photo.span} fullHeight={true}>
+                    <RevealOnScroll key={i} delay={i * 0.1} width="100%" className={spans[i] || "col-span-1 row-span-1"} fullHeight={true}>
                         <motion.div
                             className={`relative overflow-hidden cursor-pointer w-full h-full group rounded-lg`}
                             whileHover={{ scale: 0.98 }}
-                            onClick={() => setSelectedPhoto(photo.src)}
+                            onClick={() => setSelectedPhoto(photo)}
                         >
                             <div className="absolute inset-0 bg-wedding-accent/20 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg"></div>
-                            <img src={photo.src} alt="Gallery" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-lg" />
+                            <img src={photo} alt="Gallery" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-lg" />
                         </motion.div>
                     </RevealOnScroll>
                 ))}

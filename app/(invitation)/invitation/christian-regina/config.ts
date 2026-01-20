@@ -80,27 +80,23 @@ export const STORY = [
 // PHOTO GALLERY
 // ============================================
 export const GALLERY_PHOTOS = [
-
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/1.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/2.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/3.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/4.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/5.jpg", span: "row-span-1" },
-
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/6.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/7.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/8.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/9.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/10.jpg", span: "row-span-1" },
-
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/11.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/12.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/14.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/15.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/16.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/17.jpg", span: "row-span-1" },
-    { src: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/18.jpg", span: "row-span-1" },
-
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/1.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/2.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/3.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/4.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/5.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/6.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/7.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/8.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/9.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/10.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/11.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/12.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/14.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/15.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/16.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/17.jpg",
+    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/18.jpg",
 ];
 
 // Carousel photos (for countdown section)
