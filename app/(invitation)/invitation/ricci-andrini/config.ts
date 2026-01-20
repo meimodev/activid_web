@@ -76,8 +76,8 @@ export const GALLERY_PHOTOS = [
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/5.jpg",
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/4.jpg",
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/3.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
+    // "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
+    // "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
 ];
 
 // Carousel photos (for countdown section)
@@ -89,8 +89,8 @@ export const CAROUSEL_PHOTOS = [
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/5.jpg",
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/4.jpg",
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/3.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
+    // "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
+    // "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
 
 ];
 
@@ -103,8 +103,8 @@ export const BACKGROUND_PHOTOS = [
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/5.jpg",
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/4.jpg",
     "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/3.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
-    "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
+    // "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/2.jpg",
+    // "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/1.jpg",
 ];
 
 // Hero Cover Photo
@@ -131,7 +131,7 @@ export const BANK_ACCOUNTS = [
 // ============================================
 export const MUSIC = {
     // Direct streaming URL (Dropbox with raw=1 or dl=1)
-    url: "https://www.dropbox.com/scl/fi/0w731ekqg1wlpwp5qmhvv/Shane-Filan-Beautiful-In-White.mp3?rlkey=qo4agwhv931nrpozo7o4e95o1&st=t8sn8nt2&dl=1",
+    url: "https://www.dropbox.com/scl/fi/mj324o4j9x3xloodtzcd5/Rossa-feat.-Afgan-Kamu-Yang-Kutunggu.mp3?rlkey=0h8q4x13p8k0k5kyz9lowqs45&st=730ttlvm&dl=1",
     autoPlay: true,
     loop: true,
 };

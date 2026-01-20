@@ -9,9 +9,10 @@ import { FloatingParallax } from "./ParallaxText";
 interface CountdownProps {
     targetDate: string;
     photos: string[];
+    heading: string;
 }
 
-export function Countdown({ targetDate, photos }: CountdownProps) {
+export function Countdown({ targetDate, photos, heading }: CountdownProps) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const target = new Date(targetDate);
 
@@ -43,7 +44,7 @@ export function Countdown({ targetDate, photos }: CountdownProps) {
                         <FloatingParallax speed={-0.2}>
                             <h2 className="font-heading text-xl mb-8 mt-4 text-wedding-text-light uppercase tracking-[0.3em] flex items-center justify-center gap-4">
                                 <span className="h-px w-12 bg-wedding-accent/50"></span>
-                                Counting Down The Days
+                                {heading}
                                 <span className="h-px w-12 bg-wedding-accent/50"></span>
                             </h2>
                         </FloatingParallax>

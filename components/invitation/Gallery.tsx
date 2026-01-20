@@ -8,9 +8,10 @@ import { RevealOnScroll } from "./RevealOnScroll";
 
 interface GalleryProps {
     photos: string[];
+    heading: string;
 }
 
-export function Gallery({ photos }: GalleryProps) {
+export function Gallery({ photos, heading }: GalleryProps) {
     const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
     const [spans, setSpans] = useState<{ [key: number]: string }>({});
 
@@ -42,7 +43,7 @@ export function Gallery({ photos }: GalleryProps) {
                 <div className="flex flex-col items-center">
                     <DiamondAccent />
                     <h2 className="text-center font-heading text-3xl md:text-5xl text-gold-gradient mb-4 mt-4 uppercase tracking-[0.2em]">
-                        Our Moments
+                        {heading}
                     </h2>
                     <SectionOrnament />
                 </div>

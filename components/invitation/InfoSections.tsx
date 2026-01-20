@@ -57,9 +57,10 @@ interface BankAccount {
 interface TitleSectionProps {
     couple: CoupleInfo;
     date: string;
+    heading: string;
 }
 
-export function TitleSection({ couple, date }: TitleSectionProps) {
+export function TitleSection({ couple, date, heading }: TitleSectionProps) {
     return (
         <section className="min-h-screen relative flex flex-col items-center justify-end overflow-hidden">
             <GoldLeafBorder position="top" />
@@ -72,7 +73,7 @@ export function TitleSection({ couple, date }: TitleSectionProps) {
                 <RevealOnScroll direction="down" delay={0.2} distance={50} duration={1.5}>
                     <FloatingParallax speed={-0.2}>
                         <h2 className="font-heading text-sm md:text-base uppercase tracking-[0.4em] mb-6 text-wedding-text-light text-center font-semibold drop-shadow-sm">
-                            We Are Getting Married
+                            {heading}
                         </h2>
                     </FloatingParallax>
                 </RevealOnScroll>
@@ -113,9 +114,10 @@ export function TitleSection({ couple, date }: TitleSectionProps) {
 // ============================================
 interface CoupleSectionProps {
     couple: CoupleInfo;
+    disableGrayscale?: boolean;
 }
 
-export function CoupleSection({ couple }: CoupleSectionProps) {
+export function CoupleSection({ couple, disableGrayscale = false }: CoupleSectionProps) {
     return (
         <section className="section-curved py-24 bg-wedding-bg-alt/90 backdrop-blur-md relative border-b border-wedding-accent/30">
             <GoldLeafBorder position="top" />
@@ -126,7 +128,11 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
                     <div className="text-center group">
                         <RevealOnScroll direction="right" delay={0.2} width="100%">
                             <div className="w-64 h-64 mx-auto rounded-full overflow-hidden mb-8 border border-wedding-accent p-2 shadow-xl bg-white rotate-3 group-hover:rotate-0 transition-transform duration-700">
-                                <img src={couple.groom.photo} alt="Groom" className="w-full h-full object-cover rounded-full grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                <img
+                                    src={couple.groom.photo}
+                                    alt="Groom"
+                                    className={`w-full h-full object-cover rounded-full transition-all duration-700 ${disableGrayscale ? "" : "grayscale group-hover:grayscale-0"}`}
+                                />
                             </div>
                         </RevealOnScroll>
 
@@ -154,7 +160,11 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
                     <div className="text-center group">
                         <RevealOnScroll direction="left" delay={0.2} width="100%">
                             <div className="w-64 h-64 mx-auto rounded-full overflow-hidden mb-8 border border-wedding-accent p-2 shadow-xl bg-white -rotate-3 group-hover:rotate-0 transition-transform duration-700">
-                                <img src={couple.bride.photo} alt="Bride" className="w-full h-full object-cover rounded-full grayscale group-hover:grayscale-0 transition-all duration-700" />
+                                <img
+                                    src={couple.bride.photo}
+                                    alt="Bride"
+                                    className={`w-full h-full object-cover rounded-full transition-all duration-700 ${disableGrayscale ? "" : "grayscale group-hover:grayscale-0"}`}
+                                />
                             </div>
                         </RevealOnScroll>
 
@@ -182,9 +192,10 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
 // ============================================
 interface EventSectionProps {
     events: EventsConfig;
+    heading: string;
 }
 
-export function EventSection({ events }: EventSectionProps) {
+export function EventSection({ events, heading }: EventSectionProps) {
     return (
         <section className="section-curved py-24 bg-wedding-bg/90 backdrop-blur-md text-center relative border-b border-wedding-accent/30">
             <GoldLeafBorder position="top" />
@@ -194,7 +205,7 @@ export function EventSection({ events }: EventSectionProps) {
                 <div className="flex flex-col items-center">
                     <DiamondAccent />
                     <FloatingParallax speed={-0.2}>
-                        <h2 className="font-heading text-3xl uppercase tracking-[0.2em] text-wedding-accent mb-4 mt-4">The Wedding Event</h2>
+                        <h2 className="font-heading text-3xl uppercase tracking-[0.2em] text-wedding-accent mb-4 mt-4">{heading}</h2>
                     </FloatingParallax>
                     <RingsDivider />
                 </div>
@@ -387,9 +398,11 @@ export function ConfirmationSection({ invitationId, rsvpDeadline }: Confirmation
 // ============================================
 interface GiftSectionProps {
     bankAccounts: BankAccount[];
+    heading: string;
+    description: string;
 }
 
-export function GiftSection({ bankAccounts }: GiftSectionProps) {
+export function GiftSection({ bankAccounts, heading, description }: GiftSectionProps) {
     return (
         <section className="section-curved py-24 bg-white/90 backdrop-blur-md text-center relative">
             <GoldLeafBorder position="top" />
@@ -399,14 +412,14 @@ export function GiftSection({ bankAccounts }: GiftSectionProps) {
                     <div className="flex flex-col items-center">
                         <DiamondAccent />
                         <FloatingParallax speed={-0.3}>
-                            <h2 className="font-script text-6xl text-gold-gradient mb-4 mt-4">Wedding Gift</h2>
+                            <h2 className="font-script text-6xl text-gold-gradient mb-4 mt-4">{heading}</h2>
                         </FloatingParallax>
                         <HeartDivider />
                     </div>
                 </RevealOnScroll>
 
                 <RevealOnScroll delay={0.2} width="100%">
-                    <p className="font-body text-wedding-text-light mb-16 italic leading-relaxed">Your love and prayers are the most precious gift to us.<br />However, if you would like to give a token of appreciation, <br />you can transfer to the following accounts:</p>
+                    <p className="font-body text-wedding-text-light mb-16 italic leading-relaxed whitespace-pre-line">{description}</p>
                 </RevealOnScroll>
 
                 <div className="grid md:grid-cols-2 gap-8 font-heading">
@@ -434,15 +447,16 @@ export function GiftSection({ bankAccounts }: GiftSectionProps) {
 // ============================================
 interface FooterSectionProps {
     couple: CoupleInfo;
+    message: string;
 }
 
-export function FooterSection({ couple }: FooterSectionProps) {
+export function FooterSection({ couple, message }: FooterSectionProps) {
     return (
         <footer className="py-16 bg-wedding-dark/95 text-center text-white/80">
             <RevealOnScroll direction="up" delay={0.1} width="100%">
                 <FloatingParallax speed={0.4}>
                     <h2 className="font-script text-5xl text-wedding-accent mb-6">{couple.groom.firstName} & {couple.bride.firstName}</h2>
-                    <p className="font-heading text--[10px] uppercase tracking-[0.4em] opacity-60">Thank you for celebrating with us</p>
+                    <p className="font-heading text--[10px] uppercase tracking-[0.4em] opacity-60">{message}</p>
                 </FloatingParallax>
             </RevealOnScroll>
         </footer>

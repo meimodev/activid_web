@@ -20,9 +20,12 @@ interface Wish {
 
 interface WishesProps {
     invitationId: string;
+    heading: string;
+    placeholder: string;
+    thankYouMessage: string;
 }
 
-export function Wishes({ invitationId }: WishesProps) {
+export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: WishesProps) {
     const searchParams = useSearchParams();
     const inviteeName = searchParams.get("to");
 
@@ -121,7 +124,7 @@ export function Wishes({ invitationId }: WishesProps) {
                         <DiamondAccent />
                         <FloatingParallax speed={-0.2}>
                             <h2 className="text-center font-heading text-3xl md:text-4xl text-gold-gradient mb-4 mt-4 uppercase tracking-[0.2em]">
-                                Wedding Wishes
+                                {heading}
                             </h2>
                         </FloatingParallax>
                         <HeartDivider />
@@ -140,7 +143,7 @@ export function Wishes({ invitationId }: WishesProps) {
                         ) : hasPosted ? (
                             <div className="text-center py-8">
                                 <h3 className="font-script text-4xl text-wedding-accent mb-2">Thank you, {inviteeName}!</h3>
-                                <p className="font-body text-wedding-text-light">Your warm wishes have been received.</p>
+                                <p className="font-body text-wedding-text-light">{thankYouMessage}</p>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-6">
@@ -151,7 +154,7 @@ export function Wishes({ invitationId }: WishesProps) {
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     className="w-full bg-wedding-bg border border-wedding-accent/30 p-4 rounded-sm focus:outline-none focus:border-wedding-accent transition-colors font-body text-wedding-text min-h-[120px]"
-                                    placeholder="Write your beautiful message for the couple..."
+                                    placeholder={placeholder}
                                     disabled={isSubmitting}
                                 />
                                 {error && <p className="text-red-400 text-xs text-center">{error}</p>}
