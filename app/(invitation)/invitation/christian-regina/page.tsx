@@ -44,7 +44,12 @@ export default function InvitationPage() {
             <motion.div
                 className="fixed inset-0 z-50"
                 initial={false}
-                animate={{ y: isOpen ? "-100%" : "0%" }}
+                animate={{
+                    y: isOpen ? "-100%" : "0%",
+                    transitionEnd: {
+                        display: isOpen ? "none" : "block"
+                    }
+                }}
                 transition={{ duration: 1.5, ease: [0.19, 1, 0.22, 1] }}
             >
                 <Hero
