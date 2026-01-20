@@ -10,19 +10,19 @@
 // ============================================
 export const COUPLE = {
     groom: {
-        firstName: "Christian",
-        fullName: "Christian Jehezkiel Roring, S.Th",
-        shortName: "Christian",
+        firstName: "Ricci",
+        fullName: "Ricci Gerungan",
+        shortName: "Ricci",
         role: "The Groom",
-        parents: "Putra pertama dari Delvy Ronald Roring & Novke Juana Rumapar",
+        parents: "Putra dari Roberd Gerungan & Sermy Sangari",
         photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/main_groom.png",
     },
     bride: {
-        firstName: "Regina",
-        fullName: "Regina Claudia Tairas, S.Th",
-        shortName: "Regina",
+        firstName: "Andrini",
+        fullName: "Andrini Regina Mokodaser",
+        shortName: "Andrini",
         role: "The Bride",
-        parents: "Putri kedua dari Jaffray Frengky Tairas & Nolvita Silfia Pandoh",
+        parents: "Putri dari Yunus Mokodaser & Suryati Kalensang",
         photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/main-bride.png",
     },
 };
@@ -32,48 +32,37 @@ export const COUPLE = {
 // ============================================
 export const WEDDING_DATE = {
     // Main display date
-    display: "31 JANUARI 2026",
-    displayShort: "31 . 01 . 2026",
+    display: "24 Januari 2026",
+    displayShort: "24 Jan 2026",
     
     // Countdown target (ISO format)
-    countdownTarget: "2026-01-31T00:00:00",
+    countdownTarget: "2026-01-24T00:00:00",
     
     // RSVP deadline text
-    rsvpDeadline: "30 Januari 2026",
+    rsvpDeadline: "[DATE] [MONTH] [YEAR]",
 };
 
 export const EVENTS = {
     holyMatrimony: {
         title: "Pemberkatan",
-        date: "Sabtu, 31 Januari, 2026",
+        date: "24 Januari 2026",
         time: "13:00 WITA",
-        venue: "Gereja Baptis Kalvari Seretan",
+        venue: "GMIM Alfa Omega Rinegetan",
         address: "",
-        mapUrl: "https://maps.app.goo.gl/1ajxvkej8CkS1Zsy9",
+        mapUrl: "https://maps.app.goo.gl/XDbv3QeGtVkZtw9o8",
     },
     reception: {
         title: "Resepsi",
-        date: "Sabtu, 31 Januari, 2026",
-        time: "16:00 WITA",
-        venue: "Kompleks Gereja Baptis Kalvari Seretan",
+        date: "24 Januari 2026",
+        time: "17:00 WITA",
+        venue: "Rumah Keluarga Ricci Gerungan",
         address: "",
-        mapUrl: "https://maps.app.goo.gl/r59Cv36ta2vqMaai6",
+        mapUrl: "https://maps.app.goo.gl/hfuQCuGk17bgCmw16",
     },
 };
 
 export const STORY = [
-    {
-        date: "7 July 2016",
-        description: "Mulai menjalani hubungan pacaran"
-    },
-    {
-        date: "Awalan 2024",
-        description: "Memutuskan untuk melanjutkan hubungan ke jenjang yang lebih serius"
-    },
-    {
-        date: "05 Oktober 2025",
-        description: "Mengadakan pembicaraan bersama dengan kedua orang tua kami masing-masing dan memutuskan untuk melangsungkan pernikahan di tanggal 31 Januari 2026"
-    },
+  
 ];
 
 // ============================================
@@ -139,13 +128,13 @@ export const HERO_PHOTO = "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invit
 export const BANK_ACCOUNTS = [
     {
         bankName: "MANDIRI",
-        accountNumber: "1500035142601",
-        accountHolder: "CHRISTIAN JEHEZKIEL",
+        accountNumber: "1500033822725",
+        accountHolder: "ANDRINI REGINA MOKODASER",
     },
     {
-        bankName: "SEABANK",
-        accountNumber: "901317250168",
-        accountHolder: "REGINA CLAUDIA TAIRAS",
+        bankName: "BNI",
+        accountNumber: "0952131951",
+        accountHolder: "RICCI GERUNGAN",
     },
 ];
 
@@ -167,8 +156,8 @@ export const TEXT = {
         subtitle: "The Wedding",
     },
     quote: {
-        text: "Dan di atas semuanya itu: kenakanlah kasih, sebagai pengikat yang mempersatukan dan menyempurnakan.",
-        author: "Kolose 3:14",
+        text: "Tuhan membuat segala sesuatu indah pada waktu-Nya. Indah ketika Ia mempertemukan kami. Indah ketika Ia menumbuhkan kasih di antara kami. Dan indah ketika Ia mempersatukan kami dalam sebuah ikatan Pernikahan Kudus.",
+        author: "",
     },
     title: {
         heading: "The Wedding",
@@ -184,13 +173,6 @@ export const TEXT = {
     },
     gallery: {
         heading: "The Moments",
-    },
-    rsvp: {
-        heading: "RSVP",
-        description: "Kehadiran anda sangat kami nantikan",
-        successMessage: "Terima kasih atas konfirmasi anda",
-        alreadySubmittedMessage: "Konfirmasi anda sudah kami terima",
-        seeYouMessage: "Sampai jumpa di acara kami",
     },
     gift: {
         heading: "Wedding Gift",
@@ -210,19 +192,19 @@ export const TEXT = {
 // PAGE METADATA
 // ============================================
 export const METADATA = {
-    title: "The Wedding of Christian & Regina",
-    description: "Premium custom theme web invitation for the Wedding of Christian & Regina.",
+    title: "The Wedding of Ricci & Andrini",
+    description: "Premium custom theme web invitation for the Wedding of Ricci & Andrini.",
     openGraph: {
-        title: "The Wedding of Christian & Regina",
+        title: "The Wedding of Ricci & Andrini",
         description: "Premium custom theme web invitation.",
-        url: "https://activid.web.id/invitation/christian-regina",
+        url: "https://activid.web.id/invitation/ricci-andrini",
         siteName: "Activid Web Invitation",
         images: [
             {
                 url: HERO_PHOTO,
                 width: 1200,
                 height: 630,
-                alt: "The Wedding of Christian & Regina",
+                alt: "The Wedding of Ricci & Andrini",
             },
         ],
         locale: "id_ID",
@@ -230,7 +212,7 @@ export const METADATA = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "The Wedding of Christian & Regina",
+        title: "The Wedding of Ricci & Andrini",
         description: "Premium custom theme web invitation.",
         images: [HERO_PHOTO],
     },
@@ -239,4 +221,4 @@ export const METADATA = {
 // ============================================
 // INVITATION ID (for Firebase/database)
 // ============================================
-export const INVITATION_ID = "christian-regina";
+export const INVITATION_ID = "ricci-andrini";

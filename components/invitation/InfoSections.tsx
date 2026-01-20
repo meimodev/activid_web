@@ -66,7 +66,7 @@ export function TitleSection({ couple, date }: TitleSectionProps) {
 
 
             {/* Smooth Gradient Overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-gradient-to-t from-wedding-bg via-wedding-bg/70 to-transparent pointer-events-none z-0" />
+            <div className="absolute inset-x-0 bottom-0 h-[80vh] bg-linear-to-t from-wedding-bg via-wedding-bg/70 to-transparent pointer-events-none z-0" />
 
             <div className="relative z-10 w-full flex flex-col items-center text-center pb-24 md:pb-32 px-4">
                 <RevealOnScroll direction="down" delay={0.2} distance={50} duration={1.5}>
