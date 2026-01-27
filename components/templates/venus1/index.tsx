@@ -43,7 +43,8 @@ function VenusReveal(props: ComponentProps<typeof RevealOnScroll>) {
 type NavSectionId = "home" | "couple" | "event" | "story" | "gallery" | "gift" | "wishes";
 
 export function Venus1({ config }: Venus1Props) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(() => !config.sections.hero.enabled);
+    const [contentReady, setContentReady] = useState(() => !config.sections.hero.enabled);
     const [activeSection, setActiveSection] = useState<NavSectionId>("home");
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -90,7 +91,7 @@ export function Venus1({ config }: Venus1Props) {
     );
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen || !contentReady) return;
 
         // Attempt to autoplay once the invitation is opened (user just interacted)
         if (audioRef.current) {
@@ -130,7 +131,7 @@ export function Venus1({ config }: Venus1Props) {
 
         els.forEach((el) => observer.observe(el));
         return () => observer.disconnect();
-    }, [isOpen]);
+    }, [contentReady, isOpen]);
 
     const togglePlay = () => {
         if (!audioRef.current) return;
@@ -198,6 +199,9 @@ export function Venus1({ config }: Venus1Props) {
                         },
                     }}
                     transition={{ duration: 1.2, ease: [0.19, 1, 0.22, 1] }}
+                    onAnimationComplete={() => {
+                        if (isOpen) setContentReady(true);
+                    }}
                 >
                     <CoverOverlay
                         couple={config.couple}
@@ -210,16 +214,11 @@ export function Venus1({ config }: Venus1Props) {
                 </motion.div>
             )}
 
-            <div
-                className={`relative z-10 transition-opacity duration-700 ${isOpen ? "opacity-100" : "opacity-0 fixed top-0 w-full"}`}
-            >
-                <div className={isOpen ? "" : "h-screen overflow-hidden"}>
+            {contentReady ? (
+                <div className="relative z-10">
                     <div id="home" className="scroll-mt-24" />
 
-                    <HeaderIntro
-                        couple={config.couple}
-                        isOpen={isOpen}
-                    />
+                    <HeaderIntro couple={config.couple} isOpen={isOpen} />
 
                     {config.sections.quote.enabled && (
                         <QuoteBlock
@@ -338,7 +337,7 @@ export function Venus1({ config }: Venus1Props) {
                         />
                     )}
                 </div>
-            </div>
+            ) : null}
         </main>
     );
 }
@@ -535,9 +534,7 @@ function QuoteBlock({
             <div className="absolute inset-0 bg-black/55" />
             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/25 to-black/60" />
             <div className="absolute bottom-8 right-6 z-10">
-                <VenusReveal direction="up" width="auto" delay={1.25}>
-                    <CountdownVertical targetDate={targetDate} stagger />
-                </VenusReveal>
+                <CountdownVertical targetDate={targetDate} stagger revealDelay={1.25} />
             </div>
 
             <div className="relative z-10 max-w-5xl mx-auto min-h-[calc(100vh-7rem)]">
@@ -556,9 +553,11 @@ function QuoteBlock({
 function CountdownVertical({
     targetDate,
     stagger,
+    revealDelay,
 }: {
     targetDate: string;
     stagger?: boolean;
+    revealDelay?: number;
 }) {
     const compute = (raw: string) => {
         const target = new Date(raw);
@@ -593,47 +592,32 @@ function CountdownVertical({
         { label: "Secs", value: timeLeft.seconds },
     ];
 
-    const container = {
-        hidden: {},
-        show: {
-            transition: {
-                staggerChildren: 0.22,
-                delayChildren: 0.05,
-            },
-        },
-    };
-
-    const card = {
-        hidden: { opacity: 0, y: 16, scale: 0.98, filter: "blur(8px)" },
-        show: {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            filter: "blur(0px)",
-            transition: { duration: 0.9, ease: [0.19, 1, 0.22, 1] },
-        },
-    };
-
     return (
-        <motion.div
-            className="flex flex-col gap-2 items-end"
-            variants={container}
-            initial={stagger ? "hidden" : undefined}
-            animate={stagger ? "show" : undefined}
-        >
-            {items.map((it) => (
-                <motion.div
-                    key={it.label}
-                    className="text-center px-4 py-3 rounded-2xl border border-black/10 bg-white/60 backdrop-blur min-w-[88px]"
-                    variants={stagger ? card : undefined}
-                >
-                    <div className="font-body text-2xl leading-none text-[#2B2424]">{it.value}</div>
-                    <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[#6B5B5B] font-body">
-                        {it.label}
+        <div className="flex flex-col gap-2 items-end">
+            {items.map((it, idx) => {
+                const cardNode = (
+                    <div className="text-center px-4 py-3 rounded-2xl border border-black/10 bg-white/60 backdrop-blur min-w-[88px]">
+                        <div className="font-body text-2xl leading-none text-[#2B2424]">{it.value}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[#6B5B5B] font-body">
+                            {it.label}
+                        </div>
                     </div>
-                </motion.div>
-            ))}
-        </motion.div>
+                );
+
+                if (!stagger) return <div key={it.label}>{cardNode}</div>;
+
+                return (
+                    <VenusReveal
+                        key={it.label}
+                        direction="up"
+                        width="fit-content"
+                        delay={(revealDelay ?? 0) + 0.25 + idx * 0.25}
+                    >
+                        {cardNode}
+                    </VenusReveal>
+                );
+            })}
+        </div>
     );
 }
 
@@ -1059,7 +1043,7 @@ function GiftBlock({
                                 Exclusive Discount
                             </h4>
                             <p className="mt-4 text-sm text-[#3A2F2F]">
-                                Anda akan mendapatkan exclusive discount hingga <span className="font-body text-[#2B2424]">25%</span> untuk pemesanan hadiah dari link ini. "Chat WhatsApp" untuk informasi lebih lanjut.
+                                Anda akan mendapatkan exclusive discount hingga <span className="font-body text-[#2B2424]">25%</span> untuk pemesanan hadiah dari link ini. &quot;Chat WhatsApp&quot; untuk informasi lebih lanjut.
                             </p>
 
                             <div className="mt-7 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1293,16 +1277,9 @@ function WishesFirestore({
                         <p className="text-sm text-[#6B5B5B]">Belum ada ucapan. Jadilah yang pertama.</p>
                     </div>
                 ) : (
-                    <AnimatePresence initial={false}>
-                        {wishes.map((w, idx) => (
-                            <motion.div
-                                key={w.id}
-                                initial={{ opacity: 0, y: 14 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -14 }}
-                                transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1], delay: idx * 0.18 }}
-                                className="rounded-3xl border border-black/10 bg-white/40 backdrop-blur p-7"
-                            >
+                    wishes.map((w, idx) => (
+                        <VenusReveal key={w.id} width="100%" direction="up" delay={0.35 + idx * 0.18}>
+                            <div className="rounded-3xl border border-black/10 bg-white/40 backdrop-blur p-7">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
                                         <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-body">{w.name}</p>
@@ -1322,9 +1299,9 @@ function WishesFirestore({
                                 </div>
 
                                 <p className="mt-4 text-sm text-[#3A2F2F] whitespace-pre-line">{w.message}</p>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                            </div>
+                        </VenusReveal>
+                    ))
                 )}
             </div>
         </div>
@@ -1430,38 +1407,51 @@ function FooterMark({ couple }: { couple: InvitationConfig["couple"] }) {
 
             <div className="relative px-6 py-12 md:py-14">
                 <div className="max-w-3xl mx-auto text-center text-white">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/30 border border-indigo-500/20 text-xs font-mono text-indigo-300 backdrop-blur-md relative overflow-hidden">
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-indigo-500/20 to-transparent animate-[gradient_4s_linear_infinite]" />
-                        <span className="relative w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_#4ade80]" />
-                        <span className="relative">{names}</span>
-                    </div>
+                    <VenusReveal direction="up" width="100%" delay={0.25} className="flex justify-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/30 border border-indigo-500/20 text-xs font-mono text-indigo-300 backdrop-blur-md relative overflow-hidden">
+                            <div className="absolute inset-0 bg-linear-to-r from-transparent via-indigo-500/20 to-transparent animate-[gradient_4s_linear_infinite]" />
+                            <span className="relative w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_#4ade80]" />
+                            <span className="relative">{names}</span>
+                        </div>
+                    </VenusReveal>
 
-                    <h3
-                        className={`mt-4 ${venusScript.className} text-5xl md:text-6xl bg-linear-to-r from-indigo-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent bg-size-[200%_auto] animate-[gradient_4s_linear_infinite]`}
-                        style={{ textShadow: "0 0 40px rgba(79, 70, 229, 0.4)", WebkitBackgroundClip: "text" }}
-                    >
-                        Misi selesai
-                    </h3>
-
-                    <p className="mt-4 text-sm md:text-base text-indigo-200/70 font-light leading-relaxed">
-                        Terima kasih sudah menjelajah bersama <br/>Activid Invitation
-                    </p>
-
-                    <div className="mt-7 flex items-center justify-center">
-                        <a
-                            href="https://invitation.activid.id"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center justify-center rounded-full px-8 py-3 bg-indigo-950/30 border border-indigo-500/20 text-xs font-mono text-indigo-200 backdrop-blur-md transition-all hover:border-indigo-500/50 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.35)]"
+                    <VenusReveal direction="up" width="100%" delay={0.75}>
+                        <h3
+                            className={`mt-4 ${venusScript.className} text-5xl md:text-6xl bg-linear-to-r from-indigo-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent bg-size-[200%_auto] animate-[gradient_4s_linear_infinite]`}
+                            style={{ textShadow: "0 0 40px rgba(79, 70, 229, 0.4)", WebkitBackgroundClip: "text" }}
                         >
-                            <span className="uppercase tracking-[0.25em]">Kembali Pulang 🚀</span>
-                        </a>
-                    </div>
+                            Misi selesai
+                        </h3>
+                    </VenusReveal>
 
-                    <div className="mt-10 h-px w-full bg-white/10" />
-                    <p className="mt-6 text-[11px] tracking-[0.25em] uppercase text-white/40 font-body">
-                        © {new Date().getFullYear()} Activid Invitation
-                    </p>
+                    <VenusReveal direction="up" width="100%" delay={1.25}>
+                        <p className="mt-4 text-sm md:text-base text-indigo-200/70 font-light leading-relaxed">
+                            Terima kasih sudah menjelajah bersama <br />Activid Invitation
+                        </p>
+                    </VenusReveal>
+
+                    <VenusReveal direction="up" width="100%" delay={1.75}>
+                        <div className="mt-7 flex items-center justify-center">
+                            <a
+                                href="https://invitation.activid.id"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center justify-center rounded-full px-8 py-3 bg-indigo-950/30 border border-indigo-500/20 text-xs font-mono text-indigo-200 backdrop-blur-md transition-all hover:border-indigo-500/50 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.35)]"
+                            >
+                                <span className="uppercase tracking-[0.25em]">Kembali Pulang 🚀</span>
+                            </a>
+                        </div>
+                    </VenusReveal>
+
+                    <VenusReveal direction="up" width="100%" delay={2.25}>
+                        <div className="mt-10 h-px w-full bg-white/10" />
+                    </VenusReveal>
+
+                    <VenusReveal direction="up" width="100%" delay={2.55}>
+                        <p className="mt-6 text-[11px] tracking-[0.25em] uppercase text-white/40 font-body">
+                            © {new Date().getFullYear()} Activid Invitation
+                        </p>
+                    </VenusReveal>
                 </div>
             </div>
         </footer>
