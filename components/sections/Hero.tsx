@@ -40,12 +40,38 @@ export function Hero({ content, className = '' }: HeroProps) {
   return (
     <section
       ref={sectionRef}
-      className={`relative min-h-screen flex flex-col overflow-hidden ${className}`}
+      className={`relative min-h-screen flex flex-col items-center justify-center overflow-hidden ${className}`}
     >
-      {/* Animated Radial Gradient Background with Parallax - Removed as it is now global */}
+      {/* Animated Radial Gradient Orbs */}
+      {content.gradientOrbs && content.gradientOrbs.count > 0 && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: content.gradientOrbs.count }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full mix-blend-screen blur-3xl opacity-30"
+              style={{
+                background: `radial-gradient(circle, ${content.gradientOrbs?.colors[i % content.gradientOrbs.colors.length]} 0%, transparent 70%)`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: '40vw',
+                height: '40vw',
+              }}
+              animate={{
+                x: [0, Math.random() * 100 - 50, 0],
+                y: [0, Math.random() * 100 - 50, 0],
+              }}
+              transition={{
+                duration: 10 + Math.random() * 10,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Video Background */}
-      {backgroundVideo && (
+      {/* Background - Video or Gradient */}
+      {backgroundVideo ? (
         <div className="absolute inset-0 z-0">
           <video
             autoPlay
@@ -56,9 +82,13 @@ export function Hero({ content, className = '' }: HeroProps) {
           >
             <source src={backgroundVideo} type="video/mp4" />
           </video>
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-linear-to-b from-black/40 via-purple-900/20 to-[#1a1a3e]/90 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-linear-to-r from-[#1a1a3e]/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-purple-900/20 to-[#1a1a3e]/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a3e]/80 via-transparent to-transparent" />
+        </div>
+      ) : (
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a3e] to-[#2d1b4e]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
         </div>
       )}
 
@@ -81,25 +111,12 @@ export function Hero({ content, className = '' }: HeroProps) {
         </div>
       </motion.div>
 
-      {/* Main Content - Right Aligned Title with Parallax */}
-      <div className="flex-1 flex items-center justify-center relative z-10 px-4">
-        <motion.h1
-          className="w-full pr-12 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-right text-[#F8EFDE] tracking-tight leading-none font-sans"
-          variants={ANIMATION_VARIANTS.hero}
-          initial="initial"
-          animate="animate"
-          style={{ y: titleY, opacity: titleOpacity }}
-        >
-          <SplitText text={title} splitBy="word" staggerDelay={0.1} />
-        </motion.h1>
-      </div>
-
       {/* Bottom Info Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="relative z-10 bg-[#F8EFDE] py-8 px-8"
+        className="relative z-10 bg-[#F8EFDE] py-8 px-8 mt-auto"
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="flex items-center gap-6">
@@ -115,17 +132,9 @@ export function Hero({ content, className = '' }: HeroProps) {
               </p>
             </div>
           </div>
-          <motion.a
-            href="/contact"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => trackCTA.getInTouch('hero_section')}
-            className="px-8 py-4 bg-[#1a1a3e] text-[#F8EFDE] font-bold rounded-lg transition-colors hover:bg-[#2d1b4e] focus:outline-none focus:ring-2 focus:ring-[#1a1a3e] focus:ring-offset-2 font-sans"
-          >
-            Get in Touch
-          </motion.a>
         </div>
       </motion.div>
     </section>
+
   );
 }
