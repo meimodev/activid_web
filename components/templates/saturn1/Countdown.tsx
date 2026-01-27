@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { SectionDivider, GoldLeafBorder, DiamondAccent } from "./Decorations";
-import { RevealOnScroll } from "./RevealOnScroll";
-import { FloatingParallax } from "./ParallaxText";
+import { CosmicDivider, SatrunIcon, StarDivider } from "./Decorations";
+import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
 interface CountdownProps {
     targetDate: string;
@@ -35,52 +35,59 @@ export function Countdown({ targetDate, photos, heading }: CountdownProps) {
     }, [targetDate]);
 
     return (
-        <section className="py-24 bg-wedding-bg/90 backdrop-blur-md border-b border-wedding-accent/30 relative shadow-xl">
-            <GoldLeafBorder position="top" />
-            <div className="container mx-auto px-4 text-center mb-16">
+        <section className="relative py-24 min-h-screen flex flex-col items-center justify-center overflow-hidden bg-transparent text-white border-b border-[#D4AF37]/10">
+
+            <div className="absolute inset-0 bg-[#0B0D17]/40 backdrop-blur-sm z-0" />
+
+            <div className="container mx-auto px-4 relative z-10">
                 <RevealOnScroll direction="down" width="100%">
-                    <div className="flex flex-col items-center">
-                        <DiamondAccent />
-                        <FloatingParallax speed={-0.2}>
-                            <h2 className="font-heading text-xl mb-8 mt-4 text-wedding-text-light uppercase tracking-[0.3em] flex items-center justify-center gap-4">
-                                <span className="h-px w-12 bg-wedding-accent/50"></span>
-                                {heading}
-                                <span className="h-px w-12 bg-wedding-accent/50"></span>
-                            </h2>
-                        </FloatingParallax>
+                    <div className="flex flex-col items-center mb-16">
+                        <SatrunIcon />
+                        <h2 className="font-heading text-3xl md:text-4xl uppercase tracking-[0.3em] text-[#D4AF37] mt-6 text-glow">
+                            {heading}
+                        </h2>
+                        <StarDivider />
                     </div>
                 </RevealOnScroll>
 
-                <div className="flex justify-center gap-8 md:gap-16 font-heading text-wedding-dark">
+                <div className="flex justify-center gap-4 md:gap-8 font-heading flex-wrap">
                     <RevealOnScroll delay={0.1} direction="up">
                         <FloatingParallax speed={0.2}>
-                            <div className="text-center group">
-                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500">{timeLeft.days}</span>
-                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Days</span>
+                            <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-[#D4AF37]/30 rounded-sm min-w-[80px] md:min-w-[140px]">
+                                <span className="font-heading text-3xl md:text-6xl text-white font-bold block mb-2 drop-shadow-md">
+                                    {timeLeft.days}
+                                </span>
+                                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#D4AF37]">Days</span>
                             </div>
                         </FloatingParallax>
                     </RevealOnScroll>
                     <RevealOnScroll delay={0.2} direction="up">
                         <FloatingParallax speed={0.3}>
-                            <div className="text-center group">
-                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-75">{timeLeft.hours}</span>
-                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Hours</span>
+                            <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-[#D4AF37]/30 rounded-sm min-w-[80px] md:min-w-[140px]">
+                                <span className="font-heading text-3xl md:text-6xl text-white font-bold block mb-2 drop-shadow-md">
+                                    {timeLeft.hours}
+                                </span>
+                                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#D4AF37]">Hours</span>
                             </div>
                         </FloatingParallax>
                     </RevealOnScroll>
                     <RevealOnScroll delay={0.3} direction="up">
                         <FloatingParallax speed={0.4}>
-                            <div className="text-center group">
-                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-100">{timeLeft.minutes}</span>
-                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Mins</span>
+                            <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-[#D4AF37]/30 rounded-sm min-w-[80px] md:min-w-[140px]">
+                                <span className="font-heading text-3xl md:text-6xl text-white font-bold block mb-2 drop-shadow-md">
+                                    {timeLeft.minutes}
+                                </span>
+                                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#D4AF37]">Mins</span>
                             </div>
                         </FloatingParallax>
                     </RevealOnScroll>
                     <RevealOnScroll delay={0.4} direction="up">
                         <FloatingParallax speed={0.5}>
-                            <div className="text-center group">
-                                <span className="text-5xl md:text-7xl block mb-2 font-light text-wedding-accent group-hover:-translate-y-2 transition-transform duration-500 delay-150">{timeLeft.seconds}</span>
-                                <span className="text-[10px] uppercase tracking-[0.4em] text-wedding-text-light">Secs</span>
+                            <div className="text-center p-4 bg-white/5 backdrop-blur-sm border border-[#D4AF37]/30 rounded-sm min-w-[80px] md:min-w-[140px]">
+                                <span className="font-heading text-3xl md:text-6xl text-white font-bold block mb-2 drop-shadow-md">
+                                    {timeLeft.seconds}
+                                </span>
+                                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#D4AF37]">Secs</span>
                             </div>
                         </FloatingParallax>
                     </RevealOnScroll>
@@ -88,8 +95,7 @@ export function Countdown({ targetDate, photos, heading }: CountdownProps) {
             </div>
 
             {/* Carousel */}
-            <div className="relative w-full overflow-hidden py-8 bg-wedding-bg-alt/40 backdrop-blur-md border-y border-wedding-accent/20">
-                {/* Center Focus Effect Overlay */}
+            <div className="relative w-full overflow-hidden py-8 mt-16 bg-[#0B0D17]/40 backdrop-blur-md border-y border-[#D4AF37]/20">
                 <div
                     className="absolute inset-0 z-10 pointer-events-none backdrop-grayscale"
                     style={{
@@ -106,7 +112,7 @@ export function Countdown({ targetDate, photos, heading }: CountdownProps) {
                         style={{ willChange: "transform" }}
                     >
                         {[...photos, ...photos, ...photos].map((photo, i) => (
-                            <div key={i} className="min-w-[160px] h-[240px] overflow-hidden shadow-xl transition-all duration-1000 ease-in-out border-4 border-white">
+                            <div key={i} className="min-w-[160px] h-[240px] overflow-hidden shadow-xl transition-all duration-1000 ease-in-out border border-[#D4AF37]/30">
                                 <img src={photo} alt="Couple" className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-3000" />
                             </div>
                         ))}
@@ -114,7 +120,7 @@ export function Countdown({ targetDate, photos, heading }: CountdownProps) {
                 </div>
             </div>
 
-            <SectionDivider />
+            <CosmicDivider />
         </section>
     );
 }

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { GoldLeafBorder, DiamondAccent, SectionOrnament } from "./Decorations";
-import { RevealOnScroll } from "./RevealOnScroll";
+import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 
 interface GalleryProps {
     photos: string[];

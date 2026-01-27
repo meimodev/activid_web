@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, Timestamp, query, where, getDocs } from "firebase/firestore";
 import { SectionDivider, VerticalLine, HeartDivider, RingsDivider, GoldLeafBorder, DiamondAccent } from "./Decorations";
-import { RevealOnScroll } from "./RevealOnScroll";
-import { FloatingParallax } from "./ParallaxText";
+import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
 // ============================================
 // TYPE DEFINITIONS

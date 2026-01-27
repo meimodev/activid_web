@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FloatingParallax } from "./ParallaxText";
+import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
 // Using a placeholder image with a more elegant, warm tone
 // const HERO_IMAGE = "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop";

@@ -7,8 +7,8 @@ import { collection, addDoc, query, orderBy, onSnapshot, where, getDocs, Timesta
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionDivider, GoldLeafBorder, HeartDivider, DiamondAccent } from "./Decorations";
-import { RevealOnScroll } from "./RevealOnScroll";
-import { FloatingParallax } from "./ParallaxText";
+import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
 interface Wish {
     id: string;

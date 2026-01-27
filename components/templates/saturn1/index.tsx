@@ -2,35 +2,35 @@
 
 import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
-import { Hero } from "@/components/invitation/Hero";
-import { Countdown } from "@/components/invitation/Countdown";
-import { QuoteSection } from "@/components/invitation/QuoteSection";
-import { Gallery } from "@/components/invitation/Gallery";
-import { Wishes } from "@/components/invitation/Wishes";
+import { Hero } from "./Hero";
+import { Countdown } from "./Countdown";
+import { QuoteSection } from "./QuoteSection";
+import { Gallery } from "./Gallery";
+import { Wishes } from "./Wishes";
 import { MusicPlayer } from "@/components/invitation/MusicPlayer";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import {
-    FloatingFlowers,
-    FloatingSparkles,
-    FloatingHearts,
-    GoldenRings
-} from "@/components/invitation/MoreDecorations";
-import { StorySection } from "@/components/invitation/StorySection";
+    SaturnRings,
+    StarField,
+    ShootingStars,
+    Nebula
+} from "./MoreDecorations";
+import { StorySection } from "./StorySection";
 import {
     TitleSection,
     CoupleSection,
     EventSection,
     GiftSection,
-    FooterSection,
-    ConfirmationSection
-} from "@/components/invitation/InfoSections";
+    ConfirmationSection,
+    FooterSection
+} from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
 
-interface Flow1Props {
+interface Saturn1Props {
     config: InvitationConfig;
 }
 
-export function Flow1({ config }: Flow1Props) {
+export function Saturn1({ config }: Saturn1Props) {
     const [isOpen, setIsOpen] = useState(false);
 
     const {
@@ -42,12 +42,18 @@ export function Flow1({ config }: Flow1Props) {
     } = config;
 
     return (
-        <main className="relative min-h-screen overflow-x-hidden">
-            <BackgroundSlideshow photos={backgroundPhotos} />
-            <GoldenRings />
-            <FloatingFlowers />
-            <FloatingSparkles />
-            <FloatingHearts />
+        <main className="relative min-h-screen overflow-x-hidden bg-[#0B0D17]">
+            {/* Global Decorations */}
+            <StarField />
+            <Nebula />
+            <SaturnRings />
+            <ShootingStars />
+
+            {/* Background Slideshow (Fades out or stays subtle) */}
+            <div className="fixed inset-0 z-0 opacity-20 pointer-events-none">
+                <BackgroundSlideshow photos={backgroundPhotos} />
+            </div>
+
             <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 
             {/* Hero / Cover Section - Fixed Overlay until opened */}
@@ -106,7 +112,7 @@ export function Flow1({ config }: Flow1Props) {
                     )}
 
                     {sections.rsvp.enabled && (
-                        <Suspense fallback={<div className="py-24 text-center text-wedding-text-light font-body italic">Loading RSVP...</div>}>
+                        <Suspense fallback={<div className="py-24 text-center text-white/50 font-body italic">Loading RSVP...</div>}>
                             <ConfirmationSection invitationId={config.id} rsvpDeadline={weddingDate.rsvpDeadline} />
                         </Suspense>
                     )}
@@ -116,7 +122,7 @@ export function Flow1({ config }: Flow1Props) {
                     )}
 
                     {sections.wishes.enabled && (
-                        <Suspense fallback={<div className="py-24 text-center text-wedding-text-light font-body italic">Loading Wishes...</div>}>
+                        <Suspense fallback={<div className="py-24 text-center text-white/50 font-body italic">Loading Wishes...</div>}>
                             <Wishes invitationId={config.id} heading={sections.wishes.heading} placeholder={sections.wishes.placeholder} thankYouMessage={sections.wishes.thankYouMessage} />
                         </Suspense>
                     )}
