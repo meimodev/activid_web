@@ -3,6 +3,9 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
+type UseInViewOptions = NonNullable<Parameters<typeof useInView>[1]>;
+type InViewMargin = UseInViewOptions extends { margin?: infer M } ? M : never;
+
 interface RevealOnScrollProps {
     children: React.ReactNode;
     width?: "fit-content" | "100%";
@@ -14,7 +17,7 @@ interface RevealOnScrollProps {
     scale?: number; // Starting scale (e.g. 0.9)
     fullHeight?: boolean;
     distance?: number;
-    margin?: string;
+    margin?: InViewMargin;
 }
 
 export function RevealOnScroll({
