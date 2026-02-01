@@ -31,6 +31,7 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
         },
     },
     music: {
+        title: "Rossa feat. Afgan - Kamu Yang Kutunggu",
         url: "https://www.dropbox.com/scl/fi/mj324o4j9x3xloodtzcd5/Rossa-feat.-Afgan-Kamu-Yang-Kutunggu.mp3?rlkey=0h8q4x13p8k0k5kyz9lowqs45&st=730ttlvm&dl=1",
         autoPlay: true,
         loop: true,
@@ -208,6 +209,7 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
         },
     },
     music: {
+        title: "Theme",
         url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
         autoPlay: true,
         loop: true,

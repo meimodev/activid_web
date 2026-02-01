@@ -37,6 +37,7 @@ export interface BankAccount {
 }
 
 export interface MusicConfig {
+    title?: string;
     url: string;
     autoPlay: boolean;
     loop: boolean;

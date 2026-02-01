@@ -27,6 +27,26 @@ export default function LandingPage() {
             priceDiscount: "159.000",
         },
 
+        {
+            id: "neptune-1-demo",
+            templateId: "neptune-1",
+            title: "Neptune-1",
+            image: "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=800",
+            tags: ["Wedding", "Neptune"],
+            priceOriginal: "450.000",
+            priceDiscount: "159.000",
+        },
+
+        {
+            id: "jupiter-demo",
+            templateId: "jupiter",
+            title: "Jupiter",
+            image: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+            tags: ["Wedding", "Jupiter"],
+            priceOriginal: "450.000",
+            priceDiscount: "159.000",
+        },
+
     ];
 
     const [viewedTemplates, setViewedTemplates] = React.useState<string[]>([]);
