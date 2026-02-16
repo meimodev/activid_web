@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, Timestamp, query, where, getDocs } from "firebase/firestore";
-import { FloralDivider, VerticalLine, SectionOrnament } from "./Decorations";
+import { FloralDivider, VerticalLine, SectionOrnament } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 

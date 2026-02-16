@@ -14,7 +14,7 @@ import {
     StarField,
     ShootingStars,
     Nebula
-} from "./MoreDecorations";
+} from "./graphics";
 import { StorySection } from "./StorySection";
 import {
     TitleSection,

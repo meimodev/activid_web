@@ -5,7 +5,16 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, Timestamp, query, where, getDocs } from "firebase/firestore";
-import { CosmicDivider, VerticalCosmicLine, StarDivider, SatrunIcon, SectionOrnament } from "./Decorations";
+import {
+    BankBuildingIcon,
+    CheckIcon,
+    CosmicDivider,
+    NavigateArrowIcon,
+    SectionOrnament,
+    SatrunIcon,
+    StarDivider,
+    VerticalCosmicLine,
+} from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
@@ -267,7 +276,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
 
                                     <a href={events.holyMatrimony.mapUrl} target="_blank" className="inline-flex items-center gap-2 px-6 py-2 border border-[#D4AF37]/50 text-[#D4AF37] text-xs uppercase tracking-[0.2em] hover:bg-[#D4AF37] hover:text-[#0B0D17] transition-colors duration-300">
                                         <span>Navigate</span>
-                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" strokeWidth="1.5" /></svg>
+                                        <NavigateArrowIcon />
                                     </a>
                                 </div>
                             </div>
@@ -296,7 +305,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
 
                                     <a href={events.reception.mapUrl} target="_blank" className="inline-flex items-center gap-2 px-6 py-2 border border-white/50 text-white text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-[#0B0D17] transition-colors duration-300">
                                         <span>Navigate</span>
-                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" strokeWidth="1.5" /></svg>
+                                        <NavigateArrowIcon />
                                     </a>
                                 </div>
                             </div>
@@ -389,7 +398,7 @@ export function ConfirmationSection({ invitationId, rsvpDeadline }: Confirmation
                             className="py-10"
                         >
                             <div className="w-20 h-20 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17L4 12" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                                <CheckIcon />
                             </div>
                             <h3 className="font-script text-5xl text-white mb-4">
                                 {status === "already_submitted" ? "Welcome Back" : "Thank You"}
@@ -483,7 +492,7 @@ export function GiftSection({ bankAccounts, heading, description }: GiftSectionP
                         <RevealOnScroll key={index} direction="up" delay={0.3 + (index * 0.1)} width="100%">
                             <div className="p-8 border border-white/10 bg-white/5 backdrop-blur-md rounded-xl relative group hover:border-[#D4AF37]/40 hover:-translate-y-1 transition-all duration-300 h-full overflow-hidden">
                                 <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h20v-2H2v2zm2-3h2v-5H4v5zm5 0h2v-5H9v5zm5 0h2v-5h-2v5zm5 0h2v-5h-2v5zM2 7l10-5 10 5v4h-2V9l-8-4-8 4v2H2V7z" /></svg>
+                                    <BankBuildingIcon />
                                 </div>
                                 <div className="font-bold text-xl mb-3 text-white group-hover:text-[#D4AF37] transition-colors">{account.bankName}</div>
                                 <p className="font-mono text-lg mb-2 tracking-wider text-white/90">{account.accountNumber}</p>

@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { SatrunIcon } from "./Decorations";
+import { SatrunIcon } from "./graphics";
 
 interface GalleryProps {
     photos: string[];

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
-import { CosmicDivider, SatrunIcon } from "./Decorations";
+import { CosmicDivider, SatrunIcon } from "./graphics";
 
 interface QuoteSectionProps {
     quote: {

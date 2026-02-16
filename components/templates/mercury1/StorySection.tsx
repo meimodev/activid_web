@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
-import { FloralDivider, SectionOrnament, VerticalLine } from "./Decorations";
+import { FloralDivider, SectionOrnament, VerticalLine } from "./graphics";
 
 interface StoryItem {
     date: string;

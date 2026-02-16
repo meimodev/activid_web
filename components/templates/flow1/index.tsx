@@ -14,7 +14,7 @@ import {
     FloatingSparkles,
     FloatingHearts,
     GoldenRings
-} from "./MoreDecorations";
+} from "./graphics";
 import { StorySection } from "./StorySection";
 import {
     TitleSection,

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
-import { CosmicDivider, StarDivider, SatrunIcon } from "./Decorations";
+import { CosmicDivider, StarDivider, SatrunIcon } from "./graphics";
 
 interface StoryItem {
     date: string;

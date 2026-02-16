@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
-import { GoldLeafBorder, DiamondAccent } from "./Decorations";
+import { GoldLeafBorder, DiamondAccent } from "./graphics";
 
 interface QuoteSectionProps {
     quote: {

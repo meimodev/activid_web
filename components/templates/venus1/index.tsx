@@ -4,6 +4,16 @@ import { type ComponentProps, useCallback, useEffect, useMemo, useRef, useState 
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { Allura, Plus_Jakarta_Sans } from "next/font/google";
+import {
+    HeaderIntroBackground,
+    IconCalendar,
+    IconChat,
+    IconCouple,
+    IconGallery,
+    IconHome,
+    IconPause,
+    IconPlay,
+} from "./graphics";
 import { InvitationConfig } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
@@ -445,20 +455,7 @@ function HeaderIntro({
 
     return (
         <section className="relative min-h-screen px-6 overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-                <motion.div
-                    className="absolute left-1/2 top-1/2 w-[520px] h-[520px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-white/10"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                >
-                    <div className="absolute top-0 left-1/2 w-3 h-3 -translate-x-1/2 bg-white rounded-full blur-[2px] shadow-[0_0_15px_white]" />
-                </motion.div>
-                <motion.div
-                    className="absolute -bottom-56 left-1/2 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl"
-                    animate={{ opacity: [0.25, 0.45, 0.25], y: [0, -18, 0] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                />
-            </div>
+            <HeaderIntroBackground />
 
             <div className="relative z-10 min-h-screen max-w-3xl mx-auto flex items-center justify-center text-center text-white">
                 <div>
@@ -972,8 +969,6 @@ function GiftBlock({
         setCopied(key);
         window.setTimeout(() => setCopied(null), 1400);
     };
-
-    const dummyAddress = "Milea Dewi 08123456789\nBebedahan kaler RT 001 RW 013\nGede Bage Bandung";
 
     const waText = `ACTIVID INVITATION-${templateName}-${eventDate}`;
     const waUrl = `https://wa.me/6285756681077?text=${encodeURIComponent(waText)}`;
@@ -1492,70 +1487,5 @@ function FloatingNav({
                 {right}
             </div>
         </div>
-    );
-}
-
-function IconHome() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 11l9-8 9 8" />
-            <path d="M9 22V12h6v10" />
-        </svg>
-    );
-}
-
-function IconCouple() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 11a4 4 0 1 0-8 0" />
-            <path d="M12 11v11" />
-            <path d="M8 22h8" />
-            <path d="M12 2a4 4 0 0 1 4 4" />
-            <path d="M12 2a4 4 0 0 0-4 4" />
-        </svg>
-    );
-}
-
-function IconCalendar() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M8 2v4" />
-            <path d="M16 2v4" />
-            <path d="M3 10h18" />
-            <path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
-        </svg>
-    );
-}
-
-function IconGallery() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <path d="M3 15l5-5 4 4 3-3 6 6" />
-        </svg>
-    );
-}
-
-function IconChat() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a4 4 0 0 1-4 4H7l-4 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
-        </svg>
-    );
-}
-
-function IconPlay() {
-    return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z" />
-        </svg>
-    );
-}
-
-function IconPause() {
-    return (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-        </svg>
     );
 }

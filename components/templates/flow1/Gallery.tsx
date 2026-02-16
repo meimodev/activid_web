@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { GoldLeafBorder, DiamondAccent, SectionOrnament } from "./Decorations";
+import { GoldLeafBorder, DiamondAccent, SectionOrnament } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 
 interface GalleryProps {

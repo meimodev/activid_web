@@ -83,9 +83,21 @@ body {
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Tan Mon Cheri';
+  src: url('/fonts/tan-mon-cheri.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Explicit fallback class to force font usage if Tailwind config fails */
 .font-script, .font-heading {
-  font-family: 'Brown Sugar', cursive !important;
+  font-family: 'Tan Mon Cheri', 'Brown Sugar', cursive !important;
+}
+
+.font-tan-mon-cheri {
+  font-family: 'Tan Mon Cheri', 'Brown Sugar', cursive !important;
 }
 
 /* Animation keyframes - matching design document variants */

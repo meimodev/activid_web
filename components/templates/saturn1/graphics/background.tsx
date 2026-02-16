@@ -1,38 +1,38 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { useMemo } from "react";
 
-export function StarField() {
-    // Three layers of stars for parallax depth
-    const [stars1, setStars1] = useState<any[]>([]);
-    const [stars2, setStars2] = useState<any[]>([]);
-    const [stars3, setStars3] = useState<any[]>([]);
-    const { scrollY } = useScroll();
+type Star = {
+    id: number;
+    left: number;
+    top: number;
+    size: number;
+    opacity: number;
+    duration: number;
+    delay: number;
+};
 
-    // Parallax movement
-    const y1 = useTransform(scrollY, [0, 2000], [0, 300]);
-    const y2 = useTransform(scrollY, [0, 2000], [0, 150]);
-    const y3 = useTransform(scrollY, [0, 2000], [0, 50]);
+function hash01(i: number, salt: number) {
+    const x = Math.sin(i * 127.1 + salt * 311.7) * 43758.5453123;
+    return x - Math.floor(x);
+}
 
-    useEffect(() => {
-        const generateStars = (count: number, minSize: number, maxSize: number) =>
-            Array.from({ length: count }, (_, i) => ({
-                id: i,
-                left: Math.random() * 100,
-                top: Math.random() * 100,
-                size: Math.random() * (maxSize - minSize) + minSize,
-                opacity: Math.random() * 0.5 + 0.3,
-                duration: Math.random() * 3 + 2,
-                delay: Math.random() * 5,
-            }));
+function generateStars(count: number, minSize: number, maxSize: number, salt: number): Star[] {
+    return Array.from({ length: count }, (_, i) => {
+        const left = hash01(i + 1, salt + 1) * 100;
+        const top = hash01(i + 2, salt + 2) * 100;
+        const size = hash01(i + 3, salt + 3) * (maxSize - minSize) + minSize;
+        const opacity = hash01(i + 4, salt + 4) * 0.5 + 0.3;
+        const duration = hash01(i + 5, salt + 5) * 3 + 2;
+        const delay = hash01(i + 6, salt + 6) * 5;
 
-        setStars1(generateStars(100, 0.5, 1.5)); // Distant stars
-        setStars2(generateStars(50, 1.5, 2.5));  // Mid-distance stars
-        setStars3(generateStars(20, 2.5, 4.0));  // Close/Bright stars
-    }, []);
+        return { id: i, left, top, size, opacity, duration, delay };
+    });
+}
 
-    const StarLayer = ({ stars, y }: { stars: any[], y: any }) => (
+function StarLayer({ stars, y }: { stars: Star[]; y: MotionValue<number> }) {
+    return (
         <motion.div style={{ y }} className="fixed inset-0 pointer-events-none z-0">
             {stars.map((star) => (
                 <motion.div
@@ -59,6 +59,20 @@ export function StarField() {
             ))}
         </motion.div>
     );
+}
+
+export function StarField() {
+    // Three layers of stars for parallax depth
+    const { scrollY } = useScroll();
+
+    // Parallax movement
+    const y1 = useTransform(scrollY, [0, 2000], [0, 300]);
+    const y2 = useTransform(scrollY, [0, 2000], [0, 150]);
+    const y3 = useTransform(scrollY, [0, 2000], [0, 50]);
+
+    const stars1 = useMemo(() => generateStars(100, 0.5, 1.5, 11), []); // Distant stars
+    const stars2 = useMemo(() => generateStars(50, 1.5, 2.5, 29), []);  // Mid-distance stars
+    const stars3 = useMemo(() => generateStars(20, 2.5, 4.0, 47), []);  // Close/Bright stars
 
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden bg-[#0B0D17]">

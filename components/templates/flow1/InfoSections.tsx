@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, Timestamp, query, where, getDocs } from "firebase/firestore";
-import { SectionDivider, VerticalLine, HeartDivider, RingsDivider, GoldLeafBorder, DiamondAccent } from "./Decorations";
+import { BankBuildingIcon, SectionDivider, VerticalLine, HeartDivider, RingsDivider, GoldLeafBorder, DiamondAccent } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
@@ -427,7 +427,7 @@ export function GiftSection({ bankAccounts, heading, description }: GiftSectionP
                         <RevealOnScroll key={index} direction="up" delay={0.3 + (index * 0.1)} width="100%">
                             <div className="p-10 border border-wedding-accent/30 rounded-sm relative group hover:shadow-lg transition-shadow duration-300 h-full">
                                 <div className="absolute top-2 right-2 opacity-10">
-                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h20v-2H2v2zm2-3h2v-5H4v5zm5 0h2v-5H9v5zm5 0h2v-5h-2v5zm5 0h2v-5h-2v5zM2 7l10-5 10 5v4h-2V9l-8-4-8 4v2H2V7z" /></svg>
+                                    <BankBuildingIcon />
                                 </div>
                                 <div className="font-bold text-2xl mb-4 text-wedding-dark">{account.bankName}</div>
                                 <p className="font-mono text-xl mb-4 tracking-wider text-wedding-accent">{account.accountNumber}</p>

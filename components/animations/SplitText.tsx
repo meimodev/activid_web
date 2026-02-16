@@ -1,13 +1,18 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useReducedMotion } from '@/hooks';
-import { EASING, DURATION, STAGGER_CONFIG } from '@/lib/animation-config';
+import { useReducedMotion, useWindowSize } from '@/hooks';
+import { EASING, DURATION } from '@/lib/animation-config';
 
 export interface SplitTextProps {
   text: string;
   splitBy?: 'word' | 'character';
   staggerDelay?: number;
+  delay?: number;
+  duration?: number;
+  once?: boolean;
+  threshold?: number;
+  margin?: string;
   className?: string;
 }
 
@@ -20,9 +25,15 @@ export function SplitText({
   text,
   splitBy = 'word',
   staggerDelay = 0.1,
+  delay = 0,
+  duration = DURATION.normal,
+  once = false,
+  threshold = 0.12,
+  margin = '20% 0px 20% 0px',
   className,
 }: SplitTextProps) {
   const prefersReducedMotion = useReducedMotion();
+  const { isMobile } = useWindowSize();
 
   // Split text based on splitBy prop
   const splitText = (text: string, splitBy: 'word' | 'character'): string[] => {
@@ -39,27 +50,29 @@ export function SplitText({
 
   // Container variant with stagger
   const containerVariants = {
-    initial: {},
-    animate: {
+    hidden: {},
+    show: {
       transition: {
         staggerChildren: staggerDelay,
+        delayChildren: delay,
       },
     },
   };
 
   // Item variants for each word/character
+  const y = prefersReducedMotion ? 0 : isMobile ? 12 : 20;
   const itemVariants = prefersReducedMotion
     ? {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
+        hidden: { opacity: 0 },
+        show: { opacity: 1 },
       }
     : {
-        initial: { opacity: 0, y: 20 },
-        animate: {
+        hidden: { opacity: 0, y },
+        show: {
           opacity: 1,
           y: 0,
           transition: {
-            duration: DURATION.normal,
+            duration,
             ease: EASING.easeOutExpo,
           },
         },
@@ -69,8 +82,9 @@ export function SplitText({
     <motion.span
       className={className}
       variants={containerVariants}
-      initial="initial"
-      animate="animate"
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once, amount: threshold, margin }}
       style={{ display: 'inline-block' }}
     >
       {elements.map((element, index) => {

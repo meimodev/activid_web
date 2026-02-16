@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, query, orderBy, onSnapshot, where, getDocs, Timestamp } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { CosmicDivider, StarDivider, SatrunIcon } from "./Decorations";
+import { CosmicDivider, StarDivider, SatrunIcon } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 

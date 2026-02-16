@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { SectionDivider, GoldLeafBorder, DiamondAccent } from "./Decorations";
+import { SectionDivider, GoldLeafBorder, DiamondAccent } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
