@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FloralDivider, SectionOrnament } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { FloatingParallax } from "@/components/invitation/ParallaxText";
 
 interface CountdownProps {
     targetDate: string;
@@ -14,9 +13,9 @@ interface CountdownProps {
 
 export function Countdown({ targetDate, photos, heading }: CountdownProps) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-    const target = new Date(targetDate);
 
     useEffect(() => {
+        const target = new Date(targetDate);
         const timer = setInterval(() => {
             const now = new Date();
             const difference = target.getTime() - now.getTime();

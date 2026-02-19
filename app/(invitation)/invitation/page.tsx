@@ -38,6 +38,18 @@ export default function LandingPage() {
         },
 
         {
+            id: "mercury-demo",
+            templateId: "mercury-1",
+            title: "Mercury",
+            image: "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=800",
+            tags: ["Wedding", "Floral"],
+            priceOriginal: "450.000",
+            priceDiscount: "159.000",
+        },
+
+
+
+        {
             id: "jupiter-demo",
             templateId: "jupiter",
             title: "Jupiter",

@@ -8,12 +8,59 @@
   --invitation-accent: #800020; /* Deep Maroon */
   --invitation-accent-light: #C5A059; /* Gold (Complementary) */
   --invitation-dark: #2A1B1B; /* Dark Warm Brown/Black */
+  --invitation-mobile-max-width: 430px;
+}
+
+.invitation-mobile-shell {
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(128, 0, 32, 0.12), transparent 42%),
+    radial-gradient(circle at 82% 84%, rgba(197, 160, 89, 0.14), transparent 48%),
+    var(--invitation-bg-alt);
+}
+
+.invitation-mobile-frame {
+  position: relative;
+  width: min(100%, var(--invitation-mobile-max-width));
+  max-width: var(--invitation-mobile-max-width);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: visible;
+  isolation: isolate;
+  background: var(--invitation-bg);
+}
+
+.invitation-mobile-frame > * {
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  .invitation-mobile-shell {
+    padding: 14px;
+  }
+}
+
+@media (min-width: 431px) {
+  .invitation-mobile-frame {
+    overflow-y: auto;
+    transform: translateZ(0);
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100dvh - 28px);
+    min-height: 0;
+    border-radius: 28px;
+    border: 1px solid rgba(42, 27, 27, 0.12);
+    box-shadow: 0 26px 66px rgba(42, 27, 27, 0.28);
+  }
 }
 
 @theme inline {
-  --font-heading: var(--font-poppins);
-  --font-script: "Brown Sugar";
-  --font-body: var(--font-poppins);
+  --font-heading: "Stoic";
+  --font-script: "Brittany Signature";
+  --font-body: "Poppins Local";
   
   --color-wedding-bg: var(--invitation-bg);
   --color-wedding-bg-alt: var(--invitation-bg-alt);
@@ -43,6 +90,46 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Brittany Signature';
+  src: url('/fonts/brittany-signature.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Garet Book';
+  src: url('/fonts/garet-book.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Stoic';
+  src: url('/fonts/stoic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins Local';
+  src: url('/fonts/poppins-regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins Local';
+  src: url('/fonts/poppins-bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @keyframes reveal {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -53,10 +140,15 @@
   50% { transform: translateY(-10px); }
 }
 
-.font-script { font-family: 'Tan Mon Cheri', 'Brown Sugar', cursive !important; }
+.font-script { font-family: 'Brittany Signature', 'Tan Mon Cheri', 'Brown Sugar', cursive !important; }
 .font-tan-mon-cheri { font-family: 'Tan Mon Cheri', 'Brown Sugar', cursive !important; }
 .font-heading { font-family: var(--font-heading); }
 .font-body { font-family: var(--font-body); }
+.font-brittany-signature { font-family: 'Brittany Signature', 'Tan Mon Cheri', cursive; }
+.font-garet-book { font-family: 'Garet Book', 'Poppins Local', Arial, sans-serif; }
+.font-stoic { font-family: 'Stoic', 'Tan Mon Cheri', serif; }
+.font-poppins { font-family: 'Poppins Local', Arial, sans-serif; }
+.font-poppins-bold { font-family: 'Poppins Local', Arial, sans-serif; font-weight: 700; }
 
 /* Elegant text utilities - Updated gradient to Maroon/Gold logic */
 .text-gold-gradient {

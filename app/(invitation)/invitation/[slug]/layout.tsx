@@ -1,13 +1,6 @@
-import { Poppins } from "next/font/google";
 import "../../invitation.css";
 import { INVITATION_DEFAULTS } from "@/data/invitations";
 import { Metadata } from "next";
-
-const poppins = Poppins({
-    subsets: ["latin"],
-    variable: "--font-poppins",
-    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-});
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -40,8 +33,12 @@ export default function InvitationLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className={`${poppins.variable} font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-gold selection:text-white`}>
-            {children}
+        <div className="invitation-mobile-shell">
+            <div className="invitation-mobile-frame">
+                <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-gold selection:text-white">
+                    {children}
+                </div>
+            </div>
         </div>
     );
 }

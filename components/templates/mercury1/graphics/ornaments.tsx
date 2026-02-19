@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 export function FloralDivider() {
     return (
         <div className="flex items-center justify-center py-12 opacity-80">

@@ -21,12 +21,12 @@ import {
   ClassicFlourishDivider,
   IconArrowRight,
   IconClock,
+  NeptuneOverlayFloat,
   IconPause,
   IconPin,
   IconPlay,
   NEPTUNE_OVERLAY_ASSETS,
   NEPTUNE_OVERLAY_URLS,
-  StoryFloralBand,
   TitleDecoration10,
 } from "./graphics";
 import { InvitationConfig } from "@/types/invitation";
@@ -108,12 +108,12 @@ function NeptuneStagger({
   const { isMobile } = useWindowSize();
   const prefersReducedMotion = useReducedMotion();
   const d = baseDelay ?? 0;
-  const step = staggerStep ?? 0.14;
+  const step = staggerStep ?? 0.24;
 
-  const containerY = prefersReducedMotion ? 0 : isMobile ? 10 : 14;
-  const itemY = prefersReducedMotion ? 0 : isMobile ? 14 : 18;
-  const containerDuration = prefersReducedMotion ? 0.25 : isMobile ? 0.9 : 1.1;
-  const itemDuration = prefersReducedMotion ? 0.25 : isMobile ? 0.95 : 1.15;
+  const containerY = prefersReducedMotion ? 0 : isMobile ? 18 : 24;
+  const itemY = prefersReducedMotion ? 0 : isMobile ? 24 : 32;
+  const containerDuration = prefersReducedMotion ? 0.32 : isMobile ? 1.4 : 1.75;
+  const itemDuration = prefersReducedMotion ? 0.32 : isMobile ? 1.45 : 1.8;
   const allowBlur = !prefersReducedMotion && !isMobile;
 
   const containerVariants = {
@@ -133,10 +133,11 @@ function NeptuneStagger({
 
   const itemVariants = allowBlur
     ? {
-        hidden: { opacity: 0, y: itemY, filter: "blur(10px)" },
+        hidden: { opacity: 0, y: itemY, scale: 0.97, filter: "blur(14px)" },
         show: {
           opacity: 1,
           y: 0,
+          scale: 1,
           filter: "blur(0px)",
           transition: {
             duration: itemDuration,
@@ -145,10 +146,11 @@ function NeptuneStagger({
         },
       }
     : {
-        hidden: { opacity: 0, y: itemY },
+        hidden: { opacity: 0, y: itemY, scale: 0.97 },
         show: {
           opacity: 1,
           y: 0,
+          scale: 1,
           transition: {
             duration: itemDuration,
             ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
@@ -224,6 +226,9 @@ export function Neptune1({ config }: Neptune1Props) {
     () => !config.sections.hero.enabled,
   );
   const [openRequested, setOpenRequested] = useState(false);
+  const [coverClosing, setCoverClosing] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const coverTransitionMs = prefersReducedMotion ? 120 : 780;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -313,11 +318,21 @@ export function Neptune1({ config }: Neptune1Props) {
   useEffect(() => {
     if (!openRequested) return;
     if (!pageAssetsReady) return;
-    setIsOpen(true);
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [openRequested, pageAssetsReady]);
+    if (coverClosing || isOpen) return;
+    setCoverClosing(true);
+  }, [coverClosing, isOpen, openRequested, pageAssetsReady]);
+
+  useEffect(() => {
+    if (!coverClosing) return;
+    const t = window.setTimeout(() => {
+      setIsOpen(true);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, coverTransitionMs);
+
+    return () => window.clearTimeout(t);
+  }, [coverClosing, coverTransitionMs]);
 
   useEffect(() => {
     if (!contentReady) return;
@@ -369,14 +384,8 @@ export function Neptune1({ config }: Neptune1Props) {
   };
 
   const openInvitation = () => {
-    if (!config.sections.hero.enabled) return;
+    if (!config.sections.hero.enabled || openRequested) return;
     setOpenRequested(true);
-    if (pageAssetsReady) {
-      setIsOpen(true);
-      if (typeof window !== "undefined") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    }
   };
 
   const events = Object.entries(config.sections.event.events)
@@ -446,6 +455,7 @@ export function Neptune1({ config }: Neptune1Props) {
             subtitle={config.sections.hero.subtitle}
             coverImage={config.sections.hero.coverImage}
             guestName={guestName}
+            isOpening={coverClosing}
             onOpen={openInvitation}
           />
         </motion.div>
@@ -463,7 +473,10 @@ export function Neptune1({ config }: Neptune1Props) {
           />
 
           {config.sections.quote.enabled ? (
-            <QuoteSection text={config.sections.quote.text} />
+            <QuoteSection
+              text={config.sections.quote.text}
+              author={config.sections.quote.author}
+            />
           ) : null}
 
           {config.sections.couple.enabled ? (
@@ -546,51 +559,67 @@ export function Neptune1({ config }: Neptune1Props) {
             </WishesSectionClassic>
           )}
 
+          <ThankYouSection
+            couple={config.couple}
+            backgroundPhotos={config.sections.gallery.photos}
+            fallbackImage={
+              persistentBackgroundPhotos[0] || config.sections.hero.coverImage
+            }
+          />
+
           <FooterMark couple={config.couple} />
         </div>
       ) : null}
 
-      {isOpen && config.music.url ? (
-        <div className="fixed bottom-5 right-5 z-40">
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="group flex items-center gap-2.5 rounded-full border border-white/15 bg-[#0B1028]/75 text-white shadow-lg shadow-black/35 backdrop-blur px-3 py-2 transition hover:bg-[#0B1028]/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
-            aria-label={`${isPlaying ? "Pause" : "Play"} music: ${musicTitle}`}
-          >
-            <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 transition group-hover:bg-white/15">
-              {isPlaying ? <IconPause /> : <IconPlay />}
-              {isPlaying ? (
-                <motion.span
-                  className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-300"
-                  animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.15, 0.9] }}
-                  transition={{
-                    duration: 1.6,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-              ) : null}
-            </span>
-
-            <AnimatePresence initial={false}>
-              {isPlaying ? (
-                <motion.span
-                  key="title"
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="max-w-[52vw] sm:max-w-[260px] text-[12.5px] leading-tight text-white/90 truncate"
-                  title={musicTitle}
+      {isOpen && config.music.url && typeof document !== "undefined"
+        ? createPortal(
+            <div className="fixed right-2 bottom-4 z-40 flex justify-center px-4 pb-[env(safe-area-inset-bottom)] pointer-events-none">
+              <div className="w-full max-w-[430px] flex justify-center">
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  className="group pointer-events-auto flex items-center gap-2.5 rounded-full border border-white/15 bg-[#0B1028]/75 text-white shadow-lg shadow-black/35 backdrop-blur px-3 py-2 transition hover:bg-[#0B1028]/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
+                  aria-label={`${isPlaying ? "Pause" : "Play"} music: ${musicTitle}`}
                 >
-                  {musicTitle}
-                </motion.span>
-              ) : null}
-            </AnimatePresence>
-          </button>
-        </div>
-      ) : null}
+                  <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 transition group-hover:bg-white/15">
+                    {isPlaying ? <IconPause /> : <IconPlay />}
+                    {isPlaying ? (
+                      <motion.span
+                        className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-300"
+                        animate={{
+                          opacity: [0.4, 1, 0.4],
+                          scale: [0.9, 1.15, 0.9],
+                        }}
+                        transition={{
+                          duration: 1.6,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    ) : null}
+                  </span>
+
+                  <AnimatePresence initial={false}>
+                    {isPlaying ? (
+                      <motion.span
+                        key="title"
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -8 }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
+                        className="max-w-[52vw] sm:max-w-[260px] text-[12.5px] leading-tight text-white/90 truncate"
+                        title={musicTitle}
+                      >
+                        {musicTitle}
+                      </motion.span>
+                    ) : null}
+                  </AnimatePresence>
+                </button>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </main>
   );
 }
@@ -601,6 +630,7 @@ function CoverOverlay({
   subtitle,
   coverImage,
   guestName,
+  isOpening,
   onOpen,
 }: {
   couple: InvitationConfig["couple"];
@@ -608,6 +638,7 @@ function CoverOverlay({
   subtitle: string;
   coverImage: string;
   guestName: string;
+  isOpening: boolean;
   onOpen: () => void;
 }) {
   const heroDate = useMemo(() => {
@@ -634,41 +665,72 @@ function CoverOverlay({
   }, [targetDate]);
 
   const containerVariants = {
-    hidden: { opacity: 0, y: 18 },
+    hidden: { opacity: 0, y: 34 },
     show: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.9,
+        duration: 1.75,
         ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
         when: "beforeChildren" as const,
-        staggerChildren: 0.12,
-        delayChildren: 0.1,
+        staggerChildren: 0.24,
+        delayChildren: 0.18,
+      },
+    },
+    open: {
+      opacity: 0,
+      y: -22,
+      scale: 0.985,
+      transition: {
+        duration: 0.52,
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
+        when: "afterChildren" as const,
+        staggerChildren: 0.08,
+        staggerDirection: -1 as const,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 14 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.75,
-        ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
-      },
-    },
-  };
-
-  const imageVariants = {
-    hidden: { opacity: 0, y: 16, scale: 1.02 },
+    hidden: { opacity: 0, y: 28, scale: 0.97 },
     show: {
       opacity: 1,
       y: 0,
       scale: 1,
       transition: {
-        duration: 0.95,
+        duration: 1.3,
         ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
+      },
+    },
+    open: {
+      opacity: 0,
+      y: -26,
+      scale: 0.95,
+      transition: {
+        duration: 0.42,
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
+      },
+    },
+  };
+
+  const imageVariants = {
+    hidden: { opacity: 0, y: 28, scale: 1.08 },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 1.55,
+        ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
+      },
+    },
+    open: {
+      opacity: 0,
+      y: -22,
+      scale: 1.03,
+      transition: {
+        duration: 0.46,
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
       },
     },
   };
@@ -707,7 +769,7 @@ function CoverOverlay({
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          animate="show"
+          animate={isOpening ? "open" : "show"}
           className="w-full max-w-[420px]"
         >
           <div className="relative overflow-visible rounded-[44px] border border-white/35 bg-[#E7E4DC] shadow-[0_40px_90px_rgba(0,0,0,0.50)] p-[6px]">
@@ -727,13 +789,21 @@ function CoverOverlay({
                     <div className="absolute inset-0 bg-black/40" />
                   </div>
 
-                  <img
-                    src={NEPTUNE_OVERLAY_ASSETS.ribbonBottom}
-                    alt=""
-                    className="pointer-events-none absolute inset-x-0 -bottom-4 w-full px-8"
-                    loading="eager"
-                    draggable={false}
-                  />
+                  <motion.div
+                    variants={itemVariants}
+                    className="pointer-events-none absolute inset-x-0 -bottom-4"
+                  >
+                    <NeptuneOverlayFloat
+                      src={NEPTUNE_OVERLAY_ASSETS.ribbonBottom}
+                      alt=""
+                      className="w-full px-8"
+                      amplitude={4.8}
+                      duration={8.8}
+                      delay={0.15}
+                      loading="eager"
+                      draggable={false}
+                    />
+                  </motion.div>
                 </div>
               </motion.div>
 
@@ -770,46 +840,75 @@ function CoverOverlay({
                 >
                   {guestName}
                 </motion.p>
-                <motion.button
-                  variants={itemVariants}
-                  type="button"
-                  onClick={onOpen}
-                  initial={false}
-                  animate={{ scale: [1, 1.025, 1] }}
-                  transition={{
-                    duration: 2.8,
-                    repeat: Infinity,
-                    repeatDelay: 2.6,
-                    ease: "easeInOut",
-                  }}
-                  className="mt-9 relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-lg bg-[#5E6A78] text-white px-6 py-3 shadow-md hover:bg-[#556170] transition"
-                >
-                  <motion.span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-white/40 to-transparent"
-                    initial={{ x: "-120%", opacity: 0 }}
-                    animate={{ x: ["-120%", "160%"], opacity: [0, 1, 0] }}
-                    transition={{
-                      duration: 1.15,
-                      repeat: Infinity,
-                      repeatDelay: 4.2,
-                      ease: "easeInOut",
-                    }}
-                  />
-                  <span className="relative z-10 text-sm font-body tracking-wide">
-                    Buka Undangan
-                  </span>
-                </motion.button>
+                <motion.div variants={itemVariants} className="mt-9">
+                  <motion.button
+                    type="button"
+                    onClick={onOpen}
+                    disabled={isOpening}
+                    initial={false}
+                    animate={
+                      isOpening
+                        ? { scale: 0.96, opacity: 0, y: -8 }
+                        : { scale: [1, 1.025, 1], opacity: 1, y: 0 }
+                    }
+                    transition={
+                      isOpening
+                        ? {
+                            duration: 0.42,
+                            ease: [0.4, 0, 0.2, 1],
+                          }
+                        : {
+                            duration: 2.8,
+                            repeat: Infinity,
+                            repeatDelay: 2.6,
+                            ease: "easeInOut",
+                          }
+                    }
+                    className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-lg bg-[#5E6A78] text-white px-6 py-3 shadow-md transition hover:bg-[#556170] disabled:pointer-events-none"
+                  >
+                    <motion.span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 bg-linear-to-r from-transparent via-white/40 to-transparent"
+                      initial={{ x: "-120%", opacity: 0 }}
+                      animate={
+                        isOpening
+                          ? { x: "-120%", opacity: 0 }
+                          : { x: ["-120%", "160%"], opacity: [0, 1, 0] }
+                      }
+                      transition={
+                        isOpening
+                          ? { duration: 0.2, ease: "easeOut" }
+                          : {
+                              duration: 1.15,
+                              repeat: Infinity,
+                              repeatDelay: 4.2,
+                              ease: "easeInOut",
+                            }
+                      }
+                    />
+                    <span className="relative z-10 text-sm font-body tracking-wide">
+                      Buka Undangan
+                    </span>
+                  </motion.button>
+                </motion.div>
               </div>
             </div>
 
-            <img
-              src={NEPTUNE_OVERLAY_ASSETS.ribbonBottomWide}
-              alt=""
-              className="pointer-events-none absolute inset-x-0 -bottom-6 -left-18 w-full px-12 "
-              loading="eager"
-              draggable={false}
-            />
+            <motion.div
+              variants={itemVariants}
+              className="pointer-events-none absolute inset-x-0 -bottom-6 -left-18 w-full px-12"
+            >
+              <NeptuneOverlayFloat
+                src={NEPTUNE_OVERLAY_ASSETS.ribbonBottomWide}
+                alt=""
+                className="w-full"
+                amplitude={5.2}
+                duration={9.4}
+                delay={0.35}
+                loading="eager"
+                draggable={false}
+              />
+            </motion.div>
           </div>
         </motion.div>
       </div>
@@ -858,7 +957,7 @@ function TitleCountdownSection({
   return (
     <section
       id={id}
-      className="relative isolate scroll-mt-24 min-h-screen overflow-hidden bg-[#F3F1EC] text-[#2E343A]"
+      className="relative isolate scroll-mt-24 min-h-screen overflow-hidden  text-[#2E343A]"
     >
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 overflow-hidden">
@@ -886,7 +985,7 @@ function TitleCountdownSection({
                     alt="Background"
                     fill
                     sizes="100vw"
-                    className="object-cover opacity-[0.22]"
+                    className="object-cover opacity-[0.36]"
                     unoptimized
                   />
                 </motion.div>
@@ -895,27 +994,8 @@ function TitleCountdownSection({
           </AnimatePresence>
         </div>
 
-        <div className="absolute inset-0 bg-linear-to-b from-white via-white/85 to-[#F3F1EC]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(0,0,0,0.06),transparent_55%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-48 bg-linear-to-t from-[#F3F1EC] to-transparent" />
-      </div>
-
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        <div className="absolute left-1/2 top-[18%] -translate-x-1/2 w-[240px] h-[360px] rounded-t-[999px] border border-black/15 opacity-25" />
-        <img
-          src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
-          alt=""
-          className="absolute -left-4 bottom-10 w-[140px] max-w-[55vw] opacity-95"
-          loading="eager"
-          draggable={false}
-        />
-        <img
-          src={NEPTUNE_OVERLAY_ASSETS.leafRight}
-          alt=""
-          className="absolute -right-10 bottom-15 w-[140px] max-w-[55vw] opacity-95"
-          loading="eager"
-          draggable={false}
-        />
+        <div className="absolute inset-x-0 bottom-0 h-[72%] bg-linear-to-t from-[#F3F1EC] via-[#F3F1EC]/82 to-transparent" />
+        {/* <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[radial-gradient(ellipse_at_50%_100%,rgba(0,0,0,0.08),transparent_68%)]" /> */}
       </div>
 
       <div className="absolute inset-x-0 -bottom-38 z-20 pointer-events-none flex justify-center">
@@ -923,24 +1003,55 @@ function TitleCountdownSection({
       </div>
 
       <div className="relative z-30 min-h-screen flex flex-col items-center justify-end text-center px-6 pb-32 pt-18">
-        <NeptuneStagger className="w-full max-w-sm" baseDelay={0.15}>
+        <NeptuneStagger className="relative w-full max-w-sm" baseDelay={0.15}>
+          <div className="pointer-events-none absolute inset-0 z-0">
+            <div className="absolute left-1/2 top-[18%] -translate-x-1/2 w-[240px] h-[360px] rounded-t-[999px] border border-black/15 opacity-25" />
+            <div className="absolute -left-4 bottom-10">
+              <NeptuneOverlayFloat
+                src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+                alt=""
+                className="w-[140px] max-w-[55vw] opacity-95"
+                amplitude={4.6}
+                duration={8.6}
+                rotate={1}
+                breeze
+                loading="eager"
+                draggable={false}
+              />
+            </div>
+            <div className="absolute -right-10 bottom-15">
+              <NeptuneOverlayFloat
+                src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+                alt=""
+                className="w-[140px] max-w-[55vw] opacity-95"
+                amplitude={5.4}
+                duration={9.2}
+                delay={0.15}
+                rotate={-1}
+                breeze
+                loading="eager"
+                draggable={false}
+              />
+            </div>
+          </div>
+
           <p
-            className={`${neptuneSerif.className} text-sm tracking-[0.28em] uppercase text-[#667078]`}
+            className={`${neptuneSerif.className} relative z-10 text-sm tracking-[0.28em] uppercase text-[#667078]`}
           >
             The Wedding Of
           </p>
           <h2
-            className={`${neptuneSerif.className} mt-4 text-5xl leading-none text-[#586057]`}
+            className={`${neptuneSerif.className} relative z-10 mt-4 text-5xl leading-none text-[#586057]`}
           >
             <SplitText text={coupleLabel} splitBy="word" staggerDelay={0.09} />
           </h2>
-          <p className="mt-4 text-lg tracking-wide text-[#5C666F] font-body">
+          <p className="relative z-10 mt-4 text-lg tracking-wide text-[#5C666F] font-body">
             {date}
           </p>
-          <p className="mt-10 text-xs tracking-[0.45em] uppercase text-[#7A838B] font-body">
+          <p className="relative z-10 mt-10 text-xs tracking-[0.45em] uppercase text-[#7A838B] font-body">
             SAVE THE DATE
           </p>
-          <div className="mt-6">
+          <div className="relative z-10 mt-6">
             <CountdownRow targetDate={targetDate} />
           </div>
         </NeptuneStagger>
@@ -986,20 +1097,39 @@ function GallerySectionClassic({
   );
 }
 
-function QuoteSection({ text }: { text: string }) {
-  const lastParen = text.lastIndexOf("(");
+function QuoteSection({
+  text,
+  author,
+}: {
+  text: string;
+  author?: string;
+}) {
+  const trimmedAuthor = author?.trim() ?? "";
+  const hasInlineCitation =
+    trimmedAuthor.length === 0 && text.lastIndexOf("(") > 0 && text.endsWith(")");
+  const lastParen = hasInlineCitation ? text.lastIndexOf("(") : -1;
   const main = lastParen > 0 ? text.slice(0, lastParen).trim() : text.trim();
-  const citation = lastParen > 0 ? text.slice(lastParen).trim() : "";
+  const inlineCitation =
+    lastParen > 0 ? text.slice(lastParen + 1, -1).trim() : "";
+  const quoteAuthor = trimmedAuthor || inlineCitation;
 
   return (
     <section className="relative overflow-hidden bg-[#5F737B] text-white px-6 py-4">
       <div className="relative z-10 py-10 flex items-center justify-center">
-        <NeptuneStagger className="max-w-3xl text-center" baseDelay={0.1}>
+        <NeptuneStagger
+          className="max-w-3xl text-center"
+          baseDelay={0.08}
+          staggerStep={0.24}
+        >
           <div className="flex justify-center">
-            <img
+            <NeptuneOverlayFloat
               src={NEPTUNE_OVERLAY_ASSETS.leafRight}
               alt=""
               className="w-[70px] max-w-[70vw] opacity-95"
+              amplitude={4.4}
+              duration={8.2}
+              rotate={1}
+              breeze
               loading="lazy"
               draggable={false}
             />
@@ -1007,8 +1137,8 @@ function QuoteSection({ text }: { text: string }) {
           <p className="mt-10 text-xl md:text-2xl leading-relaxed text-white/95 whitespace-pre-line">
             {main}
           </p>
-          {citation ? (
-            <p className="mt-10 text-2xl text-white/90">{citation}</p>
+          {quoteAuthor ? (
+            <p className="mt-10 text-2xl text-white/90">- {quoteAuthor}</p>
           ) : null}
         </NeptuneStagger>
       </div>
@@ -1053,7 +1183,7 @@ function CountdownRow({ targetDate }: { targetDate: string }) {
     <NeptuneStagger
       className="grid grid-cols-4 gap-3"
       baseDelay={0.08}
-      staggerStep={0.22}
+      staggerStep={0.26}
     >
       {cells.map((c) => (
         <div key={c.label}>
@@ -1164,17 +1294,12 @@ function CoupleProfileCard({
 
         {intro ? (
           <div className="mt-4 flex justify-center">
-            <motion.img
+            <NeptuneOverlayFloat
               src={NEPTUNE_OVERLAY_ASSETS.flourishes}
               alt=""
               className="w-[240px] max-w-[72vw]"
-              initial={false}
-              animate={{ y: [0, -4, 0] }}
-              transition={{
-                duration: 7.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+              amplitude={4.6}
+              duration={8.1}
               loading="lazy"
               draggable={false}
             />
@@ -1210,15 +1335,20 @@ function CoupleProfileCard({
           {city}
         </p>
         <p className="mt-4 text-lg leading-relaxed text-[#6B747C]">{parents}</p>
+
+        <div className="pt-10 -mx-6 sm:-mx-8 pointer-events-none">
+          <NeptuneOverlayFloat
+            src={NEPTUNE_OVERLAY_ASSETS.flowerDivider}
+            alt=""
+            className="w-full"
+            amplitude={4.8}
+            duration={8.6}
+            delay={0.2}
+            loading="lazy"
+            draggable={false}
+          />
+        </div>
       </NeptuneStagger>
-      <motion.img
-        src={NEPTUNE_OVERLAY_ASSETS.flowerDivider}
-        alt=""
-        className="w-full translate-y-30"
-        initial={false}
-        loading="lazy"
-        draggable={false}
-      />
     </section>
   );
 }
@@ -1237,34 +1367,28 @@ function ArchedPortrait({
       <div className="relative w-[260px] sm:w-[290px]">
         <div className="pointer-events-none absolute inset-y-0 left-0 right-0">
           {flowerSide === "left" ? (
-            <motion.img
+            <NeptuneOverlayFloat
               src={NEPTUNE_OVERLAY_ASSETS.flower}
               alt=""
               className="absolute top-1/2 -translate-y-1/2 -left-40 sm:-left-32 w-40 sm:w-50 opacity-80  scale-x-[-1]"
-              initial={false}
-              animate={{ y: [0, -6, 0], rotate: [-2, 2, -2] }}
-              transition={{
-                duration: 8.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+              amplitude={5.8}
+              duration={8.8}
+              rotate={1.6}
+              breeze
               loading="lazy"
               draggable={false}
             />
           ) : null}
           {flowerSide === "right" ? (
-            <motion.img
+            <NeptuneOverlayFloat
               src={NEPTUNE_OVERLAY_ASSETS.flower}
               alt=""
               className="absolute top-1/2 -translate-y-1/2 -right-40 sm:-right-32 w-40 sm:w-50 opacity-80 scale-x-[-1]"
-              initial={false}
-              animate={{ y: [0, 6, 0], rotate: [2, -2, 2] }}
-              transition={{
-                duration: 8.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.25,
-              }}
+              amplitude={5.8}
+              duration={8.8}
+              delay={0.25}
+              rotate={-1.6}
+              breeze
               loading="lazy"
               draggable={false}
             />
@@ -1315,7 +1439,44 @@ function WeddingEventSection({
       className="relative scroll-mt-24 overflow-hidden bg-[#4E5C6C] text-white px-6 pt-18 pb-20"
     >
       <div className="absolute inset-0 bg-linear-to-b from-[#59677A] via-[#4E5C6C] to-[#3E4A58]" />
-      <div className="absolute inset-0 pointer-events-none"></div>
+      <div className="absolute inset-0 pointer-events-none">
+        <NeptuneReveal
+          direction="up"
+          delay={0.12}
+          className="absolute -left-10 top-16 md:-left-12"
+        >
+          <NeptuneOverlayFloat
+            src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+            alt=""
+            className="w-[150px] sm:w-[185px] md:w-[220px] opacity-45"
+            amplitude={5.2}
+            duration={8.8}
+            rotate={1.2}
+            breeze
+            loading="lazy"
+            draggable={false}
+          />
+        </NeptuneReveal>
+
+        <NeptuneReveal
+          direction="up"
+          delay={0.22}
+          className="absolute -right-10 bottom-10 md:-right-12 md:bottom-16"
+        >
+          <NeptuneOverlayFloat
+            src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+            alt=""
+            className="w-[160px] sm:w-[195px] md:w-[230px] opacity-42"
+            amplitude={5.4}
+            duration={9.2}
+            delay={0.16}
+            rotate={-1.2}
+            breeze
+            loading="lazy"
+            draggable={false}
+          />
+        </NeptuneReveal>
+      </div>
 
       <div className="relative z-10 max-w-xl mx-auto">
         <NeptuneReveal direction="up" width="100%" delay={0.18}>
@@ -1327,7 +1488,7 @@ function WeddingEventSection({
                 <SplitText text={topWord} splitBy="word" staggerDelay={0.1} />
               </div>
               <div
-                className={`${neptuneScript.className} -mt-2 text-5xl md:text-6xl text-white/90`}
+                className={`${neptuneScript.className} mt-2 text-5xl md:text-6xl text-white/90`}
               >
                 <SplitText
                   text={scriptWord}
@@ -1480,11 +1641,12 @@ function StorySectionClassic({
                   delay={0.1}
                   className="absolute -top-2 left-0 right-0 flex justify-center pointer-events-none"
                 >
-                  <motion.img
+                  <NeptuneOverlayFloat
                     src={NEPTUNE_OVERLAY_ASSETS.flowerDivider}
                     alt=""
                     className="w-full -translate-y-24"
-                    initial={false}
+                    amplitude={4.6}
+                    duration={8.4}
                     loading="lazy"
                     draggable={false}
                   />
@@ -1515,22 +1677,19 @@ function StorySectionClassic({
 
                 <NeptuneReveal direction="up" width="100%" delay={0.55}>
                   <div className="mt-8">
-                    <div className="rounded-t-[999px] border border-[#6E7B6E] bg-[#F6F4EF] p-[7px] shadow-[0_14px_40px_rgba(0,0,0,0.12)]">
-                      <motion.img
-                          src={NEPTUNE_OVERLAY_ASSETS.flowerDouble}
-                          alt=""
-                          className="absolute w-30 -bottom-10 -right-8 opacity-90 scale-x-[-1] z-10"
-                          initial={false}
-                          animate={{ y: [0, 8, 0] }}
-                          transition={{
-                            duration: 6.2,
-                            repeat: Infinity,
-                            ease: "easeInOut",
-                            delay: 0.25,
-                          }}
-                          loading="lazy"
-                          draggable={false}
-                        />
+                    <div className="relative rounded-t-[999px] border border-[#6E7B6E] bg-[#F6F4EF] p-[7px] shadow-[0_14px_40px_rgba(0,0,0,0.12)]">
+                      <NeptuneOverlayFloat
+                        src={NEPTUNE_OVERLAY_ASSETS.flowerDouble}
+                        alt=""
+                        className="absolute w-30 -bottom-10 -right-8 opacity-90 scale-x-[-1] z-10"
+                        amplitude={5.2}
+                        duration={7.2}
+                        delay={0.25}
+                        rotate={1.4}
+                        breeze
+                        loading="lazy"
+                        draggable={false}
+                      />
                       <div className="relative aspect-[4/5] rounded-t-[999px] overflow-hidden border border-[#6E7B6E] bg-white">
                         <Image
                           src={photo}
@@ -1540,7 +1699,6 @@ function StorySectionClassic({
                           className="object-cover"
                           unoptimized
                         />
-                        
                       </div>
                     </div>
                   </div>
@@ -1596,18 +1754,14 @@ function WishesSectionClassic({
       <div className="absolute inset-0 pointer-events-none"></div>
 
       <div className="relative z-10 max-w-md mx-auto">
-        <div className="rounded-[34px] border border-black/10 bg-white/70 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
-          <div className="p-10">
-            <NeptuneStagger baseDelay={0.1}>
-              <h3
-                className={`${neptuneSerif.className} text-4xl text-[#6B7480] text-center`}
-              >
-                <SplitText text={heading} splitBy="word" staggerDelay={0.09} />
-              </h3>
-              <div className="mt-8">{children}</div>
-            </NeptuneStagger>
-          </div>
-        </div>
+        <NeptuneStagger baseDelay={0.1}>
+          <h3
+            className={`${neptuneSerif.className} text-4xl text-[#6B7480] text-center`}
+          >
+            <SplitText text={heading} splitBy="word" staggerDelay={0.09} />
+          </h3>
+          <div className="mt-8">{children}</div>
+        </NeptuneStagger>
       </div>
     </section>
   );
@@ -1625,16 +1779,16 @@ function GiftSectionClassic({
   return (
     <section
       id={id}
-      className="relative scroll-mt-24 overflow-hidden bg-[#F3F1EC] text-[#2E343A] px-6 py-16"
+      className="relative scroll-mt-24 overflow-hidden bg-[#4E5C6C] text-white px-6 py-16"
     >
-      <div className="absolute inset-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-linear-to-b from-[#59677A] via-[#4E5C6C] to-[#3E4A58]" />
 
       <div className="relative z-10 max-w-xl mx-auto">
-        <div className="rounded-[34px] border border-black/10 bg-white/70 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
+        <div className="rounded-[34px] border border-white/10 bg-[#0B1028]/75 backdrop-blur shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
           <div className="p-10">
             <NeptuneStagger baseDelay={0.1}>
               <h3
-                className={`${neptuneSerif.className} text-4xl text-[#6B7480] text-center`}
+                className={`${neptuneSerif.className} text-4xl text-center bg-linear-to-r from-cyan-200 via-indigo-200 to-emerald-200 bg-clip-text text-transparent`}
               >
                 <SplitText text={heading} splitBy="word" staggerDelay={0.09} />
               </h3>
@@ -1891,6 +2045,7 @@ function GiftBlock({
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<Record<string, boolean>>({});
 
   const effectiveUiVariant = uiVariant ?? "default";
   const isClassic = effectiveUiVariant === "classic";
@@ -1919,14 +2074,14 @@ function GiftBlock({
         <div
           className={
             isClassic
-              ? "rounded-2xl border border-black/10 bg-white/80 backdrop-blur p-6"
+              ? "rounded-2xl border border-white/12 bg-white/6 backdrop-blur p-6"
               : "rounded-3xl border border-white/12 bg-white/8 backdrop-blur p-7"
           }
         >
           <p
             className={
               isClassic
-                ? "text-sm text-[#6B747C] text-center whitespace-pre-line"
+                ? "text-sm text-cyan-100/70 text-center whitespace-pre-line"
                 : "text-sm text-cyan-100/70 text-center whitespace-pre-line"
             }
           >
@@ -1939,7 +2094,7 @@ function GiftBlock({
         <button
           type="button"
           onClick={() => setIsGiftDialogOpen(true)}
-          className="w-full inline-flex items-center justify-center rounded-full px-6 py-3 bg-[#2B2424] text-white hover:bg-black transition"
+          className="w-full inline-flex items-center justify-center rounded-full px-6 py-3 border border-white/15 bg-linear-to-r from-cyan-400/20 via-indigo-400/20 to-emerald-400/20 text-white hover:bg-white/10 transition"
         >
           <span className="text-xs uppercase tracking-[0.25em] font-body">
             Kirim Hadiah
@@ -1948,65 +2103,79 @@ function GiftBlock({
       </NeptuneReveal>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {bankAccounts.map((b, idx) => (
-          <NeptuneReveal
-            key={`${b.bankName}-${idx}`}
-            direction="up"
-            width="100%"
-            delay={0.35 + idx * 0.45}
-          >
-            <div
-              className={
-                isClassic
-                  ? "rounded-2xl border border-black/10 bg-white/80 backdrop-blur p-6 text-center"
-                  : "rounded-3xl border border-white/12 bg-white/8 backdrop-blur p-7 text-center"
-              }
+        {bankAccounts.map((b, idx) => {
+          const k = `${b.bankName}-${idx}`;
+          const isExpanded = !!expandedKeys[k];
+
+          return (
+            <NeptuneReveal
+              key={k}
+              direction="up"
+              width="100%"
+              delay={0.35 + idx * 0.45}
             >
-              <p
+              <div
                 className={
                   isClassic
-                    ? "text-xs tracking-[0.35em] uppercase text-[#6B747C] font-body"
-                    : "text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body"
+                    ? "rounded-2xl border border-white/12 bg-white/6 backdrop-blur p-6"
+                    : "rounded-3xl border border-white/12 bg-white/8 backdrop-blur p-7"
                 }
               >
-                {b.bankName}
-              </p>
-              <p
-                className={
-                  isClassic
-                    ? "mt-4 text-sm font-body text-[#2E343A]"
-                    : "mt-4 text-sm font-body text-white/90"
-                }
-              >
-                {b.accountHolder}
-              </p>
-              <p
-                className={
-                  isClassic
-                    ? "mt-2 text-2xl tracking-wide text-[#2E343A]"
-                    : "mt-2 text-2xl tracking-wide text-white"
-                }
-              >
-                {b.accountNumber}
-              </p>
-              <button
-                type="button"
-                onClick={() => copy(b.accountNumber, `${b.bankName}-${idx}`)}
-                className={
-                  isClassic
-                    ? "mt-6 inline-flex items-center justify-center rounded-sm px-6 py-3 border border-black/15 bg-[#363E4C] hover:bg-[#6A7A95] transition w-full"
-                    : "mt-6 inline-flex items-center justify-center rounded-full px-6 py-3 border border-white/15 bg-white/10 hover:bg-white/15 transition w-full"
-                }
-              >
-                <span className="text-xs uppercase tracking-[0.25em] font-body text-white">
-                  {copied === `${b.bankName}-${idx}`
-                    ? "Tersalin"
-                    : "Salin Rekening"}
-                </span>
-              </button>
-            </div>
-          </NeptuneReveal>
-        ))}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body">
+                      {b.bankName}
+                    </p>
+                    <p className="mt-3 text-sm font-body text-white/90 truncate">
+                      {b.accountHolder}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedKeys((prev) => ({ ...prev, [k]: !prev[k] }))
+                    }
+                    className="shrink-0 inline-flex items-center justify-center rounded-full h-9 w-9 border border-white/15 bg-white/6 hover:bg-white/10 transition"
+                    aria-expanded={isExpanded}
+                    aria-label={isExpanded ? "Tutup rekening" : "Lihat rekening"}
+                  >
+                    <IconArrowRight
+                      className={`h-4 w-4 text-white transition-transform duration-200 ${isExpanded ? "-rotate-90" : "rotate-90"}`}
+                    />
+                  </button>
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {isExpanded ? (
+                    <motion.div
+                      key="expanded"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: "easeOut" }}
+                      className="mt-5 overflow-hidden"
+                    >
+                      <p className="text-2xl tracking-wide text-white">
+                        {b.accountNumber}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => copy(b.accountNumber, k)}
+                        className="mt-5 inline-flex items-center justify-center rounded-full px-6 py-3 border border-white/15 bg-white/10 hover:bg-white/15 transition w-full"
+                      >
+                        <span className="text-xs uppercase tracking-[0.25em] font-body text-white">
+                          {copied === k ? "Tersalin" : "Salin Rekening"}
+                        </span>
+                      </button>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            </NeptuneReveal>
+          );
+        })}
       </div>
 
       {typeof document !== "undefined"
@@ -2266,6 +2435,10 @@ function WishesFirestore({
   const [visibleCount, setVisibleCount] = useState(10);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
+  const prefersReducedMotion = useReducedMotion();
+  const isDemo = useMemo(() => invitationId.endsWith("-demo"), [invitationId]);
+  const effectiveInviteeName = inviteeName ?? (isDemo ? "Demo Guest" : null);
+
   const inviteeNameKey = useMemo(() => {
     if (!inviteeName) return null;
     return normalizeNameKey(inviteeName);
@@ -2276,8 +2449,58 @@ function WishesFirestore({
     return doc(db, "wishes", `${invitationId}_${inviteeNameKey}`);
   }, [invitationId, inviteeNameKey]);
 
+  const demoSeedWishes = useMemo(() => {
+    if (!isDemo) return [] as WishDoc[];
+    const now = Date.now();
+    return [
+      {
+        id: `demo_${invitationId}_1`,
+        invitationId,
+        name: "Raka", 
+        message: "Selamat menempuh hidup baru. Semoga selalu diberi kebahagiaan dan keberkahan.",
+        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 18)),
+      },
+      {
+        id: `demo_${invitationId}_2`,
+        invitationId,
+        name: "Nadya",
+        message: "Happy wedding! Semoga langgeng sampai tua dan saling menguatkan dalam setiap keadaan.",
+        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 2)),
+      },
+      {
+        id: `demo_${invitationId}_3`,
+        invitationId,
+        name: "Dimas",
+        message: "Semoga pernikahannya penuh cinta, rezeki lancar, dan rumah tangga sakinah mawaddah warahmah.",
+        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 9)),
+      },
+      {
+        id: `demo_${invitationId}_4`,
+        invitationId,
+        name: "Alya",
+        message: "Congrats! Semoga jadi pasangan yang saling melengkapi dan selalu kompak.",
+        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 26)),
+      },
+      {
+        id: `demo_${invitationId}_5`,
+        invitationId,
+        name: "Bima",
+        message: "Doa terbaik untuk kalian berdua. Semoga acaranya lancar dan pernikahannya bahagia selalu.",
+        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 54)),
+      },
+    ];
+  }, [invitationId, isDemo]);
+
   useEffect(() => {
-    if (!invitationId) return;
+    if (!isDemo) return;
+    setError("");
+    setHasPosted(false);
+    setExistingWish(null);
+    setWishes(demoSeedWishes);
+  }, [demoSeedWishes, isDemo]);
+
+  useEffect(() => {
+    if (!invitationId || isDemo) return;
 
     const q = query(
       collection(db, "wishes"),
@@ -2299,10 +2522,11 @@ function WishesFirestore({
     });
 
     return () => unsub();
-  }, [invitationId]);
+  }, [invitationId, isDemo]);
 
   useEffect(() => {
     const checkExisting = async () => {
+      if (isDemo) return;
       if (!inviteeName || !inviteeWishRef) return;
 
       const snap = await getDoc(inviteeWishRef);
@@ -2317,16 +2541,42 @@ function WishesFirestore({
     };
 
     void checkExisting();
-  }, [inviteeName, inviteeWishRef]);
+  }, [inviteeName, inviteeWishRef, isDemo]);
 
   const submit = async () => {
+    if (!message.trim()) return;
+
+    if (isDemo) {
+      setIsSubmitting(true);
+      setError("");
+
+      try {
+        const next: WishDoc = {
+          id: `demo_post_${nowId()}`,
+          invitationId,
+          name: effectiveInviteeName ?? "Demo Guest",
+          message: message.trim(),
+          createdAt: Timestamp.now(),
+        };
+
+        if (withAttendance ?? true) {
+          next.attendance = attendance;
+        }
+
+        setWishes((prev) => [next, ...prev]);
+        setMessage("");
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!inviteeName || !inviteeNameKey || !inviteeWishRef) {
       setError(
         "Fitur ini hanya tersedia untuk tamu yang mengakses link undangan personal.",
       );
       return;
     }
-    if (!message.trim()) return;
 
     setIsSubmitting(true);
     setError("");
@@ -2387,6 +2637,26 @@ function WishesFirestore({
   const effectiveUiVariant = uiVariant ?? "default";
   const isClassic = effectiveUiVariant === "classic";
 
+  const wishItemVariants = useMemo(() => {
+    return {
+      hidden: {
+        opacity: 0,
+        y: 18,
+        scale: 0.985,
+      },
+      show: (idx: number) => ({
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: {
+          duration: prefersReducedMotion ? 0 : 0.58,
+          delay: prefersReducedMotion ? 0 : Math.min(0.55, idx * 0.1),
+          ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
+        },
+      }),
+    };
+  }, [prefersReducedMotion]);
+
   const visibleWishes = useMemo(() => {
     if (!showList) return [] as WishDoc[];
     return wishes.slice(0, visibleCount);
@@ -2423,16 +2693,33 @@ function WishesFirestore({
         <div
           className={
             isClassic
-              ? "rounded-2xl border border-black/10 bg-white/80 backdrop-blur p-6"
+              ? "relative overflow-hidden rounded-3xl border border-white/15 bg-[#475465] shadow-[0_18px_50px_rgba(0,0,0,0.18)] p-7"
               : "rounded-3xl border border-white/12 bg-white/8 backdrop-blur p-7"
           }
         >
-          {!inviteeName ? (
+          {isClassic ? (
+            <div className="pointer-events-none absolute -right-20 -top-16 opacity-25">
+              <NeptuneOverlayFloat
+                src={NEPTUNE_OVERLAY_ASSETS.flowerDouble}
+                alt=""
+                className="w-64"
+                amplitude={3.8}
+                duration={9.6}
+                delay={0.15}
+                rotate={1.1}
+                breeze
+                loading="lazy"
+                draggable={false}
+              />
+            </div>
+          ) : null}
+
+          {!effectiveInviteeName ? (
             <div className="text-center">
               <p
                 className={
                   isClassic
-                    ? "text-sm text-[#6B747C]"
+                    ? "text-sm text-white/80"
                     : "text-sm text-cyan-100/70"
                 }
               >
@@ -2441,22 +2728,22 @@ function WishesFirestore({
                   : "Untuk mengisi ucapan, silakan akses dari link undangan personal."}
               </p>
             </div>
-          ) : hasPosted ? (
+          ) : hasPosted && !isDemo ? (
             <div className="text-center">
               <p
                 className={
                   isClassic
-                    ? "text-xs tracking-[0.35em] uppercase text-[#6B747C] font-body"
+                    ? "text-xs tracking-[0.35em] uppercase text-white/70 font-body"
                     : "text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body"
                 }
               >
-                {inviteeName}
+                {effectiveInviteeName}
               </p>
               {existingWish?.attendance ? (
                 <p
                   className={
                     isClassic
-                      ? "mt-3 text-xs uppercase tracking-[0.25em] font-body text-[#2E343A]"
+                      ? "mt-3 text-xs uppercase tracking-[0.25em] font-body text-white/90"
                       : "mt-3 text-xs uppercase tracking-[0.25em] font-body text-white"
                   }
                 >
@@ -2468,7 +2755,7 @@ function WishesFirestore({
               <p
                 className={
                   isClassic
-                    ? "mt-4 text-sm text-[#2E343A]"
+                    ? "mt-4 text-sm text-white/90"
                     : "mt-4 text-sm text-white/90"
                 }
               >
@@ -2478,7 +2765,7 @@ function WishesFirestore({
                 <p
                   className={
                     isClassic
-                      ? "mt-4 text-sm text-[#3A3F45] whitespace-pre-line"
+                      ? "mt-4 text-sm text-white/85 whitespace-pre-line"
                       : "mt-4 text-sm text-white/80 whitespace-pre-line"
                   }
                 >
@@ -2492,7 +2779,7 @@ function WishesFirestore({
                 <p
                   className={
                     isClassic
-                      ? "text-xs tracking-[0.35em] uppercase text-[#6B747C] font-body"
+                      ? "text-xs tracking-[0.35em] uppercase text-white/70 font-body"
                       : "text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body"
                   }
                 >
@@ -2501,11 +2788,11 @@ function WishesFirestore({
                 <p
                   className={
                     isClassic
-                      ? "mt-2 text-sm font-body text-[#2E343A]"
+                      ? "mt-2 text-sm font-body text-white/90"
                       : "mt-2 text-sm font-body text-white/90"
                   }
                 >
-                  {inviteeName}
+                  {effectiveInviteeName}
                 </p>
               </div>
 
@@ -2514,14 +2801,14 @@ function WishesFirestore({
                   <button
                     type="button"
                     onClick={() => setAttendance("hadir")}
-                    className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-white text-[#020615] border-white" : "bg-white/10 text-white border-white/15 hover:bg-white/15"}`}
+                    className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-white text-[#475465] border-white" : "bg-white/10 text-white border-white/15 hover:bg-white/15"}`}
                   >
                     Hadir
                   </button>
                   <button
                     type="button"
                     onClick={() => setAttendance("tidak")}
-                    className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-white text-[#020615] border-white" : "bg-white/10 text-white border-white/15 hover:bg-white/15"}`}
+                    className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-white text-[#475465] border-white" : "bg-white/10 text-white border-white/15 hover:bg-white/15"}`}
                   >
                     Tidak
                   </button>
@@ -2534,14 +2821,18 @@ function WishesFirestore({
                 placeholder={placeholder || "Tuliskan pesanmu"}
                 className={
                   isClassic
-                    ? "w-full min-h-24 rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/10 text-[#2E343A] placeholder:text-black/35"
+                    ? "w-full min-h-28 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-white/20 text-white placeholder:text-white/45"
                     : "w-full min-h-28 rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-white/15 text-white placeholder:text-white/40"
                 }
                 disabled={isSubmitting}
               />
 
               {error ? (
-                <p className="text-center text-xs text-red-300">{error}</p>
+                <p
+                  className={`text-center text-xs ${isClassic ? "text-red-200" : "text-red-600"}`}
+                >
+                  {error}
+                </p>
               ) : null}
 
               <button
@@ -2550,7 +2841,7 @@ function WishesFirestore({
                 disabled={isSubmitting || !message.trim()}
                 className={
                   isClassic
-                    ? "rounded-none px-6 py-3 border border-[#D39B90] text-[#D16D5A] bg-transparent hover:bg-[#D16D5A]/5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    ? "rounded-full px-6 py-3 bg-white text-[#475465] hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     : "rounded-full px-6 py-3 bg-white text-[#020615] hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 }
               >
@@ -2567,7 +2858,7 @@ function WishesFirestore({
         <div
           className={
             isClassic
-              ? "rounded-2xl border border-black/10 bg-white/70 backdrop-blur"
+              ? "rounded-3xl border border-black/10 bg-white/70 shadow-[0_18px_50px_rgba(0,0,0,0.10)]"
               : "space-y-3"
           }
         >
@@ -2590,43 +2881,58 @@ function WishesFirestore({
               </p>
             </div>
           ) : isClassic ? (
-            <div className="px-6">
-              {visibleWishes.map((w, idx) => (
-                <div
-                  key={w.id}
-                  className={`py-6 ${idx === 0 ? "" : "border-t border-black/10"}`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-[#D16D5A]">
-                        {w.name}
-                      </p>
-                      <p className="mt-2 text-xs text-black/35">
-                        {w.createdAt?.toDate
-                          ? formatDistanceToNow(w.createdAt.toDate(), {
-                              addSuffix: true,
-                            })
-                          : "Baru saja"}
+            <div className="p-6 space-y-4">
+              <AnimatePresence initial={!prefersReducedMotion} mode="popLayout">
+                {visibleWishes.map((w, idx) => (
+                  <motion.div
+                    key={w.id}
+                    variants={wishItemVariants}
+                    initial={prefersReducedMotion ? "show" : "hidden"}
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.2 }}
+                    custom={idx}
+                    layout
+                    className="relative rounded-[24px] bg-white text-[#2E343A] shadow-[0_18px_50px_rgba(0,0,0,0.12)]"
+                  >
+                    <div className="absolute inset-0 rounded-[24px] bg-[radial-gradient(circle_at_25%_20%,rgba(0,0,0,0.06),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(0,0,0,0.05),transparent_55%)] opacity-50" />
+                    <div className="relative rounded-[24px] border border-black/10 p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-[#3A3F45]">
+                            {w.name}
+                          </p>
+                          <p className="mt-2 text-xs text-[#6B747C]">
+                            {w.createdAt?.toDate
+                              ? formatDistanceToNow(w.createdAt.toDate(), {
+                                  addSuffix: true,
+                                })
+                              : "Baru saja"}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm text-[#5A6168] whitespace-pre-line">
+                        {w.message}
                       </p>
                     </div>
-                  </div>
-                  <p className="mt-3 text-sm text-[#3A3F45] whitespace-pre-line">
-                    {w.message}
-                  </p>
-                </div>
-              ))}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               <div ref={loadMoreRef} className="h-px" />
             </div>
           ) : (
             <div className="space-y-3">
-              {visibleWishes.map((w, idx) => (
-                <NeptuneReveal
-                  key={w.id}
-                  width="100%"
-                  direction="up"
-                  delay={0.25 + idx * 0.16}
-                >
-                  <div className="rounded-3xl border border-white/12 bg-white/6 backdrop-blur p-7">
+              <AnimatePresence initial={!prefersReducedMotion} mode="popLayout">
+                {visibleWishes.map((w, idx) => (
+                  <motion.div
+                    key={w.id}
+                    variants={wishItemVariants}
+                    initial={prefersReducedMotion ? "show" : "hidden"}
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.2 }}
+                    custom={idx}
+                    layout
+                    className="rounded-3xl border border-white/12 bg-white/6 backdrop-blur p-7"
+                  >
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body">
@@ -2654,15 +2960,118 @@ function WishesFirestore({
                     <p className="mt-4 text-sm text-white/85 whitespace-pre-line">
                       {w.message}
                     </p>
-                  </div>
-                </NeptuneReveal>
-              ))}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
               <div ref={loadMoreRef} className="h-px" />
             </div>
           )}
         </div>
       ) : null}
     </div>
+  );
+}
+
+function nowId() {
+  return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+function ThankYouSection({
+  couple,
+  backgroundPhotos,
+  fallbackImage,
+}: {
+  couple: InvitationConfig["couple"];
+  backgroundPhotos?: string[];
+  fallbackImage: string;
+}) {
+  const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+  const photos = useMemo(() => {
+    const list = backgroundPhotos?.filter(Boolean) ?? [];
+    if (list.length > 0) return list;
+    return fallbackImage ? [fallbackImage] : [];
+  }, [backgroundPhotos, fallbackImage]);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (photos.length <= 1) return;
+    const t = window.setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % photos.length);
+    }, 7200);
+    return () => window.clearInterval(t);
+  }, [photos.length]);
+
+  useEffect(() => {
+    if (activeIndex >= photos.length) setActiveIndex(0);
+  }, [activeIndex, photos.length]);
+
+  const activePhoto = photos[activeIndex] ?? fallbackImage;
+
+  return (
+    <section
+      id="thankyou"
+      className="relative overflow-hidden bg-[#F3F1EC] text-[#536675]"
+    >
+      <div className="relative h-[56vh] min-h-[360px] max-h-[560px] overflow-hidden">
+        <AnimatePresence initial={false}>
+          {activePhoto ? (
+            <motion.div
+              key={`${activeIndex}-${activePhoto}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 1.2,
+                ease: [0.19, 1, 0.22, 1] as [number, number, number, number],
+              }}
+              className="absolute inset-0"
+            >
+              <motion.div
+                initial={{ scale: 1.05 }}
+                animate={{ scale: 1.14 }}
+                transition={{ duration: 8.2, ease: "easeOut" }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={activePhoto}
+                  alt="Thank you background"
+                  fill
+                  sizes="100vw"
+                  className="object-cover object-center"
+                  unoptimized
+                />
+              </motion.div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-white/18" />
+        <div className="absolute inset-0 bg-linear-to-b from-white/5 via-white/28 to-[#F3F1EC]/85" />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-[#F3F1EC] to-transparent" />
+      </div>
+
+      <div className="relative -mt-24 px-6 pb-16 md:-mt-28 md:pb-20">
+        <NeptuneStagger
+          className="mx-auto max-w-3xl text-center"
+          baseDelay={0.08}
+          staggerStep={0.22}
+        >
+          <p className="mx-auto max-w-2xl text-md leading-tight text-[#536675] sm:text-[42px]">
+            Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila
+            Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Atas
+            perhatian dan doa yang diberikan, kami ucapkan terima kasih.
+          </p>
+
+          <p className={`${neptuneScript.className} pt-10 text-xl text-[#5E7382]`}>
+            The Wedding of
+          </p>
+
+          <h3 className={`${neptuneSerif.className} pt-2 text-4xl text-[#516675]`}>
+            {names}
+          </h3>
+        </NeptuneStagger>
+      </div>
+    </section>
   );
 }
 

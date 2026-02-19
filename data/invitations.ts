@@ -383,7 +383,102 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
     },
 };
 
+export const MERCURY_CONFIG: InvitationConfig = {
+    ...CHRISTIAN_REGINA_CONFIG,
+    id: "mercury",
+    templateId: "mercury-1",
+    metadata: {
+        ...CHRISTIAN_REGINA_CONFIG.metadata,
+        title: "The Wedding of Daniel & Aurelia",
+        description: "Mercury template invitation demo by Activid.",
+        openGraph: {
+            ...CHRISTIAN_REGINA_CONFIG.metadata.openGraph,
+            title: "The Wedding of Daniel & Aurelia",
+            description: "Mercury template invitation demo by Activid.",
+            url: "https://activid.web.id/invitation/mercury",
+            images: [
+                {
+                    url: "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=1200",
+                    width: 1200,
+                    height: 630,
+                    alt: "The Wedding of Daniel & Aurelia",
+                },
+            ],
+        },
+        twitter: {
+            ...CHRISTIAN_REGINA_CONFIG.metadata.twitter,
+            title: "The Wedding of Daniel & Aurelia",
+            description: "Mercury template invitation demo by Activid.",
+            images: ["https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        },
+    },
+    weddingDate: {
+        display: "21 Januari 2026",
+        displayShort: "21.01.2026",
+        countdownTarget: "2026-01-21T00:00:00",
+        rsvpDeadline: "20 Januari 2026",
+    },
+    couple: {
+        groom: {
+            firstName: "Daniel",
+            fullName: "Daniel Mahendra",
+            shortName: "Daniel",
+            role: "The Groom",
+            parents: "Putra dari Bapak Mahendra & Ibu Kristina",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        bride: {
+            firstName: "Aurelia",
+            fullName: "Aurelia Pramudita",
+            shortName: "Aurelia",
+            role: "The Bride",
+            parents: "Putri dari Bapak Pramono & Ibu Siska",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    },
+    sections: {
+        ...CHRISTIAN_REGINA_CONFIG.sections,
+        hero: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.hero,
+            subtitle: "The Wedding of",
+            coverImage: "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        },
+        title: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.title,
+            heading: "The Wedding of",
+        },
+        quote: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.quote,
+            text: "So they are no longer two, but one flesh. Therefore what God has joined together, let no one separate.",
+            author: "Matthew 19:6",
+        },
+    },
+};
+
+export const MERCURY_DEMO_CONFIG: InvitationConfig = {
+    ...MERCURY_CONFIG,
+    id: "mercury-demo",
+    metadata: {
+        ...MERCURY_CONFIG.metadata,
+        title: "Demo Invitation - Activid",
+        description: "This is a demo preview of the Mercury invitation template.",
+        openGraph: {
+            ...MERCURY_CONFIG.metadata.openGraph,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Mercury invitation template.",
+            url: "https://activid.web.id/invitation/mercury-demo",
+        },
+        twitter: {
+            ...MERCURY_CONFIG.metadata.twitter,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Mercury invitation template.",
+        },
+    },
+};
+
 export const INVITATION_DEFAULTS: Record<string, InvitationConfig> = {
     "ricci-andrini": RICCI_ANDRINI_CONFIG,
     "christian-regina": CHRISTIAN_REGINA_CONFIG,
+    "mercury": MERCURY_CONFIG,
+    "mercury-demo": MERCURY_DEMO_CONFIG,
 };

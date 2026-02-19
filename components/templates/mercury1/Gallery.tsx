@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { SectionOrnament } from "./graphics";
+import { MERCURY_OVERLAY_ASSETS } from "./graphics/overlays";
 
 interface GalleryProps {
     photos: string[];
@@ -16,26 +16,28 @@ export function Gallery({ photos, heading }: GalleryProps) {
 
     // Limit to 9 photos for the grid
     const displayPhotos = photos.slice(0, 9);
+    const collagePhotos = displayPhotos.slice(0, 5);
+    const lightboxPhotos = photos;
 
     const handleNext = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (selectedIndex === null) return;
         setDirection(1);
-        setSelectedIndex((prev) => (prev === null ? null : (prev + 1) % displayPhotos.length));
+        setSelectedIndex((prev) => (prev === null ? null : (prev + 1) % lightboxPhotos.length));
     };
 
     const handlePrev = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (selectedIndex === null) return;
         setDirection(-1);
-        setSelectedIndex((prev) => (prev === null ? null : (prev - 1 + displayPhotos.length) % displayPhotos.length));
+        setSelectedIndex((prev) => (prev === null ? null : (prev - 1 + lightboxPhotos.length) % lightboxPhotos.length));
     };
 
     const handleDownload = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (selectedIndex === null) return;
 
-        const imageUrl = displayPhotos[selectedIndex];
+        const imageUrl = lightboxPhotos[selectedIndex];
         try {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
@@ -74,37 +76,112 @@ export function Gallery({ photos, heading }: GalleryProps) {
     };
 
     return (
-        <section className="py-24 relative text-stone-800 bg-stone-50">
-            <div className="container mx-auto px-4 relative z-10">
-                <RevealOnScroll direction="down" width="100%">
-                    <div className="flex flex-col items-center mb-16 text-center">
-                        <SectionOrnament />
-                        <h2 className="font-serif text-3xl md:text-5xl mt-6">{heading}</h2>
-                        <p className="mt-4 font-sans text-stone-500 text-xs tracking-widest uppercase">Capturing the Moments</p>
-                    </div>
-                </RevealOnScroll>
+        <section className="relative overflow-hidden bg-[#612A35] py-24 text-white sm:py-28">
+            <div aria-hidden className="pointer-events-none absolute inset-0">
+                <motion.div
+                    className="absolute -left-32 top-12 h-[520px] w-[520px] rotate-[8deg] bg-contain bg-no-repeat opacity-14"
+                    style={{ backgroundImage: `url(${MERCURY_OVERLAY_ASSETS.sprinkle})` }}
+                    animate={{ x: [0, 14, 0], y: [0, -8, 0], rotate: [8, 10, 8] }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                    className="absolute -right-44 bottom-10 h-[640px] w-[640px] -rotate-[10deg] bg-contain bg-no-repeat opacity-12"
+                    style={{ backgroundImage: `url(${MERCURY_OVERLAY_ASSETS.sprinkle2})` }}
+                    animate={{ x: [0, -12, 0], y: [0, 10, 0], rotate: [-10, -8, -10] }}
+                    transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                />
+            </div>
 
-                <div className="relative max-w-5xl mx-auto">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 relative z-10">
-                        {displayPhotos.map((photo, index) => (
-                            <RevealOnScroll key={index} delay={index * 0.1} width="100%">
+            <div className="container mx-auto px-4 relative z-10">
+                <div className="mx-auto w-full max-w-[560px]">
+                    <RevealOnScroll direction="none" scale={1} delay={0.1} width="100%">
+                        <div className="flex items-center justify-end gap-4">
+                            <div className="h-px flex-1 bg-white/25" />
+                            <div className="h-2 w-2 rounded-full bg-white/55" />
+                            <h2 className="font-tan-mon-cheri text-[58px] leading-none text-white sm:text-[66px]">{heading}</h2>
+                        </div>
+                    </RevealOnScroll>
+
+                    <div className="mt-14 grid grid-cols-2 gap-6 sm:gap-7">
+                        {collagePhotos[0] && (
+                            <RevealOnScroll direction="none" scale={1} delay={0.18} width="100%">
                                 <motion.div
-                                    whileHover={{ scale: 1.02 }}
-                                    className="relative aspect-square cursor-pointer group overflow-hidden rounded-sm shadow-sm"
+                                    whileHover={{ scale: 1.01 }}
+                                    className="relative col-span-2 aspect-[16/10] cursor-pointer overflow-hidden rounded-[28px] ring-1 ring-white/15"
                                     onClick={() => {
                                         setDirection(0);
-                                        setSelectedIndex(index);
+                                        setSelectedIndex(0);
                                     }}
                                 >
-                                    <img
-                                        src={photo}
-                                        alt={`Memory ${index + 1}`}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300" />
+                                    <img src={collagePhotos[0]} alt="Gallery photo 1" className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10" />
                                 </motion.div>
                             </RevealOnScroll>
-                        ))}
+                        )}
+
+                        {collagePhotos[1] && (
+                            <RevealOnScroll direction="none" scale={1} delay={0.26} width="100%">
+                                <motion.div
+                                    whileHover={{ scale: 1.01 }}
+                                    className="relative aspect-[3/4] cursor-pointer overflow-hidden rounded-[28px] ring-1 ring-white/15"
+                                    onClick={() => {
+                                        setDirection(0);
+                                        setSelectedIndex(1);
+                                    }}
+                                >
+                                    <img src={collagePhotos[1]} alt="Gallery photo 2" className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10" />
+                                </motion.div>
+                            </RevealOnScroll>
+                        )}
+
+                        {collagePhotos[2] && (
+                            <RevealOnScroll direction="none" scale={1} delay={0.34} width="100%">
+                                <motion.div
+                                    whileHover={{ scale: 1.01 }}
+                                    className="relative aspect-[3/4] cursor-pointer overflow-hidden rounded-[28px] ring-1 ring-white/15"
+                                    onClick={() => {
+                                        setDirection(0);
+                                        setSelectedIndex(2);
+                                    }}
+                                >
+                                    <img src={collagePhotos[2]} alt="Gallery photo 3" className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10" />
+                                </motion.div>
+                            </RevealOnScroll>
+                        )}
+
+                        {collagePhotos[3] && (
+                            <RevealOnScroll direction="none" scale={1} delay={0.42} width="100%">
+                                <motion.div
+                                    whileHover={{ scale: 1.01 }}
+                                    className="relative col-span-2 aspect-[16/10] cursor-pointer overflow-hidden rounded-[28px] ring-1 ring-white/15"
+                                    onClick={() => {
+                                        setDirection(0);
+                                        setSelectedIndex(3);
+                                    }}
+                                >
+                                    <img src={collagePhotos[3]} alt="Gallery photo 4" className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10" />
+                                </motion.div>
+                            </RevealOnScroll>
+                        )}
+
+                        {collagePhotos[4] && (
+                            <RevealOnScroll direction="none" scale={1} delay={0.5} width="100%">
+                                <motion.div
+                                    whileHover={{ scale: 1.01 }}
+                                    className="relative col-span-2 aspect-[16/10] cursor-pointer overflow-hidden rounded-[28px] ring-1 ring-white/15"
+                                    onClick={() => {
+                                        setDirection(0);
+                                        setSelectedIndex(4);
+                                    }}
+                                >
+                                    <img src={collagePhotos[4]} alt="Gallery photo 5" className="h-full w-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10" />
+                                </motion.div>
+                            </RevealOnScroll>
+                        )}
                     </div>
                 </div>
             </div>
@@ -117,22 +194,42 @@ export function Gallery({ photos, heading }: GalleryProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setSelectedIndex(null)}
-                        className="fixed inset-0 z-100 bg-white/95 backdrop-blur-xl flex items-center justify-center p-4"
+                        className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-3 backdrop-blur-md sm:p-6"
                     >
                         <div
-                            className="relative max-w-6xl w-full h-full max-h-[90vh] flex items-center justify-center pointer-events-none"
+                            className="relative h-[86vh] w-full max-w-5xl pointer-events-none"
                         >
                             {/* Image Container */}
                             <div
-                                className="relative max-w-4xl w-full aspect-video p-2 pointer-events-auto shadow-2xl bg-white"
+                                className="relative h-full w-full overflow-hidden rounded-2xl bg-white p-2 pointer-events-auto shadow-2xl sm:p-3"
                                 onClick={(e) => e.stopPropagation()}
                             >
+                                <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 bg-white/85 px-4 py-3 text-xs tracking-widest uppercase backdrop-blur">
+                                    <button
+                                        onClick={handleDownload}
+                                        className="text-stone-800 hover:text-stone-500 transition-colors flex items-center gap-2 group"
+                                    >
+                                        <span className="text-lg group-hover:animate-bounce">↓</span> Download
+                                    </button>
+
+                                    <div className="font-poppins text-[10px] text-stone-600">
+                                        {selectedIndex + 1} / {lightboxPhotos.length}
+                                    </div>
+
+                                    <button
+                                        onClick={() => setSelectedIndex(null)}
+                                        className="text-stone-800 hover:text-stone-500 transition-colors"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+
                                 {/* Image Viewport - Overflow hidden for slide animation */}
-                                <div className="relative w-full h-full overflow-hidden bg-stone-100">
+                                <div className="relative h-full w-full overflow-hidden bg-stone-100 pt-12 sm:pt-14">
                                     <AnimatePresence initial={false} custom={direction} mode="wait">
                                         <motion.img
                                             key={selectedIndex}
-                                            src={displayPhotos[selectedIndex]}
+                                            src={lightboxPhotos[selectedIndex]}
                                             custom={direction}
                                             variants={slideVariants}
                                             initial="enter"
@@ -147,40 +244,23 @@ export function Gallery({ photos, heading }: GalleryProps) {
                                         />
                                     </AnimatePresence>
                                 </div>
-
-                                {/* Controls Header */}
-                                <div className="absolute -top-12 left-0 right-0 flex justify-between items-center text-xs tracking-widest uppercase">
-                                    <button
-                                        onClick={handleDownload}
-                                        className="text-stone-800 hover:text-stone-500 transition-colors flex items-center gap-2 group"
-                                    >
-                                        <span className="text-lg group-hover:animate-bounce">↓</span> Download
-                                    </button>
-
-                                    <button
-                                        onClick={() => setSelectedIndex(null)}
-                                        className="text-stone-800 hover:text-stone-500 transition-colors"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
                             </div>
 
                             {/* Navigation Buttons */}
                             <button
                                 onClick={handlePrev}
-                                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-4 text-stone-400 hover:text-stone-800 transition-colors pointer-events-auto z-50 group"
+                                className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/85 p-3 text-stone-700 shadow-lg backdrop-blur transition-colors hover:bg-white pointer-events-auto sm:left-4 sm:p-4"
                                 aria-label="Previous image"
                             >
-                                <span className="text-4xl font-light group-hover:-translate-x-1 transition-transform inline-block">&lt;</span>
+                                <span className="text-3xl font-light sm:text-4xl">&lt;</span>
                             </button>
 
                             <button
                                 onClick={handleNext}
-                                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-4 text-stone-400 hover:text-stone-800 transition-colors pointer-events-auto z-50 group"
+                                className="absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/85 p-3 text-stone-700 shadow-lg backdrop-blur transition-colors hover:bg-white pointer-events-auto sm:right-4 sm:p-4"
                                 aria-label="Next image"
                             >
-                                <span className="text-4xl font-light group-hover:translate-x-1 transition-transform inline-block">&gt;</span>
+                                <span className="text-3xl font-light sm:text-4xl">&gt;</span>
                             </button>
                         </div>
                     </motion.div>

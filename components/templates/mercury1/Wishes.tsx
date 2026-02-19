@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, where, getDocs, Timestamp } from "firebase/firestore";
+import { collection, addDoc, query, onSnapshot, where, getDocs, Timestamp } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { FloralDivider, SectionOrnament } from "./graphics";
@@ -187,7 +187,7 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
                                         </span>
                                     </div>
                                     <p className="font-body text-stone-600 leading-relaxed italic">
-                                        "{wish.message}"
+                                        &ldquo;{wish.message}&rdquo;
                                     </p>
                                 </motion.div>
                             ))}

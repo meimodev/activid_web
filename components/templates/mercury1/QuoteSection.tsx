@@ -1,9 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { FloatingParallax } from "@/components/invitation/ParallaxText";
-import { FloralDivider, SectionOrnament } from "./graphics";
+import { MERCURY_OVERLAY_ASSETS } from "./graphics/overlays";
 
 interface QuoteSectionProps {
     quote: {
@@ -16,41 +13,31 @@ export function QuoteSection({ quote }: QuoteSectionProps) {
     if (!quote || !quote.text) return null;
 
     return (
-        <section className="relative py-32 flex flex-col items-center justify-center text-center overflow-hidden bg-white text-stone-800">
+        <section className="relative py-8 sm:py-32 flex flex-col items-center justify-center text-center overflow-hidden bg-white text-stone-800">
+            <div className="container mx-auto px-2 sm:px-8 md:px-12 max-w-5xl relative z-10">
+                    <div className="relative mx-auto w-full overflow-hidden rounded-2xl bg-white px-6 py-16 sm:px-12 sm:py-20 shadow-[0_22px_70px_rgba(44,11,19,0.12)]">
+                        <div aria-hidden className="pointer-events-none absolute left-8 bottom-8 h-[140px] w-[140px] rotate-180 bg-contain bg-no-repeat" style={{ backgroundImage: `url(${MERCURY_OVERLAY_ASSETS.sidedCorner})` }} />
+                        <div aria-hidden className="pointer-events-none absolute right-8 top-8 h-[140px] w-[140px]  bg-contain bg-no-repeat" style={{ backgroundImage: `url(${MERCURY_OVERLAY_ASSETS.sidedCorner})` }} />
 
-            <div className="container mx-auto px-6 md:px-12 max-w-3xl relative z-10">
-                <RevealOnScroll direction="down" width="100%">
-                    <div className="flex flex-col items-center mb-10">
-                        <SectionOrnament />
+                        <div
+                            aria-hidden
+                            className="pointer-events-none absolute -left-8 -top-8 h-[220px] w-[220px] bg-contain bg-no-repeat"
+                            style={{ backgroundImage: `url(${MERCURY_OVERLAY_ASSETS.flowerCornerSecond})` }}
+                        />
+
+                        <div
+                            aria-hidden
+                            className="pointer-events-none absolute -bottom-8 -right-8 h-[240px] w-[240px] rotate-180 bg-contain bg-no-repeat"
+                            style={{ backgroundImage: `url(${MERCURY_OVERLAY_ASSETS.flowerCornerSecond})` }}
+                        />
+
+                        <div className="relative z-10 mx-auto max-w-[980px]">
+                            <blockquote className="font-poppins text-[20px] sm:text-[30px] pt-12 leading-tight sm:leading-tight text-[#9a6a74] tracking-wide">
+                                {quote.text}
+                            </blockquote>
+                            <p className="mt-4  font-poppins-bold text-[24px] sm:text-[30px] text-[#9a6a74]">{quote.author}</p>
+                        </div>
                     </div>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.2} width="100%">
-                    <div className="relative p-8">
-                        {/* Decorative Quote Marks */}
-                        <span className="absolute -top-6 -left-2 md:-left-8 font-serif text-8xl text-stone-200 pointer-events-none">“</span>
-
-                        <blockquote className="font-serif text-2xl md:text-3xl italic leading-loose text-stone-700 tracking-wide relative z-10">
-                            {quote.text}
-                        </blockquote>
-
-                        <span className="absolute -bottom-12 -right-2 md:-right-8 font-serif text-8xl text-stone-200 pointer-events-none transform rotate-180">“</span>
-                    </div>
-                </RevealOnScroll>
-
-                <RevealOnScroll delay={0.4} direction="up" width="100%">
-                    <div className="mt-12 flex flex-col items-center">
-                        <div className="w-12 h-px bg-stone-300 mb-4"></div>
-                        <p className="font-sans text-xs md:text-sm uppercase tracking-[0.3em] text-stone-500 font-semibold">
-                            {quote.author}
-                        </p>
-                    </div>
-                </RevealOnScroll>
-            </div>
-
-            {/* Bottom Decoration */}
-            <div className="mt-16">
-                <FloralDivider />
             </div>
         </section>
     );
