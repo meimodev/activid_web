@@ -524,12 +524,10 @@ export function TitleSection({
 // ============================================
 interface CoupleSectionProps {
   couple: CoupleInfo;
-  disableGrayscale?: boolean;
 }
 
 export function CoupleSection({
   couple,
-  disableGrayscale = false,
 }: CoupleSectionProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -652,7 +650,7 @@ export function CoupleSection({
                   <img
                     src={couple.groom.photo}
                     alt="Groom"
-                    className={`h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02] ${disableGrayscale ? "" : "grayscale hover:grayscale-0"}`}
+                    className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
                   />
                 </div>
               </div>
@@ -713,7 +711,7 @@ export function CoupleSection({
                   <img
                     src={couple.bride.photo}
                     alt="Bride"
-                    className={`h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02] ${disableGrayscale ? "" : "grayscale hover:grayscale-0"}`}
+                    className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
                   />
                 </div>
               </div>

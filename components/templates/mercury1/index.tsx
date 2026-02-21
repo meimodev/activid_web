@@ -19,6 +19,26 @@ import {
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
 
+const MERCURY_DEMO_ASSETS = {
+    groomPhoto: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+    bridePhoto: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+    coverImage: "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    backgroundPhotos: [
+        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+    galleryPhotos: [
+        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=800",
+    ],
+} as const;
+
 interface Mercury1Props {
     config: InvitationConfig;
 }
@@ -29,6 +49,8 @@ export function Mercury1({ config }: Mercury1Props) {
     const searchParams = useSearchParams();
     const guestName = searchParams.get("to");
 
+    const isDemo = config.id.endsWith("-demo");
+
     const {
         music,
         backgroundPhotos,
@@ -37,11 +59,23 @@ export function Mercury1({ config }: Mercury1Props) {
         sections
     } = config;
 
+    const effectiveCouple = isDemo
+        ? {
+            ...couple,
+            groom: { ...couple.groom, photo: MERCURY_DEMO_ASSETS.groomPhoto },
+            bride: { ...couple.bride, photo: MERCURY_DEMO_ASSETS.bridePhoto },
+        }
+        : couple;
+
+    const effectiveBackgroundPhotos = isDemo ? [...MERCURY_DEMO_ASSETS.backgroundPhotos] : backgroundPhotos;
+    const effectiveGalleryPhotos = isDemo ? [...MERCURY_DEMO_ASSETS.galleryPhotos] : (sections.gallery?.photos ?? []);
+    const effectiveCoverImage = isDemo ? MERCURY_DEMO_ASSETS.coverImage : sections.hero.coverImage;
+
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-serif">
             {/* Background Slideshow (Fades out or stays subtle) */}
             <div className="fixed inset-0 z-0 opacity-10 pointer-events-none">
-                <BackgroundSlideshow photos={backgroundPhotos} />
+                <BackgroundSlideshow photos={effectiveBackgroundPhotos} />
             </div>
 
             <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
@@ -66,10 +100,10 @@ export function Mercury1({ config }: Mercury1Props) {
                         onOpen={() => {
                             setIsOpen(true);
                         }}
-                        couple={couple}
+                        couple={effectiveCouple}
                         date={weddingDate.displayShort}
                         subtitle={sections.hero.subtitle}
-                        coverImage={sections.hero.coverImage}
+                        coverImage={effectiveCoverImage}
                         guestName={guestName || undefined}
                     />
                 </motion.div>
@@ -83,11 +117,11 @@ export function Mercury1({ config }: Mercury1Props) {
                         <>
                             {sections.title.enabled && (
                                 <TitleSection
-                                    couple={couple}
+                                    couple={effectiveCouple}
                                     date={weddingDate.display}
                                     heading={sections.title.heading}
                                     countdownTarget={weddingDate.countdownTarget}
-                                    galleryPhotos={sections.gallery.photos}
+                                    galleryPhotos={effectiveGalleryPhotos}
                                     showCountdown={sections.countdown.enabled}
                                 />
                             )}
@@ -97,14 +131,14 @@ export function Mercury1({ config }: Mercury1Props) {
                             )}
 
                             {sections.couple.enabled && (
-                                <CoupleSection couple={couple} disableGrayscale={sections.couple.disableGrayscale} />
+                                <CoupleSection couple={effectiveCouple} />
                             )}
 
                             {sections.story.enabled && (
                                 <StorySection
                                     stories={sections.story.stories}
                                     heading={sections.story.heading}
-                                    fallbackImageUrl={sections.gallery?.photos?.[0]}
+                                    fallbackImageUrl={effectiveGalleryPhotos[0]}
                                 />
                             )}
 
@@ -113,7 +147,7 @@ export function Mercury1({ config }: Mercury1Props) {
                             )}
 
                             {sections.gallery.enabled && (
-                                <Gallery photos={sections.gallery.photos} heading={sections.gallery.heading} />
+                                <Gallery photos={effectiveGalleryPhotos} heading={sections.gallery.heading} />
                             )}
 
                             {sections.gift.enabled && (
