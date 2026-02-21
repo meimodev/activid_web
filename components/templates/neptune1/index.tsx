@@ -219,16 +219,13 @@ export function Neptune1({ config }: Neptune1Props) {
   const [contentReady, setContentReady] = useState(
     () => !config.sections.hero.enabled,
   );
-  const [backgroundReady, setBackgroundReady] = useState(
-    () => !config.sections.hero.enabled,
-  );
-  const [pageAssetsReady, setPageAssetsReady] = useState(
-    () => !config.sections.hero.enabled,
-  );
+  const [backgroundReady, setBackgroundReady] = useState(false);
+  const [pageAssetsReady, setPageAssetsReady] = useState(false);
   const [openRequested, setOpenRequested] = useState(false);
-  const [coverClosing, setCoverClosing] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const coverTransitionMs = prefersReducedMotion ? 120 : 780;
+  const coverClosing =
+    config.sections.hero.enabled && openRequested && pageAssetsReady && !isOpen;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -316,13 +313,6 @@ export function Neptune1({ config }: Neptune1Props) {
   ]);
 
   useEffect(() => {
-    if (!openRequested) return;
-    if (!pageAssetsReady) return;
-    if (coverClosing || isOpen) return;
-    setCoverClosing(true);
-  }, [coverClosing, isOpen, openRequested, pageAssetsReady]);
-
-  useEffect(() => {
     if (!coverClosing) return;
     const t = window.setTimeout(() => {
       setIsOpen(true);
@@ -403,9 +393,14 @@ export function Neptune1({ config }: Neptune1Props) {
   const storyPhoto = useMemo(() => {
     const list = config.sections.gallery.photos ?? [];
     if (list.length === 0) return quoteBackgroundImage;
-    const idx = Math.floor(Math.random() * list.length);
+    let hash = 0;
+    const seed = config.id || "neptune";
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+    }
+    const idx = hash % list.length;
     return list[idx] ?? quoteBackgroundImage;
-  }, [config.id, quoteBackgroundImage]);
+  }, [config.id, config.sections.gallery.photos, quoteBackgroundImage]);
 
   const coupleTitle = `${config.couple.bride.firstName} & ${config.couple.groom.firstName}`;
 
@@ -931,6 +926,9 @@ function TitleCountdownSection({
   coupleLabel: string;
   targetDate: string;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+  const { isMobile } = useWindowSize();
+
   const photos = useMemo(() => {
     const list = backgroundPhotos ?? [];
     const safe = list.filter(Boolean);
@@ -948,11 +946,8 @@ function TitleCountdownSection({
     return () => window.clearInterval(t);
   }, [photos.length]);
 
-  useEffect(() => {
-    if (activeIndex >= photos.length) setActiveIndex(0);
-  }, [activeIndex, photos.length]);
-
-  const activePhoto = photos[activeIndex] ?? coverImage;
+  const safeActiveIndex = photos.length > 0 ? activeIndex % photos.length : 0;
+  const activePhoto = photos[safeActiveIndex] ?? coverImage;
 
   return (
     <section
@@ -964,7 +959,7 @@ function TitleCountdownSection({
           <AnimatePresence initial={false}>
             {activePhoto ? (
               <motion.div
-                key={`${activeIndex}-${activePhoto}`}
+                key={`${safeActiveIndex}-${activePhoto}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -998,9 +993,26 @@ function TitleCountdownSection({
         {/* <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[radial-gradient(ellipse_at_50%_100%,rgba(0,0,0,0.08),transparent_68%)]" /> */}
       </div>
 
-      <div className="absolute inset-x-0 -bottom-38 z-20 pointer-events-none flex justify-center">
+      <motion.div
+        className="absolute inset-x-0 -bottom-38 z-20 pointer-events-none flex justify-center"
+        initial={false}
+        animate={
+          prefersReducedMotion
+            ? { x: 0, y: 0, rotate: 0 }
+            : {
+                x: [0, isMobile ? 8 : 12, isMobile ? -5 : -8, isMobile ? 5 : 8, 0],
+                y: [0, isMobile ? -6 : -10, isMobile ? 4 : 6, isMobile ? -4 : -6, 0],
+                rotate: [0, isMobile ? -1.1 : -1.6, isMobile ? 0.8 : 1.1, isMobile ? -0.8 : -1.1, 0],
+              }
+        }
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : { duration: 10.5, repeat: Infinity, ease: "easeInOut" }
+        }
+      >
         <TitleDecoration10 className="w-full" />
-      </div>
+      </motion.div>
 
       <div className="relative z-30 min-h-screen flex flex-col items-center justify-end text-center px-6 pb-32 pt-18">
         <NeptuneStagger className="relative w-full max-w-sm" baseDelay={0.15}>
@@ -3002,11 +3014,8 @@ function ThankYouSection({
     return () => window.clearInterval(t);
   }, [photos.length]);
 
-  useEffect(() => {
-    if (activeIndex >= photos.length) setActiveIndex(0);
-  }, [activeIndex, photos.length]);
-
-  const activePhoto = photos[activeIndex] ?? fallbackImage;
+  const safeActiveIndex = photos.length > 0 ? activeIndex % photos.length : 0;
+  const activePhoto = photos[safeActiveIndex] ?? fallbackImage;
 
   return (
     <section
@@ -3017,7 +3026,7 @@ function ThankYouSection({
         <AnimatePresence initial={false}>
           {activePhoto ? (
             <motion.div
-              key={`${activeIndex}-${activePhoto}`}
+              key={`${safeActiveIndex}-${activePhoto}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

@@ -32,27 +32,15 @@ export function NeptuneOverlayFloat({
   const prefersReducedMotion = useReducedMotion();
   const { isMobile } = useWindowSize();
 
-  const mobileAmplitude = isMobile ? Math.min(amplitude, 4.5) : amplitude;
-  const yAmplitude = prefersReducedMotion
-    ? Math.min(Math.max(amplitude, 4), 6)
-    : mobileAmplitude;
+  const baseAmplitude = isMobile ? Math.min(amplitude, 6.5) : amplitude;
+  const drift = baseAmplitude * 0.55;
+  const driftX = drift * (breeze ? 1.35 : 1.15);
+  const driftY = drift * (breeze ? 1.25 : 1.05);
 
-  const rotateAmplitude = prefersReducedMotion
-    ? Math.sign(rotate) * Math.min(Math.abs(rotate), 1)
-    : rotate;
-
-  const breezeXAmplitude = prefersReducedMotion
-    ? Math.min(Math.max(yAmplitude * 0.16, 0.75), 1.45)
-    : Math.min(Math.max(yAmplitude * 0.72, 3), 8.4);
-
-  const baseRotateAmplitude =
-    rotateAmplitude !== 0
-      ? prefersReducedMotion
-        ? rotateAmplitude
-        : rotateAmplitude * 1.8
-      : prefersReducedMotion
-        ? 0.95
-        : Math.min(Math.max(yAmplitude * 0.72, 3), 8);
+  const rotateSign = rotate < 0 ? -1 : 1;
+  const rotateDrift =
+    Math.max(rotate !== 0 ? Math.abs(rotate) : 0, baseAmplitude * 0.6) *
+    (breeze ? 1.25 : 1.15);
 
   return (
     <motion.img
@@ -63,79 +51,29 @@ export function NeptuneOverlayFloat({
       draggable={draggable}
       initial={false}
       animate={
-        breeze
-          ? {
-              x: [
-                0,
-                breezeXAmplitude * 1.35,
-                -breezeXAmplitude * 1.45,
-                breezeXAmplitude * 1.05,
-                -breezeXAmplitude * 0.7,
-                breezeXAmplitude * 0.4,
-                0,
-              ],
-              y: [
-                0,
-                -yAmplitude * 0.48,
-                -yAmplitude * 1.38,
-                -yAmplitude * 0.62,
-                -yAmplitude * 1.08,
-                -yAmplitude * 0.35,
-                0,
-              ],
+        prefersReducedMotion
+          ? { x: 0, y: 0, rotate: 0 }
+          : {
+              x: [0, driftX, -driftX * 0.66, driftX * 0.66, 0],
+              y: [0, -driftY, driftY * 0.55, -driftY * 0.55, 0],
               rotate: [
                 0,
-                baseRotateAmplitude,
-                -baseRotateAmplitude * 1.2,
-                baseRotateAmplitude * 0.9,
-                -baseRotateAmplitude * 0.6,
-                baseRotateAmplitude * 0.32,
+                -rotateDrift * rotateSign,
+                rotateDrift * 0.6 * rotateSign,
+                -rotateDrift * 0.6 * rotateSign,
                 0,
               ],
             }
-          : rotateAmplitude !== 0
-            ? {
-                y: [0, -yAmplitude, 0],
-                rotate: [0, rotateAmplitude, 0, -rotateAmplitude, 0],
-              }
-            : { y: [0, -yAmplitude, 0] }
       }
       transition={
-        breeze
-          ? {
-              x: {
-                duration: duration * 0.68,
-                repeat: Infinity,
-                times: [0, 0.16, 0.34, 0.52, 0.68, 0.84, 1],
-                ease: "easeInOut",
-                delay,
-              },
-              y: {
-                duration: duration * 0.72,
-                repeat: Infinity,
-                times: [0, 0.12, 0.29, 0.47, 0.65, 0.82, 1],
-                ease: "easeInOut",
-                delay,
-              },
-              rotate: {
-                duration: duration * 0.74,
-                repeat: Infinity,
-                times: [0, 0.14, 0.31, 0.49, 0.67, 0.84, 1],
-                ease: "easeInOut",
-                delay,
-              },
+        prefersReducedMotion
+          ? { duration: 0 }
+          : {
+              duration: breeze ? duration * 0.95 : duration,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay,
             }
-          : rotateAmplitude !== 0
-            ? {
-                y: { duration, repeat: Infinity, ease: "easeInOut", delay },
-                rotate: {
-                  duration: duration * 1.15,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay,
-                },
-              }
-            : { duration, repeat: Infinity, ease: "easeInOut", delay }
       }
     />
   );

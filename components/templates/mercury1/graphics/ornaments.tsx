@@ -2,7 +2,7 @@
 
 export function FloralDivider() {
     return (
-        <div className="flex items-center justify-center py-12 opacity-80">
+        <div className="flex items-center justify-center py-2">
             <div className="flex items-center gap-4">
                 <div className="h-px w-16 md:w-32 bg-stone-300" />
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-stone-400">

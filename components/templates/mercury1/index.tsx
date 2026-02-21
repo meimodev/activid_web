@@ -15,7 +15,6 @@ import {
     CoupleSection,
     EventSection,
     GiftSection,
-    ConfirmationSection,
     FooterSection
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
@@ -117,14 +116,14 @@ export function Mercury1({ config }: Mercury1Props) {
                                 <Gallery photos={sections.gallery.photos} heading={sections.gallery.heading} />
                             )}
 
-                            {sections.rsvp.enabled && (
-                                <Suspense fallback={<div className="py-24 text-center text-stone-400 font-serif italic">Loading RSVP...</div>}>
-                                    <ConfirmationSection invitationId={config.id} rsvpDeadline={weddingDate.rsvpDeadline} />
-                                </Suspense>
-                            )}
-
                             {sections.gift.enabled && (
-                                <GiftSection bankAccounts={sections.gift.bankAccounts} heading={sections.gift.heading} description={sections.gift.description} />
+                                <GiftSection
+                                    bankAccounts={sections.gift.bankAccounts}
+                                    heading={sections.gift.heading}
+                                    description={sections.gift.description}
+                                    templateName={config.templateId || "mercury-1"}
+                                    eventDate={weddingDate.display}
+                                />
                             )}
 
                             {sections.wishes.enabled && (
