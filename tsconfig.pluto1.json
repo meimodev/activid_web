@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "components/templates/pluto1/**/*.ts",
+    "components/templates/pluto1/**/*.tsx"
+  ],
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.pbt.test.ts",
+    "**/*.pbt.test.tsx",
+    "node_modules"
+  ]
+}

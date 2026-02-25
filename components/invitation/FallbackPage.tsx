@@ -92,10 +92,10 @@ export function FallbackPage() {
                     transition={{ duration: 0.8 }}
                     className="space-y-4"
                 >
-                    <h1 className="text-7xl md:text-9xl font-black tracking-tighter bg-linear-to-b from-white via-indigo-100 to-indigo-900 bg-clip-text text-transparent drop-shadow-2xl">
+                    <h1 className="text-7xl font-black tracking-tighter bg-linear-to-b from-white via-indigo-100 to-indigo-900 bg-clip-text text-transparent drop-shadow-2xl">
                         404
                     </h1>
-                    <h2 className="text-2xl md:text-3xl font-light tracking-wide text-indigo-200">
+                    <h2 className="text-2xl font-light tracking-wide text-indigo-200">
                         Hilang di Luar Angkasa
                     </h2>
                 </motion.div>

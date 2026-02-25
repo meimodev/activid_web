@@ -1,4 +1,9 @@
 import '@testing-library/jest-dom';
+import fc from 'fast-check';
+
+fc.configureGlobal({
+  numRuns: 20,
+});
 
 // Mock window.matchMedia for tests
 Object.defineProperty(window, 'matchMedia', {

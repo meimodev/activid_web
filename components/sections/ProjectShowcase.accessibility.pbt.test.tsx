@@ -33,11 +33,6 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-// Mock hooks
-vi.mock('@/hooks', () => ({
-  useReducedMotion: () => false,
-}));
-
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {

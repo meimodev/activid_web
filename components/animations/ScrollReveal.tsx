@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useReducedMotion } from '@/hooks';
 import { EASING, DURATION } from '@/lib/animation-config';
 
 export interface ScrollRevealProps {
@@ -27,8 +26,6 @@ export function ScrollReveal({
   threshold = 0.1,
   className,
 }: ScrollRevealProps) {
-  const prefersReducedMotion = useReducedMotion();
-
   // Direction-based offset mapping
   const offsets = {
     up: { x: 0, y: 100 },
@@ -39,16 +36,10 @@ export function ScrollReveal({
 
   const offset = offsets[direction];
 
-  // If reduced motion is preferred, use simple fade
-  const variants = prefersReducedMotion
-    ? {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-      }
-    : {
-        initial: { opacity: 0, x: offset.x, y: offset.y },
-        animate: { opacity: 1, x: 0, y: 0 },
-      };
+  const variants = {
+    initial: { opacity: 0, x: offset.x, y: offset.y },
+    animate: { opacity: 1, x: 0, y: 0 },
+  } as const;
 
   return (
     <motion.div

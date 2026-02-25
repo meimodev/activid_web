@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { useReducedMotion } from '@/hooks';
 
 export interface ParallaxWrapperProps {
   children: React.ReactNode;
@@ -23,7 +22,6 @@ export function ParallaxWrapper({
   className,
 }: ParallaxWrapperProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -37,11 +35,6 @@ export function ParallaxWrapper({
 
   const y = useTransform(scrollYProgress, [0, 1], [-offset, offset]);
   const x = useTransform(scrollYProgress, [0, 1], [-offset, offset]);
-
-  // If reduced motion is preferred, disable parallax
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
 
   return (
     <motion.div

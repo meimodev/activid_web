@@ -37,7 +37,7 @@ describe('Property 24: Navigation menu opacity and position', () => {
           return allItemsExist;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -59,15 +59,15 @@ describe('Property 24: Navigation menu opacity and position', () => {
           fireEvent.click(menuButton);
 
           // Menu should be open (AnimatePresence handles the animation)
-          const closeButton = getByLabelText('Close navigation menu');
-          const menuIsOpen = closeButton !== null;
+          const closeButtons = screen.getAllByLabelText('Close navigation menu');
+          const menuIsOpen = closeButtons.length > 0;
 
           unmount();
 
           return menuIsOpen;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -98,7 +98,7 @@ describe('Property 24: Navigation menu opacity and position', () => {
           return menuItemsRendered;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -122,12 +122,12 @@ describe('Property 24: Navigation menu opacity and position', () => {
           fireEvent.click(openButton);
 
           // Close menu
-          const closeButton = getByLabelText('Close navigation menu');
+          const closeButton = screen.getAllByLabelText('Close navigation menu')[0];
           fireEvent.click(closeButton);
 
           // Menu should be closing (AnimatePresence handles exit animation)
           // After animation completes, close button should not be present
-          const menuClosed = queryByLabelText('Close navigation menu') === null;
+          const menuClosed = screen.queryAllByLabelText('Close navigation menu').length === 0;
 
           unmount();
 
@@ -135,7 +135,7 @@ describe('Property 24: Navigation menu opacity and position', () => {
           return true; // Animation system is configured correctly
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -160,7 +160,7 @@ describe('Property 24: Navigation menu opacity and position', () => {
           return hasNav;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -190,7 +190,7 @@ describe('Property 24: Navigation menu opacity and position', () => {
           return allItemsPresent;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 interface MusicPlayerProps {
     shouldStart: boolean;
@@ -44,9 +45,9 @@ export function MusicPlayer({ shouldStart, audioUrl }: MusicPlayerProps) {
     };
 
     // Only show the player after the invitation has been opened
-    if (!shouldStart) return null;
+    if (!shouldStart || typeof document === "undefined") return null;
 
-    return (
+    const player = (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -106,6 +107,8 @@ export function MusicPlayer({ shouldStart, audioUrl }: MusicPlayerProps) {
        )} */}
         </motion.div>
     );
+
+    return createPortal(player, document.body);
 }
 
 function PlayIcon() {

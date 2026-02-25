@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { useReducedMotion } from '@/hooks';
 
 export interface SVGMorphProps {
   pathFrom: string;
@@ -33,7 +32,6 @@ export function SVGMorph({
   strokeWidth = 0,
 }: SVGMorphProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -43,17 +41,6 @@ export function SVGMorph({
   // Interpolate between path definitions based on scroll progress
   // Note: For proper path morphing, both paths should have the same number of points
   const pathData = useTransform(scrollYProgress, [0, 1], [pathFrom, pathTo]);
-
-  // If reduced motion is preferred, show final path
-  if (prefersReducedMotion) {
-    return (
-      <div ref={ref} className={className}>
-        <svg viewBox={viewBox} className={svgClassName}>
-          <path d={pathTo} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
-        </svg>
-      </div>
-    );
-  }
 
   return (
     <div ref={ref} className={className}>

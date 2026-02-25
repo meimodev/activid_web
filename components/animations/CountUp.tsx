@@ -2,8 +2,7 @@
 
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
-import { useInView } from '@/hooks';
-import { useReducedMotion } from '@/hooks';
+import { useInView } from '@/hooks/useInView';
 
 export interface CountUpProps {
   end: number;
@@ -30,7 +29,6 @@ export function CountUp({
   className,
 }: CountUpProps) {
   const [ref, isInView] = useInView({ once: true, threshold: 0.5 });
-  const prefersReducedMotion = useReducedMotion();
 
   // Create spring animation for smooth counting
   const motionValue = useSpring(start, {
@@ -48,14 +46,9 @@ export function CountUp({
   // Trigger animation when element comes into view
   useEffect(() => {
     if (isInView) {
-      if (prefersReducedMotion) {
-        // Skip animation, jump to end value
-        motionValue.set(end);
-      } else {
-        motionValue.set(end);
-      }
+      motionValue.set(end);
     }
-  }, [isInView, end, motionValue, prefersReducedMotion]);
+  }, [isInView, end, motionValue]);
 
   return (
     <motion.span ref={ref as any} className={className}>

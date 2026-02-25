@@ -35,11 +35,6 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-// Mock hooks
-vi.mock('@/hooks', () => ({
-  useReducedMotion: () => false,
-}));
-
 /**
  * Feature: project-showcase-section, Property 19: Lazy loading implementation
  * 

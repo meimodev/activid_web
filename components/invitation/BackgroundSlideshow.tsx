@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 
 interface BackgroundSlideshowProps {
     photos: string[];
+    className?: string;
 }
 
-export function BackgroundSlideshow({ photos }: BackgroundSlideshowProps) {
+export function BackgroundSlideshow({ photos, className }: BackgroundSlideshowProps) {
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
@@ -19,7 +20,7 @@ export function BackgroundSlideshow({ photos }: BackgroundSlideshowProps) {
     }, [photos.length]);
 
     return (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className={className ?? "fixed inset-0 z-0 overflow-hidden pointer-events-none"}>
             <AnimatePresence mode="popLayout" initial={false}>
                 <motion.div
                     key={photos[index]}

@@ -32,11 +32,6 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-// Mock hooks
-vi.mock('@/hooks', () => ({
-  useReducedMotion: () => false,
-}));
-
 /**
  * Feature: project-showcase-section, Property 4: Instagram grid structure
  * 
@@ -169,7 +164,12 @@ describe('Property 4: Instagram grid structure', () => {
           // Each image should have alt text from the provided array
           let allHaveCorrectAlt = true;
           imgs.forEach((img, index) => {
-            if (img.getAttribute('alt') !== alts[index]) {
+            const trimmedAlt = alts[index]?.trim();
+            const expectedAlt =
+              trimmedAlt && trimmedAlt.length >= 5
+                ? alts[index]
+                : 'Project mockup placeholder';
+            if (img.getAttribute('alt') !== expectedAlt) {
               allHaveCorrectAlt = false;
             }
           });

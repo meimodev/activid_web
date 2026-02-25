@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useReducedMotion } from '@/hooks';
 
 export interface SkeletonProps {
   width?: string | number;
@@ -21,7 +20,6 @@ export function Skeleton({
   className = '',
   variant = 'rectangular',
 }: SkeletonProps) {
-  const prefersReducedMotion = useReducedMotion();
 
   const variantStyles = {
     text: 'rounded',
@@ -38,22 +36,14 @@ export function Skeleton({
     <motion.div
       className={`bg-gray-200 ${variantStyles[variant]} ${className}`}
       style={style}
-      animate={
-        prefersReducedMotion
-          ? {}
-          : {
-              opacity: [0.5, 1, 0.5],
-            }
-      }
-      transition={
-        prefersReducedMotion
-          ? {}
-          : {
-              duration: 1.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }
-      }
+      animate={{
+        opacity: [0.5, 1, 0.5],
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
     />
   );
 }

@@ -2,7 +2,6 @@
 
 import { motion, useTransform } from 'framer-motion';
 import { useScrollProgress } from '@/hooks';
-import { useReducedMotion } from '@/hooks';
 
 export interface ProgressIndicatorProps {
   type?: 'line' | 'circle';
@@ -26,7 +25,6 @@ export function ProgressIndicator({
   className = '',
 }: ProgressIndicatorProps) {
   const scrollProgress = useScrollProgress();
-  const prefersReducedMotion = useReducedMotion();
 
   // Position classes based on position prop
   const positionClasses = {
@@ -43,7 +41,7 @@ export function ProgressIndicator({
       >
         <motion.div
           style={{
-            scaleX: prefersReducedMotion ? 1 : scrollProgress,
+            scaleX: scrollProgress,
             transformOrigin: '0% 0%',
             height: '100%',
             width: '100%',
@@ -102,7 +100,7 @@ export function ProgressIndicator({
           stroke={color}
           strokeWidth={thickness}
           strokeDasharray={circumference}
-          strokeDashoffset={prefersReducedMotion ? 0 : strokeDashoffset}
+          strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           style={{
             transform: 'rotate(-90deg)',

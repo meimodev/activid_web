@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it } from 'vitest';
 import { render } from '@testing-library/react';
 import fc from 'fast-check';
 import { Suspense, lazy } from 'react';
@@ -9,11 +9,6 @@ import {
   GridSkeleton,
   FormSkeleton,
 } from './Skeleton';
-
-// Mock the hooks
-vi.mock('@/hooks', () => ({
-  useReducedMotion: () => false,
-}));
 
 /**
  * Feature: premium-landing-page, Property 18: Skeleton screen display during loading

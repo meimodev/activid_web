@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useReducedMotion } from '@/hooks';
 import { EASING } from '@/lib/animation-config';
 
 export interface FlipCardProps {
@@ -18,18 +17,10 @@ export interface FlipCardProps {
  * Requirements: 3.5
  */
 export function FlipCard({ children, delay = 0, className }: FlipCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
-  // If reduced motion is preferred, use simple fade
-  const variants = prefersReducedMotion
-    ? {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-      }
-    : {
-        initial: { opacity: 0, rotateY: -90 },
-        animate: { opacity: 1, rotateY: 0 },
-      };
+  const variants = {
+    initial: { opacity: 0, rotateY: -90 },
+    animate: { opacity: 1, rotateY: 0 },
+  } as const;
 
   return (
     <motion.div

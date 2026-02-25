@@ -31,11 +31,6 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-// Mock hooks
-vi.mock('@/hooks', () => ({
-  useReducedMotion: () => false,
-}));
-
 describe('InstagramGrid', () => {
   const mockImages = Array.from({ length: 9 }, (_, i) => `https://example.com/image${i}.jpg`);
   const mockAlts = Array.from({ length: 9 }, (_, i) => `Image ${i} alt text`);

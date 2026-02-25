@@ -1,8 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useReducedMotion } from '@/hooks';
-import { EASING, DURATION, STAGGER_CONFIG } from '@/lib/animation-config';
+import { EASING, DURATION } from '@/lib/animation-config';
 
 export interface StaggerChildrenProps {
   children: React.ReactNode;
@@ -28,7 +27,6 @@ export function StaggerChildren({
   'aria-labelledby': ariaLabelledBy,
   id,
 }: StaggerChildrenProps) {
-  const prefersReducedMotion = useReducedMotion();
 
   // Container variant with configurable stagger delay
   const containerVariants = {
@@ -41,22 +39,17 @@ export function StaggerChildren({
   };
 
   // Item variants for child elements
-  const itemVariants = prefersReducedMotion
-    ? {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-      }
-    : {
-        initial: { opacity: 0, y: 20 },
-        animate: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: DURATION.normal,
-            ease: EASING.easeOutExpo,
-          },
-        },
-      };
+  const itemVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: DURATION.normal,
+        ease: EASING.easeOutExpo,
+      },
+    },
+  } as const;
 
   return (
     <motion.div

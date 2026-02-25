@@ -74,16 +74,17 @@ export function Mercury1({ config }: Mercury1Props) {
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-serif">
             {/* Background Slideshow (Fades out or stays subtle) */}
-            <div className="fixed inset-0 z-0 opacity-10 pointer-events-none">
-                <BackgroundSlideshow photos={effectiveBackgroundPhotos} />
-            </div>
+            <BackgroundSlideshow
+                photos={effectiveBackgroundPhotos}
+                className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10"
+            />
 
             <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 
             {/* Hero / Cover Section - Fixed Overlay until opened */}
             {sections.hero.enabled && (
                 <motion.div
-                    className="fixed inset-0 z-50"
+                    className="absolute inset-0 z-50"
                     initial={false}
                     animate={{
                         opacity: isOpen ? 0 : 1,
@@ -110,7 +111,7 @@ export function Mercury1({ config }: Mercury1Props) {
             )}
 
             {/* Main Content - Visible underneath or revealed */}
-            <div className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 fixed top-0 w-full"}`}>
+            <div className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}>
                 {/* Only allow scrolling when content is visible */}
                 <div className={isContentReady ? "" : "h-screen overflow-hidden"}>
                     {isContentReady && (

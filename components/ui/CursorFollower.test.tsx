@@ -38,7 +38,7 @@ describe('Property 15: Cursor follower tracking', () => {
   });
 
   it('should track mouse position for any coordinates', async () => {
-    fc.assert(
+    await fc.assert(
       fc.asyncProperty(
         fc.record({
           x: fc.integer({ min: 0, max: 1920 }),
@@ -71,7 +71,7 @@ describe('Property 15: Cursor follower tracking', () => {
   });
 
   it('should apply blur effect with any blur value', async () => {
-    fc.assert(
+    await fc.assert(
       fc.asyncProperty(
         fc.integer({ min: 0, max: 50 }),
         async (blur) => {
@@ -94,7 +94,7 @@ describe('Property 15: Cursor follower tracking', () => {
   });
 
   it('should support custom size', async () => {
-    fc.assert(
+    await fc.assert(
       fc.asyncProperty(
         fc.integer({ min: 10, max: 100 }),
         async (size) => {
@@ -118,9 +118,9 @@ describe('Property 15: Cursor follower tracking', () => {
   });
 
   it('should support custom opacity', async () => {
-    fc.assert(
+    await fc.assert(
       fc.asyncProperty(
-        fc.double({ min: 0, max: 1 }),
+        fc.double({ min: 0, max: 1, noNaN: true, noDefaultInfinity: true }),
         async (opacity) => {
           const { container, unmount } = render(<CursorFollower opacity={opacity} hideDefaultCursor={false} />);
 
@@ -133,7 +133,8 @@ describe('Property 15: Cursor follower tracking', () => {
           const opacityStyle = cursor?.style.opacity;
 
           unmount();
-          return opacityStyle === String(opacity);
+          const parsed = opacityStyle ? Number.parseFloat(opacityStyle) : NaN;
+          return Number.isFinite(parsed) && Math.abs(parsed - opacity) < 1e-6;
         }
       ),
       { numRuns: 20 }

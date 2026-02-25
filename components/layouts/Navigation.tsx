@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useScrollProgress } from '@/hooks';
-import { useReducedMotion } from '@/hooks';
 import { EASING, DURATION } from '@/lib/animation-config';
 import { trackNavigation } from '@/lib/analytics';
 
@@ -55,7 +54,6 @@ export default function Navigation({
   const [isVisible, setIsVisible] = useState(!hideUntilScroll);
   const { scrollY } = useScroll();
   const scrollProgress = useScrollProgress();
-  const prefersReducedMotion = useReducedMotion();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (hideUntilScroll) {
@@ -84,27 +82,22 @@ export default function Navigation({
   if (!shouldRender) return null;
 
   // Drawer variants
-  const drawerVariants = prefersReducedMotion
-    ? {
-      closed: { x: '100%' },
-      open: { x: 0 },
-    }
-    : {
-      closed: {
-        x: '100%',
-        transition: {
-          duration: DURATION.normal,
-          ease: EASING.easeInOutQuint,
-        },
+  const drawerVariants = {
+    closed: {
+      x: '100%',
+      transition: {
+        duration: DURATION.normal,
+        ease: EASING.easeInOutQuint,
       },
-      open: {
-        x: 0,
-        transition: {
-          duration: DURATION.normal,
-          ease: EASING.easeOutExpo,
-        },
+    },
+    open: {
+      x: 0,
+      transition: {
+        duration: DURATION.normal,
+        ease: EASING.easeOutExpo,
       },
-    };
+    },
+  };
 
   // Container variants for stagger animation
   const menuContainerVariants = {
@@ -123,29 +116,24 @@ export default function Navigation({
   };
 
   // Menu item variants with opacity and position transitions
-  const menuItemVariants = prefersReducedMotion
-    ? {
-      closed: { opacity: 0 },
-      open: { opacity: 1 },
-    }
-    : {
-      closed: {
-        opacity: 0,
-        x: 20,
-        transition: {
-          duration: DURATION.fast,
-          ease: EASING.easeInOutQuint,
-        },
+  const menuItemVariants = {
+    closed: {
+      opacity: 0,
+      x: 20,
+      transition: {
+        duration: DURATION.fast,
+        ease: EASING.easeInOutQuint,
       },
-      open: {
-        opacity: 1,
-        x: 0,
-        transition: {
-          duration: DURATION.fast,
-          ease: EASING.easeOutExpo,
-        },
+    },
+    open: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: DURATION.fast,
+        ease: EASING.easeOutExpo,
       },
-    };
+    },
+  };
 
   return (
     <motion.nav

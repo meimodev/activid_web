@@ -6,6 +6,7 @@ import { useInvitationConfig } from "@/components/invitation/useInvitationConfig
 import { Flow1 } from "@/components/templates/flow1";
 import { Saturn1 } from "@/components/templates/saturn1";
 import { Mercury1 } from "@/components/templates/mercury1";
+import { Pluto1 } from "@/components/templates/pluto1";
 import { Venus1 } from "@/components/templates/venus1";
 import { Jupiter } from "@/components/templates/jupiter";
 import { Neptune1 } from "@/components/templates/neptune1";
@@ -20,6 +21,8 @@ interface PageProps {
 
 export default function InvitationPage({ params }: PageProps) {
     const { slug } = use(params);
+
+    const baseConfig = (INVITATION_DEFAULTS["christian-regina"] ?? INVITATION_DEFAULTS["ricci-andrini"])!;
 
     // Get default config based on slug
     let defaultConfig = INVITATION_DEFAULTS[slug];
@@ -202,13 +205,15 @@ export default function InvitationPage({ params }: PageProps) {
         }
     }
 
-    // If no default exists (and not a valid demo), show Fallback Page immediately
+    const isValidSlug = !!defaultConfig;
+
+    // Fetch dynamic config (must be called unconditionally)
+    const { config } = useInvitationConfig(isValidSlug ? slug : "", defaultConfig ?? baseConfig);
+
+    // If no default exists (and not a valid demo), show Fallback Page
     if (!defaultConfig) {
         return <FallbackPage />;
     }
-
-    // Fetch dynamic config
-    const { config } = useInvitationConfig(slug, defaultConfig);
 
     // Determines which template to render
     const templateId = config.templateId || "flow-1";
@@ -223,6 +228,10 @@ export default function InvitationPage({ params }: PageProps) {
 
     if (templateId === "mercury-1") {
         return <Mercury1 config={config} />;
+    }
+
+    if (templateId === "pluto-1") {
+        return <Pluto1 config={config} />;
     }
 
     if (templateId === "venus-1") {

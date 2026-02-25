@@ -143,35 +143,6 @@ describe('Property 11: Magnetic button attraction', () => {
     );
   });
 
-  it('should respect reduced motion preference', () => {
-    fc.assert(
-      fc.property(
-        fc.record({
-          strength: fc.double({ min: 0.1, max: 1.0, noNaN: true }),
-          content: fc.string({ minLength: 1, maxLength: 50 }),
-        }),
-        ({ strength, content }) => {
-          // The component uses useReducedMotion hook internally
-          // When reduced motion is preferred, it renders a static button
-          const { container } = render(
-            <MagneticButton strength={strength}>
-              {content}
-            </MagneticButton>
-          );
-
-          const button = container.firstChild as HTMLButtonElement;
-          
-          // Verify the button exists and renders content
-          expect(button).toBeTruthy();
-          expect(button.textContent).toBe(content);
-          
-          return true;
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
   it('should handle various strength values correctly', () => {
     fc.assert(
       fc.property(

@@ -16,45 +16,34 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 18% 18%, rgba(128, 0, 32, 0.12), transparent 42%),
     radial-gradient(circle at 82% 84%, rgba(197, 160, 89, 0.14), transparent 48%),
     var(--invitation-bg-alt);
 }
 
+.invitation-scale-stage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
 .invitation-mobile-frame {
   position: relative;
-  width: min(100%, var(--invitation-mobile-max-width));
-  max-width: var(--invitation-mobile-max-width);
+  width: var(--invitation-mobile-max-width);
+  max-width: none;
   min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: visible;
   isolation: isolate;
   background: var(--invitation-bg);
+  will-change: transform;
 }
 
 .invitation-mobile-frame > * {
   min-height: 100%;
-}
-
-@media (min-width: 768px) {
-  .invitation-mobile-shell {
-    padding: 14px;
-  }
-}
-
-@media (min-width: 431px) {
-  .invitation-mobile-frame {
-    overflow-y: auto;
-    transform: translateZ(0);
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
-    height: calc(100dvh - 28px);
-    min-height: 0;
-    border-radius: 28px;
-    border: 1px solid rgba(42, 27, 27, 0.12);
-    box-shadow: 0 26px 66px rgba(42, 27, 27, 0.28);
-  }
 }
 
 @theme inline {
@@ -93,6 +82,14 @@
 @font-face {
   font-family: 'Brittany Signature';
   src: url('/fonts/brittany-signature.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Great Vibes';
+  src: url('/fonts/great-vibes-regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -149,6 +146,7 @@
 .font-stoic { font-family: 'Stoic', 'Tan Mon Cheri', serif; }
 .font-poppins { font-family: 'Poppins Local', Arial, sans-serif; }
 .font-poppins-bold { font-family: 'Poppins Local', Arial, sans-serif; font-weight: 700; }
+.font-great-vibes { font-family: 'Great Vibes', 'Brittany Signature', 'Tan Mon Cheri', cursive; }
 
 /* Elegant text utilities - Updated gradient to Maroon/Gold logic */
 .text-gold-gradient {

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useReducedMotion, useWindowSize } from '@/hooks';
+import { useWindowSize } from '@/hooks';
 import { EASING, DURATION } from '@/lib/animation-config';
 
 export interface SplitTextProps {
@@ -32,7 +32,6 @@ export function SplitText({
   margin = '20% 0px 20% 0px',
   className,
 }: SplitTextProps) {
-  const prefersReducedMotion = useReducedMotion();
   const { isMobile } = useWindowSize();
 
   // Split text based on splitBy prop
@@ -60,23 +59,18 @@ export function SplitText({
   };
 
   // Item variants for each word/character
-  const y = prefersReducedMotion ? 0 : isMobile ? 12 : 20;
-  const itemVariants = prefersReducedMotion
-    ? {
-        hidden: { opacity: 0 },
-        show: { opacity: 1 },
-      }
-    : {
-        hidden: { opacity: 0, y },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration,
-            ease: EASING.easeOutExpo,
-          },
-        },
-      };
+  const y = isMobile ? 12 : 20;
+  const itemVariants = {
+    hidden: { opacity: 0, y },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration,
+        ease: EASING.easeOutExpo,
+      },
+    },
+  } as const;
 
   return (
     <motion.span

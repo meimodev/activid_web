@@ -59,16 +59,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -196,15 +186,13 @@ body {
 }
 
 /* Apply will-change sparingly for performance */
-@media (prefers-reduced-motion: no-preference) {
-  /* Only apply will-change when animations are enabled */
-  .animate-on-scroll {
-    will-change: transform, opacity;
-  }
-  
-  .animate-on-scroll.animation-complete {
-    will-change: auto;
-  }
+/* Only apply will-change when animations are enabled */
+.animate-on-scroll {
+  will-change: transform, opacity;
+}
+
+.animate-on-scroll.animation-complete {
+  will-change: auto;
 }
 
 /* Screen reader only utility - for accessibility */

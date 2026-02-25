@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { useReducedMotion } from '@/hooks';
 
 export interface ScaleOnScrollProps {
   children: React.ReactNode;
@@ -25,7 +24,6 @@ export function ScaleOnScroll({
   className,
 }: ScaleOnScrollProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -34,11 +32,6 @@ export function ScaleOnScroll({
 
   // Interpolate scale based on scroll progress
   const scale = useTransform(scrollYProgress, [0, 0.5, 1], [scaleFrom, scaleTo, scaleTo]);
-
-  // If reduced motion is preferred, use final scale
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
 
   return (
     <motion.div

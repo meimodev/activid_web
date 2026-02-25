@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { BrowserFrame } from './BrowserFrame';
 import { ProjectDetails } from './ProjectDetails';
 import { FadeUp } from '@/components/animations/FadeUp';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { ensureValidProjectData } from '@/types/project-showcase.types';
 import type { ProjectShowcaseProps } from '@/types/project-showcase.types';
 
@@ -28,9 +27,7 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
   
   // Check if projects array is empty
   const hasProjects = validatedProjects.length > 0;
-  
-  // Check user's motion preference
-  const prefersReducedMotion = useReducedMotion();
+
   return (
     <section
       className={`relative py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-[#F8EFDE] ${className}`}
@@ -68,29 +65,21 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
             {validatedProjects.map((project, index) => (
               <motion.article
                 key={project.id}
-                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 40 }}
-                whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-100px' }}
-                transition={
-                  prefersReducedMotion
-                    ? { duration: 0 }
-                    : {
-                        duration: 0.8,
-                        delay: index * 0.1,
-                        ease: [0.19, 1, 0.22, 1],
-                      }
-                }
-                whileHover={
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        scale: 1.02,
-                        transition: { duration: 0.3, ease: 'easeInOut' },
-                      }
-                }
+                transition={{
+                  duration: 0.8,
+                  delay: index * 0.1,
+                  ease: [0.19, 1, 0.22, 1],
+                }}
+                whileHover={{
+                  scale: 1.02,
+                  transition: { duration: 0.3, ease: 'easeInOut' },
+                }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-[#1a1a3e] focus-within:ring-offset-4 rounded-lg transition-shadow"
                 style={{
-                  willChange: prefersReducedMotion ? 'auto' : 'transform',
+                  willChange: 'transform',
                 }}
                 tabIndex={0}
                 role="article"
@@ -120,10 +109,10 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
           </div>
         ) : (
           <motion.div
-            initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
-            whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6 }}
+            transition={{ duration: 0.6 }}
             className="text-center py-16"
             role="status"
             aria-live="polite"

@@ -50,16 +50,17 @@ export function Saturn1({ config }: Saturn1Props) {
             <ShootingStars />
 
             {/* Background Slideshow (Fades out or stays subtle) */}
-            <div className="fixed inset-0 z-0 opacity-20 pointer-events-none">
-                <BackgroundSlideshow photos={backgroundPhotos} />
-            </div>
+            <BackgroundSlideshow
+                photos={backgroundPhotos}
+                className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20"
+            />
 
             <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 
             {/* Hero / Cover Section - Fixed Overlay until opened */}
             {sections.hero.enabled && (
                 <motion.div
-                    className="fixed inset-0 z-50"
+                    className="absolute inset-0 z-50"
                     initial={false}
                     animate={{
                         y: isOpen ? "-100%" : "0%",
@@ -80,7 +81,7 @@ export function Saturn1({ config }: Saturn1Props) {
             )}
 
             {/* Main Content - Visible underneath or revealed */}
-            <div className={`relative z-10 transition-opacity duration-1000 ${isOpen ? "opacity-100" : "opacity-0 fixed top-0 w-full"}`}>
+            <div className={`relative z-10 transition-opacity duration-1000 ${isOpen ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}>
                 {/* Only allow scrolling when open */}
                 <div className={isOpen ? "" : "h-screen overflow-hidden"}>
                     {sections.title.enabled && (

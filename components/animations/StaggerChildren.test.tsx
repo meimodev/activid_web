@@ -1,11 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { StaggerChildren } from './StaggerChildren';
-
-// Mock the useReducedMotion hook
-vi.mock('@/hooks', () => ({
-  useReducedMotion: vi.fn(() => false),
-}));
 
 describe('StaggerChildren', () => {
   it('should render children', () => {

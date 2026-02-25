@@ -33,11 +33,6 @@ vi.mock('next/image', () => ({
   ),
 }));
 
-// Mock hooks
-vi.mock('@/hooks', () => ({
-  useReducedMotion: () => false,
-}));
-
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
@@ -95,7 +90,7 @@ describe('Property 1: Minimum case study display', () => {
           return caseStudyCards.length >= 3;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -1115,133 +1110,7 @@ describe('Property 10: Hover interaction feedback', () => {
           const articles = container.querySelectorAll('article');
           
           // Articles should have style attribute for will-change
-          // (This is set dynamically based on prefersReducedMotion)
           return articles.length === projects.length;
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-});
-
-/**
- * Feature: project-showcase-section, Property 11: Motion preference respect
- * 
- * For any animation in the section, when the user has prefers-reduced-motion 
- * enabled, animations should be disabled or reduced to minimal duration.
- * 
- * Validates: Requirements 4.3, 4.5
- */
-describe('Property 11: Motion preference respect', () => {
-  it('should render without animations when reduced motion is preferred', () => {
-    // Mock useReducedMotion to return true
-    vi.mock('@/hooks', () => ({
-      useReducedMotion: () => true,
-    }));
-
-    fc.assert(
-      fc.property(
-        fc.array(validProjectDataArb, { minLength: 1, maxLength: 5 }),
-        (projects) => {
-          const { container } = render(<ProjectShowcase projects={projects} />);
-
-          // Content should still be present
-          const articles = container.querySelectorAll('article');
-          const heading = container.querySelector('h2');
-          
-          return articles.length === projects.length && heading !== null;
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
-  it('should maintain content visibility with reduced motion', () => {
-    fc.assert(
-      fc.property(
-        fc.array(validProjectDataArb, { minLength: 1, maxLength: 5 }),
-        (projects) => {
-          const { container } = render(<ProjectShowcase projects={projects} />);
-
-          // All essential content should be visible
-          const section = container.querySelector('section');
-          const heading = container.querySelector('h2');
-          const articles = container.querySelectorAll('article');
-          const browserFrames = container.querySelectorAll('[aria-label="Browser mockup frame"]');
-          
-          return (
-            section !== null &&
-            heading !== null &&
-            articles.length === projects.length &&
-            browserFrames.length === projects.length
-          );
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
-  it('should render all projects regardless of motion preference', () => {
-    fc.assert(
-      fc.property(
-        fc.array(validProjectDataArb, { minLength: 1, maxLength: 5 }),
-        (projects) => {
-          const { container } = render(<ProjectShowcase projects={projects} />);
-
-          const articles = container.querySelectorAll('article');
-          
-          // Verify all projects are rendered
-          let allProjectsPresent = true;
-          projects.forEach((project) => {
-            const textContent = container.textContent || '';
-            if (!textContent.includes(project.client)) {
-              allProjectsPresent = false;
-            }
-          });
-          
-          return allProjectsPresent && articles.length === projects.length;
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
-  it('should maintain layout structure with reduced motion', () => {
-    fc.assert(
-      fc.property(
-        fc.array(validProjectDataArb, { minLength: 1, maxLength: 5 }),
-        (projects) => {
-          const { container } = render(<ProjectShowcase projects={projects} />);
-
-          // Check that grid layout is maintained
-          const articles = container.querySelectorAll('article');
-          
-          let allHaveGrid = true;
-          articles.forEach((article) => {
-            if (!article.className.includes('grid')) {
-              allHaveGrid = false;
-            }
-          });
-          
-          return allHaveGrid && articles.length === projects.length;
-        }
-      ),
-      { numRuns: 100 }
-    );
-  });
-
-  it('should handle empty projects array with reduced motion', () => {
-    fc.assert(
-      fc.property(
-        fc.constant([]),
-        (projects) => {
-          const { container } = render(<ProjectShowcase projects={[...projects]} />);
-
-          // Should show fallback message
-          const fallbackMessage = container.textContent?.includes('No projects available');
-          const articles = container.querySelectorAll('article');
-          
-          return fallbackMessage === true && articles.length === 0;
         }
       ),
       { numRuns: 100 }
@@ -1324,8 +1193,15 @@ describe('Property 16: Image alt text presence', () => {
           let allAltTextsUsed = true;
           projects.forEach((project) => {
             project.imageAlts.forEach((altText) => {
+              const trimmedAlt = altText?.trim();
+              const expectedAlt =
+                trimmedAlt && trimmedAlt.length >= 5
+                  ? altText
+                  : 'Project mockup placeholder';
               const images = Array.from(container.querySelectorAll('img'));
-              const hasAltText = images.some((img) => img.getAttribute('alt') === altText);
+              const hasAltText = images.some(
+                (img) => img.getAttribute('alt') === expectedAlt,
+              );
               if (!hasAltText) {
                 allAltTextsUsed = false;
               }

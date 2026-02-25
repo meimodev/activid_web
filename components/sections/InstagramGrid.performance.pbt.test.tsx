@@ -1,5 +1,5 @@
 import { describe, it, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import fc from 'fast-check';
 import { InstagramGrid } from './InstagramGrid';
 
@@ -369,12 +369,12 @@ describe('Property 20: Responsive image sizing', () => {
  * Validates: Requirements 8.5
  */
 describe('Property 21: Image load failure handling', () => {
-  it('should display fallback UI when image fails to load', () => {
-    fc.assert(
-      fc.property(
+  it('should display fallback UI when image fails to load', async () => {
+    await fc.assert(
+      fc.asyncProperty(
         imageArrayArb,
         altArrayArb,
-        (images, alts) => {
+        async (images, alts) => {
           const { container } = render(
             <InstagramGrid images={images} alts={alts} isLoading={false} />
           );
@@ -386,9 +386,10 @@ describe('Property 21: Image load failure handling', () => {
             const firstImg = imgs[0] as HTMLImageElement;
             firstImg.dispatchEvent(new Event('error'));
 
-            // Should display fallback UI
-            const fallback = container.querySelector('[role="img"]');
-            return fallback !== null;
+            await waitFor(() => {
+              const fallback = container.querySelector('[role="img"]');
+              expect(fallback).toBeTruthy();
+            });
           }
 
           return true;
@@ -426,12 +427,12 @@ describe('Property 21: Image load failure handling', () => {
     );
   });
 
-  it('should display error icon in fallback state', () => {
-    fc.assert(
-      fc.property(
+  it('should display error icon in fallback state', async () => {
+    await fc.assert(
+      fc.asyncProperty(
         imageArrayArb,
         altArrayArb,
-        (images, alts) => {
+        async (images, alts) => {
           const { container } = render(
             <InstagramGrid images={images} alts={alts} isLoading={false} />
           );
@@ -443,9 +444,10 @@ describe('Property 21: Image load failure handling', () => {
             const firstImg = imgs[0] as HTMLImageElement;
             firstImg.dispatchEvent(new Event('error'));
 
-            // Should display SVG icon in fallback
-            const svg = container.querySelector('svg');
-            return svg !== null;
+            await waitFor(() => {
+              const svg = container.querySelector('svg');
+              expect(svg).toBeTruthy();
+            });
           }
 
           return true;
@@ -455,12 +457,12 @@ describe('Property 21: Image load failure handling', () => {
     );
   });
 
-  it('should include descriptive text in fallback state', () => {
-    fc.assert(
-      fc.property(
+  it('should include descriptive text in fallback state', async () => {
+    await fc.assert(
+      fc.asyncProperty(
         imageArrayArb,
         altArrayArb,
-        (images, alts) => {
+        async (images, alts) => {
           const { container } = render(
             <InstagramGrid images={images} alts={alts} isLoading={false} />
           );
@@ -472,9 +474,11 @@ describe('Property 21: Image load failure handling', () => {
             const firstImg = imgs[0] as HTMLImageElement;
             firstImg.dispatchEvent(new Event('error'));
 
-            // Should display text indicating image is unavailable
-            const text = container.textContent;
-            return text !== null && text.includes('unavailable');
+            await waitFor(() => {
+              const text = container.textContent;
+              expect(text).toBeTruthy();
+              expect(text as string).toContain('unavailable');
+            });
           }
 
           return true;
@@ -514,12 +518,12 @@ describe('Property 21: Image load failure handling', () => {
     );
   });
 
-  it('should provide accessible fallback with aria-label', () => {
-    fc.assert(
-      fc.property(
+  it('should provide accessible fallback with aria-label', async () => {
+    await fc.assert(
+      fc.asyncProperty(
         fc.array(imageUrlArb, { minLength: 9, maxLength: 9 }),
         fc.array(altTextArb, { minLength: 9, maxLength: 9 }),
-        (images, alts) => {
+        async (images, alts) => {
           const { container } = render(
             <InstagramGrid images={images} alts={alts} isLoading={false} />
           );
@@ -531,18 +535,20 @@ describe('Property 21: Image load failure handling', () => {
             const firstImg = imgs[0] as HTMLImageElement;
             firstImg.dispatchEvent(new Event('error'));
 
-            // Fallback should have aria-label with alt text
             // Component validates alt text and uses fallback for invalid ones
-            const fallback = container.querySelector('[role="img"]');
-            if (!fallback) return false;
-
-            const ariaLabel = fallback.getAttribute('aria-label');
-            if (!ariaLabel) return false;
-
-            // Should include either the provided alt text (if valid) or the fallback
             const trimmedAlt = alts[0]?.trim();
-            const expectedAlt = trimmedAlt && trimmedAlt.length >= 5 ? alts[0] : 'Project mockup placeholder';
-            return ariaLabel.includes(expectedAlt);
+            const expectedAlt =
+              trimmedAlt && trimmedAlt.length >= 5
+                ? alts[0]
+                : 'Project mockup placeholder';
+
+            await waitFor(() => {
+              const fallback = container.querySelector('[role="img"]');
+              expect(fallback).toBeTruthy();
+              const ariaLabel = (fallback as HTMLElement).getAttribute('aria-label');
+              expect(ariaLabel).toBeTruthy();
+              expect(ariaLabel as string).toContain(expectedAlt);
+            });
           }
 
           return true;

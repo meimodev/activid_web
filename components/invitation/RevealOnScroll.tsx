@@ -2,7 +2,6 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { useReducedMotion } from "@/hooks";
 
 type UseInViewOptions = NonNullable<Parameters<typeof useInView>[1]>;
 type InViewMargin = UseInViewOptions extends { margin?: infer M } ? M : never;
@@ -37,17 +36,9 @@ export function RevealOnScroll({
     threshold = 0.12,
 }: RevealOnScrollProps) {
     const ref = useRef(null);
-    const prefersReducedMotion = useReducedMotion();
     const isInView = useInView(ref, { once, margin, amount: threshold });
 
     const getVariants = () => {
-        if (prefersReducedMotion) {
-            return {
-                hidden: { opacity: 0 },
-                visible: { opacity: 1 },
-            };
-        }
-
         const variants = {
             hidden: { opacity: 0, x: 0, y: 0, scale: scale },
             visible: { opacity: 1, x: 0, y: 0, scale: 1 },

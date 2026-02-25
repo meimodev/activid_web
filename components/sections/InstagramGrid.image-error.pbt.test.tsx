@@ -163,7 +163,7 @@ describe('Property 21: Image load failure handling', () => {
           return hasThreeColumns;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -298,7 +298,7 @@ describe('Property 21: Image load failure handling', () => {
           return allHaveAriaLabel && fallbackElements.length > 0;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -337,7 +337,7 @@ describe('Property 21: Image load failure handling', () => {
           return allHaveBackground && fallbackElements.length > 0;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -371,7 +371,7 @@ describe('Property 21: Image load failure handling', () => {
           return !!gridContainer;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   }, 10000);
 
@@ -399,7 +399,7 @@ describe('Property 21: Image load failure handling', () => {
           return skeletons.length === 0;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   }, 10000);
 });

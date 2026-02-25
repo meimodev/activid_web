@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-import { useReducedMotion, useWindowSize } from "@/hooks";
+import { useWindowSize } from "@/hooks";
 
 type NeptuneOverlayFloatProps = {
   src: string;
@@ -29,7 +29,6 @@ export function NeptuneOverlayFloat({
   loading = "lazy",
   draggable = false,
 }: NeptuneOverlayFloatProps) {
-  const prefersReducedMotion = useReducedMotion();
   const { isMobile } = useWindowSize();
 
   const baseAmplitude = isMobile ? Math.min(amplitude, 6.5) : amplitude;
@@ -50,31 +49,23 @@ export function NeptuneOverlayFloat({
       loading={loading}
       draggable={draggable}
       initial={false}
-      animate={
-        prefersReducedMotion
-          ? { x: 0, y: 0, rotate: 0 }
-          : {
-              x: [0, driftX, -driftX * 0.66, driftX * 0.66, 0],
-              y: [0, -driftY, driftY * 0.55, -driftY * 0.55, 0],
-              rotate: [
-                0,
-                -rotateDrift * rotateSign,
-                rotateDrift * 0.6 * rotateSign,
-                -rotateDrift * 0.6 * rotateSign,
-                0,
-              ],
-            }
-      }
-      transition={
-        prefersReducedMotion
-          ? { duration: 0 }
-          : {
-              duration: breeze ? duration * 0.95 : duration,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay,
-            }
-      }
+      animate={{
+        x: [0, driftX, -driftX * 0.66, driftX * 0.66, 0],
+        y: [0, -driftY, driftY * 0.55, -driftY * 0.55, 0],
+        rotate: [
+          0,
+          -rotateDrift * rotateSign,
+          rotateDrift * 0.6 * rotateSign,
+          -rotateDrift * 0.6 * rotateSign,
+          0,
+        ],
+      }}
+      transition={{
+        duration: breeze ? duration * 0.95 : duration,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay,
+      }}
     />
   );
 }

@@ -476,9 +476,143 @@ export const MERCURY_DEMO_CONFIG: InvitationConfig = {
     },
 };
 
+export const PLUTO_CONFIG: InvitationConfig = {
+    ...CHRISTIAN_REGINA_CONFIG,
+    id: "pluto",
+    templateId: "pluto-1",
+    metadata: {
+        ...CHRISTIAN_REGINA_CONFIG.metadata,
+        title: "The Wedding of Daniel & Aurelia",
+        description: "Pluto template invitation demo by Activid.",
+        openGraph: {
+            ...CHRISTIAN_REGINA_CONFIG.metadata.openGraph,
+            title: "The Wedding of Daniel & Aurelia",
+            description: "Pluto template invitation demo by Activid.",
+            url: "https://activid.web.id/invitation/pluto",
+            images: [
+                {
+                    url: "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+                    width: 1200,
+                    height: 630,
+                    alt: "The Wedding of Daniel & Aurelia",
+                },
+            ],
+        },
+        twitter: {
+            ...CHRISTIAN_REGINA_CONFIG.metadata.twitter,
+            title: "The Wedding of Daniel & Aurelia",
+            description: "Pluto template invitation demo by Activid.",
+            images: ["https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        },
+    },
+    weddingDate: {
+        display: "21 Januari 2026",
+        displayShort: "21.01.2026",
+        countdownTarget: "2026-01-21T00:00:00",
+        rsvpDeadline: "20 Januari 2026",
+    },
+    couple: {
+        groom: {
+            firstName: "Daniel",
+            fullName: "Daniel Pratama",
+            shortName: "Daniel",
+            role: "Bandung",
+            parents: "Putra dari Bapak Hendra Pratama dan Ibu Rina Kusuma",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        bride: {
+            firstName: "Aurelia",
+            fullName: "Aurelia Putri",
+            shortName: "Aurelia",
+            role: "Surabaya",
+            parents: "Putri dari Bapak Samuel Wijaya dan Ibu Maria Lestari",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    },
+    sections: {
+        ...CHRISTIAN_REGINA_CONFIG.sections,
+        hero: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.hero,
+            subtitle: "The Wedding of",
+            coverImage: "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        },
+        title: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.title,
+            heading: "The Wedding of",
+        },
+        quote: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.quote,
+            text: "So they are no longer two, but one flesh. Therefore what God has joined together, let no one separate.",
+            author: "Matthew 19:6",
+        },
+        event: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.event,
+            heading: "Wedding Event",
+            events: {
+                ...CHRISTIAN_REGINA_CONFIG.sections.event.events,
+                holyMatrimony: {
+                    ...CHRISTIAN_REGINA_CONFIG.sections.event.events.holyMatrimony,
+                    title: "PEMBERKATAN",
+                    date: "Senin, 21 Januari 2026",
+                    time: "Jam 12.00 - 15.00",
+                    venue: "Gereja Baitani Malalayang",
+                    mapUrl: "https://www.google.com/maps",
+                },
+                reception: {
+                    ...CHRISTIAN_REGINA_CONFIG.sections.event.events.reception,
+                    title: "RESEPSI",
+                    date: "Senin, 21 Januari 2026",
+                    time: "Jam 18.00 - Selesai",
+                    venue: "Gedung Serbaguna Bukit Inspirasi",
+                    mapUrl: "https://www.google.com/maps",
+                },
+            },
+        },
+        story: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.story,
+            heading: "Wedding Story",
+            stories: [
+                {
+                    date: "Tahun 2019",
+                    description:
+                        "Berawal dari pertemanan sederhana di tahun 2019, kami mulai saling mengenal dan belajar memahami satu sama lain. Dari kebersamaan kecil hingga memberi berarti, hubungan ini tumbuh perlahan dengan penuh cerita.",
+                },
+                {
+                    date: "Tahun 2026",
+                    description:
+                        "Setelah melalui perjalanan panjang yang dipenuhi suka dan duka, di tahun 2026 dengan penuh rasa syukur kami memutuskan untuk melangkah ke jenjang pernikahan dan memulai perjalanan hidup sebagai satu keluarga.",
+                },
+            ],
+        },
+    },
+};
+
+export const PLUTO_DEMO_CONFIG: InvitationConfig = {
+    ...PLUTO_CONFIG,
+    id: "pluto-demo",
+    metadata: {
+        ...PLUTO_CONFIG.metadata,
+        title: "Demo Invitation - Activid",
+        description: "This is a demo preview of the Pluto invitation template.",
+        openGraph: {
+            ...PLUTO_CONFIG.metadata.openGraph,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Pluto invitation template.",
+            url: "https://activid.web.id/invitation/pluto-demo",
+        },
+        twitter: {
+            ...PLUTO_CONFIG.metadata.twitter,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Pluto invitation template.",
+        },
+    },
+};
+
 export const INVITATION_DEFAULTS: Record<string, InvitationConfig> = {
     "ricci-andrini": RICCI_ANDRINI_CONFIG,
     "christian-regina": CHRISTIAN_REGINA_CONFIG,
     "mercury": MERCURY_CONFIG,
     "mercury-demo": MERCURY_DEMO_CONFIG,
+    "pluto": PLUTO_CONFIG,
+    "pluto-demo": PLUTO_DEMO_CONFIG,
 };
