@@ -72,13 +72,13 @@ export function Hero({ content, className = '' }: HeroProps) {
 
       {/* Background - Video or Gradient */}
       {backgroundVideo ? (
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-[#1a1a3e]">
           <video
             autoPlay
             loop
             muted
             playsInline
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain md:object-cover"
           >
             <source src={backgroundVideo} type="video/mp4" />
           </video>
@@ -98,9 +98,9 @@ export function Hero({ content, className = '' }: HeroProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         style={{ scale: logoScale, opacity: logoOpacity }}
-        className="absolute top-16 left-16 md:top-20 md:left-20 lg:top-24 lg:left-24 z-20"
+        className="absolute top-6 left-6 sm:top-10 sm:left-10 md:top-20 md:left-20 lg:top-24 lg:left-24 z-20"
       >
-        <div className="w-32 h-32 relative">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 relative">
           <Image
             src="https://ik.imagekit.io/geb6bfhmhx/activid%20web/0_LOGO_WHITE.PNG"
             alt="Activid Logo"
