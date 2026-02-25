@@ -227,8 +227,8 @@ export default function LandingPage() {
         </section>
 
         {/* Template Gallery */}
-        <section className="max-w-7xl mx-auto w-full px-6 pb-24 relative z-10">
-          <div className="grid grid-cols-2 gap-8">
+        <section className="max-w-7xl mx-auto w-full px-4 sm:px-6 pb-24 relative z-10">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {templates.map((template, index) => {
               const isViewed = viewedTemplates.includes(template.id);
 
@@ -239,100 +239,140 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.15, duration: 0.6 }}
                   viewport={{ once: true }}
-                  onClick={() => handleView(template.id)}
-                  className={`group relative rounded-3xl overflow-hidden bg-[#0d0d1f] border transition-all duration-500 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.3)] hover:-translate-y-2 cursor-pointer ${
+                  className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#0d0d1f] border transition-all duration-500 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.3)] hover:-translate-y-1 ${
                     isViewed
                       ? "border-green-500/50 shadow-[0_0_20px_rgba(34,197,94,0.2)]"
                       : "border-white/5 hover:border-indigo-500/50"
                   }`}
                 >
-                  <Link
-                    href={`/invitation/${template.id}`}
-                    target="_blank"
-                    className="block h-full w-full"
-                  >
-                    <div className="aspect-4/5 overflow-hidden relative">
-                      <img
-                        src={template.image}
-                        alt={template.title}
-                        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${isViewed ? "grayscale-[0.8] group-hover:grayscale-0" : "grayscale-[0.6] group-hover:grayscale-0"}`}
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-[#020205] via-black/40 to-transparent opacity-90 group-hover:opacity-60 transition-all" />
+                  <div className="flex flex-col h-full">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleView(template.id);
+                        window.open(
+                          `/invitation/${template.id}`,
+                          "_blank",
+                          "noopener,noreferrer",
+                        );
+                      }}
+                      className="aspect-4/5 overflow-hidden relative text-left"
+                      aria-label={`Lihat template ${template.title}`}
+                    >
+                        <img
+                          src={template.image}
+                          alt={template.title}
+                          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${isViewed ? "grayscale-[0.8] group-hover:grayscale-0" : "grayscale-[0.6] group-hover:grayscale-0"}`}
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-[#020205]/70 via-black/10 to-transparent opacity-80 group-hover:opacity-60 transition-all" />
 
-                      {/* Holographic Overlay Effect */}
-                      <motion.div
-                        aria-hidden
-                        className="absolute inset-0 opacity-0 pointer-events-none mix-blend-screen blur-[0.2px] bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.26)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]"
-                        animate={{ opacity: [0, 0.22, 0, 0] }}
-                        transition={{
-                          duration: 5.5,
-                          repeat: Infinity,
-                          repeatDelay: 7,
-                          delay: index * 1.2,
-                          ease: "easeInOut",
-                        }}
-                      />
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
+                        {/* Holographic Overlay Effect */}
+                        <motion.div
+                          aria-hidden
+                          className="absolute inset-0 opacity-0 pointer-events-none mix-blend-screen blur-[0.2px] bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.26)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]"
+                          animate={{ opacity: [0, 0.22, 0, 0] }}
+                          transition={{
+                            duration: 5.5,
+                            repeat: Infinity,
+                            repeatDelay: 7,
+                            delay: index * 1.2,
+                            ease: "easeInOut",
+                          }}
+                        />
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
 
-                      {/* Overlay Content */}
-                      <div className="absolute inset-x-0 bottom-0 p-8 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                        <div className="flex flex-wrap gap-2 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                          {template.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-white/10 backdrop-blur-sm border border-white/10"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <h3
-                          className={`text-2xl font-bold mb-1 transition-colors ${isViewed ? "text-green-100/80" : "text-white group-hover:text-indigo-200"}`}
-                        >
-                          {template.title}
-                        </h3>
-
-                        <div className="flex items-end justify-between gap-4 mb-5">
-                          <div>
-                            <div className="flex items-baseline gap-2">
-                              <div className="text-2xl font-black tracking-tight text-white">
-                                {template.priceDiscount}
-                              </div>
-                              <div className="text-xs text-white/35 line-through">
-                                {template.priceOriginal}
-                              </div>
-                            </div>
+                        {/* Overlay Content */}
+                        {isViewed ? (
+                          <div className="absolute top-3 left-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-200 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
+                            Viewed
                           </div>
+                        ) : null}
+                    </button>
 
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              window.open(
-                                createWhatsAppUrl(
-                                  `INV-${template.templateId}-order`,
-                                ),
-                                "_blank",
-                                "noopener,noreferrer",
-                              );
-                            }}
-                            className="shrink-0 inline-flex items-center justify-center px-4 py-2 rounded-xl bg-green-500/15 border border-green-500/40 text-green-200 text-xs font-bold uppercase tracking-wider hover:bg-green-500/25 hover:border-green-400/70 transition-colors"
-                          >
-                            Pesan
-                          </button>
+                    <div className="flex flex-col gap-3 p-4 sm:p-5 bg-black/20 backdrop-blur-md border-t border-white/5">
+                      <h3
+                        className={`text-sm sm:text-base font-bold tracking-tight truncate transition-colors ${isViewed ? "text-green-100/80" : "text-white group-hover:text-indigo-200"}`}
+                      >
+                        {template.title}
+                      </h3>
+
+                      <div className="flex items-baseline gap-2">
+                        <div className="text-base sm:text-xl font-black tracking-tight text-white">
+                          {template.priceDiscount}
                         </div>
-                        <div
-                          className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider transition-colors group/link ${isViewed ? "text-green-400" : "text-white hover:text-cyan-400"}`}
-                        >
-                          {isViewed ? "Lihat Lagi" : "Lihat Detail "}
-                          <span className="group-hover/link:translate-x-1 transition-transform">
-                            →
-                          </span>
+                        <div className="text-xs text-white/35 line-through">
+                          {template.priceOriginal}
                         </div>
                       </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleView(template.id);
+                            window.open(
+                              `/invitation/${template.id}`,
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                          }}
+                          aria-label="Lihat"
+                          className="inline-flex items-center justify-center gap-0.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl bg-linear-to-r from-indigo-500/15 via-purple-500/10 to-cyan-500/10 border border-indigo-400/40 text-indigo-100 text-xs font-black uppercase tracking-wider hover:bg-indigo-500/20 hover:border-indigo-300/70 transition-colors"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="text-indigo-200"
+                          >
+                            <path
+                              d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <span className="hidden sm:inline">Lihat</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            window.open(
+                              createWhatsAppUrl(
+                                `INV-${template.templateId}-order`,
+                              ),
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                          }}
+                          aria-label="Pesan"
+                          className="inline-flex items-center justify-center gap-0.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 text-green-100 text-xs font-black uppercase tracking-wider hover:bg-green-500/20 hover:border-green-400/70 transition-colors"
+                        >
+                            <span>🚀</span>
+                        
+                          <span className="hidden sm:inline">Pesan</span>
+                        </button>
+                      </div>
                     </div>
-                  </Link>
+                  </div>
                 </motion.div>
               );
             })}
@@ -343,25 +383,56 @@ export default function LandingPage() {
               transition={{ delay: 0.3, duration: 0.6 }}
               viewport={{ once: true }}
               whileHover={{ scale: 0.98 }}
-              className="relative rounded-3xl overflow-hidden bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center p-12 text-center group hover:border-white/30 transition-all cursor-wait"
+              className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center p-6 sm:p-12 text-center group hover:border-white/30 transition-all cursor-wait"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.1),transparent)] opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="w-20 h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 relative">
+              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-500 relative">
                 <div className="absolute inset-0 rounded-full border border-indigo-400/30 animate-ping opacity-20" />
-                <span className="text-4xl relative z-10">🔭</span>
+                <span className="text-3xl sm:text-4xl relative z-10">🔭</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">
+              <h3 className="text-base sm:text-xl font-bold text-white mb-2">
                 Memindai Antariksa ...
               </h3>
-              <p className="text-indigo-300/60 text-sm">
+              <p className="text-indigo-300/60 text-xs sm:text-sm">
                 Mendeteksi misi baru yang akan datang.
               </p>
-              <h3 className="text-indigo-300/60 text-sm my-2">
+              <h3 className="text-indigo-300/60 text-xs sm:text-sm my-2">
                 Estimasi kedatangan: SEGERA.
               </h3>
             </motion.div>
           </div>
         </section>
+
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+          onClick={() => {
+            window.open(
+              createWhatsAppUrl("[INV] Halo mau informasi tentang, "),
+              "_blank",
+              "noopener,noreferrer",
+            );
+          }}
+          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[70] inline-flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_0_40px_-12px_rgba(34,197,94,0.55)] hover:shadow-[0_0_55px_-12px_rgba(34,211,238,0.5)] transition-shadow"
+          aria-label="Buka WhatsApp untuk konsultasi"
+        >
+          <span className="relative inline-flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-green-400/20 via-emerald-400/10 to-cyan-400/15 border border-white/10">
+            <span className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.35),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(34,211,238,0.25),transparent_60%)]" />
+            <span className="relative text-sm font-black tracking-tight text-white">🚀</span>
+          </span>
+          <span className="flex flex-col items-start leading-tight">
+            <span className="text-xs font-black uppercase tracking-wider text-white">
+              WhatsApp
+            </span>
+            <span className="text-[11px] text-indigo-200/70 font-mono">
+              Konsultasi 
+            </span>
+          </span>
+          <span className="ml-1 text-white/70">→</span>
+        </motion.button>
 
         <section className="max-w-7xl mx-auto w-full px-6 pb-24 relative z-10">
           <motion.div
