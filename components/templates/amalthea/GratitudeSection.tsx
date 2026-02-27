@@ -12,7 +12,7 @@ interface GratitudeSectionProps {
 }
 
 export function GratitudeSection({ couple, message }: GratitudeSectionProps) {
-  const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+  const names = `${couple.groom.firstName} ${couple.bride?.firstName ? "&" : ""} ${couple.bride.firstName}`;
 
   return (
     <section className="relative overflow-hidden bg-[#F6FBFF] pb-20 text-[#0B1B2A]">
