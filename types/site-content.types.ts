@@ -3,6 +3,7 @@ import { HeroContent } from './hero.types';
 export interface NavigationItem {
   label: string;
   href: string;
+  external?: boolean;
 }
 
 export interface AboutUsPoint {

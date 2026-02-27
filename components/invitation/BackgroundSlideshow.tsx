@@ -14,7 +14,7 @@ export function BackgroundSlideshow({ photos, className }: BackgroundSlideshowPr
     useEffect(() => {
         const timer = setInterval(() => {
             setIndex((prev) => (prev + 1) % photos.length);
-        }, 8000); // Change image every 8 seconds
+        }, 4000); // Change image every 4 seconds
 
         return () => clearInterval(timer);
     }, [photos.length]);

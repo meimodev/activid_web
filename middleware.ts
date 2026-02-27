@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
     
     // User requested invitation.activid.id/ricci-andrini
     // Rewrite to /invitation/ricci-andrini
-    // The previous flow-1 prefix is removed here, as the template logic is now inside /invitation/[slug]
+    // The previous flow prefix is removed here, as the template logic is now inside /invitation/[slug]
     return NextResponse.rewrite(new URL(`/invitation${pathname}`, request.url));
   }
 

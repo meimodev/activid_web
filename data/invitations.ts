@@ -3,7 +3,7 @@ import { InvitationConfig } from "@/types/invitation";
 
 export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
     id: "ricci-andrini",
-    templateId: "flow-1",
+    templateId: "flow",
     metadata: {
         title: "The Wedding of Ricci & Andrini",
         description: "Premium custom theme web invitation for the Wedding of Ricci & Andrini.",
@@ -51,6 +51,24 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
         countdownTarget: "2026-01-24T00:00:00",
         rsvpDeadline: "24 Januari 2026",
     },
+    hosts: [
+        {
+            firstName: "Ricci",
+            fullName: "Ricci Gerungan",
+            shortName: "Ricci",
+            role: "The Groom",
+            parents: "Putra dari Roberd Gerungan & Sermy Sangari",
+            photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/hs1.jpg",
+        },
+        {
+            firstName: "Andrini",
+            fullName: "Andrini Regina Mokodaser",
+            shortName: "Andrini",
+            role: "The Bride",
+            parents: "Putri dari Yunus Mokodaser & Suryati Kalensang",
+            photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/ricci-andrini/hs2.jpg",
+        },
+    ],
     couple: {
         groom: {
             firstName: "Ricci",
@@ -101,6 +119,10 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
             enabled: true,
             disableGrayscale: true,
         },
+        hosts: {
+            enabled: true,
+            disableGrayscale: true,
+        },
         story: {
             enabled: true,
             heading: "The Love Story",
@@ -109,8 +131,8 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
         event: {
             enabled: true,
             heading: "The Event",
-            events: {
-                holyMatrimony: {
+            events: [
+                {
                     title: "Pemberkatan",
                     date: "24 Januari 2026",
                     time: "13:00 WITA",
@@ -118,7 +140,7 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
                     address: "",
                     mapUrl: "https://maps.app.goo.gl/XDbv3QeGtVkZtw9o8",
                 },
-                reception: {
+                {
                     title: "Resepsi",
                     date: "24 Januari 2026",
                     time: "17:00 WITA",
@@ -126,7 +148,7 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
                     address: "",
                     mapUrl: "https://maps.app.goo.gl/hfuQCuGk17bgCmw16",
                 },
-            },
+            ],
         },
         gallery: {
             enabled: true,
@@ -181,7 +203,7 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
 
 export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
     id: "christian-regina",
-    templateId: "flow-1",
+    templateId: "flow",
     metadata: {
         title: "The Wedding of Christian & Regina",
         description: "Premium custom theme web invitation for the Wedding of Christian & Regina.",
@@ -230,6 +252,24 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
         countdownTarget: "2026-01-31T00:00:00",
         rsvpDeadline: "30 Januari 2026",
     },
+    hosts: [
+        {
+            firstName: "Christian",
+            fullName: "Christian Jehezkiel Roring, S.Th",
+            shortName: "Christian",
+            role: "The Groom",
+            parents: "Putra pertama dari Delvy Ronald Roring & Novke Juana Rumapar",
+            photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/main_groom.png",
+        },
+        {
+            firstName: "Regina",
+            fullName: "Regina Claudia Tairas, S.Th",
+            shortName: "Regina",
+            role: "The Bride",
+            parents: "Putri kedua dari Jaffray Frengky Tairas & Nolvita Silfia Pandoh",
+            photo: "https://ik.imagekit.io/geb6bfhmhx/activid%20web/invitation/main-bride.png",
+        },
+    ],
     couple: {
         groom: {
             firstName: "Christian",
@@ -282,6 +322,10 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
             enabled: true,
             disableGrayscale: false, // Default for Christian Regina
         },
+        hosts: {
+            enabled: true,
+            disableGrayscale: false, // Default for Christian Regina
+        },
         story: {
             enabled: true,
             heading: "The Love Story",
@@ -303,8 +347,8 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
         event: {
             enabled: true,
             heading: "The Event",
-            events: {
-                holyMatrimony: {
+            events: [
+                {
                     title: "Pemberkatan",
                     date: "Sabtu, 31 Januari, 2026",
                     time: "13:00 WITA",
@@ -312,7 +356,7 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
                     address: "",
                     mapUrl: "https://maps.app.goo.gl/1ajxvkej8CkS1Zsy9",
                 },
-                reception: {
+                {
                     title: "Resepsi",
                     date: "Sabtu, 31 Januari, 2026",
                     time: "16:00 WITA",
@@ -320,7 +364,7 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
                     address: "",
                     mapUrl: "https://maps.app.goo.gl/r59Cv36ta2vqMaai6",
                 },
-            },
+            ],
         },
         gallery: {
             enabled: true,
@@ -383,10 +427,210 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
     },
 };
 
+export const VENUS_CONFIG: InvitationConfig = {
+    ...CHRISTIAN_REGINA_CONFIG,
+    id: "venus",
+    templateId: "venus",
+    metadata: {
+        ...CHRISTIAN_REGINA_CONFIG.metadata,
+        title: "The Wedding Of Milea & Dilan",
+        description: "You are invited to Milea & Dilan",
+        openGraph: {
+            ...CHRISTIAN_REGINA_CONFIG.metadata.openGraph,
+            title: "The Wedding Of Milea & Dilan",
+            description: "You are invited to Milea & Dilan",
+            url: "https://activid.web.id/invitation/venus",
+            images: [
+                {
+                    url: "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=1200",
+                    width: 1200,
+                    height: 630,
+                    alt: "The Wedding Of Milea & Dilan",
+                },
+            ],
+        },
+        twitter: {
+            ...CHRISTIAN_REGINA_CONFIG.metadata.twitter,
+            title: "The Wedding Of Milea & Dilan",
+            description: "You are invited to Milea & Dilan",
+            images: [
+                "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=1200",
+            ],
+        },
+    },
+    hosts: [
+        {
+            firstName: "Dilan",
+            fullName: "Dilan Saputra",
+            shortName: "Dilan",
+            role: "Bandung",
+            parents: "Putra dari Bapak Fikri Fahreza dan Ibu Elsa Melisa",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        {
+            firstName: "Milea",
+            fullName: "Milea Dewi",
+            shortName: "Milea",
+            role: "Jakarta",
+            parents: "Putri dari Bapak Ikhsan Fauzi dan Ibu Putri Saumi",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    ],
+    couple: {
+        groom: {
+            firstName: "Dilan",
+            fullName: "Dilan Saputra",
+            shortName: "Dilan",
+            role: "Bandung",
+            parents: "Putra dari Bapak Fikri Fahreza dan Ibu Elsa Melisa",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        bride: {
+            firstName: "Milea",
+            fullName: "Milea Dewi",
+            shortName: "Milea",
+            role: "Jakarta",
+            parents: "Putri dari Bapak Ikhsan Fauzi dan Ibu Putri Saumi",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    },
+    weddingDate: {
+        display: "Senin, 30 Desember 2024",
+        displayShort: "30 Des 2024",
+        countdownTarget: "2024-12-30T00:00:00",
+        rsvpDeadline: "30 Desember 2024",
+    },
+    backgroundPhotos: [
+        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+    sections: {
+        ...CHRISTIAN_REGINA_CONFIG.sections,
+        hero: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.hero,
+            subtitle: "The Wedding Of",
+            coverImage: "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        },
+        title: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.title,
+            heading: "The Wedding Of",
+        },
+        quote: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.quote,
+            text: "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang. (QS. Ar-Rum: 21)",
+            author: "",
+        },
+        story: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.story,
+            heading: "Story",
+            stories: [
+                {
+                    date: "DESEMBER 2013",
+                    description:
+                        "Dari yang pacarannya nanya “Lagi apa?” lewat SMS bergeser jadi dikit-dikit Vidcall WA. Dari yang pacarannya sama-sama kurus hingga akhirnya melebar bersama. Dari yang biasanya kalo mau main bingung harus cari tempat wisata, sekarang cukup dengan chill di cafe / kulineran. Dan dengan bumbu drama LDR 5 tahun lamanya.",
+                },
+                {
+                    date: "DESEMBER 2021",
+                    description:
+                        "#SewinduBerkasih (8 tahun yang utuh dan menggenapkan). Sebuah perayaan sederhana atas rasa syukur yang telah mengantarkan kami ke 8 tahun berproses, juga telah merangkum 8 tahun gelap terang perjalanan kami.",
+                },
+            ],
+        },
+        event: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.event,
+            heading: "Event",
+            events: [
+                {
+                    ...(Array.isArray(CHRISTIAN_REGINA_CONFIG.sections.event.events)
+                        ? CHRISTIAN_REGINA_CONFIG.sections.event.events[0]
+                        : CHRISTIAN_REGINA_CONFIG.sections.event.events.holyMatrimony),
+                    title: "Akad",
+                    date: "Senin, 30 Desember 2024",
+                    time: "08:00",
+                    venue: "Kediaman Mempelai Wanita",
+                    address: "Jalan Keramat Jati Nomer 45",
+                    mapUrl: "https://www.google.com/maps/place/-5.370534,104.693768/data=!4m6!3m5!1s0!7e2!8m2!3d-5.3705339!4d104.6937676",
+                },
+                {
+                    ...(Array.isArray(CHRISTIAN_REGINA_CONFIG.sections.event.events)
+                        ? CHRISTIAN_REGINA_CONFIG.sections.event.events[1]
+                        : CHRISTIAN_REGINA_CONFIG.sections.event.events.reception),
+                    title: "Resepsi",
+                    date: "Senin, 30 Desember 2024",
+                    time: "19:00",
+                    venue: "Kediaman Mempelai Wanita",
+                    address: "Jalan Keramat Jati Nomer 45",
+                    mapUrl: "https://www.google.com/maps/place/-5.370534,104.693768/data=!4m6!3m5!1s0!7e2!8m2!3d-5.3705339!4d104.6937676",
+                },
+                {
+                    title: "Live Streaming",
+                    date: "",
+                    time: "",
+                    venue: "Instagram",
+                    address: "",
+                    mapUrl: "https://ringvitation.com",
+                },
+            ],
+        },
+        gallery: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.gallery,
+            photos: [
+                "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg?auto=compress&cs=tinysrgb&w=800",
+            ],
+        },
+        rsvp: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.rsvp,
+            enabled: true,
+            heading: "Konfirmasi Kehadiran",
+        },
+        gift: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.gift,
+            enabled: true,
+            heading: "Wedding Gift",
+            bankAccounts: [
+                { bankName: "BCA", accountHolder: "Dilan Putra", accountNumber: "1234567894" },
+                { bankName: "Shopeepay", accountHolder: "Milea Putri", accountNumber: "123456789" },
+            ],
+        },
+        wishes: {
+            ...CHRISTIAN_REGINA_CONFIG.sections.wishes,
+            enabled: true,
+            heading: "Friends Wishes",
+        },
+    },
+};
+
+export const VENUS_DEMO_CONFIG: InvitationConfig = {
+    ...VENUS_CONFIG,
+    id: "venus-demo",
+    metadata: {
+        ...VENUS_CONFIG.metadata,
+        title: "Demo Invitation - Activid",
+        description: "This is a demo preview of the Venus invitation template.",
+        openGraph: {
+            ...VENUS_CONFIG.metadata.openGraph,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Venus invitation template.",
+            url: "https://activid.web.id/invitation/venus-demo",
+        },
+        twitter: {
+            ...VENUS_CONFIG.metadata.twitter,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Venus invitation template.",
+        },
+    },
+};
+
 export const MERCURY_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "mercury",
-    templateId: "mercury-1",
+    templateId: "mercury",
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "The Wedding of Daniel & Aurelia",
@@ -418,6 +662,24 @@ export const MERCURY_CONFIG: InvitationConfig = {
         countdownTarget: "2026-01-21T00:00:00",
         rsvpDeadline: "20 Januari 2026",
     },
+    hosts: [
+        {
+            firstName: "Daniel",
+            fullName: "Daniel Mahendra",
+            shortName: "Daniel",
+            role: "The Groom",
+            parents: "Putra dari Bapak Mahendra & Ibu Kristina",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        {
+            firstName: "Aurelia",
+            fullName: "Aurelia Pramudita",
+            shortName: "Aurelia",
+            role: "The Bride",
+            parents: "Putri dari Bapak Pramono & Ibu Siska",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    ],
     couple: {
         groom: {
             firstName: "Daniel",
@@ -479,7 +741,7 @@ export const MERCURY_DEMO_CONFIG: InvitationConfig = {
 export const PLUTO_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "pluto",
-    templateId: "pluto-1",
+    templateId: "pluto",
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "The Wedding of Daniel & Aurelia",
@@ -511,6 +773,24 @@ export const PLUTO_CONFIG: InvitationConfig = {
         countdownTarget: "2026-01-21T00:00:00",
         rsvpDeadline: "20 Januari 2026",
     },
+    hosts: [
+        {
+            firstName: "Daniel",
+            fullName: "Daniel Pratama",
+            shortName: "Daniel",
+            role: "Bandung",
+            parents: "Putra dari Bapak Hendra Pratama dan Ibu Rina Kusuma",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        {
+            firstName: "Aurelia",
+            fullName: "Aurelia Putri",
+            shortName: "Aurelia",
+            role: "Surabaya",
+            parents: "Putri dari Bapak Samuel Wijaya dan Ibu Maria Lestari",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    ],
     couple: {
         groom: {
             firstName: "Daniel",
@@ -548,25 +828,28 @@ export const PLUTO_CONFIG: InvitationConfig = {
         event: {
             ...CHRISTIAN_REGINA_CONFIG.sections.event,
             heading: "Wedding Event",
-            events: {
-                ...CHRISTIAN_REGINA_CONFIG.sections.event.events,
-                holyMatrimony: {
-                    ...CHRISTIAN_REGINA_CONFIG.sections.event.events.holyMatrimony,
+            events: [
+                {
+                    ...(Array.isArray(CHRISTIAN_REGINA_CONFIG.sections.event.events)
+                        ? CHRISTIAN_REGINA_CONFIG.sections.event.events[0]
+                        : CHRISTIAN_REGINA_CONFIG.sections.event.events.holyMatrimony),
                     title: "PEMBERKATAN",
                     date: "Senin, 21 Januari 2026",
                     time: "Jam 12.00 - 15.00",
                     venue: "Gereja Baitani Malalayang",
                     mapUrl: "https://www.google.com/maps",
                 },
-                reception: {
-                    ...CHRISTIAN_REGINA_CONFIG.sections.event.events.reception,
+                {
+                    ...(Array.isArray(CHRISTIAN_REGINA_CONFIG.sections.event.events)
+                        ? CHRISTIAN_REGINA_CONFIG.sections.event.events[1]
+                        : CHRISTIAN_REGINA_CONFIG.sections.event.events.reception),
                     title: "RESEPSI",
                     date: "Senin, 21 Januari 2026",
                     time: "Jam 18.00 - Selesai",
                     venue: "Gedung Serbaguna Bukit Inspirasi",
                     mapUrl: "https://www.google.com/maps",
                 },
-            },
+            ],
         },
         story: {
             ...CHRISTIAN_REGINA_CONFIG.sections.story,
@@ -608,11 +891,176 @@ export const PLUTO_DEMO_CONFIG: InvitationConfig = {
     },
 };
 
+export const AMALTHEA_CONFIG: InvitationConfig = {
+    ...PLUTO_CONFIG,
+    id: "amalthea",
+    templateId: "amalthea",
+    metadata: {
+        ...PLUTO_CONFIG.metadata,
+        title: "The Wedding of Arga & Naya",
+        description: "Amalthea template invitation demo by Activid.",
+        openGraph: {
+            ...PLUTO_CONFIG.metadata.openGraph,
+            title: "The Wedding of Arga & Naya",
+            description: "Amalthea template invitation demo by Activid.",
+            url: "https://activid.web.id/invitation/amalthea",
+            images: [
+                {
+                    url: "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
+                    width: 1200,
+                    height: 630,
+                    alt: "The Wedding of Arga & Naya",
+                },
+            ],
+        },
+        twitter: {
+            ...PLUTO_CONFIG.metadata.twitter,
+            title: "The Wedding of Arga & Naya",
+            description: "Amalthea template invitation demo by Activid.",
+            images: [
+                "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
+            ],
+        },
+    },
+    weddingDate: {
+        display: "10 Oktober 2026",
+        displayShort: "10.10.2026",
+        countdownTarget: "2026-10-10T00:00:00",
+        rsvpDeadline: "01 Oktober 2026",
+    },
+    hosts: [
+        {
+            firstName: "Arga",
+            fullName: "Arga Pratama",
+            shortName: "Arga",
+            role: "Bandung",
+            parents: "Putra dari Bapak Hendra Pratama dan Ibu Rina Kusuma",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        {
+            firstName: "Naya",
+            fullName: "Naya Putri",
+            shortName: "Naya",
+            role: "Surabaya",
+            parents: "Putri dari Bapak Samuel Wijaya dan Ibu Maria Lestari",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    ],
+    couple: {
+        groom: {
+            firstName: "Arga",
+            fullName: "Arga Pratama",
+            shortName: "Arga",
+            role: "Bandung",
+            parents: "Putra dari Bapak Hendra Pratama dan Ibu Rina Kusuma",
+            photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+        bride: {
+            firstName: "Naya",
+            fullName: "Naya Putri",
+            shortName: "Naya",
+            role: "Surabaya",
+            parents: "Putri dari Bapak Samuel Wijaya dan Ibu Maria Lestari",
+            photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+        },
+    },
+    backgroundPhotos: [
+        "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/5138883/pexels-photo-5138883.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/8102189/pexels-photo-8102189.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        "https://images.pexels.com/photos/17593652/pexels-photo-17593652.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+    sections: {
+        ...PLUTO_CONFIG.sections,
+        hero: {
+            ...PLUTO_CONFIG.sections.hero,
+            subtitle: "The Wedding of",
+            coverImage:
+                "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        },
+        title: {
+            ...PLUTO_CONFIG.sections.title,
+            heading: "The Wedding of",
+        },
+        gallery: {
+            ...PLUTO_CONFIG.sections.gallery,
+            heading: "Gallery",
+            photos: [
+                "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/5138883/pexels-photo-5138883.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/8102189/pexels-photo-8102189.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/17593652/pexels-photo-17593652.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/29981994/pexels-photo-29981994.jpeg?auto=compress&cs=tinysrgb&w=800",
+                "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
+            ],
+        },
+        story: {
+            ...PLUTO_CONFIG.sections.story,
+            heading: "Our Story",
+        },
+        wishes: {
+            ...PLUTO_CONFIG.sections.wishes,
+            heading: "Wishes",
+        },
+        event: {
+            ...PLUTO_CONFIG.sections.event,
+            heading: "Wedding Event",
+            events: [
+                {
+                    ...(Array.isArray(PLUTO_CONFIG.sections.event.events)
+                        ? PLUTO_CONFIG.sections.event.events[0]
+                        : PLUTO_CONFIG.sections.event.events.holyMatrimony),
+                    title: "AKAD",
+                    date: "Sabtu, 10 Oktober 2026",
+                    time: "09.00 - 11.00",
+                    venue: "Sky Garden Hall",
+                    mapUrl: "https://www.google.com/maps",
+                },
+                {
+                    ...(Array.isArray(PLUTO_CONFIG.sections.event.events)
+                        ? PLUTO_CONFIG.sections.event.events[1]
+                        : PLUTO_CONFIG.sections.event.events.reception),
+                    title: "RESEPSI",
+                    date: "Sabtu, 10 Oktober 2026",
+                    time: "18.30 - 21.30",
+                    venue: "Blue Horizon Ballroom",
+                    mapUrl: "https://www.google.com/maps",
+                },
+            ],
+        },
+    },
+};
+
+export const AMALTHEA_DEMO_CONFIG: InvitationConfig = {
+    ...AMALTHEA_CONFIG,
+    id: "amalthea-demo",
+    metadata: {
+        ...AMALTHEA_CONFIG.metadata,
+        title: "Demo Invitation - Activid",
+        description: "This is a demo preview of the Amalthea invitation template.",
+        openGraph: {
+            ...AMALTHEA_CONFIG.metadata.openGraph,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Amalthea invitation template.",
+            url: "https://activid.web.id/invitation/amalthea-demo",
+        },
+        twitter: {
+            ...AMALTHEA_CONFIG.metadata.twitter,
+            title: "Demo Invitation",
+            description: "This is a demo preview of the Amalthea invitation template.",
+        },
+    },
+};
+
 export const INVITATION_DEFAULTS: Record<string, InvitationConfig> = {
     "ricci-andrini": RICCI_ANDRINI_CONFIG,
     "christian-regina": CHRISTIAN_REGINA_CONFIG,
+    "venus": VENUS_CONFIG,
+    "venus-demo": VENUS_DEMO_CONFIG,
     "mercury": MERCURY_CONFIG,
     "mercury-demo": MERCURY_DEMO_CONFIG,
     "pluto": PLUTO_CONFIG,
     "pluto-demo": PLUTO_DEMO_CONFIG,
+    "amalthea": AMALTHEA_CONFIG,
+    "amalthea-demo": AMALTHEA_DEMO_CONFIG,
 };

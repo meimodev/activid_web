@@ -4,7 +4,9 @@ import type { SiteContent } from '@/types/site-content.types';
 export const siteContent: SiteContent = {
   navigation: [
     { label: 'Home', href: '/' },
+    { label: 'Invitation', href: 'https://invitation.activid.id', external: true },
     { label: 'About', href: '/#about' },
+    { label: 'Clients', href: '/#clients' },
     { label: 'Services', href: '/#services' },
     { label: 'Contact', href: '/contact' },
   ],

@@ -8,9 +8,9 @@ export default function LandingPage() {
   // Demo Data as requested
   const templates = [
     {
-      id: "flow-1-demo",
-      templateId: "flow-1",
-      title: "Flow-1",
+      id: "flow-demo",
+      templateId: "flow",
+      title: "Flow",
       image:
         "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
       tags: ["Wedding", "Maroon"],
@@ -19,9 +19,9 @@ export default function LandingPage() {
     },
 
     {
-      id: "venus-1-demo",
-      templateId: "venus-1",
-      title: "Venus-1",
+      id: "venus-demo",
+      templateId: "venus",
+      title: "Venus",
       image:
         "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=800",
       tags: ["Wedding", "Haruki"],
@@ -30,9 +30,9 @@ export default function LandingPage() {
     },
 
     {
-      id: "neptune-1-demo",
-      templateId: "neptune-1",
-      title: "Neptune-1",
+      id: "neptune-demo",
+      templateId: "neptune",
+      title: "Neptune",
       image:
         "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=800",
       tags: ["Wedding", "Neptune"],
@@ -42,7 +42,7 @@ export default function LandingPage() {
 
     {
       id: "mercury-demo",
-      templateId: "mercury-1",
+      templateId: "mercury",
       title: "Mercury",
       image:
         "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -53,11 +53,22 @@ export default function LandingPage() {
 
     {
       id: "pluto-demo",
-      templateId: "pluto-1",
+      templateId: "pluto",
       title: "Pluto",
       image:
         "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
       tags: ["Wedding", "Pluto"],
+      priceOriginal: "450.000",
+      priceDiscount: "159.000",
+    },
+
+    {
+      id: "amalthea-demo",
+      templateId: "amalthea",
+      title: "Amalthea",
+      image:
+        "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
+      tags: ["Wedding", "Sky Blue"],
       priceOriginal: "450.000",
       priceDiscount: "159.000",
     },
@@ -261,35 +272,35 @@ export default function LandingPage() {
                       className="aspect-4/5 overflow-hidden relative text-left"
                       aria-label={`Lihat template ${template.title}`}
                     >
-                        <img
-                          src={template.image}
-                          alt={template.title}
-                          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${isViewed ? "grayscale-[0.8] group-hover:grayscale-0" : "grayscale-[0.6] group-hover:grayscale-0"}`}
-                        />
-                        <div className="absolute inset-0 bg-linear-to-t from-[#020205]/70 via-black/10 to-transparent opacity-80 group-hover:opacity-60 transition-all" />
+                      <img
+                        src={template.image}
+                        alt={template.title}
+                        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${isViewed ? "grayscale-[0.8] group-hover:grayscale-0" : "grayscale-[0.6] group-hover:grayscale-0"}`}
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-[#020205]/70 via-black/10 to-transparent opacity-80 group-hover:opacity-60 transition-all" />
 
-                        {/* Holographic Overlay Effect */}
-                        <motion.div
-                          aria-hidden
-                          className="absolute inset-0 opacity-0 pointer-events-none mix-blend-screen blur-[0.2px] bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.26)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]"
-                          animate={{ opacity: [0, 0.22, 0, 0] }}
-                          transition={{
-                            duration: 5.5,
-                            repeat: Infinity,
-                            repeatDelay: 7,
-                            delay: index * 1.2,
-                            ease: "easeInOut",
-                          }}
-                        />
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
+                      {/* Holographic Overlay Effect */}
+                      <motion.div
+                        aria-hidden
+                        className="absolute inset-0 opacity-0 pointer-events-none mix-blend-screen blur-[0.2px] bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.26)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]"
+                        animate={{ opacity: [0, 0.22, 0, 0] }}
+                        transition={{
+                          duration: 5.5,
+                          repeat: Infinity,
+                          repeatDelay: 7,
+                          delay: index * 1.2,
+                          ease: "easeInOut",
+                        }}
+                      />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
 
-                        {/* Overlay Content */}
-                        {isViewed ? (
-                          <div className="absolute top-3 left-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-200 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
-                            Viewed
-                          </div>
-                        ) : null}
+                      {/* Overlay Content */}
+                      {isViewed ? (
+                        <div className="absolute top-3 left-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-200 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_12px_rgba(34,197,94,0.55)]" />
+                          Viewed
+                        </div>
+                      ) : null}
                     </button>
 
                     <div className="flex flex-col gap-3 p-4 sm:p-5 bg-black/20 backdrop-blur-md border-t border-white/5">
@@ -366,8 +377,8 @@ export default function LandingPage() {
                           aria-label="Pesan"
                           className="inline-flex items-center justify-center gap-0.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 text-green-100 text-xs font-black uppercase tracking-wider hover:bg-green-500/20 hover:border-green-400/70 transition-colors"
                         >
-                            <span>🚀</span>
-                        
+                          <span>🚀</span>
+
                           <span className="hidden sm:inline">Pesan</span>
                         </button>
                       </div>
@@ -421,14 +432,16 @@ export default function LandingPage() {
         >
           <span className="relative inline-flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-green-400/20 via-emerald-400/10 to-cyan-400/15 border border-white/10">
             <span className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_30%_20%,rgba(34,197,94,0.35),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(34,211,238,0.25),transparent_60%)]" />
-            <span className="relative text-sm font-black tracking-tight text-white">🚀</span>
+            <span className="relative text-sm font-black tracking-tight text-white">
+              🚀
+            </span>
           </span>
           <span className="flex flex-col items-start leading-tight">
             <span className="text-xs font-black uppercase tracking-wider text-white">
               WhatsApp
             </span>
             <span className="text-[11px] text-indigo-200/70 font-mono">
-              Konsultasi 
+              Konsultasi
             </span>
           </span>
           <span className="ml-1 text-white/70">→</span>

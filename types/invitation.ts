@@ -98,6 +98,10 @@ export interface CoupleSection extends SectionBase {
    disableGrayscale?: boolean;
 }
 
+export interface HostsSection extends SectionBase {
+   disableGrayscale?: boolean;
+}
+
 export interface StorySection extends SectionBase {
     heading: string;
     stories: StoryItem[];
@@ -105,11 +109,13 @@ export interface StorySection extends SectionBase {
 
 export interface EventSection extends SectionBase {
     heading: string;
-    events: {
-        holyMatrimony: EventDetail;
-        reception: EventDetail;
-        [key: string]: EventDetail; // Allow extra events if needed, but enforce main ones
-    };
+    events:
+        | {
+              holyMatrimony: EventDetail;
+              reception: EventDetail;
+              [key: string]: EventDetail;
+          }
+        | EventDetail[];
 }
 
 export interface GallerySection extends SectionBase {
@@ -144,11 +150,14 @@ export interface FooterSection extends SectionBase {
 // Main Config Interface
 export interface InvitationConfig {
     id: string; // matches document ID in firebase
-    templateId?: string; // e.g. "flow-1"
+    templateId?: string; // e.g. "flow"
+    purpose?: "marriage" | "birthday" | "event";
     metadata: MetadataConfig;
     music: MusicConfig;
     backgroundPhotos: string[];
     weddingDate: WeddingDate;
+
+    hosts?: CoupleData[];
     
     couple: {
         groom: CoupleData;
@@ -161,6 +170,7 @@ export interface InvitationConfig {
         countdown: CountdownSection;
         quote: QuoteSection;
         couple: CoupleSection;
+        hosts?: HostsSection;
         story: StorySection;
         event: EventSection;
         gallery: GallerySection;

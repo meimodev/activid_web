@@ -12,6 +12,7 @@ import { trackNavigation } from '@/lib/analytics';
 export interface NavigationItem {
   label: string;
   href: string;
+  external?: boolean;
 }
 
 export interface NavigationProps {
@@ -27,6 +28,7 @@ const defaultItems: NavigationItem[] = [
   { label: 'About', href: '/#about' },
   { label: 'Services', href: '/#services' },
   { label: 'Work', href: '/#services' },
+  { label: 'Invitation', href: 'https://invitation.activid.id', external: true },
   { label: 'Contact', href: '/contact' },
 ];
 
@@ -280,18 +282,52 @@ export default function Navigation({
             >
               {items.map((item, index) => (
                 <motion.li key={index} variants={menuItemVariants} role="none">
-                  <Link
-                    href={item.href}
-                    onClick={() => {
-                      setIsOpen(false);
-                      trackNavigation.linkClick(item.label, item.href);
-                    }}
-                    className="block px-4 py-3 text-lg font-medium text-[#1a1a3e] hover:bg-[#1a1a3e]/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 font-sans"
-                    role="menuitem"
-                    tabIndex={0}
-                  >
-                    {item.label}
-                  </Link>
+                  {item.external || /^https?:\/\//.test(item.href) ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        setIsOpen(false);
+                        trackNavigation.linkClick(item.label, item.href);
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-lg font-semibold rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 font-sans bg-[#1a1a3e] text-[#F8EFDE] hover:bg-[#1a1a3e]/90"
+                      role="menuitem"
+                      tabIndex={0}
+                    >
+                      <span className="flex-1 min-w-0 truncate">{item.label}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#F8EFDE]/30 bg-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-[#F8EFDE]/90 whitespace-nowrap shrink-0">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M7 17L17 7" />
+                          <path d="M7 7h10v10" />
+                        </svg>
+                        New tab
+                      </span>
+                    </a>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={() => {
+                        setIsOpen(false);
+                        trackNavigation.linkClick(item.label, item.href);
+                      }}
+                      className="flex items-center px-4 py-3 text-lg font-medium text-[#1a1a3e] hover:bg-[#1a1a3e]/10 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#3d2645] focus:ring-offset-2 font-sans"
+                      role="menuitem"
+                      tabIndex={0}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </motion.li>
               ))}
             </motion.ul>

@@ -134,6 +134,17 @@ export function Jupiter({ config }: JupiterProps) {
   return Array.from(new Set([...hero, ...gallery, ...backgrounds])).filter(Boolean);
   }, [config.backgroundPhotos, config.sections.gallery.photos, config.sections.hero.coverImage]);
 
+  const hosts = Array.isArray(config.hosts) && config.hosts.length
+  ? config.hosts
+  : [config.couple.groom, config.couple.bride].filter(Boolean);
+
+  const effectiveCouple = {
+  groom: hosts[0] ?? config.couple.groom,
+  bride: hosts[1] ?? config.couple.bride,
+  };
+
+  const hostsSection = config.sections.hosts ?? config.sections.couple;
+
   useEffect(() => {
   if (!isOpen || !contentReady) return;
 
@@ -203,7 +214,7 @@ export function Jupiter({ config }: JupiterProps) {
   }}
   >
   <JupiterCoverOverlay
-  couple={config.couple}
+  couple={effectiveCouple}
   date={config.weddingDate.display}
   subtitle={config.sections.hero.subtitle}
   coverImage={config.sections.hero.coverImage}
@@ -217,7 +228,7 @@ export function Jupiter({ config }: JupiterProps) {
   <div className="relative z-10">
   <div className="relative">
   <JupiterTitleCountdown
-  couple={config.couple}
+  couple={effectiveCouple}
   targetDate={config.weddingDate.countdownTarget}
   heading={config.sections.title.heading}
   coverImage={config.sections.hero.coverImage}
@@ -232,10 +243,10 @@ export function Jupiter({ config }: JupiterProps) {
   />
   )}
 
-  {config.sections.couple.enabled && (
+  {hostsSection.enabled && (
   <JupiterCouple
-  groom={config.couple.groom}
-  bride={config.couple.bride}
+  groom={effectiveCouple.groom}
+  bride={effectiveCouple.bride}
   />
   )}
 
@@ -255,7 +266,7 @@ export function Jupiter({ config }: JupiterProps) {
   )}
 
   <JupiterGratitude
-  couple={config.couple}
+  couple={effectiveCouple}
   message={config.sections.footer.message}
   />
 
@@ -272,7 +283,7 @@ export function Jupiter({ config }: JupiterProps) {
   </JupiterSectionWrap>
   )}
 
-  <JupiterFooter couple={config.couple} />
+  <JupiterFooter couple={effectiveCouple} />
 
   {isOpen ? (
   <button
@@ -569,7 +580,15 @@ function JupiterEvent({
   heading: string;
   events: InvitationConfig["sections"]["event"]["events"];
 }) {
-  const cards = [events.holyMatrimony, events.reception].filter(Boolean);
+  const cards = Array.isArray(events)
+    ? events
+    : [
+        events.holyMatrimony,
+        events.reception,
+        ...Object.entries(events)
+          .filter(([key]) => key !== "holyMatrimony" && key !== "reception")
+          .map(([, v]) => v),
+      ].filter(Boolean);
 
   return (
   <section className="relative px-6 py-20">

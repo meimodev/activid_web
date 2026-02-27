@@ -58,13 +58,42 @@ export function Footer({ className = '' }: FooterProps) {
               <ul className="space-y-2">
                 {navigation.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={() => trackFooter.navLinkClick(link.label)}
-                      className="text-sm text-white/70 hover:text-[#F8EFDE] transition-colors duration-200 font-sans block w-fit"
-                    >
-                      {link.label}
-                    </Link>
+                    {link.external || /^https?:\/\//.test(link.href) ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackFooter.navLinkClick(link.label)}
+                        className="text-sm text-white/70 hover:text-[#F8EFDE] transition-colors duration-200 font-sans inline-flex items-center gap-2 w-fit"
+                      >
+                        <span>{link.label}</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/60">
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M7 17L17 7" />
+                            <path d="M7 7h10v10" />
+                          </svg>
+                          New tab
+                        </span>
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        onClick={() => trackFooter.navLinkClick(link.label)}
+                        className="text-sm text-white/70 hover:text-[#F8EFDE] transition-colors duration-200 font-sans block w-fit"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

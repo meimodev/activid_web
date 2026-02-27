@@ -19,24 +19,29 @@ function readInvitationTargetWidth(): number {
 
 export function InvitationScaleWrapper({ children }: InvitationScaleWrapperProps) {
   const [scale, setScale] = useState(1);
-  const [targetWidth, setTargetWidth] = useState(430);
+  const [targetWidth] = useState(() => readInvitationTargetWidth());
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
-    const width = readInvitationTargetWidth();
-    setTargetWidth(width);
-
     const updateScale = () => {
       const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
-      const nextScale = Math.min(1, viewportWidth / width);
+      const nextScale = Math.min(1, viewportWidth / targetWidth);
       setScale(nextScale > 0 ? nextScale : 1);
     };
 
-    updateScale();
+    const raf = window.requestAnimationFrame(updateScale);
     window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
+
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", updateScale);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", updateScale);
+      vv?.removeEventListener("resize", updateScale);
+    };
+  }, [targetWidth]);
 
   useLayoutEffect(() => {
     const el = contentRef.current;
@@ -46,13 +51,16 @@ export function InvitationScaleWrapper({ children }: InvitationScaleWrapperProps
       setContentHeight(el.offsetHeight);
     };
 
-    updateHeight();
+    const raf = window.requestAnimationFrame(updateHeight);
 
     if (typeof ResizeObserver === "undefined") return;
 
     const ro = new ResizeObserver(() => updateHeight());
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      window.cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
   }, [targetWidth]);
 
   return (
@@ -62,6 +70,7 @@ export function InvitationScaleWrapper({ children }: InvitationScaleWrapperProps
         width: `${targetWidth * scale}px`,
         height: contentHeight ? `${contentHeight * scale}px` : undefined,
         position: "relative",
+        ...( { "--invitation-scale": scale } as React.CSSProperties),
       }}
     >
       <div
