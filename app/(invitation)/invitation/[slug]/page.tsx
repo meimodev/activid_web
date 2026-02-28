@@ -12,7 +12,10 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import type { InvitationConfig, InvitationDateTime } from "@/types/invitation";
 import { notFound } from "next/navigation";
-import { getInvitationConfig } from "@/lib/invitation-config";
+import {
+    getInvitationConfig,
+    InvitationConfigQuotaExceededError,
+} from "@/lib/invitation-config";
 
 function makeDateTime(
     year: number,
@@ -208,10 +211,24 @@ export async function generateMetadata(
         };
     }
 
-    const config = await getInvitationConfig(slug);
-    if (!config) {
-        notFound();
+    let config: InvitationConfig | null;
+    try {
+        config = await getInvitationConfig(slug);
+    } catch (err) {
+        if (err instanceof InvitationConfigQuotaExceededError) {
+            return {
+                title: "Invitation",
+                description: "Please try again later.",
+                alternates: {
+                    canonical: canonicalUrl,
+                },
+            };
+        }
+
+        throw err;
     }
+
+    if (!config) notFound();
 
     return {
         title: config.metadata.title,
@@ -457,7 +474,27 @@ export default async function InvitationPage({ params }: PageProps) {
         return withInvitationChrome(templateId, renderTemplate(templateId, config));
     }
 
-    const config = await getInvitationConfig(slug);
+    let config: InvitationConfig | null;
+    try {
+        config = await getInvitationConfig(slug);
+    } catch (err) {
+        if (err instanceof InvitationConfigQuotaExceededError) {
+            return withInvitationChrome(
+                "flow",
+                <div className="min-h-screen flex items-center justify-center px-6 py-16">
+                    <div className="max-w-sm text-center">
+                        <div className="text-lg font-semibold">Undangan sedang sibuk</div>
+                        <div className="mt-2 text-sm opacity-80">
+                            Silakan coba lagi dalam beberapa menit.
+                        </div>
+                    </div>
+                </div>,
+            );
+        }
+
+        throw err;
+    }
+
     if (!config) {
         notFound();
     }
