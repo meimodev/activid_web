@@ -383,13 +383,13 @@ export function Neptune({ config }: NeptuneProps) {
 
  return (
   <main
-  className={`relative min-h-screen overflow-x-hidden bg-[#020615] text-[#EAF7FF] font-body ${neptuneBody.variable} ${neptuneSerif.variable} [--font-body:var(--font-neptune-body)]`}
+  className={`relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text font-body ${neptuneBody.variable} ${neptuneSerif.variable} [--font-body:var(--font-neptune-body)]`}
   >
   {backgroundReady && derivedPhotos.length > 0 ? (
   <div className="fixed inset-0 z-0 pointer-events-none">
   <BackgroundSlideshow photos={derivedPhotos} />
-  <div className="absolute inset-0 bg-[#020615]/70" />
-  <div className="absolute inset-0 bg-linear-to-b from-[#020615]/80 via-[#020615]/55 to-[#020615]/90" />
+  <div className="absolute inset-0 bg-wedding-bg/70" />
+  <div className="absolute inset-0 bg-linear-to-b from-wedding-bg/80 via-wedding-bg/55 to-wedding-bg/90" />
   <AuroraLayer />
   </div>
   ) : null}

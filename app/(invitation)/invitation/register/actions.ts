@@ -154,6 +154,38 @@ function readPurpose(formData: FormData): "marriage" | "birthday" | "event" {
   return "marriage";
 }
 
+function normalizeSlugSegment(value: string): string {
+  return (value ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
+
+function deriveBaseSlug(purpose: "marriage" | "birthday" | "event", hosts: Host[]): string {
+  const hostParts = (hosts ?? [])
+    .map((h) => normalizeSlugSegment(h.firstName ?? ""))
+    .filter(Boolean);
+
+  const hostSegment = hostParts.length ? hostParts.join("-") : "untitled";
+  return `${purpose}-${hostSegment}`;
+}
+
+function deriveImagekitFolderKey(purpose: "marriage" | "birthday" | "event", hosts: Host[]): string {
+  const firstHostName = normalizeSlugSegment(hosts?.[0]?.firstName ?? "");
+  const hostSegment = firstHostName || "untitled";
+  const unixEpochSeconds = Math.floor(Date.now() / 1000);
+  return `${purpose}-${hostSegment}-${unixEpochSeconds}`;
+}
+
+function isAlreadyExistsError(err: unknown): boolean {
+  const code = (err as { code?: unknown } | null)?.code;
+  return code === 6 || code === "already-exists";
+}
+
 function normalizeEventList(
   raw: InvitationConfig["sections"]["event"]["events"],
 ): EventDetail[] {
@@ -289,15 +321,6 @@ export async function registerInvitation(
     return { error: "Invalid password." };
   }
 
-  const slug = readString(formData, "slug").trim();
-  if (!slug) {
-    return { error: "Slug is required." };
-  }
-
-  if (slug.endsWith("-demo")) {
-    return { error: "Slug must not end with -demo." };
-  }
-
   const templateId = readString(formData, "templateId").trim();
   if (!templateId) {
     return { error: "Template is required." };
@@ -353,34 +376,64 @@ export async function registerInvitation(
 
   const purpose = readPurpose(formData);
 
+  const baseSlug = deriveBaseSlug(purpose, config.hosts);
+  if (!baseSlug) {
+    return { error: "Failed to derive slug." };
+  }
+
+  const imagekitFolderKey = config.imagekitFolderKey || deriveImagekitFolderKey(purpose, config.hosts);
+
   const derivedPhotos = normalizePhotoList(config.sections?.gallery?.photos);
 
-  const toSave: InvitationConfig = {
-    ...config,
-    id: slug,
-    templateId,
-    purpose,
-    metadata: generateMetadata({
-      slug,
+  const db = getAdminDb();
+  const collection = db.collection("invitations");
+
+  const startIndex = baseSlug.endsWith("-demo") ? 1 : 0;
+
+  let finalSlug = "";
+  for (let i = startIndex; i < 300; i++) {
+    const candidateSlug = i === 0 ? baseSlug : `${baseSlug}-${i}`;
+    if (candidateSlug.endsWith("-demo")) continue;
+
+    const toSave: InvitationConfig = {
+      ...config,
+      id: candidateSlug,
+      imagekitFolderKey,
+      templateId,
       purpose,
-      config,
-    }),
-    weddingDate: derivedWeddingDate,
-    backgroundPhotos: derivedPhotos,
-    sections: {
-      ...config.sections,
-      countdown: {
-        ...config.sections.countdown,
-        photos: derivedPhotos,
+      metadata: generateMetadata({
+        slug: candidateSlug,
+        purpose,
+        config,
+      }),
+      weddingDate: derivedWeddingDate,
+      backgroundPhotos: derivedPhotos,
+      sections: {
+        ...config.sections,
+        countdown: {
+          ...config.sections.countdown,
+          photos: derivedPhotos,
+        },
+        event: {
+          ...config.sections.event,
+          events,
+        },
       },
-      event: {
-        ...config.sections.event,
-        events,
-      },
-    },
-  };
+    };
 
-  await getAdminDb().collection("invitations").doc(slug).set(toSave);
+    try {
+      await collection.doc(candidateSlug).create(toSave);
+      finalSlug = candidateSlug;
+      break;
+    } catch (err) {
+      if (isAlreadyExistsError(err)) continue;
+      throw err;
+    }
+  }
 
-  redirect(`/invitation/${slug}`);
+  if (!finalSlug) {
+    return { error: "Failed to allocate a unique mission code. Please try again." };
+  }
+
+  redirect(`/invitation/${finalSlug}`);
 }

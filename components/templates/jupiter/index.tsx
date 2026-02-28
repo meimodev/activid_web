@@ -179,7 +179,7 @@ export function Jupiter({ config }: JupiterProps) {
 
   return (
   <main
-  className={`relative min-h-screen overflow-x-hidden bg-[#F7F3EA] text-[#1F1B16] font-body ${jupiterBody.variable} [--font-body:var(--font-jupiter-body)]`}
+  className={`relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text font-body ${jupiterBody.variable} [--font-body:var(--font-jupiter-body)]`}
   >
   {isOpen && derivedPhotos.length > 0 ? (
   <div className="absolute inset-0 z-0 pointer-events-none">
@@ -187,7 +187,7 @@ export function Jupiter({ config }: JupiterProps) {
   photos={derivedPhotos}
   className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"
   />
-  <div className="absolute inset-0 bg-linear-to-b from-[#F7F3EA]/85 via-[#F7F3EA]/70 to-[#F7F3EA]/90" />
+  <div className="absolute inset-0 bg-linear-to-b from-wedding-bg/85 via-wedding-bg/70 to-wedding-bg/90" />
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,199,122,0.16),transparent_60%),radial-gradient(circle_at_80%_40%,rgba(56,189,248,0.08),transparent_55%)]" />
   </div>
   ) : null}

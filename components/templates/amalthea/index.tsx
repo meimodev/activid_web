@@ -144,7 +144,7 @@ export function Amalthea({ config }: AmaltheaProps) {
   }, [isDemo, weddingDate.display]);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#F6FBFF] text-[#0B1B2A] ">
+    <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text ">
       {/* <BackgroundSlideshow
         photos={derivedPhotos}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"

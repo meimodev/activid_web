@@ -172,7 +172,7 @@ export function Venus({ config }: VenusProps) {
 
   return (
   <main
-  className={`relative min-h-[100dvh] w-full overflow-x-hidden bg-[#F8F4EC] text-[#2B2424] font-body ${venusBody.variable} [--font-body:var(--font-venus-body)]`}
+  className={`relative min-h-[100dvh] w-full overflow-x-hidden bg-wedding-bg text-wedding-text font-body ${venusBody.variable} [--font-body:var(--font-venus-body)]`}
   >
   {isOpen && persistentBackgroundPhotos.length > 0 ? (
   <div className="fixed inset-0 z-0 pointer-events-none">

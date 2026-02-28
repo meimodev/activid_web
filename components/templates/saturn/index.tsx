@@ -49,7 +49,7 @@ export function Saturn({ config }: SaturnProps) {
     );
 
     return (
-        <main className="relative min-h-screen overflow-x-hidden bg-[#0B0D17]">
+        <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg">
             {/* Global Decorations */}
             <StarField />
             <Nebula />

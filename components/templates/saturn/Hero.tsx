@@ -19,7 +19,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   const scale = useTransform(scrollY, [0, 500], [1, 1.2]);
 
   return (
-  <div className="relative h-screen w-full overflow-hidden bg-[#0B0D17]">
+  <div className="relative h-screen w-full overflow-hidden bg-wedding-bg">
   {/* Background Image - Full Screen with Fade */}
   <motion.div
   className="absolute inset-0 w-full h-full bg-cover bg-center opacity-40"
@@ -28,13 +28,13 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   scale
   }}
   >
-  <div className="absolute inset-0 bg-gradient-to-b from-[#0B0D17] via-transparent to-[#0B0D17]" />
-  <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D17] via-transparent to-[#0B0D17]" />
+  <div className="absolute inset-0 bg-gradient-to-b from-wedding-bg via-transparent to-wedding-bg" />
+  <div className="absolute inset-0 bg-gradient-to-r from-wedding-bg via-transparent to-wedding-bg" />
   </motion.div>
 
   {/* Scanning Scanline Effect */}
   <div className="absolute inset-0 pointer-events-none z-0">
-  <div className="w-full h-[2px] bg-cyan-500/20 blur-[1px] animate-scan-slow opacity-50" />
+  <div className="w-full h-[2px] bg-wedding-accent/20 blur-[1px] animate-scan-slow opacity-50" />
   </div>
 
   {/* Central Content */}
@@ -48,11 +48,11 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   >
   {/* Top Tagline */}
   <div className="flex items-center gap-4">
-  <div className="w-8 h-px bg-gradient-to-r from-transparent to-cyan-500" />
-  <span className="font-heading text-xs tracking-[0.5em] uppercase text-cyan-400/80">
+  <div className="w-8 h-px bg-gradient-to-r from-transparent to-wedding-accent" />
+  <span className="font-heading text-xs tracking-[0.5em] uppercase text-wedding-accent/80">
   {subtitle || "THE WEDDING OF"}
   </span>
-  <div className="w-8 h-px bg-gradient-to-l from-transparent to-cyan-500" />
+  <div className="w-8 h-px bg-gradient-to-l from-transparent to-wedding-accent" />
   </div>
 
   {/* Names - Massive & Glowing */}
@@ -61,21 +61,21 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   <span className="block">{primary?.firstName ?? ""}</span>
   {secondary ? (
   <>
-  <span className="block text-2xl  text-cyan-500 my-2 opacity-80">&</span>
+  <span className="block text-2xl  text-wedding-accent my-2 opacity-80">&</span>
   <span className="block">{secondary.firstName}</span>
   </>
   ) : null}
   </h1>
 
   {/* Decorative Brackets around Names */}
-  <div className="absolute -top-4 -left-4 w-8 h-8 border-t border-l border-cyan-500/50" />
-  <div className="absolute -top-4 -right-4 w-8 h-8 border-t border-r border-cyan-500/50" />
-  <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b border-l border-cyan-500/50" />
-  <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b border-r border-cyan-500/50" />
+  <div className="absolute -top-4 -left-4 w-8 h-8 border-t border-l border-wedding-accent/50" />
+  <div className="absolute -top-4 -right-4 w-8 h-8 border-t border-r border-wedding-accent/50" />
+  <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b border-l border-wedding-accent/50" />
+  <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b border-r border-wedding-accent/50" />
   </div>
 
   {/* Date / Stardate */}
-  <p className="mt-4 font-mono text-sm text-cyan-200/60 tracking-[0.3em]">
+  <p className="mt-4 font-mono text-sm text-wedding-text-light tracking-[0.3em]">
   STARDATE {date.replace(/ /g, ".")}{" // SECTOR 001"}
   </p>
 
@@ -84,19 +84,19 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   whileHover={{ scale: 1.05, letterSpacing: "0.4em" }}
   whileTap={{ scale: 0.95 }}
   onClick={onOpen}
-  className="mt-12 group relative px-10 py-4 bg-cyan-950/30 border border-cyan-500/30 overflow-hidden"
+  className="mt-12 group relative px-10 py-4 bg-wedding-bg-alt/30 border border-wedding-accent/30 overflow-hidden"
   >
-  <div className="absolute inset-0 bg-cyan-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+  <div className="absolute inset-0 bg-wedding-accent/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
   <div className="relative z-10 flex items-center gap-3">
-  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-  <span className="font-heading text-xs uppercase tracking-[0.3em] text-cyan-300 group-hover:text-white transition-colors">
+  <span className="w-1.5 h-1.5 rounded-full bg-wedding-accent animate-pulse" />
+  <span className="font-heading text-xs uppercase tracking-[0.3em] text-wedding-accent-light group-hover:text-white transition-colors">
   Initialize Sequence
   </span>
   </div>
 
   {/* Button Corner Accents */}
-  <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-400" />
-  <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-400" />
+  <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-wedding-accent" />
+  <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-wedding-accent" />
   </motion.button>
   </motion.div>
   </div>

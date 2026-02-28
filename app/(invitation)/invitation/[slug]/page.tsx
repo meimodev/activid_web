@@ -9,9 +9,11 @@ import { Jupiter } from "@/components/templates/jupiter";
 import { Neptune } from "@/components/templates/neptune";
 import { InvitationScaleWrapper } from "@/components/invitation/InvitationScaleWrapper";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { InvitationConfig, InvitationDateTime } from "@/types/invitation";
 import { notFound } from "next/navigation";
+import { getInvitationThemeStyle } from "@/lib/invitation-theme";
+import { getInvitationTemplateThemes } from "@/data/invitation-templates";
 import {
     getInvitationConfig,
     InvitationConfigQuotaExceededError,
@@ -86,21 +88,26 @@ function getDemoCoverImage(templateId: string) {
     return "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200";
 }
 
-function withInvitationChrome(templateId: string, children: ReactNode) {
+function withInvitationChrome(
+    templateId: string,
+    theme: InvitationConfig["theme"] | undefined,
+    children: ReactNode,
+) {
     const isScaleToFitDisabled = templateId === "venus" || templateId === "amalthea";
+    const themeStyle = getInvitationThemeStyle(templateId, theme);
 
     return (
-        <div className="invitation-mobile-shell">
+        <div className="invitation-mobile-shell" style={themeStyle as CSSProperties}>
             {isScaleToFitDisabled ? (
                 <div className="invitation-mobile-frame fluid-layout">
-                    <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-gold selection:text-white">
+                    <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-accent selection:text-white">
                         {children}
                     </div>
                 </div>
             ) : (
                 <InvitationScaleWrapper>
                     <div className="invitation-mobile-frame">
-                        <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-gold selection:text-white">
+                        <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-accent selection:text-white">
                             {children}
                         </div>
                     </div>
@@ -271,6 +278,8 @@ export default async function InvitationPage({ params }: PageProps) {
             const isMileaDilanDemo =
                 templateId === "venus" || templateId === "neptune" || templateId === "jupiter";
 
+            const fallbackTheme = getInvitationTemplateThemes(templateId)[0];
+
             const base = INVITATION_DEFAULTS["christian-regina"];
 
             if (base) {
@@ -278,6 +287,12 @@ export default async function InvitationPage({ params }: PageProps) {
                     ...base,
                     id: slug,
                     templateId: templateId,
+                    theme: fallbackTheme
+                        ? {
+                            mainColor: fallbackTheme.mainColor,
+                            accentColor: fallbackTheme.accentColor,
+                        }
+                        : base.theme,
                     metadata: {
                         ...base.metadata,
                         title: isMileaDilanDemo ? "The Wedding Of Milea & Dilan" : "Demo Invitation - Activid",
@@ -476,7 +491,7 @@ export default async function InvitationPage({ params }: PageProps) {
         }
 
         const templateId = config.templateId ?? "flow";
-        return withInvitationChrome(templateId, renderTemplate(templateId, config));
+        return withInvitationChrome(templateId, config.theme, renderTemplate(templateId, config));
     }
 
     let config: InvitationConfig | null;
@@ -486,6 +501,7 @@ export default async function InvitationPage({ params }: PageProps) {
         if (err instanceof InvitationConfigQuotaExceededError) {
             return withInvitationChrome(
                 "flow",
+                undefined,
                 <div className="min-h-screen flex items-center justify-center px-6 py-16">
                     <div className="max-w-sm text-center">
                         <div className="text-lg font-semibold">Undangan sedang sibuk</div>
@@ -506,5 +522,5 @@ export default async function InvitationPage({ params }: PageProps) {
 
     const templateId = config.templateId ?? "flow";
 
-    return withInvitationChrome(templateId, renderTemplate(templateId, config));
+    return withInvitationChrome(templateId, config.theme, renderTemplate(templateId, config));
 }

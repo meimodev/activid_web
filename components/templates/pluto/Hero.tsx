@@ -91,7 +91,7 @@ export function Hero({
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#EFE7D6]">
+    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg">
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[610px] items-center justify-center px-4">
         <motion.div
           variants={containerVariants}
@@ -115,7 +115,7 @@ export function Hero({
                 className="absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(circle at 50% 45%, rgba(235,227,209,0) 0%, rgba(235,227,209,0.5) 50%, rgba(235,227,209,1) 70%, rgba(235,227,209,1) 100%)",
+                    "radial-gradient(circle at 50% 45%, transparent 0%, color-mix(in srgb, var(--invitation-bg) 50%, transparent) 50%, var(--invitation-bg) 70%, var(--invitation-bg) 100%)",
                 }}
               />
             </div>
@@ -168,24 +168,24 @@ export function Hero({
           <motion.div
             variants={itemVariants}
           >
-            <p className="font-stoic text-[30px] leading-none text-[#8A6A2E] pt-8">
+            <p className="font-stoic text-[30px] leading-none text-wedding-accent pt-8">
               {heading}
             </p>
-            <p className="mt-4 font-tan-mon-cheri text-[35px] leading-none text-[#7C5A2A]">
+            <p className="mt-4 font-tan-mon-cheri text-[35px] leading-none text-wedding-accent">
               {nameLine}
             </p>
-            <p className="mt-1 font-garet-book text-[18px] tracking-[0.18em] text-[#7C5A2A]">
+            <p className="mt-1 font-garet-book text-[18px] tracking-[0.18em] text-wedding-accent">
               {date}
             </p>
           </motion.div>
 
           <motion.div
-            className="mt-10 space-y-2 text-[#6B5B3D]"
+            className="mt-10 space-y-2 text-wedding-text-light"
             variants={itemVariants}
           >
             <p className="font-poppins text-sm">Kepada Yth.</p>
             <p className="font-poppins text-sm">Bapak/Ibu/Saudara-i</p>
-            <p className="pt-2 font-poppins-bold text-2xl tracking-wide text-[#5B4521]">
+            <p className="pt-2 font-poppins-bold text-2xl tracking-wide text-wedding-accent">
               {displayGuest}
             </p>
           </motion.div>
@@ -196,12 +196,16 @@ export function Hero({
               whileTap={isOpening ? {} : { scale: 0.98 }}
               onClick={handleOpen}
               disabled={isOpening}
-              className="mt-6 inline-flex items-center justify-center gap-3 rounded-full bg-[#7A5A2A] px-10 py-3 font-poppins text-sm tracking-wide text-white shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-colors hover:bg-[#6B4F25] disabled:opacity-70"
+              className="mt-6 inline-flex items-center justify-center gap-3 rounded-full bg-wedding-accent px-10 py-3 font-poppins text-sm tracking-wide text-white shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-colors hover:bg-wedding-accent/90 disabled:opacity-70"
               animate={
                 isOpening
                   ? undefined
                   : {
-                      y: [0, -3, 0],
+                      boxShadow: [
+                        "0 12px 30px rgba(0,0,0,0.18)",
+                        "0 18px 44px rgba(0,0,0,0.22)",
+                        "0 12px 30px rgba(0,0,0,0.18)",
+                      ],
                     }
               }
               transition={

@@ -9,6 +9,10 @@ const dt = (year: number, month: number, day: number, hour = 0, minute = 0) => (
 export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
     id: "ricci-andrini",
     templateId: "flow",
+    theme: {
+        mainColor: "#F9F7F2",
+        accentColor: "#800020",
+    },
     metadata: {
         title: "The Wedding of Ricci & Andrini",
         description: "Premium custom theme web invitation for the Wedding of Ricci & Andrini.",
@@ -169,6 +173,10 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
 export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
     id: "christian-regina",
     templateId: "flow",
+    theme: {
+        mainColor: "#F9F7F2",
+        accentColor: "#800020",
+    },
     metadata: {
         title: "The Wedding of Christian & Regina",
         description: "Premium custom theme web invitation for the Wedding of Christian & Regina.",
@@ -353,6 +361,10 @@ export const VENUS_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "venus",
     templateId: "venus",
+    theme: {
+        mainColor: "#F8F4EC",
+        accentColor: "#C5A059",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "The Wedding Of Milea & Dilan",
@@ -527,6 +539,10 @@ export const FLOW_DEMO_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "flow-demo",
     templateId: "flow",
+    theme: {
+        mainColor: "#F9F7F2",
+        accentColor: "#800020",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "Demo Invitation - Flow | Activid",
@@ -549,6 +565,10 @@ export const SATURN_DEMO_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "saturn-demo",
     templateId: "saturn",
+    theme: {
+        mainColor: "#0B0D17",
+        accentColor: "#D4AF37",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "Demo Invitation - Saturn | Activid",
@@ -571,6 +591,10 @@ export const NEPTUNE_DEMO_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "neptune-demo",
     templateId: "neptune",
+    theme: {
+        mainColor: "#020615",
+        accentColor: "#7DD3FC",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "Demo Invitation - Neptune | Activid",
@@ -611,6 +635,10 @@ export const JUPITER_DEMO_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "jupiter-demo",
     templateId: "jupiter",
+    theme: {
+        mainColor: "#F7F3EA",
+        accentColor: "#C5A059",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "Demo Invitation - Jupiter | Activid",
@@ -651,6 +679,10 @@ export const MERCURY_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "mercury",
     templateId: "mercury",
+    theme: {
+        mainColor: "#F7F3EA",
+        accentColor: "#612A35",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "The Wedding of Daniel & Aurelia",
@@ -744,6 +776,10 @@ export const PLUTO_CONFIG: InvitationConfig = {
     ...CHRISTIAN_REGINA_CONFIG,
     id: "pluto",
     templateId: "pluto",
+    theme: {
+        mainColor: "#EFE7D6",
+        accentColor: "#7A5A2A",
+    },
     metadata: {
         ...CHRISTIAN_REGINA_CONFIG.metadata,
         title: "The Wedding of Daniel & Aurelia",
@@ -877,6 +913,10 @@ export const AMALTHEA_CONFIG: InvitationConfig = {
     ...PLUTO_CONFIG,
     id: "amalthea",
     templateId: "amalthea",
+    theme: {
+        mainColor: "#F6FBFF",
+        accentColor: "#0B1B2A",
+    },
     metadata: {
         ...PLUTO_CONFIG.metadata,
         title: "The Wedding of Arga & Naya",

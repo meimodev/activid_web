@@ -74,11 +74,11 @@ export function Mercury({ config }: MercuryProps) {
     );
 
     return (
-        <main className="relative min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-serif">
+        <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text font-serif">
             {/* Background Slideshow (Fades out or stays subtle) */}
             <BackgroundSlideshow
                 photos={derivedPhotos}
-                className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10"
+                className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"
             />
 
             <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />

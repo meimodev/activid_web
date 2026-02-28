@@ -165,7 +165,12 @@ export interface FooterSection extends SectionBase {
 // Main Config Interface
 export interface InvitationConfig {
     id: string; // matches document ID in firebase
+    imagekitFolderKey?: string;
     templateId?: string; // e.g. "flow"
+    theme?: {
+        mainColor: string;
+        accentColor: string;
+    };
     purpose?: "marriage" | "birthday" | "event";
     metadata: MetadataConfig;
     music: MusicConfig;

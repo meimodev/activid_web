@@ -73,7 +73,7 @@ export function Hero({
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#612A35]">
+    <div className="relative h-screen w-full overflow-hidden bg-wedding-accent">
       <motion.div
         className="absolute inset-0"
         style={{
@@ -91,7 +91,7 @@ export function Hero({
             : { duration: 1.2, ease: "easeOut" }
         }
       >
-        <div className="absolute inset-0 bg-[#431A23]/85" />
+        <div className="absolute inset-0 bg-wedding-dark/85" />
       </motion.div>
       <motion.div
         className="absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,rgba(255,255,255,0.08),transparent_40%),radial-gradient(circle_at_82%_88%,rgba(255,255,255,0.06),transparent_45%)]"

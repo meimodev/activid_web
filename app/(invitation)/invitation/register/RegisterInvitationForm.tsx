@@ -2,7 +2,11 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { EventDetail, Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
-import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
+import {
+  getInvitationTemplateThemes,
+  INVITATION_TEMPLATE_LISTINGS,
+  type InvitationTemplateTheme,
+} from "@/data/invitation-templates";
 import { RegisterInvitationState, VerifyRegisterPasswordState } from "./actions";
 
 type TemplateOption = {
@@ -47,6 +51,36 @@ function asBoolean(value: boolean | undefined): boolean {
   return !!value;
 }
 
+function normalizeSlugSegment(value: string): string {
+  return (value ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
+
+function deriveBaseSlug(purpose: "marriage" | "birthday" | "event", hosts: Host[]): string {
+  const hostParts = (hosts ?? [])
+    .map((h) => normalizeSlugSegment(h.firstName ?? ""))
+    .filter(Boolean);
+
+  const hostSegment = hostParts.length ? hostParts.join("-") : "untitled";
+  return `${purpose}-${hostSegment}`;
+}
+
+function deriveImagekitFolderKey(
+  purpose: "marriage" | "birthday" | "event",
+  hosts: Host[],
+  unixEpochSeconds: number,
+): string {
+  const firstHostName = normalizeSlugSegment(hosts?.[0]?.firstName ?? "");
+  const hostSegment = firstHostName || "untitled";
+  return `${purpose}-${hostSegment}-${unixEpochSeconds}`;
+}
+
 const MAX_IMAGE_SIZE_BYTES = 25 * 1024 * 1024;
 
 function getErrorMessage(err: unknown): string {
@@ -67,15 +101,15 @@ function validateImageFile(file: File): string | null {
 
 async function uploadToImageKit({
   file,
-  slug,
+  folderKey,
   fieldKey,
 }: {
   file: File;
-  slug: string;
+  folderKey: string;
   fieldKey: string;
 }): Promise<string> {
-  if (!slug) {
-    throw new Error("Slug is required before uploading images.");
+  if (!folderKey) {
+    throw new Error("Upload folder is required before uploading images.");
   }
 
   const authRes = await fetch("/api/imagekit/auth", { method: "GET" });
@@ -97,7 +131,7 @@ async function uploadToImageKit({
   form.set("signature", auth.signature);
   form.set("token", auth.token);
   form.set("expire", String(auth.expire));
-  form.set("folder", `activid web/invitation/${slug}`);
+  form.set("folder", `activid web/invitation/${folderKey}`);
   form.set("useUniqueFileName", "true");
 
   const uploadRes = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
@@ -121,13 +155,13 @@ function ImageUrlPicker({
   label,
   value,
   onChange,
-  slug,
+  folderKey,
   fieldKey,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  slug: string;
+  folderKey: string;
   fieldKey: string;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -176,7 +210,7 @@ function ImageUrlPicker({
               setLocalPreview(objectUrl);
 
               try {
-                const url = await uploadToImageKit({ file, slug, fieldKey });
+                const url = await uploadToImageKit({ file, folderKey, fieldKey });
                 onChange(url);
                 setLocalPreview(null);
               } catch (err) {
@@ -221,13 +255,13 @@ function ImageUrlListPicker({
   label,
   items,
   onChange,
-  slug,
+  folderKey,
   fieldKey,
 }: {
   label: string;
   items: string[];
   onChange: (items: string[]) => void;
-  slug: string;
+  folderKey: string;
   fieldKey: string;
 }) {
   const [pending, setPending] = useState<PendingUpload[]>([]);
@@ -274,14 +308,10 @@ function ImageUrlListPicker({
                 setPending((prev) => [...prev, { id, previewUrl, name: file.name, status: "uploading" }]);
 
                 try {
-                  const url = await uploadToImageKit({ file, slug, fieldKey });
+                  const url = await uploadToImageKit({ file, folderKey, fieldKey });
                   nextItems = [...nextItems, url];
                   onChange(nextItems);
-                  setPending((prev) => {
-                    const next = prev.filter((p) => p.id !== id);
-                    return next;
-                  });
-                  URL.revokeObjectURL(previewUrl);
+                  setPending((prev) => prev.filter((p) => p.id !== id));
                 } catch (err) {
                   setPending((prev) =>
                     prev.map((p) =>
@@ -608,20 +638,25 @@ function TextInput({
   value,
   onChange,
   type = "text",
+  readOnly = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  readOnly?: boolean;
 }) {
   return (
     <label className="grid gap-1 text-sm">
       <span className="text-white/70">{label}</span>
       <input
-        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
+        className={`rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60 ${
+          readOnly ? "cursor-default" : ""
+        }`}
         value={value}
         type={type}
-        onChange={(e) => onChange(e.target.value)}
+        readOnly={readOnly}
+        onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
       />
     </label>
   );
@@ -864,16 +899,23 @@ export function RegisterInvitationForm({
 
   const [slug, setSlug] = useState("");
   const [templateId, setTemplateId] = useState(templateOptions[0]?.id ?? "flow");
+  const initialTheme = useMemo(() => getInvitationTemplateThemes(templateId)[0], [templateId]);
+  const [themeId, setThemeId] = useState(() => initialTheme?.id ?? "");
   const [password, setPassword] = useState("");
-  const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(
-    initialConfig.purpose ?? "marriage",
-  );
-
+  const initialPurpose = initialConfig.purpose ?? "marriage";
+  const imagekitEpochSecondsRef = useRef<number>(Math.floor(Date.now() / 1000));
+  const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
     id: "",
+    imagekitFolderKey:
+      initialConfig.imagekitFolderKey
+      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.hosts ?? [], imagekitEpochSecondsRef.current),
     templateId: templateId,
-    purpose: initialConfig.purpose ?? "marriage",
+    theme: initialTheme
+      ? { mainColor: initialTheme.mainColor, accentColor: initialTheme.accentColor }
+      : initialConfig.theme,
+    purpose: initialPurpose,
     sections: {
       ...initialConfig.sections,
       story: {
@@ -897,19 +939,50 @@ export function RegisterInvitationForm({
     }));
   }
 
-  const handleSlugChange = (nextSlug: string) => {
-    setSlug(nextSlug);
-    setConfig((prev) => ({
-      ...prev,
-      id: nextSlug,
-    }));
-  };
+  useEffect(() => {
+    const nextSlug = deriveBaseSlug(purpose, config.hosts ?? []);
+    setSlug((prev) => (prev === nextSlug ? prev : nextSlug));
+    setConfig((prev) => (prev.id === nextSlug ? prev : { ...prev, id: nextSlug }));
+  }, [config.hosts, purpose]);
+  const hasImageUploads = Boolean(config.sections?.hero?.coverImage)
+    || Boolean((config.hosts ?? []).some((h) => Boolean(h.photo)))
+    || Boolean((config.sections?.gallery?.photos ?? []).length);
+
+  useEffect(() => {
+    if (hasImageUploads) return;
+    const nextFolderKey = deriveImagekitFolderKey(
+      purpose,
+      config.hosts ?? [],
+      imagekitEpochSecondsRef.current,
+    );
+    setConfig((prev) =>
+      prev.imagekitFolderKey === nextFolderKey ? prev : { ...prev, imagekitFolderKey: nextFolderKey },
+    );
+  }, [config.hosts, hasImageUploads, purpose]);
 
   const handleTemplateChange = (nextTemplateId: string) => {
+    const nextTheme = getInvitationTemplateThemes(nextTemplateId)[0];
     setTemplateId(nextTemplateId);
+    setThemeId(nextTheme?.id ?? "");
     setConfig((prev) => ({
       ...prev,
       templateId: nextTemplateId,
+      theme: nextTheme
+        ? { mainColor: nextTheme.mainColor, accentColor: nextTheme.accentColor }
+        : prev.theme,
+    }));
+  };
+
+  const templateThemes = useMemo(() => getInvitationTemplateThemes(templateId), [templateId]);
+
+  const handleThemeChange = (nextTheme: InvitationTemplateTheme) => {
+    setThemeId(nextTheme.id);
+    setConfig((prev) => ({
+      ...prev,
+      theme: {
+        mainColor: nextTheme.mainColor,
+        accentColor: nextTheme.accentColor,
+      },
     }));
   };
 
@@ -954,6 +1027,73 @@ export function RegisterInvitationForm({
   });
   const templateIgnoreClickRef = useRef(false);
   const [templateDragging, setTemplateDragging] = useState(false);
+
+  const themeScrollerRef = useRef<HTMLDivElement | null>(null);
+  const themeDragRef = useRef<{
+    active: boolean;
+    pointerId: number | null;
+    startClientX: number;
+    startScrollLeft: number;
+    moved: boolean;
+  }>({
+    active: false,
+    pointerId: null,
+    startClientX: 0,
+    startScrollLeft: 0,
+    moved: false,
+  });
+  const themeIgnoreClickRef = useRef(false);
+  const [themeDragging, setThemeDragging] = useState(false);
+
+  const handleThemeScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    const el = themeScrollerRef.current;
+    if (!el) return;
+
+    themeDragRef.current = {
+      active: true,
+      pointerId: e.pointerId,
+      startClientX: e.clientX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setThemeDragging(true);
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const handleThemeScrollerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = themeScrollerRef.current;
+    const drag = themeDragRef.current;
+    if (!el || !drag.active) return;
+
+    const deltaX = e.clientX - drag.startClientX;
+    if (!drag.moved && Math.abs(deltaX) > 4) {
+      drag.moved = true;
+    }
+    el.scrollLeft = drag.startScrollLeft - deltaX;
+    if (drag.moved) {
+      e.preventDefault();
+    }
+  };
+
+  const handleThemeScrollerPointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = themeScrollerRef.current;
+    const drag = themeDragRef.current;
+    if (!el || !drag.active) return;
+
+    themeIgnoreClickRef.current = drag.moved;
+    if (drag.moved) {
+      window.setTimeout(() => {
+        themeIgnoreClickRef.current = false;
+      }, 0);
+    }
+    if (drag.pointerId !== null && el.hasPointerCapture(drag.pointerId)) {
+      el.releasePointerCapture(drag.pointerId);
+    }
+    themeDragRef.current.active = false;
+    themeDragRef.current.pointerId = null;
+    setThemeDragging(false);
+  };
 
   const handleTemplateScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
@@ -1060,7 +1200,12 @@ export function RegisterInvitationForm({
         ) : null}
 
         <div className="grid gap-4 relative z-10 sm:grid-cols-2">
-          <TextInput label="Mission Code (slug/document id)" value={slug} onChange={handleSlugChange} />
+          <TextInput
+            label="Mission Code (slug/document id)"
+            value={slug}
+            onChange={() => {}}
+            readOnly
+          />
 
           <div className="grid gap-2 text-sm sm:col-span-2">
             <span className="text-indigo-200/70 font-medium tracking-wide">Ship Template</span>
@@ -1119,6 +1264,82 @@ export function RegisterInvitationForm({
                       <div className="text-sm font-black tracking-tight text-white">{card.label}</div>
                       <div className="text-sm font-black tracking-tight text-white/90">
                         {card.priceDiscount || "-"}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid gap-2 text-sm sm:col-span-2">
+            <span className="text-indigo-200/70 font-medium tracking-wide">Color Combination</span>
+            <div
+              ref={themeScrollerRef}
+              className={`-mx-1 px-1 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+                themeDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
+              style={{ touchAction: "pan-y" }}
+              onPointerDown={handleThemeScrollerPointerDown}
+              onPointerMove={handleThemeScrollerPointerMove}
+              onPointerUp={handleThemeScrollerPointerEnd}
+              onPointerCancel={handleThemeScrollerPointerEnd}
+              onPointerLeave={handleThemeScrollerPointerEnd}
+            >
+              {templateThemes.map((theme) => {
+                const selected = theme.id === themeId;
+
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    className={`shrink-0 w-36 rounded-2xl border bg-[#0b0b16]/70 overflow-hidden text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 ${
+                      selected
+                        ? "border-indigo-400/70 shadow-[0_0_20px_-8px_rgba(99,102,241,0.5)]"
+                        : "border-white/10 hover:border-indigo-500/50"
+                    }`}
+                    onClick={() => {
+                      if (themeIgnoreClickRef.current) {
+                        themeIgnoreClickRef.current = false;
+                        return;
+                      }
+                      handleThemeChange(theme);
+                    }}
+                    aria-pressed={selected}
+                  >
+                    <div
+                      className="relative aspect-[4/5]"
+                      style={{ backgroundColor: theme.mainColor }}
+                    >
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            `radial-gradient(circle at 18% 18%, ${theme.accentColor}40, transparent 58%), radial-gradient(circle at 78% 86%, ${theme.accentColor}26, transparent 62%)`,
+                        }}
+                      />
+                      <div className="absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
+                      {selected ? (
+                        <div className="absolute top-2 right-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-100">
+                          Selected
+                        </div>
+                      ) : null}
+                      <div className="absolute bottom-3 left-3 flex gap-2">
+                        <span
+                          className="h-4 w-4 rounded-full border border-white/30"
+                          style={{ backgroundColor: theme.mainColor }}
+                        />
+                        <span
+                          className="h-4 w-4 rounded-full border border-white/30"
+                          style={{ backgroundColor: theme.accentColor }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-1 p-2">
+                      <div className="text-sm font-black tracking-tight text-white">{theme.title}</div>
+                      <div className="text-[11px] font-semibold tracking-tight text-white/70">
+                        Main & Accent
                       </div>
                     </div>
                   </button>
@@ -1201,7 +1422,7 @@ export function RegisterInvitationForm({
               <ImageUrlPicker
                 label="Cover Image"
                 value={config.sections.hero.coverImage}
-                slug={slug}
+                folderKey={config.imagekitFolderKey ?? ""}
                 fieldKey="hero-cover"
                 onChange={(v) =>
                   setConfig((prev) => updateAtPath(prev, ["sections", "hero", "coverImage"], v))
@@ -1334,7 +1555,7 @@ export function RegisterInvitationForm({
                         <ImageUrlPicker
                           label={label}
                           value={host.photo}
-                          slug={slug}
+                          folderKey={config.imagekitFolderKey ?? ""}
                           fieldKey={`host-${idx}-photo`}
                           onChange={(v) => {
                             const next = [...(config.hosts ?? [])];
@@ -1634,7 +1855,7 @@ export function RegisterInvitationForm({
               <ImageUrlListPicker
                 label="Gallery Photos"
                 items={config.sections.gallery.photos}
-                slug={slug}
+                folderKey={config.imagekitFolderKey ?? ""}
                 fieldKey="gallery-photo"
                 onChange={(items) =>
                   setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "photos"], items))
