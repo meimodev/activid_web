@@ -211,33 +211,38 @@ export async function generateMetadata(
         };
     }
 
-    let config: InvitationConfig | null;
-    try {
-        config = await getInvitationConfig(slug);
-    } catch (err) {
-        if (err instanceof InvitationConfigQuotaExceededError) {
-            return {
-                title: "Invitation",
-                description: "Please try again later.",
-                alternates: {
-                    canonical: canonicalUrl,
-                },
-            };
-        }
-
-        throw err;
-    }
-
-    if (!config) notFound();
+    const coverImage = getDemoCoverImage("flow");
+    const title = "Invitation | Activid";
+    const description = "You are invited.";
 
     return {
-        title: config.metadata.title,
-        description: config.metadata.description,
+        title,
+        description,
         alternates: {
             canonical: canonicalUrl,
         },
-        openGraph: config.metadata.openGraph,
-        twitter: config.metadata.twitter,
+        openGraph: {
+            siteName: "Activid Web Invitation",
+            locale: "id_ID",
+            type: "website",
+            title,
+            description,
+            url: canonicalUrl,
+            images: [
+                {
+                    url: coverImage,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [coverImage],
+        },
     };
 }
 

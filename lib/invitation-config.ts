@@ -34,7 +34,7 @@ async function getInvitationConfigCached(slug: string): Promise<InvitationConfig
       return snap.data() as InvitationConfig;
     },
     ["getInvitationConfig", slug],
-    { revalidate: 60 },
+    { revalidate: 300 },
   );
 
   return cached();
