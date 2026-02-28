@@ -1,7 +1,7 @@
 "use client";
 
 import type { InvitationConfig } from "@/types/invitation";
-import type { InvitationDateTime } from "@/types/invitation";
+import type { InvitationDateTimeValue } from "@/types/invitation";
 import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils";
 import { SectionWrap } from "./SectionWrap";
 import { venusScript } from "./fonts";
@@ -56,7 +56,7 @@ function EventCard({
   revealDelay,
 }: {
   title: string;
-  date: InvitationDateTime;
+  date: InvitationDateTimeValue;
   venue: string;
   address: string;
   mapUrl: string;
@@ -76,7 +76,7 @@ function EventCard({
             <div className="mt-5 space-y-2 text-sm text-[#3A2F2F]">
               {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
               {date ? (
-                <p className="text-[#6B5B5B]">{formatInvitationTime(date.time)}</p>
+                <p className="text-[#6B5B5B]">{formatInvitationTime(date)}</p>
               ) : null}
               {venue ? <p className="font-body">{venue}</p> : null}
               {address ? (

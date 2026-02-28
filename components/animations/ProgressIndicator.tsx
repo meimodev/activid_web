@@ -26,6 +26,17 @@ export function ProgressIndicator({
 }: ProgressIndicatorProps) {
   const scrollProgress = useScrollProgress();
 
+  // Circle type
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  
+  // Transform scroll progress to stroke-dashoffset
+  const strokeDashoffset = useTransform(
+    scrollProgress,
+    [0, 1],
+    [circumference, 0]
+  );
+
   // Position classes based on position prop
   const positionClasses = {
     top: 'fixed top-0 left-0 right-0 z-[60]',
@@ -60,17 +71,6 @@ export function ProgressIndicator({
       </div>
     );
   }
-
-  // Circle type
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  
-  // Transform scroll progress to stroke-dashoffset
-  const strokeDashoffset = useTransform(
-    scrollProgress,
-    [0, 1],
-    [circumference, 0]
-  );
 
   return (
     <div

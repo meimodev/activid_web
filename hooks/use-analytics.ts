@@ -54,7 +54,7 @@ export function useScrollDepthTracking() {
  */
 export function useTimeOnPageTracking() {
   const pathname = usePathname();
-  const startTime = useRef<number>(Date.now());
+  const startTime = useRef<number>(0);
 
   useEffect(() => {
     startTime.current = Date.now();

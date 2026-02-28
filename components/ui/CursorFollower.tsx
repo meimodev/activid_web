@@ -28,7 +28,7 @@ export function CursorFollower({
 
   useEffect(() => {
     // Show cursor after mount to avoid SSR issues
-    setIsVisible(true);
+    const timer = window.setTimeout(() => setIsVisible(true), 0);
 
     // Hide default cursor if requested
     if (hideDefaultCursor) {
@@ -36,6 +36,7 @@ export function CursorFollower({
     }
 
     return () => {
+      window.clearTimeout(timer);
       if (hideDefaultCursor) {
         document.body.style.cursor = 'auto';
       }

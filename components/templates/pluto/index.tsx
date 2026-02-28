@@ -20,6 +20,8 @@ import {
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { DateTime } from "luxon";
+import { INVITATION_LOCALE, INVITATION_ZONE } from "@/lib/date-time";
 
 const PLUTO_DEMO_ASSETS = {
   groomPhoto:
@@ -78,12 +80,12 @@ export function Pluto({ config }: PlutoProps) {
   );
 
   const demoCountdownTarget = useMemo(() => {
-    const dt = new Date();
-    dt.setDate(dt.getDate() + 3);
-    dt.setHours(0, 0, 0, 0);
-
-    const pad2 = (n: number) => String(n).padStart(2, "0");
-    return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}T00:00:00`;
+    const dt = DateTime.now()
+      .setZone(INVITATION_ZONE)
+      .plus({ days: 3 })
+      .startOf("day")
+      .set({ second: 0, millisecond: 0 });
+    return dt.toISO({ includeOffset: true, suppressMilliseconds: true }) ?? "";
   }, []);
 
   const effectiveCountdownTarget = isDemo
@@ -93,10 +95,8 @@ export function Pluto({ config }: PlutoProps) {
   const effectiveWeddingDateDisplay = useMemo(() => {
     if (!isDemo) return weddingDate.display;
 
-    const dt = new Date();
-    dt.setDate(dt.getDate() + 3);
-    const month = dt.toLocaleString("id-ID", { month: "long" });
-    return `${dt.getDate()} ${month} ${dt.getFullYear()}`;
+    const dt = DateTime.now().setZone(INVITATION_ZONE).plus({ days: 3 }).startOf("day");
+    return dt.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
   }, [isDemo, weddingDate.display]);
 
   return (

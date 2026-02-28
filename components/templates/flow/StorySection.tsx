@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 import { GoldLeafBorder, DiamondAccent, HeartDivider, RingsDivider } from "./graphics";
@@ -59,7 +58,7 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                                             <div className="max-w-md mx-auto relative px-4 py-2">
                                                 <div className="absolute inset-0 bg-white/40 blur-xl rounded-full -z-10" />
                                                 <p className="font-body text-wedding-text text-lg leading-relaxed italic">
-                                                    "{story.description}"
+                                                    &quot;{story.description}&quot;
                                                 </p>
                                             </div>
                                         </div>

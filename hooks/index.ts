@@ -7,3 +7,4 @@ export { useWindowSize } from './useWindowSize';
 export type { WindowSize } from './useWindowSize';
 export { useResponsiveAnimation, getAnimationParams } from './useResponsiveAnimation';
 export { useWillChange } from './useWillChange';
+export { useDeferredEffect } from './useDeferredEffect';

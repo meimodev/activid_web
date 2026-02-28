@@ -14,7 +14,7 @@ import {
   where,
   Timestamp,
 } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeToNow } from "@/lib/date-time";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloralDivider, OverlayReveal } from "./graphics";
@@ -92,7 +92,7 @@ export function Wishes({
         name: "Raka",
         message:
           "Selamat menempuh hidup baru. Semoga selalu diberi kebahagiaan dan keberkahan.",
-        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 18)),
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 18),
       },
       {
         id: `demo_${invitationId}_2`,
@@ -100,7 +100,7 @@ export function Wishes({
         name: "Nadya",
         message:
           "Happy wedding! Semoga langgeng sampai tua dan saling menguatkan dalam setiap keadaan.",
-        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 2)),
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 2),
       },
       {
         id: `demo_${invitationId}_3`,
@@ -108,7 +108,7 @@ export function Wishes({
         name: "Dimas",
         message:
           "Semoga pernikahannya penuh cinta, rezeki lancar, dan rumah tangga sakinah mawaddah warahmah.",
-        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 9)),
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 9),
       },
       {
         id: `demo_${invitationId}_4`,
@@ -116,7 +116,7 @@ export function Wishes({
         name: "Alya",
         message:
           "Congrats! Semoga jadi pasangan yang saling melengkapi dan selalu kompak.",
-        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 26)),
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 26),
       },
       {
         id: `demo_${invitationId}_5`,
@@ -124,7 +124,7 @@ export function Wishes({
         name: "Bima",
         message:
           "Doa terbaik untuk kalian berdua. Semoga acaranya lancar dan pernikahannya bahagia selalu.",
-        createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 54)),
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 54),
       },
     ];
   }, [invitationId, isDemo]);
@@ -460,10 +460,8 @@ export function Wishes({
                           {wish.name}
                         </p>
                         <p className="mt-2 text-[10px] uppercase tracking-[0.25em] font-poppins text-[#3A2F2F]/55">
-                          {wish.createdAt?.toDate
-                            ? formatDistanceToNow(wish.createdAt.toDate(), {
-                                addSuffix: true,
-                              })
+                          {wish.createdAt
+                            ? formatRelativeToNow(wish.createdAt) || "Just now"
                             : "Just now"}
                         </p>
                       </div>

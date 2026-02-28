@@ -124,7 +124,7 @@ export function EventSection({ events, heading, purpose }: EventSectionProps) {
                     {formatInvitationDateLong(data.date)}
                   </p>
                   <p className="relative mt-2 font-poppins text-[16px] text-[#0B1B2A]/70">
-                    {formatInvitationTime(data.date.time)}
+                    {formatInvitationTime(data.date)}
                   </p>
                   <p className="relative font-poppins text-[16px] text-[#0B1B2A]/70">
                     {data.venue}

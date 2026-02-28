@@ -3,21 +3,50 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
+type Petal = {
+  id: number;
+  left: number;
+  duration: number;
+  delay: number;
+  drift: number;
+  scale: number;
+};
+
+type Sparkle = {
+  id: number;
+  left: number;
+  top: number;
+  duration: number;
+  delay: number;
+};
+
+type Heart = {
+  id: number;
+  x: number;
+  duration: number;
+  delay: number;
+};
+
 export function FloatingFlowers() {
-  const [petals, setPetals] = useState<any[]>([]);
+  const [petals, setPetals] = useState<Petal[]>([]);
 
   useEffect(() => {
-  const count = 6;
+  const timer = window.setTimeout(() => {
+    const count = 6;
 
-  const newPetals = Array.from({ length: count }, (_, i) => ({
-  id: i,
-  left: Math.random() * 100,
-  duration: 15 + Math.random() * 10,
-  delay: Math.random() * 15,
-  drift: Math.random() * 100 - 50,
-  scale: 0.5 + Math.random() * 0.5, // vary scale
-  }));
-  setPetals(newPetals);
+    const newPetals: Petal[] = Array.from({ length: count }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      duration: 15 + Math.random() * 10,
+      delay: Math.random() * 15,
+      drift: Math.random() * 100 - 50,
+      scale: 0.5 + Math.random() * 0.5,
+    }));
+
+    setPetals(newPetals);
+  }, 0);
+
+  return () => window.clearTimeout(timer);
   }, []);
 
   if (petals.length === 0) return null;
@@ -64,18 +93,29 @@ export function FloatingFlowers() {
 }
 
 export function FloatingSparkles() {
-  const [sparkles, setSparkles] = useState<number[]>([]);
+  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
   useEffect(() => {
-  const count = 10;
-  setSparkles(Array.from({ length: count }, (_, i) => i));
+  const timer = window.setTimeout(() => {
+    const count = 10;
+    const next: Sparkle[] = Array.from({ length: count }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: 2 + Math.random() * 2,
+      delay: Math.random() * 8,
+    }));
+    setSparkles(next);
+  }, 0);
+
+  return () => window.clearTimeout(timer);
   }, []);
 
   return (
   <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-  {sparkles.map((i) => (
+  {sparkles.map((sparkle) => (
   <motion.div
-  key={i}
+  key={sparkle.id}
   initial={{
   opacity: 0,
   scale: 0,
@@ -85,14 +125,14 @@ export function FloatingSparkles() {
   scale: [0, 1, 0],
   }}
   transition={{
-  duration: 2 + Math.random() * 2,
+  duration: sparkle.duration,
   repeat: Infinity,
-  delay: Math.random() * 8,
+  delay: sparkle.delay,
   ease: "easeInOut",
   }}
   style={{
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
+  left: `${sparkle.left}%`,
+  top: `${sparkle.top}%`,
   willChange: "transform, opacity"
   }}
   className="absolute w-1 h-1 bg-wedding-accent rounded-full"
@@ -105,21 +145,31 @@ export function FloatingSparkles() {
 }
 
 export function FloatingHearts() {
-  const [hearts, setHearts] = useState<number[]>([]);
+  const [hearts, setHearts] = useState<Heart[]>([]);
 
   useEffect(() => {
-  const count = 3;
-  setHearts(Array.from({ length: count }, (_, i) => i));
+  const timer = window.setTimeout(() => {
+    const count = 3;
+    const next: Heart[] = Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      duration: 15 + Math.random() * 10,
+      delay: Math.random() * 20,
+    }));
+    setHearts(next);
+  }, 0);
+
+  return () => window.clearTimeout(timer);
   }, []);
 
   return (
   <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-  {hearts.map((i) => (
+  {hearts.map((heart) => (
   <motion.div
-  key={i}
+  key={heart.id}
   initial={{
   y: 900,
-  x: `${Math.random() * 100}%`,
+  x: `${heart.x}%`,
   opacity: 0,
   scale: 0.5,
   }}
@@ -129,9 +179,9 @@ export function FloatingHearts() {
   scale: [0.5, 1, 0.5],
   }}
   transition={{
-  duration: 15 + Math.random() * 10,
+  duration: heart.duration,
   repeat: Infinity,
-  delay: Math.random() * 20,
+  delay: heart.delay,
   ease: "easeOut",
   }}
   style={{

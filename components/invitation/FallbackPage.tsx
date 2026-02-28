@@ -5,6 +5,11 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 
 export function FallbackPage() {
+    const prng = (seed: number) => {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    };
+
     return (
         <div className="min-h-screen bg-[#050511] text-white flex flex-col items-center justify-center p-4 overflow-hidden relative selection:bg-cyan-500/30">
             {/* Space Background */}
@@ -19,19 +24,27 @@ export function FallbackPage() {
                 <div className="absolute bottom-20 left-20 w-1 h-1 bg-white rounded-full" />
 
                 {/* Randomly placed tiny stars */}
-                {[...Array(20)].map((_, i) => (
-                    <motion.div
-                        key={i}
-                        className="absolute bg-white rounded-full w-px h-px"
-                        initial={{ opacity: 0.1, scale: 0.5 }}
-                        animate={{ opacity: [0.1, 0.8, 0.1], scale: [0.5, 1.2, 0.5] }}
-                        transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 5 }}
-                        style={{
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                        }}
-                    />
-                ))}
+                {Array.from({ length: 20 }).map((_, i) => {
+                    const seed = i + 1;
+                    const duration = 2 + prng(seed * 12.9898) * 3;
+                    const delay = prng(seed * 78.233) * 5;
+                    const top = prng(seed * 39.346) * 100;
+                    const left = prng(seed * 11.135) * 100;
+
+                    return (
+                        <motion.div
+                            key={i}
+                            className="absolute bg-white rounded-full w-px h-px"
+                            initial={{ opacity: 0.1, scale: 0.5 }}
+                            animate={{ opacity: [0.1, 0.8, 0.1], scale: [0.5, 1.2, 0.5] }}
+                            transition={{ duration, repeat: Infinity, delay }}
+                            style={{
+                                top: `${top}%`,
+                                left: `${left}%`,
+                            }}
+                        />
+                    );
+                })}
 
                 {/* Nebula Glows */}
                 <div className="absolute -top-20 -left-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[100px] mix-blend-screen" />
@@ -113,7 +126,7 @@ export function FallbackPage() {
                     </p>
 
                     <p className="text-sm text-indigo-300/80 font-mono border-t border-white/10 pt-4 mt-4">
-                        "Houston, we have a problem... Typo detected?"
+                        &quot;Houston, we have a problem... Typo detected?&quot;
                     </p>
                 </motion.div>
 

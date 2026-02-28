@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import type { Host } from "@/types/invitation";
 import { venusScript } from "./fonts";
 import { VenusReveal } from "./reveal";
+import { DateTime } from "luxon";
 
 export function FooterSection({
   hosts,
@@ -192,7 +193,7 @@ export function FooterSection({
 
           <VenusReveal direction="up" width="100%" delay={1.15}>
             <p className="mt-6 text-[11px] tracking-[0.25em] uppercase text-white/40 font-body">
-              © {new Date().getFullYear()} Activid Invitation
+              © {DateTime.now().year} Activid Invitation
             </p>
           </VenusReveal>
         </div>

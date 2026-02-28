@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
 
 interface QuoteSectionProps {
   quote: {

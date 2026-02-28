@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { FloralDivider, SectionOrnament } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { getCountdownParts } from "@/lib/date-time";
 
 interface CountdownProps {
   targetDate: string;
@@ -12,25 +13,17 @@ interface CountdownProps {
 }
 
 export function Countdown({ targetDate, photos, heading }: CountdownProps) {
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState(() => getCountdownParts(targetDate));
 
   useEffect(() => {
-  const target = new Date(targetDate);
-  const timer = setInterval(() => {
-  const now = new Date();
-  const difference = target.getTime() - now.getTime();
+    const update = () => setTimeLeft(getCountdownParts(targetDate));
+    const immediate = window.setTimeout(update, 0);
+    const timer = window.setInterval(update, 1000);
 
-  if (difference > 0) {
-  setTimeLeft({
-  days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-  hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-  minutes: Math.floor((difference / 1000 / 60) % 60),
-  seconds: Math.floor((difference / 1000) % 60),
-  });
-  }
-  }, 1000);
-
-  return () => clearInterval(timer);
+    return () => {
+      window.clearTimeout(immediate);
+      window.clearInterval(timer);
+    };
   }, [targetDate]);
 
   return (

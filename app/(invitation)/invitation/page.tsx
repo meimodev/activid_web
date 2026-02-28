@@ -3,13 +3,20 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
+import {
+  getInvitationTemplateThemes,
+  INVITATION_TEMPLATE_LISTINGS,
+} from "@/data/invitation-templates";
+import { DateTime } from "luxon";
 
 export default function LandingPage() {
   // Demo Data as requested
   const templates = INVITATION_TEMPLATE_LISTINGS;
 
   const [viewedTemplates, setViewedTemplates] = React.useState<string[]>([]);
+  const [selectedThemeByTemplateId, setSelectedThemeByTemplateId] = React.useState<
+    Record<string, string>
+  >({});
 
   React.useEffect(() => {
     const stored = localStorage.getItem("activid_viewed_templates");
@@ -166,6 +173,13 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {templates.map((template, index) => {
               const isViewed = viewedTemplates.includes(template.id);
+              const themes = getInvitationTemplateThemes(template.templateId);
+              const activeThemeId =
+                selectedThemeByTemplateId[template.templateId] ?? themes[0]?.id;
+
+              const previewUrl = activeThemeId
+                ? `/invitation/${template.id}?theme=${encodeURIComponent(activeThemeId)}`
+                : `/invitation/${template.id}`;
 
               return (
                 <motion.div
@@ -188,7 +202,7 @@ export default function LandingPage() {
                         e.stopPropagation();
                         handleView(template.id);
                         window.open(
-                          `/invitation/${template.id}`,
+                          previewUrl,
                           "_blank",
                           "noopener,noreferrer",
                         );
@@ -243,6 +257,60 @@ export default function LandingPage() {
                         </div>
                       </div>
 
+                      <div className="grid gap-2">
+                        <div className="text-[9px] sm:text-[10px] font-mono text-white/40 uppercase tracking-wider">
+                          Colors
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          {themes.map((theme) => {
+                            const isActive = activeThemeId === theme.id;
+
+                            return (
+                              <button
+                                key={theme.id}
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setSelectedThemeByTemplateId((prev) => ({
+                                    ...prev,
+                                    [template.templateId]: theme.id,
+                                  }));
+                                }}
+                                aria-label={`Pilih warna ${theme.title}`}
+                                className={
+                                  "flex items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors " +
+                                  (isActive
+                                    ? "border-indigo-300/70 bg-white/5 ring-4 ring-indigo-600/30"
+                                    : "border-white/10 bg-white/0 hover:bg-white/5 hover:border-white/25")
+                                }
+                              >
+                                <span className="flex min-w-0 items-center gap-2">
+                                  <span className="flex shrink-0 items-center overflow-hidden rounded-full border border-white/10">
+                                    <span
+                                      aria-hidden
+                                      className="h-4 w-4"
+                                      style={{ backgroundColor: theme.mainColor }}
+                                    />
+                                    <span
+                                      aria-hidden
+                                      className="h-4 w-4"
+                                      style={{ backgroundColor: theme.accentColor }}
+                                    />
+                                  </span>
+                                  <span className="hidden sm:inline min-w-0 truncate text-[10px] font-bold text-white/80">
+                                    {theme.title}
+                                  </span>
+                                </span>
+
+                                
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
@@ -251,7 +319,7 @@ export default function LandingPage() {
                             e.stopPropagation();
                             handleView(template.id);
                             window.open(
-                              `/invitation/${template.id}`,
+                              previewUrl,
                               "_blank",
                               "noopener,noreferrer",
                             );
@@ -533,7 +601,7 @@ export default function LandingPage() {
 
               <div className="mt-10 pt-6 border-t border-white/5 flex flex-col items-center justify-between gap-3 text-xs font-mono text-indigo-500/35">
                 <p>
-                  TRANSMISSION END // ACTIVID.ID // {new Date().getFullYear()}
+                  TRANSMISSION END // ACTIVID.ID // {DateTime.now().year}
                 </p>
               </div>
             </div>

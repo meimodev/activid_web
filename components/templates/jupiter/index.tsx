@@ -5,13 +5,14 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Allura, Plus_Jakarta_Sans } from "next/font/google";
 import { IconPause, IconPlay, WaveSeparator } from "./graphics";
-import { Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
+import { Host, InvitationConfig, InvitationDateTimeValue } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, onSnapshot, query, runTransaction, Timestamp, where } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { DateTime } from "luxon";
+import { formatRelativeToNow, getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
 import {
   formatInvitationDateLong,
   formatInvitationMonthYear,
@@ -68,46 +69,27 @@ function normalizeNameKey(value: string) {
 }
 
 function useCountdown(targetDate: string) {
-  const compute = (raw: string) => {
-  const target = new Date(raw);
-  const now = new Date();
-  const difference = target.getTime() - now.getTime();
-
-  if (!Number.isFinite(difference) || difference <= 0) {
-  return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }
-
-  return {
-  days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-  hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-  minutes: Math.floor((difference / 1000 / 60) % 60),
-  seconds: Math.floor((difference / 1000) % 60),
-  };
-  };
+  const compute = (raw: string) => getCountdownParts(raw);
 
   const [timeLeft, setTimeLeft] = useState(() => compute(targetDate));
 
   useEffect(() => {
-  const timer = setInterval(() => {
-  setTimeLeft(compute(targetDate));
-  }, 1000);
-  return () => clearInterval(timer);
+    const timer = setInterval(() => {
+      setTimeLeft(compute(targetDate));
+    }, 1000);
+    return () => clearInterval(timer);
   }, [targetDate]);
 
   return timeLeft;
 }
 
 function formatJupiterDateParts(targetIso: string) {
-  const d = new Date(targetIso);
+  const dt = parseInvitationDateTime(targetIso);
+  if (!dt) return { month: "", day: "", year: "" };
 
-  if (Number.isNaN(d.getTime())) {
-  return { month: "", day: "", year: "" };
-  }
-
-  const month = d.toLocaleString("id-ID", { month: "long" });
-  const day = String(d.getDate());
-  const year = String(d.getFullYear());
-
+  const month = dt.setLocale("id").toFormat("LLLL");
+  const day = dt.toFormat("d");
+  const year = dt.toFormat("yyyy");
   return { month, day, year };
 }
 
@@ -620,7 +602,7 @@ function JupiterEventCard({
   delay,
 }: {
   title: string;
-  date: InvitationDateTime;
+  date: InvitationDateTimeValue;
   venue: string;
   address: string;
   mapUrl: string;
@@ -644,7 +626,7 @@ function JupiterEventCard({
 
   <div className="mt-6 space-y-2 text-sm text-[#1F1B16]">
   {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
-  {date ? <p className="text-[#6B5B5B]">{formatInvitationTime(date.time)}</p> : null}
+  {date ? <p className="text-[#6B5B5B]">{formatInvitationTime(date)}</p> : null}
   {venue ? <p className="font-body">{venue}</p> : null}
   {address ? <p className="text-[#6B5B5B] whitespace-pre-line">{address}</p> : null}
   </div>
@@ -971,7 +953,7 @@ function JupiterWishesFirestore({
   </span>
   ) : null}
   <span className="text-[10px] text-white/40 uppercase tracking-[0.25em] font-body">
-  {w.createdAt?.toDate ? formatDistanceToNow(w.createdAt.toDate(), { addSuffix: true }) : "Baru saja"}
+  {w.createdAt ? formatRelativeToNow(w.createdAt) || "Baru saja" : "Baru saja"}
   </span>
   </div>
   </div>
@@ -1069,7 +1051,7 @@ function JupiterFooter({ hosts }: { hosts: Host[] }) {
 
   <JupiterReveal direction="up" width="100%" delay={1.05}>
   <p className="mt-10 text-xs tracking-[0.25em] uppercase text-white/35 font-body">
-  ACTIVID.ID // {new Date().getFullYear()}
+  ACTIVID.ID // {DateTime.now().year}
   </p>
   </JupiterReveal>
   </div>

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { OverlayReveal } from "./graphics";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
 import type { Host } from "@/types/invitation";
 

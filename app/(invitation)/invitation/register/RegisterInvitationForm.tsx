@@ -1,13 +1,22 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
-import { EventDetail, Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
+import {
+  EventDetail,
+  Host,
+  InvitationConfig,
+  InvitationDateTime,
+  InvitationDateTimeValue,
+} from "@/types/invitation";
+import { DateTime } from "luxon";
+import { INVITATION_ZONE, parseInvitationDateTime } from "@/lib/date-time";
 import {
   getInvitationTemplateThemes,
   INVITATION_TEMPLATE_LISTINGS,
   type InvitationTemplateTheme,
 } from "@/data/invitation-templates";
 import { RegisterInvitationState, VerifyRegisterPasswordState } from "./actions";
+import { useDeferredEffect } from "@/hooks/useDeferredEffect";
 
 type TemplateOption = {
   id: string;
@@ -422,9 +431,9 @@ function pad2(n: number) {
 }
 
 function createTodayDateTime(): InvitationDateTime {
-  const now = new Date();
+  const now = DateTime.now().setZone(INVITATION_ZONE);
   return {
-    date: { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() },
+    date: { year: now.year, month: now.month, day: now.day },
     time: { hour: 0, minute: 0 },
   };
 }
@@ -557,6 +566,15 @@ function coerceInvitationDateTime(value: unknown): InvitationDateTime {
   }
 
   if (typeof value === "string") {
+    const dt = parseInvitationDateTime(value);
+    if (dt) {
+      const zoned = dt.setZone(INVITATION_ZONE);
+      return {
+        date: { year: zoned.year, month: zoned.month, day: zoned.day },
+        time: { hour: zoned.hour, minute: zoned.minute },
+      };
+    }
+
     const parsed = tryParseDateStringToDateTime(value);
     if (parsed) return parsed;
   }
@@ -583,8 +601,8 @@ function withDateFromInput(value: InvitationDateTime, input: string): Invitation
   if (!Number.isInteger(year) || year < 1900) return value;
   if (!Number.isInteger(month) || month < 1 || month > 12) return value;
   if (!Number.isInteger(day) || day < 1 || day > 31) return value;
-  const dt = new Date(year, month - 1, day);
-  if (dt.getFullYear() !== year || dt.getMonth() !== month - 1 || dt.getDate() !== day) return value;
+  const dt = DateTime.fromObject({ year, month, day }, { zone: INVITATION_ZONE });
+  if (!dt.isValid) return value;
   return { ...value, date: { year, month, day } };
 }
 
@@ -668,17 +686,18 @@ function DateInput({
   onChange,
 }: {
   label: string;
-  value: InvitationDateTime;
+  value: InvitationDateTimeValue;
   onChange: (value: InvitationDateTime) => void;
 }) {
+  const normalized = coerceInvitationDateTime(value);
   return (
     <label className="grid gap-1 text-sm">
       <span className="text-white/70">{label}</span>
       <input
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
-        value={toDateInputValue(value)}
+        value={toDateInputValue(normalized)}
         type="date"
-        onChange={(e) => onChange(withDateFromInput(value, e.target.value))}
+        onChange={(e) => onChange(withDateFromInput(normalized, e.target.value))}
       />
     </label>
   );
@@ -690,17 +709,18 @@ function TimeInput({
   onChange,
 }: {
   label: string;
-  value: InvitationDateTime;
+  value: InvitationDateTimeValue;
   onChange: (value: InvitationDateTime) => void;
 }) {
+  const normalized = coerceInvitationDateTime(value);
   return (
     <label className="grid gap-1 text-sm">
       <span className="text-white/70">{label}</span>
       <input
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
-        value={toTimeInputValue(value)}
+        value={toTimeInputValue(normalized)}
         type="time"
-        onChange={(e) => onChange(withTimeFromInput(value, e.target.value))}
+        onChange={(e) => onChange(withTimeFromInput(normalized, e.target.value))}
       />
     </label>
   );
@@ -903,14 +923,14 @@ export function RegisterInvitationForm({
   const [themeId, setThemeId] = useState(() => initialTheme?.id ?? "");
   const [password, setPassword] = useState("");
   const initialPurpose = initialConfig.purpose ?? "marriage";
-  const imagekitEpochSecondsRef = useRef<number>(Math.floor(Date.now() / 1000));
+  const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
     id: "",
     imagekitFolderKey:
       initialConfig.imagekitFolderKey
-      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.hosts ?? [], imagekitEpochSecondsRef.current),
+      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.hosts ?? [], 0),
     templateId: templateId,
     theme: initialTheme
       ? { mainColor: initialTheme.mainColor, accentColor: initialTheme.accentColor }
@@ -939,7 +959,7 @@ export function RegisterInvitationForm({
     }));
   }
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     const nextSlug = deriveBaseSlug(purpose, config.hosts ?? []);
     setSlug((prev) => (prev === nextSlug ? prev : nextSlug));
     setConfig((prev) => (prev.id === nextSlug ? prev : { ...prev, id: nextSlug }));
@@ -948,13 +968,18 @@ export function RegisterInvitationForm({
     || Boolean((config.hosts ?? []).some((h) => Boolean(h.photo)))
     || Boolean((config.sections?.gallery?.photos ?? []).length);
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     if (hasImageUploads) return;
+    if (!imagekitEpochSecondsRef.current) {
+      imagekitEpochSecondsRef.current = Math.floor(Date.now() / 1000);
+    }
+
     const nextFolderKey = deriveImagekitFolderKey(
       purpose,
       config.hosts ?? [],
       imagekitEpochSecondsRef.current,
     );
+
     setConfig((prev) =>
       prev.imagekitFolderKey === nextFolderKey ? prev : { ...prev, imagekitFolderKey: nextFolderKey },
     );
@@ -1012,6 +1037,7 @@ export function RegisterInvitationForm({
   }, [templateListingByTemplateId, templateOptions]);
 
   const templateScrollerRef = useRef<HTMLDivElement | null>(null);
+  const templateCounterRafRef = useRef<number | null>(null);
   const templateDragRef = useRef<{
     active: boolean;
     pointerId: number | null;
@@ -1027,8 +1053,10 @@ export function RegisterInvitationForm({
   });
   const templateIgnoreClickRef = useRef(false);
   const [templateDragging, setTemplateDragging] = useState(false);
+  const [templateDisplayedIndex, setTemplateDisplayedIndex] = useState(1);
 
   const themeScrollerRef = useRef<HTMLDivElement | null>(null);
+  const themeCounterRafRef = useRef<number | null>(null);
   const themeDragRef = useRef<{
     active: boolean;
     pointerId: number | null;
@@ -1044,6 +1072,92 @@ export function RegisterInvitationForm({
   });
   const themeIgnoreClickRef = useRef(false);
   const [themeDragging, setThemeDragging] = useState(false);
+  const [themeDisplayedIndex, setThemeDisplayedIndex] = useState(1);
+
+  const getDisplayedIndexFromScroller = (el: HTMLDivElement): number => {
+    const children = Array.from(el.children) as HTMLElement[];
+    if (!children.length) return 1;
+
+    const center = el.scrollLeft + el.clientWidth / 2;
+    let bestIdx = 0;
+    let bestDist = Number.POSITIVE_INFINITY;
+
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]!;
+      const childCenter = child.offsetLeft + child.clientWidth / 2;
+      const dist = Math.abs(childCenter - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = i;
+      }
+    }
+
+    return bestIdx + 1;
+  };
+
+  const updateTemplateDisplayedIndex = () => {
+    const el = templateScrollerRef.current;
+    if (!el) return;
+    setTemplateDisplayedIndex(getDisplayedIndexFromScroller(el));
+  };
+
+  const updateThemeDisplayedIndex = () => {
+    const el = themeScrollerRef.current;
+    if (!el) return;
+    setThemeDisplayedIndex(getDisplayedIndexFromScroller(el));
+  };
+
+  const handleTemplateScrollerScroll = () => {
+    if (templateCounterRafRef.current != null) return;
+    templateCounterRafRef.current = window.requestAnimationFrame(() => {
+      templateCounterRafRef.current = null;
+      updateTemplateDisplayedIndex();
+    });
+  };
+
+  const handleThemeScrollerScroll = () => {
+    if (themeCounterRafRef.current != null) return;
+    themeCounterRafRef.current = window.requestAnimationFrame(() => {
+      themeCounterRafRef.current = null;
+      updateThemeDisplayedIndex();
+    });
+  };
+
+  useEffect(() => {
+    updateTemplateDisplayedIndex();
+    return () => {
+      if (templateCounterRafRef.current != null) {
+        window.cancelAnimationFrame(templateCounterRafRef.current);
+        templateCounterRafRef.current = null;
+      }
+    };
+  }, [templateCards.length]);
+
+  useDeferredEffect(() => {
+    setThemeDisplayedIndex(1);
+    const el = themeScrollerRef.current;
+    if (el) {
+      el.scrollLeft = 0;
+    }
+    updateThemeDisplayedIndex();
+
+    return () => {
+      if (themeCounterRafRef.current != null) {
+        window.cancelAnimationFrame(themeCounterRafRef.current);
+        themeCounterRafRef.current = null;
+      }
+    };
+  }, [templateThemes.length]);
+
+  const templatePosition = {
+    current: Math.min(Math.max(templateDisplayedIndex, 1), templateCards.length || 1),
+    total: templateCards.length,
+  };
+
+  const themePosition = {
+    current: Math.min(Math.max(themeDisplayedIndex, 1), templateThemes.length || 1),
+    total: templateThemes.length,
+  };
 
   const handleThemeScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
@@ -1147,6 +1261,115 @@ export function RegisterInvitationForm({
 
   const configJson = useMemo(() => JSON.stringify(config), [config]);
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
+  const [confirmedSubmit, setConfirmedSubmit] = useState(false);
+  const confirmedSubmitRef = useRef(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  useDeferredEffect(() => {
+    if (!pending) {
+      setConfirmedSubmit(false);
+      confirmedSubmitRef.current = false;
+    }
+  }, [pending]);
+
+  const templateLabel = useMemo(() => {
+    const found = templateCards.find((c) => c.id === templateId);
+    return found?.label ?? templateId;
+  }, [templateCards, templateId]);
+
+  const themeLabel = useMemo(() => {
+    const found = templateThemes.find((t) => t.id === themeId);
+    return found?.title ?? themeId;
+  }, [templateThemes, themeId]);
+
+  const hostLabel = useMemo(() => {
+    const hosts = config.hosts ?? [];
+    const primary = hosts[0]?.firstName || hosts[0]?.fullName || "";
+    const secondary = hosts[1]?.firstName || hosts[1]?.fullName || "";
+    if (primary && secondary) return `${primary} & ${secondary}`;
+    return primary || secondary || "";
+  }, [config.hosts]);
+
+  const firstEventSummary = useMemo(() => {
+    const eventsRaw = config.sections?.event?.events as unknown;
+    const list = normalizeEventList(eventsRaw as InvitationConfig["sections"]["event"]["events"]);
+    const first = list[0];
+    if (!first) return null;
+
+    const dt = coerceInvitationDateTime((first as { date?: unknown }).date);
+    const dateText = dt?.date
+      ? `${dt.date.year}-${pad2(dt.date.month)}-${pad2(dt.date.day)}`
+      : "";
+    const timeText = dt?.time ? `${pad2(dt.time.hour)}:${pad2(dt.time.minute)}` : "";
+    const title = (first as { title?: string } | null)?.title ?? "";
+    const venue = (first as { venue?: string } | null)?.venue ?? "";
+
+    return {
+      title,
+      venue,
+      dateText,
+      timeText,
+    };
+  }, [config.sections?.event?.events]);
+
+  const validateBeforeReview = (): string | null => {
+    if (!templateId) return "Ship Template is required.";
+    const hosts = config.hosts ?? [];
+    const hasHostName = Boolean(
+      (hosts[0]?.firstName || hosts[0]?.fullName || "").trim()
+        || (hosts[1]?.firstName || hosts[1]?.fullName || "").trim(),
+    );
+    if (!hosts.length || !hasHostName) return "At least 1 host name is required.";
+
+    const eventsRaw = config.sections?.event?.events as unknown;
+    const list = normalizeEventList(eventsRaw as InvitationConfig["sections"]["event"]["events"]);
+    if (!list.length) return "At least 1 event is required.";
+
+    const first = list[0] as { date?: unknown };
+    const dt = coerceInvitationDateTime(first?.date);
+    if (!dt?.date?.year) return "First event date is required.";
+
+    return null;
+  };
+
+  const invitationUrl = state.invitationUrl ?? (state.slug ? `https://invitation.activid.id/${state.slug}` : "");
+  const whatsappMessages = useMemo(() => {
+    if (!state.ok || !invitationUrl) return [];
+    const who = hostLabel || "kami";
+    return [
+      {
+        key: "formal",
+        title: "Formal",
+        text: `Assalamu'alaikum / Salam sejahtera.\n\nDengan hormat, kami ${who} mengundang Anda untuk hadir dan menyaksikan momen spesial kami.\n\nSilakan akses undangan digital melalui tautan berikut:\n${invitationUrl}\n\nTerima kasih.`,
+      },
+      {
+        key: "warm",
+        title: "Hangat",
+        text: `Halo!\n\nKami ${who} punya kabar bahagia. Kami ingin mengundang kamu untuk ikut merayakan bersama.\n\nDetail lengkap ada di link ini ya:\n${invitationUrl}\n\nSampai ketemu!`,
+      },
+      {
+        key: "short",
+        title: "Singkat",
+        text: `Undangan dari ${who}:\n${invitationUrl}`,
+      },
+    ];
+  }, [hostLabel, invitationUrl, state.ok]);
+
+  const copyText = async (key: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      window.setTimeout(() => {
+        setCopiedKey((prev) => (prev === key ? null : prev));
+      }, 1200);
+    } catch {
+      setCopiedKey(null);
+    }
+  };
+
   if (!isUnlocked) {
     return (
       <form action={verifyAction} className="grid gap-6">
@@ -1178,8 +1401,107 @@ export function RegisterInvitationForm({
     );
   }
 
+  if (state.ok && state.slug && invitationUrl) {
+    return (
+      <div className="grid gap-6">
+        <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
+          <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-emerald-500/10 blur-[60px] pointer-events-none" />
+          <div className="text-xl font-black tracking-tight bg-linear-to-r from-emerald-200 via-white to-emerald-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
+            <span className="text-xl">✅</span> Mission Created
+          </div>
+
+          <div className="grid gap-3 relative z-10">
+            <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
+              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Mission Code</div>
+              <div className="mt-1 text-lg font-black tracking-tight text-white">{state.slug}</div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
+              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Invitation Link</div>
+              <div className="mt-1 break-all text-sm font-mono text-white/80">{invitationUrl}</div>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
+                  onClick={() => void copyText("link", invitationUrl)}
+                >
+                  {copiedKey === "link" ? "Copied" : "Copy Link"}
+                </button>
+                <a
+                  href={invitationUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500/30 via-green-500/25 to-cyan-500/25 border border-emerald-400/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-100 hover:border-emerald-300/70"
+                >
+                  Open Invitation
+                </a>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-indigo-400/60"
+                  onClick={() => window.location.reload()}
+                >
+                  New Mission
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-3">
+          <div className="text-sm font-black tracking-tight text-white/90">WhatsApp Messages</div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {whatsappMessages.map((m) => {
+              const waUrl = `https://wa.me/?text=${encodeURIComponent(m.text)}`;
+              return (
+                <div
+                  key={m.key}
+                  className="grid gap-3 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 shadow-[0_0_30px_-12px_rgba(34,211,238,0.25)]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-xs font-black uppercase tracking-wider text-white/80">{m.title}</div>
+                    <button
+                      type="button"
+                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
+                      onClick={() => void copyText(m.key, m.text)}
+                    >
+                      {copiedKey === m.key ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+
+                  <pre className="whitespace-pre-wrap break-words rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-3 text-[12px] leading-relaxed text-white/80 font-mono">
+                    {m.text}
+                  </pre>
+
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
+                  >
+                    Open WhatsApp
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form action={formAction} className="grid gap-6">
+    <form
+      ref={formRef}
+      action={formAction}
+      className="grid gap-6"
+      onSubmit={(e) => {
+        if (confirmedSubmitRef.current || confirmedSubmit) return;
+        e.preventDefault();
+        const err = validateBeforeReview();
+        setClientError(err);
+        if (!err) setReviewOpen(true);
+      }}
+    >
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="templateId" value={templateId} />
       <input type="hidden" name="password" value={password} />
@@ -1199,6 +1521,12 @@ export function RegisterInvitationForm({
           </div>
         ) : null}
 
+        {clientError ? (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 relative z-10">
+            {clientError}
+          </div>
+        ) : null}
+
         <div className="grid gap-4 relative z-10 sm:grid-cols-2">
           <TextInput
             label="Mission Code (slug/document id)"
@@ -1208,13 +1536,19 @@ export function RegisterInvitationForm({
           />
 
           <div className="grid gap-2 text-sm sm:col-span-2">
-            <span className="text-indigo-200/70 font-medium tracking-wide">Ship Template</span>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-indigo-200/70 font-medium tracking-wide">Ship Template</span>
+              <span className="text-[11px] font-mono text-white/40">
+                {templatePosition.current}/{templatePosition.total}
+              </span>
+            </div>
             <div
               ref={templateScrollerRef}
               className={`-mx-1 px-1 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
                 templateDragging ? "cursor-grabbing" : "cursor-grab"
               }`}
               style={{ touchAction: "pan-y" }}
+              onScroll={handleTemplateScrollerScroll}
               onPointerDown={handleTemplateScrollerPointerDown}
               onPointerMove={handleTemplateScrollerPointerMove}
               onPointerUp={handleTemplateScrollerPointerEnd}
@@ -1273,13 +1607,19 @@ export function RegisterInvitationForm({
           </div>
 
           <div className="grid gap-2 text-sm sm:col-span-2">
-            <span className="text-indigo-200/70 font-medium tracking-wide">Color Combination</span>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-indigo-200/70 font-medium tracking-wide">Color Combination</span>
+              <span className="text-[11px] font-mono text-white/40">
+                {themePosition.current}/{themePosition.total}
+              </span>
+            </div>
             <div
               ref={themeScrollerRef}
               className={`-mx-1 px-1 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
                 themeDragging ? "cursor-grabbing" : "cursor-grab"
               }`}
               style={{ touchAction: "pan-y" }}
+              onScroll={handleThemeScrollerScroll}
               onPointerDown={handleThemeScrollerPointerDown}
               onPointerMove={handleThemeScrollerPointerMove}
               onPointerUp={handleThemeScrollerPointerEnd}
@@ -1293,7 +1633,7 @@ export function RegisterInvitationForm({
                   <button
                     key={theme.id}
                     type="button"
-                    className={`shrink-0 w-36 rounded-2xl border bg-[#0b0b16]/70 overflow-hidden text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 ${
+                    className={`shrink-0 min-w-[11rem] rounded-2xl border bg-[#0b0b16]/70 px-3 py-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 ${
                       selected
                         ? "border-indigo-400/70 shadow-[0_0_20px_-8px_rgba(99,102,241,0.5)]"
                         : "border-white/10 hover:border-indigo-500/50"
@@ -1307,40 +1647,31 @@ export function RegisterInvitationForm({
                     }}
                     aria-pressed={selected}
                   >
-                    <div
-                      className="relative aspect-[4/5]"
-                      style={{ backgroundColor: theme.mainColor }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            `radial-gradient(circle at 18% 18%, ${theme.accentColor}40, transparent 58%), radial-gradient(circle at 78% 86%, ${theme.accentColor}26, transparent 62%)`,
-                        }}
-                      />
-                      <div className="absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
-                      {selected ? (
-                        <div className="absolute top-2 right-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-100">
-                          Selected
-                        </div>
-                      ) : null}
-                      <div className="absolute bottom-3 left-3 flex gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="flex shrink-0 items-center overflow-hidden rounded-full border border-white/15">
                         <span
-                          className="h-4 w-4 rounded-full border border-white/30"
+                          aria-hidden
+                          className="h-6 w-6"
                           style={{ backgroundColor: theme.mainColor }}
                         />
                         <span
-                          className="h-4 w-4 rounded-full border border-white/30"
+                          aria-hidden
+                          className="h-6 w-6"
                           style={{ backgroundColor: theme.accentColor }}
                         />
-                      </div>
-                    </div>
+                      </span>
 
-                    <div className="grid gap-1 p-2">
-                      <div className="text-sm font-black tracking-tight text-white">{theme.title}</div>
-                      <div className="text-[11px] font-semibold tracking-tight text-white/70">
-                        Main & Accent
-                      </div>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-black tracking-tight text-white">
+                          {theme.title}
+                        </span>
+                      </span>
+
+                      {selected ? (
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-[13px] font-black text-indigo-200">
+                          ✓
+                        </span>
+                      ) : null}
                     </div>
                   </button>
                 );
@@ -2069,12 +2400,117 @@ export function RegisterInvitationForm({
       </div>
 
       <button
-        type="submit"
+        type="button"
         disabled={pending}
         className="sticky bottom-6 z-50 rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-8 py-4 text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none mb-10 w-full"
+        onClick={() => {
+          const err = validateBeforeReview();
+          setClientError(err);
+          if (!err) setReviewOpen(true);
+        }}
       >
         {pending ? "Launching Mission..." : "Launch Mission (Save)"}
       </button>
+
+      {reviewOpen ? (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 sm:items-center">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setReviewOpen(false)}
+            aria-label="Close review"
+          />
+          <div className="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6 shadow-[0_0_60px_-15px_rgba(79,70,229,0.35)] overflow-hidden">
+            <div className="absolute -top-32 -right-24 w-64 h-64 rounded-full bg-indigo-500/10 blur-[70px] pointer-events-none" />
+            <div className="relative z-10 grid gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-xs font-mono text-white/40 uppercase tracking-wider">Review Summary</div>
+                  <div className="mt-1 text-lg font-black tracking-tight text-white">Ready to create this mission?</div>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-white/25"
+                  onClick={() => setReviewOpen(false)}
+                >
+                  Back
+                </button>
+              </div>
+
+              <div className="grid gap-3 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Mission Code</div>
+                    <div className="mt-1 font-mono text-sm text-white/80 break-all">{slug}</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Purpose</div>
+                    <div className="mt-1 text-sm font-black text-white/90">{purpose}</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Template</div>
+                    <div className="mt-1 text-sm font-black text-white/90">{templateLabel}</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Color Combination</div>
+                    <div className="mt-1 text-sm font-black text-white/90">{themeLabel}</div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Hosts</div>
+                    <div className="mt-1 text-sm font-black text-white/90">{hostLabel || "-"}</div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/10" />
+
+                <div className="grid gap-2">
+                  <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">First Event</div>
+                  {firstEventSummary ? (
+                    <div className="grid gap-1 text-sm text-white/85">
+                      <div className="font-black text-white">
+                        {firstEventSummary.title || "Event"}
+                      </div>
+                      <div className="text-white/80">
+                        {firstEventSummary.dateText}{firstEventSummary.timeText ? ` • ${firstEventSummary.timeText}` : ""}
+                      </div>
+                      <div className="text-white/70">{firstEventSummary.venue || ""}</div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-white/60">-</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-black uppercase tracking-wider text-white hover:border-white/25 disabled:opacity-60"
+                  disabled={pending}
+                  onClick={() => setReviewOpen(false)}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-6 py-3 text-sm font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] disabled:opacity-60"
+                  disabled={pending}
+                  onClick={() => {
+                    setClientError(null);
+                    setReviewOpen(false);
+                    confirmedSubmitRef.current = true;
+                    setConfirmedSubmit(true);
+                    window.setTimeout(() => {
+                      formRef.current?.requestSubmit();
+                    }, 0);
+                  }}
+                >
+                  {pending ? "Creating..." : "Create Mission"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </form>
   );
 }

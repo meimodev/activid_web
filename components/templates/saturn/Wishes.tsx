@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, query, orderBy, onSnapshot, where, getDocs, Timestamp } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { collection, addDoc, query, onSnapshot, where, getDocs, Timestamp } from "firebase/firestore";
+import { formatRelativeToNow } from "@/lib/date-time";
 import { motion, AnimatePresence } from "framer-motion";
 import { CosmicDivider, StarDivider, SatrunIcon } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
@@ -188,7 +188,7 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
   {wish.name}
   </h4>
   <span className="text-[10px] text-white/40 uppercase tracking-widest font-heading">
-  {wish.createdAt?.toDate ? formatDistanceToNow(wish.createdAt.toDate(), { addSuffix: true }) : "Just now"}
+  {wish.createdAt ? formatRelativeToNow(wish.createdAt) || "Just now" : "Just now"}
   </span>
   </div>
   <p className="font-body text-white/90 leading-relaxed">

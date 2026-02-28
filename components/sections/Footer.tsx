@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { siteContent } from '@/lib/site-content';
 import { trackFooter } from '@/lib/analytics';
+import { DateTime } from "luxon";
 
 export interface FooterProps {
   className?: string;
@@ -11,7 +12,7 @@ export interface FooterProps {
 
 export function Footer({ className = '' }: FooterProps) {
   const { footer, navigation } = siteContent;
-  const currentYear = new Date().getFullYear();
+  const currentYear = DateTime.now().year;
 
 
   return (

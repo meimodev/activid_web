@@ -7,6 +7,7 @@ import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { OverlayReveal } from "./graphics";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
 import type { TitleSectionProps } from "./InfoSections.types";
+import { getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
 
 export function TitleSection({
   hosts,
@@ -17,31 +18,17 @@ export function TitleSection({
   showCountdown = true,
   purpose,
 }: TitleSectionProps) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [timeLeft, setTimeLeft] = useState(() => getCountdownParts(countdownTarget));
 
   useEffect(() => {
-    const target = new Date(countdownTarget);
+    const update = () => setTimeLeft(getCountdownParts(countdownTarget));
+    const immediate = window.setTimeout(update, 0);
+    const timer = window.setInterval(update, 1000);
 
-    const timer = window.setInterval(() => {
-      const now = new Date();
-      const difference = target.getTime() - now.getTime();
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-        });
-      }
-    }, 1000);
-
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(immediate);
+      window.clearInterval(timer);
+    };
   }, [countdownTarget]);
 
   const displayHeading =
@@ -52,19 +39,12 @@ export function TitleSection({
   }, [galleryPhotos]);
 
   const calendarHref = useMemo(() => {
-    const datePart = (countdownTarget || "").split("T")[0];
-    if (!datePart) return "#";
+    const dt = parseInvitationDateTime(countdownTarget);
+    if (!dt) return "#";
 
-    const [y, m, d] = datePart.split("-").map((v) => Number(v));
-    if (!y || !m || !d) return "#";
-
-    const startDate = new Date(y, m - 1, d);
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 1);
-
-    const pad2 = (n: number) => String(n).padStart(2, "0");
-    const fmt = (dt: Date) =>
-      `${dt.getFullYear()}${pad2(dt.getMonth() + 1)}${pad2(dt.getDate())}`;
+    const start = dt.startOf("day");
+    const end = start.plus({ days: 1 });
+    const fmt = (v: typeof start) => v.toFormat("yyyyLLdd");
 
     const primary = hosts[0];
     const secondary = hosts[1];
@@ -79,7 +59,7 @@ export function TitleSection({
     const params = new URLSearchParams({
       action: "TEMPLATE",
       text: title,
-      dates: `${fmt(startDate)}/${fmt(endDate)}`,
+      dates: `${fmt(start)}/${fmt(end)}`,
       ctz: "Asia/Jakarta",
     });
 

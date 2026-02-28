@@ -211,7 +211,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
   <div className="space-y-4 font-body text-wedding-text">
   <FloatingParallax speed={0.2}>
   <p className="text-xl font-bold font-heading">{formatInvitationDateLong(e.date)}</p>
-  <p className="text-wedding-text-light">{formatInvitationTime(e.date.time)}</p>
+  <p className="text-wedding-text-light">{formatInvitationTime(e.date)}</p>
   <div className="w-16 h-px bg-wedding-accent/30 mx-auto my-4"></div>
   <p className="font-bold text-lg">{e.venue}</p>
   <p className="text-wedding-text-light text-sm italic">{e.address}</p>

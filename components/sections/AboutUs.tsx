@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 import Image from 'next/image';
 import { siteContent } from '@/lib/site-content';
+import { DateTime } from 'luxon';
 
 export interface AboutUsProps {
   className?: string;
@@ -71,7 +72,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
                     </p>
                   </div>
                   <div className="text-sm font-black text-[#1a1a3e] font-sans">
-                    {new Date().getFullYear()}
+                    {DateTime.now().year}
                   </div>
                 </motion.div>
 

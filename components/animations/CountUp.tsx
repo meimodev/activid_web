@@ -2,6 +2,7 @@
 
 import { motion, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
+import type { Ref } from 'react';
 import { useInView } from '@/hooks/useInView';
 
 export interface CountUpProps {
@@ -51,7 +52,7 @@ export function CountUp({
   }, [isInView, end, motionValue]);
 
   return (
-    <motion.span ref={ref as any} className={className}>
+    <motion.span ref={ref as unknown as Ref<HTMLSpanElement>} className={className}>
       {display}
     </motion.span>
   );

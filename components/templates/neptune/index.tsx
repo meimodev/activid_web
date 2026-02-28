@@ -29,7 +29,7 @@ import {
  NEPTUNE_OVERLAY_URLS,
  TitleDecoration10,
 } from "./graphics";
-import { Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
+import { Host, InvitationConfig, InvitationDateTimeValue } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { SplitText } from "@/components/animations";
@@ -47,7 +47,8 @@ import {
  Timestamp,
  where,
 } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { DateTime } from "luxon";
+import { formatRelativeToNow, getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
 import {
  formatInvitationDateLong,
  formatInvitationMonthYear,
@@ -626,12 +627,9 @@ function CoverOverlay({
   return `${dd} . ${mm} . ${yyyy}`;
   }
 
-  const d = new Date(raw);
-  if (!Number.isNaN(d.getTime())) {
-  const dd = `${d.getDate()}`.padStart(2, "0");
-  const mm = `${d.getMonth() + 1}`.padStart(2, "0");
-  const yyyy = `${d.getFullYear()}`;
-  return `${dd} . ${mm} . ${yyyy}`;
+  const dt = parseInvitationDateTime(raw);
+  if (dt) {
+    return dt.toFormat("dd . MM . yyyy");
   }
 
   return raw;
@@ -1133,22 +1131,7 @@ function QuoteSection({
 }
 
 function CountdownRow({ targetDate }: { targetDate: string }) {
- const compute = (raw: string) => {
-  const target = new Date(raw);
-  const now = new Date();
-  const diff = target.getTime() - now.getTime();
-
-  if (!Number.isFinite(diff) || diff <= 0) {
-  return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-  }
-
-  return {
-  days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-  hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-  minutes: Math.floor((diff / 1000 / 60) % 60),
-  seconds: Math.floor((diff / 1000) % 60),
-  };
- };
+ const compute = (raw: string) => getCountdownParts(raw);
 
  const [timeLeft, setTimeLeft] = useState(() => compute(targetDate));
 
@@ -1413,7 +1396,7 @@ function WeddingEventSection({
  events: Array<{
   key: string;
   title: string;
-  date: InvitationDateTime;
+  date: InvitationDateTimeValue;
   venue: string;
   address: string;
   mapUrl: string;
@@ -1522,7 +1505,7 @@ function EventCardClassic({
  mapUrl,
 }: {
  title: string;
- date: InvitationDateTime;
+ date: InvitationDateTimeValue;
  venue: string;
  address: string;
  mapUrl: string;
@@ -1555,7 +1538,7 @@ function EventCardClassic({
   <>
   <IconClock />
   <p className="text-[22px] tracking-[0.22em] uppercase font-body">
-  {formatInvitationTime(date.time)}
+  {formatInvitationTime(date)}
   </p>
   </>
   ) : null}
@@ -2443,35 +2426,35 @@ export function WishesFirestore({
   invitationId,
   name: "Raka", 
   message: "Selamat menempuh hidup baru. Semoga selalu diberi kebahagiaan dan keberkahan.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 18)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 18),
   },
   {
   id: `demo_${invitationId}_2`,
   invitationId,
   name: "Nadya",
   message: "Happy wedding! Semoga langgeng sampai tua dan saling menguatkan dalam setiap keadaan.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 2)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 2),
   },
   {
   id: `demo_${invitationId}_3`,
   invitationId,
   name: "Dimas",
   message: "Semoga pernikahannya penuh cinta, rezeki lancar, dan rumah tangga sakinah mawaddah warahmah.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 9)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 9),
   },
   {
   id: `demo_${invitationId}_4`,
   invitationId,
   name: "Alya",
   message: "Congrats! Semoga jadi pasangan yang saling melengkapi dan selalu kompak.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 26)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 26),
   },
   {
   id: `demo_${invitationId}_5`,
   invitationId,
   name: "Bima",
   message: "Doa terbaik untuk kalian berdua. Semoga acaranya lancar dan pernikahannya bahagia selalu.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 54)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 54),
   },
   ];
  }, [invitationId, isDemo]);
@@ -2887,11 +2870,7 @@ export function WishesFirestore({
   {w.name}
   </p>
   <p className="mt-2 text-xs text-[#6B747C]">
-  {w.createdAt?.toDate
-  ? formatDistanceToNow(w.createdAt.toDate(), {
-  addSuffix: true,
-  })
-  : "Baru saja"}
+  {w.createdAt ? formatRelativeToNow(w.createdAt) || "Baru saja" : "Baru saja"}
   </p>
   </div>
   </div>
@@ -2932,11 +2911,7 @@ export function WishesFirestore({
   </span>
   ) : null}
   <span className="text-[10px] text-cyan-100/50 uppercase tracking-[0.25em] font-body">
-  {w.createdAt?.toDate
-  ? formatDistanceToNow(w.createdAt.toDate(), {
-  addSuffix: true,
-  })
-  : "Baru saja"}
+  {w.createdAt ? formatRelativeToNow(w.createdAt) || "Baru saja" : "Baru saja"}
   </span>
   </div>
   </div>
@@ -3054,7 +3029,7 @@ function ThankYouSection({
 }
 
 function FooterMark({ hosts }: { hosts: Host[] }) {
- const year = new Date().getFullYear();
+ const year = DateTime.now().year;
  const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
  const stars = useMemo(() => {

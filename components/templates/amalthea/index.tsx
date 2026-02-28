@@ -19,6 +19,8 @@ import {
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { DateTime } from "luxon";
+import { INVITATION_LOCALE, INVITATION_ZONE, parseInvitationDateTime } from "@/lib/date-time";
 
 const AMALTHEA_DEMO_ASSETS = {
   groomPhoto:
@@ -84,11 +86,12 @@ export function Amalthea({ config }: AmaltheaProps) {
   );
 
   const demoCountdownTarget = useMemo(() => {
-    const dt = new Date();
-    dt.setDate(dt.getDate() + 3);
-    dt.setHours(0, 0, 0, 0);
-
-    return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}T00:00:00`;
+    const dt = DateTime.now()
+      .setZone(INVITATION_ZONE)
+      .plus({ days: 3 })
+      .startOf("day")
+      .set({ second: 0, millisecond: 0 });
+    return dt.toISO({ includeOffset: true, suppressMilliseconds: true }) ?? "";
   }, []);
 
   const firstEventCountdownTarget = useMemo(() => {
@@ -101,34 +104,15 @@ export function Amalthea({ config }: AmaltheaProps) {
     const first = list[0];
     if (!first) return null;
 
-    const dateValue = (first as { date?: unknown } | null)?.date as
-      | {
-          date?: { year?: unknown; month?: unknown; day?: unknown };
-          time?: { hour?: unknown; minute?: unknown };
-          year?: unknown;
-          month?: unknown;
-          day?: unknown;
-          hour?: unknown;
-          minute?: unknown;
-        }
-      | undefined;
-
-    const nestedDate = dateValue?.date;
-    const nestedTime = dateValue?.time;
-
-    const year = isInt(nestedDate?.year) ? nestedDate.year : isInt(dateValue?.year) ? dateValue.year : null;
-    const month = isInt(nestedDate?.month) ? nestedDate.month : isInt(dateValue?.month) ? dateValue.month : null;
-    const day = isInt(nestedDate?.day) ? nestedDate.day : isInt(dateValue?.day) ? dateValue.day : null;
-    if (!year || !month || !day) return null;
-
-    const hour = isInt(nestedTime?.hour) ? nestedTime.hour : isInt(dateValue?.hour) ? dateValue.hour : 0;
-    const minute = isInt(nestedTime?.minute)
-      ? nestedTime.minute
-      : isInt(dateValue?.minute)
-        ? dateValue.minute
-        : 0;
-
-    return `${year}-${pad2(month)}-${pad2(day)}T${pad2(hour)}:${pad2(minute)}:00`;
+    const dateValue = (first as { date?: unknown } | null)?.date;
+    const dt = parseInvitationDateTime(dateValue);
+    if (!dt) return null;
+    return (
+      dt
+        .setZone(INVITATION_ZONE)
+        .set({ second: 0, millisecond: 0 })
+        .toISO({ includeOffset: true, suppressMilliseconds: true }) ?? null
+    );
   }, [sections.event?.events]);
 
   const effectiveCountdownTarget =
@@ -137,10 +121,8 @@ export function Amalthea({ config }: AmaltheaProps) {
   const effectiveWeddingDateDisplay = useMemo(() => {
     if (!isDemo) return weddingDate.display;
 
-    const dt = new Date();
-    dt.setDate(dt.getDate() + 3);
-    const month = dt.toLocaleString("id-ID", { month: "long" });
-    return `${dt.getDate()} ${month} ${dt.getFullYear()}`;
+    const dt = DateTime.now().setZone(INVITATION_ZONE).plus({ days: 3 }).startOf("day");
+    return dt.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
   }, [isDemo, weddingDate.display]);
 
   return (

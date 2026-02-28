@@ -7,6 +7,7 @@ import { SplitText } from '@/components/animations/SplitText';
 import { ANIMATION_VARIANTS } from '@/lib/animation-config';
 import type { HeroContent } from '@/types/hero.types';
 import { trackCTA } from '@/lib/analytics';
+import { DateTime } from 'luxon';
 
 export interface HeroProps {
   content: HeroContent;
@@ -24,6 +25,11 @@ export interface HeroProps {
 export function Hero({ content, className = '' }: HeroProps) {
   const { title, subtitle, backgroundVideo } = content;
   const sectionRef = useRef<HTMLDivElement>(null);
+
+  const prng = (seed: number) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
 
   // Parallax effect setup
   const { scrollYProgress } = useScroll({
@@ -46,26 +52,37 @@ export function Hero({ content, className = '' }: HeroProps) {
       {content.gradientOrbs && content.gradientOrbs.count > 0 && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: content.gradientOrbs.count }).map((_, i) => (
+            (() => {
+              const seed = i + 1;
+              const left = prng(seed * 12.9898) * 100;
+              const top = prng(seed * 78.233) * 100;
+              const dx = prng(seed * 39.346) * 100 - 50;
+              const dy = prng(seed * 11.135) * 100 - 50;
+              const duration = 10 + prng(seed * 4.321) * 10;
+
+              return (
             <motion.div
               key={i}
               className="absolute rounded-full mix-blend-screen blur-3xl opacity-30"
               style={{
                 background: `radial-gradient(circle, ${content.gradientOrbs?.colors[i % content.gradientOrbs.colors.length]} 0%, transparent 70%)`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: `${left}%`,
+                top: `${top}%`,
                 width: '40vw',
                 height: '40vw',
               }}
               animate={{
-                x: [0, Math.random() * 100 - 50, 0],
-                y: [0, Math.random() * 100 - 50, 0],
+                x: [0, dx, 0],
+                y: [0, dy, 0],
               }}
               transition={{
-                duration: 10 + Math.random() * 10,
+                duration,
                 repeat: Infinity,
                 ease: "linear",
               }}
             />
+              );
+            })()
           ))}
         </div>
       )}
@@ -121,7 +138,7 @@ export function Hero({ content, className = '' }: HeroProps) {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div className="flex items-center gap-6">
             <div className="text-4xl md:text-6xl font-black text-[#1a1a3e] font-sans">
-              {new Date().getFullYear()}
+              {DateTime.now().year}
             </div>
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-[#1a1a3e] mb-1 font-sans">

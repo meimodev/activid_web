@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { VenusReveal } from "./reveal";
+import { getCountdownParts } from "@/lib/date-time";
 
 export function QuoteSection({
   text,
@@ -42,28 +43,11 @@ function CountdownVertical({
 }: {
   targetDate: string;
 }) {
-  const compute = (raw: string) => {
-    const target = new Date(raw);
-    const now = new Date();
-    const difference = target.getTime() - now.getTime();
-
-    if (!Number.isFinite(difference) || difference <= 0) {
-      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-    }
-
-    return {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / 1000 / 60) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
-    };
-  };
-
-  const [timeLeft, setTimeLeft] = useState(() => compute(targetDate));
+  const [timeLeft, setTimeLeft] = useState(() => getCountdownParts(targetDate));
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(compute(targetDate));
+      setTimeLeft(getCountdownParts(targetDate));
     }, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);

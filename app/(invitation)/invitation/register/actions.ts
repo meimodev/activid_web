@@ -2,6 +2,12 @@
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
+  INVITATION_LOCALE,
+  INVITATION_ZONE,
+  parseInvitationDateTime,
+  toInvitationIso,
+} from "@/lib/date-time";
+import {
   createInvitationRegisterSessionCookieValue,
   getInvitationRegisterSessionCookieName,
   isInvitationRegisterSessionValid,
@@ -9,15 +15,15 @@ import {
 import {
   EventDetail,
   Host,
-  InvitationDate,
-  InvitationDateTime,
   InvitationConfig,
   MetadataConfig,
 } from "@/types/invitation";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export type RegisterInvitationState = {
+  ok?: boolean;
+  slug?: string;
+  invitationUrl?: string;
   error?: string;
 };
 
@@ -47,7 +53,7 @@ function getExpectedPassword(): string | null {
   return process.env.INVITATION_REGISTER_PASSWORD ?? null;
 }
 
-const SITE_ORIGIN = "https://activid.web.id";
+const SITE_ORIGIN = "https://invitation.activid.id";
 
 function generateMetadata({
   slug,
@@ -83,7 +89,7 @@ function generateMetadata({
     description = "You are invited to our event.";
   }
 
-  const canonicalUrl = `${SITE_ORIGIN}/invitation/${slug}`;
+  const canonicalUrl = `${SITE_ORIGIN}/${slug}`;
 
   const baseOg = config.metadata?.openGraph ?? {
     title,
@@ -206,59 +212,20 @@ function normalizeEventList(
   return [...prioritized, ...rest].map(([, value]) => value).filter(Boolean);
 }
 
-function pad2(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-function isValidInvitationDate(date: InvitationDate): boolean {
-  if (!date || typeof date !== "object") return false;
-  if (!Number.isInteger(date.year) || date.year < 1900) return false;
-  if (!Number.isInteger(date.month) || date.month < 1 || date.month > 12) return false;
-  if (!Number.isInteger(date.day) || date.day < 1 || date.day > 31) return false;
-  const dt = new Date(date.year, date.month - 1, date.day);
-  return (
-    dt.getFullYear() === date.year &&
-    dt.getMonth() === date.month - 1 &&
-    dt.getDate() === date.day
-  );
-}
-
-function isValidInvitationDateTime(value: InvitationDateTime): boolean {
-  if (!value || typeof value !== "object") return false;
-  if (!isValidInvitationDate(value.date)) return false;
-  const { hour, minute } = value.time ?? {};
-  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return false;
-  if (!Number.isInteger(minute) || minute < 0 || minute > 59) return false;
-  return true;
-}
-
-function toIsoDate(date: InvitationDate): string {
-  return `${date.year}-${pad2(date.month)}-${pad2(date.day)}`;
-}
-
 function deriveWeddingDateFromFirstEvent(firstEvent: EventDetail) {
-  if (!isValidInvitationDateTime(firstEvent.date)) return null;
+  const dt = parseInvitationDateTime(firstEvent.date);
+  if (!dt) return null;
 
-  const iso = toIsoDate(firstEvent.date.date);
-  const dt = new Date(`${iso}T00:00:00`);
-  if (Number.isNaN(dt.getTime())) return null;
-
-  const display = dt.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  const displayShort = dt.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const day = dt.setZone(INVITATION_ZONE).startOf("day");
+  const display = day.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
+  const displayShort = day.setLocale(INVITATION_LOCALE).toFormat("dd LLL yyyy");
+  const countdownTarget = day.toISO({ includeOffset: true, suppressMilliseconds: true });
+  if (!countdownTarget) return null;
 
   return {
     display,
     displayShort,
-    countdownTarget: `${iso}T00:00:00`,
+    countdownTarget,
     rsvpDeadline: display,
   };
 }
@@ -369,10 +336,27 @@ export async function registerInvitation(
     return { error: "At least 1 event is required." };
   }
 
-  const derivedWeddingDate = deriveWeddingDateFromFirstEvent(events[0]!);
+  const normalizedEvents = events.map((event) => {
+    const iso = toInvitationIso(event.date);
+    if (!iso) return null;
+    return { ...event, date: iso };
+  });
+
+  if (normalizedEvents.some((e) => !e)) {
+    return { error: "All event dates are required." };
+  }
+
+  const derivedWeddingDate = deriveWeddingDateFromFirstEvent(
+    normalizedEvents[0] as EventDetail,
+  );
   if (!derivedWeddingDate) {
     return { error: "First event date is required." };
   }
+
+  const normalizedStories = (config.sections?.story?.stories ?? []).map((story) => {
+    const iso = toInvitationIso(story?.date);
+    return { ...story, date: iso ?? story?.date };
+  });
 
   const purpose = readPurpose(formData);
 
@@ -416,7 +400,11 @@ export async function registerInvitation(
         },
         event: {
           ...config.sections.event,
-          events,
+          events: normalizedEvents as EventDetail[],
+        },
+        story: {
+          ...config.sections.story,
+          stories: normalizedStories,
         },
       },
     };
@@ -427,7 +415,7 @@ export async function registerInvitation(
       break;
     } catch (err) {
       if (isAlreadyExistsError(err)) continue;
-      throw err;
+      return { error: err instanceof Error ? err.message : "Failed to create invitation." };
     }
   }
 
@@ -435,5 +423,10 @@ export async function registerInvitation(
     return { error: "Failed to allocate a unique mission code. Please try again." };
   }
 
-  redirect(`/invitation/${finalSlug}`);
+  const invitationUrl = `${SITE_ORIGIN}/${finalSlug}`;
+  return {
+    ok: true,
+    slug: finalSlug,
+    invitationUrl,
+  };
 }

@@ -2,10 +2,11 @@
 
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import type { FooterSectionProps } from "./InfoSections.types";
+import { DateTime } from "luxon";
 
 export function FooterSection({ hosts, message }: FooterSectionProps) {
   const names = `${hosts[0]?.firstName ?? ""} ${hosts[1]?.firstName ? "&" : ""} ${hosts[1]?.firstName ?? ""}`;
-  const year = new Date().getFullYear();
+  const year = DateTime.now().year;
 
   void message;
 

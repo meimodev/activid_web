@@ -263,7 +263,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
 
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
-                    <p className="font-mono text-sm text-white/60">{formatInvitationTime(e.date.time)}</p>
+                    <p className="font-mono text-sm text-white/60">{formatInvitationTime(e.date)}</p>
                   </div>
 
                   <div className="pt-4 border-t border-white/10">

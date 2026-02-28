@@ -23,23 +23,27 @@ export interface InvitationDateTime {
     time: InvitationTime;
 }
 
+export type InvitationDateTimeIso = string;
+
+export type InvitationDateTimeValue = InvitationDateTimeIso | InvitationDateTime;
+
 export interface WeddingDate {
     display: string;
     displayShort: string;
-    countdownTarget: string; // ISO format
+    countdownTarget: string; // ISO format (canonical: include offset)
     rsvpDeadline: string;
 }
 
 export interface EventDetail {
     title: string;
-    date: InvitationDateTime;
+    date: InvitationDateTimeValue;
     venue: string;
     address: string;
     mapUrl: string;
 }
 
 export interface StoryItem {
-    date: InvitationDateTime;
+    date: InvitationDateTimeValue;
     description: string;
     imageUrl?: string;
     title?: string;

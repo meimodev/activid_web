@@ -8,9 +8,10 @@ import { Venus } from "@/components/templates/venus";
 import { Jupiter } from "@/components/templates/jupiter";
 import { Neptune } from "@/components/templates/neptune";
 import { InvitationScaleWrapper } from "@/components/invitation/InvitationScaleWrapper";
+import { DemoThemeSidebar } from "@/components/invitation/DemoThemeSidebar";
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
-import type { InvitationConfig, InvitationDateTime } from "@/types/invitation";
+import type { InvitationConfig } from "@/types/invitation";
 import { notFound } from "next/navigation";
 import { getInvitationThemeStyle } from "@/lib/invitation-theme";
 import { getInvitationTemplateThemes } from "@/data/invitation-templates";
@@ -18,6 +19,7 @@ import {
     getInvitationConfig,
     InvitationConfigQuotaExceededError,
 } from "@/lib/invitation-config";
+import { parseInvitationDateTime, toInvitationIso } from "@/lib/date-time";
 
 function makeDateTime(
     year: number,
@@ -25,18 +27,21 @@ function makeDateTime(
     day: number,
     hour: number,
     minute: number,
-): InvitationDateTime {
-    return {
-        date: { year, month, day },
-        time: { hour, minute },
-    };
+): string {
+    return (
+        toInvitationIso({ year, month, day, hour, minute }) ??
+        `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00+07:00`
+    );
 }
 
-function withTime(value: InvitationDateTime, hour: number, minute: number): InvitationDateTime {
-    return {
-        ...value,
-        time: { hour, minute },
-    };
+function withTime(value: string, hour: number, minute: number): string {
+    const dt = parseInvitationDateTime(value);
+    if (!dt) return value;
+    return (
+        dt
+            .set({ hour, minute, second: 0, millisecond: 0 })
+            .toISO({ includeOffset: true, suppressMilliseconds: true }) ?? value
+    );
 }
 
 const SITE_ORIGIN = "https://activid.web.id";
@@ -253,8 +258,16 @@ export async function generateMetadata(
     };
 }
 
-export default async function InvitationPage({ params }: PageProps) {
+export default async function InvitationPage({ params, searchParams }: PageProps) {
     const { slug } = await params;
+    const resolvedSearchParams = await searchParams;
+    const selectedThemeId = (() => {
+        const value = resolvedSearchParams.theme;
+
+        if (typeof value === "string") return value;
+        if (Array.isArray(value)) return value[0];
+        return undefined;
+    })();
 
     const renderTemplate = (templateId: string, config: InvitationConfig) => {
         if (templateId === "flow") return <Flow config={config} />;
@@ -272,6 +285,9 @@ export default async function InvitationPage({ params }: PageProps) {
         const baseConfig = (INVITATION_DEFAULTS["christian-regina"] ?? INVITATION_DEFAULTS["ricci-andrini"])!;
 
         let config = INVITATION_DEFAULTS[slug];
+
+        const demoTemplateId = slug.replace("-demo", "");
+        const demoThemes = getInvitationTemplateThemes(demoTemplateId);
 
         if (!config) {
             const templateId = slug.replace("-demo", "");
@@ -334,7 +350,7 @@ export default async function InvitationPage({ params }: PageProps) {
                     weddingDate: {
                         display: isMileaDilanDemo ? "Senin, 30 Desember 2024" : "01 Januari 2026",
                         displayShort: isMileaDilanDemo ? "30 Des 2024" : "01 . 01 . 2026",
-                        countdownTarget: isMileaDilanDemo ? "2024-12-30T00:00:00" : "2026-01-01T00:00:00",
+                        countdownTarget: isMileaDilanDemo ? makeDateTime(2024, 12, 30, 0, 0) : makeDateTime(2026, 1, 1, 0, 0),
                         rsvpDeadline: isMileaDilanDemo ? "30 Desember 2024" : "2025-12-31",
                     },
                     backgroundPhotos: [],
@@ -490,8 +506,33 @@ export default async function InvitationPage({ params }: PageProps) {
             }
         }
 
-        const templateId = config.templateId ?? "flow";
-        return withInvitationChrome(templateId, config.theme, renderTemplate(templateId, config));
+        const templateId = config.templateId ?? demoTemplateId;
+        const selectedTheme = selectedThemeId
+            ? demoThemes.find((theme) => theme.id === selectedThemeId)
+            : undefined;
+
+        if (selectedTheme) {
+            config = {
+                ...config,
+                theme: {
+                    mainColor: selectedTheme.mainColor,
+                    accentColor: selectedTheme.accentColor,
+                },
+            };
+        }
+
+        return withInvitationChrome(
+            templateId,
+            config.theme,
+            <>
+                <DemoThemeSidebar
+                    templateId={templateId}
+                    themes={demoThemes}
+                    initialTheme={config.theme}
+                />
+                {renderTemplate(templateId, config)}
+            </>,
+        );
     }
 
     let config: InvitationConfig | null;

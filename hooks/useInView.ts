@@ -3,12 +3,19 @@
 import { useInView as useFramerInView } from 'framer-motion';
 import { RefObject, useRef } from 'react';
 
+type MarginValue = `${number}${"px" | "%"}`;
+type MarginType =
+  | MarginValue
+  | `${MarginValue} ${MarginValue}`
+  | `${MarginValue} ${MarginValue} ${MarginValue}`
+  | `${MarginValue} ${MarginValue} ${MarginValue} ${MarginValue}`;
+
 /**
  * Options for the useInView hook
  */
 export interface UseInViewOptions {
   threshold?: number;
-  rootMargin?: string;
+  rootMargin?: MarginType;
   once?: boolean;
 }
 
@@ -25,7 +32,7 @@ export function useInView(
   const ref = useRef<HTMLElement>(null);
   const isInView = useFramerInView(ref, {
     amount: options?.threshold,
-    margin: options?.rootMargin as any,
+    margin: options?.rootMargin,
     once: options?.once,
   });
 

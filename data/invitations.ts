@@ -1,10 +1,12 @@
 
 import { InvitationConfig } from "@/types/invitation";
+import { toInvitationIso } from "@/lib/date-time";
 
-const dt = (year: number, month: number, day: number, hour = 0, minute = 0) => ({
-    date: { year, month, day },
-    time: { hour, minute },
-});
+const dt = (year: number, month: number, day: number, hour = 0, minute = 0) =>
+    toInvitationIso({ year, month, day, hour, minute }) ??
+    `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00+07:00`;
+
+const cd = (year: number, month: number, day: number) => dt(year, month, day, 0, 0);
 
 export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
     id: "ricci-andrini",
@@ -49,7 +51,7 @@ export const RICCI_ANDRINI_CONFIG: InvitationConfig = {
     weddingDate: {
         display: "24 Januari 2026",
         displayShort: "24 Jan 2026",
-        countdownTarget: "2026-01-24T00:00:00",
+        countdownTarget: cd(2026, 1, 24),
         rsvpDeadline: "24 Januari 2026",
     },
     hosts: [
@@ -213,7 +215,7 @@ export const CHRISTIAN_REGINA_CONFIG: InvitationConfig = {
     weddingDate: {
         display: "31 JANUARI 2026",
         displayShort: "31 . 01 . 2026",
-        countdownTarget: "2026-01-31T00:00:00",
+        countdownTarget: cd(2026, 1, 31),
         rsvpDeadline: "30 Januari 2026",
     },
     hosts: [
@@ -413,7 +415,7 @@ export const VENUS_CONFIG: InvitationConfig = {
     weddingDate: {
         display: "Senin, 30 Desember 2024",
         displayShort: "30 Des 2024",
-        countdownTarget: "2024-12-30T00:00:00",
+        countdownTarget: cd(2024, 12, 30),
         rsvpDeadline: "30 Desember 2024",
     },
     backgroundPhotos: [],
@@ -711,7 +713,7 @@ export const MERCURY_CONFIG: InvitationConfig = {
     weddingDate: {
         display: "21 Januari 2026",
         displayShort: "21.01.2026",
-        countdownTarget: "2026-01-21T00:00:00",
+        countdownTarget: cd(2026, 1, 21),
         rsvpDeadline: "20 Januari 2026",
     },
     hosts: [
@@ -808,7 +810,7 @@ export const PLUTO_CONFIG: InvitationConfig = {
     weddingDate: {
         display: "21 Januari 2026",
         displayShort: "21.01.2026",
-        countdownTarget: "2026-01-21T00:00:00",
+        countdownTarget: cd(2026, 1, 21),
         rsvpDeadline: "20 Januari 2026",
     },
     hosts: [
@@ -947,7 +949,7 @@ export const AMALTHEA_CONFIG: InvitationConfig = {
     weddingDate: {
         display: "10 Oktober 2026",
         displayShort: "10.10.2026",
-        countdownTarget: "2026-10-10T00:00:00",
+        countdownTarget: cd(2026, 10, 10),
         rsvpDeadline: "01 Oktober 2026",
     },
     hosts: [

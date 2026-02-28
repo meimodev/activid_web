@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 import { CosmicDivider, SatrunIcon } from "./graphics";

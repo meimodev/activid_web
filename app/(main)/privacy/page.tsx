@@ -1,6 +1,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { siteContent } from '@/lib/site-content';
+import { DateTime } from "luxon";
 
 export const metadata: Metadata = {
     title: 'Privacy Policy | Activid',
@@ -12,7 +13,7 @@ export default function PrivacyPolicyPage() {
         <main className="min-h-screen pt-32 pb-20 bg-[#0a0a0a] text-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
                 <h1 className="text-4xl md:text-5xl font-bold font-sans mb-8">Privacy Policy</h1>
-                <p className="text-white/60 mb-12">Last updated: {new Date().toLocaleDateString()}</p>
+                <p className="text-white/60 mb-12">Last updated: {DateTime.now().toLocaleString()}</p>
 
                 <div className="space-y-8 font-sans text-white/80 leading-relaxed">
                     <section>

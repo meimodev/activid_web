@@ -1,7 +1,7 @@
 "use client";
 
 import type { InvitationConfig } from "@/types/invitation";
-import type { InvitationDateTime } from "@/types/invitation";
+import type { InvitationDateTimeValue } from "@/types/invitation";
 import { formatInvitationMonthYear } from "@/lib/date-utils";
 import { SectionWrap } from "./SectionWrap";
 import { VenusReveal } from "./reveal";
@@ -34,7 +34,7 @@ function StoryItem({
   description,
   revealDelay,
 }: {
-  date: InvitationDateTime;
+  date: InvitationDateTimeValue;
   description: string;
   revealDelay?: number;
 }) {

@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import ContactCards from '@/components/sections/ContactCards';
 import { ContactMethods } from '@/components/sections/ContactMethods';
 import { siteContent } from '@/lib/site-content';
+import { DateTime } from 'luxon';
 
 export const metadata: Metadata = {
   title: `${siteContent.contactPage.header.title} | Activid Portfolio`,
@@ -36,7 +37,7 @@ export default function Contact() {
               </p>
               <span className="text-xl sm:text-2xl md:text-3xl">•</span>
               <p className="text-xl sm:text-2xl md:text-3xl font-medium font-sans">
-                {new Date().getFullYear()}
+                {DateTime.now().year}
               </p>
             </div>
           </ScrollReveal>

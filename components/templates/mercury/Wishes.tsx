@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs, onSnapshot, query, runTransaction, where, Timestamp } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeToNow } from "@/lib/date-time";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { FloralDivider } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
@@ -76,35 +76,35 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
   invitationId,
   name: "Raka",
   message: "Selamat menempuh hidup baru. Semoga selalu diberi kebahagiaan dan keberkahan.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 18)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 18),
   },
   {
   id: `demo_${invitationId}_2`,
   invitationId,
   name: "Nadya",
   message: "Happy wedding! Semoga langgeng sampai tua dan saling menguatkan dalam setiap keadaan.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 2)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 2),
   },
   {
   id: `demo_${invitationId}_3`,
   invitationId,
   name: "Dimas",
   message: "Semoga pernikahannya penuh cinta, rezeki lancar, dan rumah tangga sakinah mawaddah warahmah.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 9)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 9),
   },
   {
   id: `demo_${invitationId}_4`,
   invitationId,
   name: "Alya",
   message: "Congrats! Semoga jadi pasangan yang saling melengkapi dan selalu kompak.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 26)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 26),
   },
   {
   id: `demo_${invitationId}_5`,
   invitationId,
   name: "Bima",
   message: "Doa terbaik untuk kalian berdua. Semoga acaranya lancar dan pernikahannya bahagia selalu.",
-  createdAt: Timestamp.fromDate(new Date(now - 1000 * 60 * 60 * 54)),
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 54),
   },
   ];
   }, [invitationId, isDemo]);
@@ -406,9 +406,7 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
   <div>
   <p className="text-xs tracking-[0.35em] uppercase text-white/70 font-poppins">{wish.name}</p>
   <p className="mt-2 text-[10px] uppercase tracking-[0.25em] font-poppins text-white/55">
-  {wish.createdAt?.toDate
-  ? formatDistanceToNow(wish.createdAt.toDate(), { addSuffix: true })
-  : "Just now"}
+  {wish.createdAt ? formatRelativeToNow(wish.createdAt) || "Just now" : "Just now"}
   </p>
   </div>
   </div>

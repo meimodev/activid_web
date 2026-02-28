@@ -6,7 +6,7 @@ export type AnimationDuration = 'instant' | 'fast' | 'normal' | 'slow' | 'slower
 
 export interface AnimationVariant {
   initial: Record<string, number | string>;
-  animate: Record<string, number | string | { transition?: any }>;
+  animate: Record<string, number | string | { transition?: unknown }>;
   exit?: Record<string, number | string>;
 }
 
