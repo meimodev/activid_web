@@ -27,6 +27,7 @@ import { GiftSection } from "./GiftSection";
 import { WishesSection } from "./WishesSection";
 import { FooterSection } from "./FooterSection";
 import { FloatingNav } from "./FloatingNav";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 interface VenusProps {
   config: InvitationConfig;
@@ -50,16 +51,17 @@ export function Venus({ config }: VenusProps) {
   const audioStreamUrl = useMemo(() => config.music.url.replace(/dl=[01]/, "raw=1"), [config.music.url]);
 
   const persistentBackgroundPhotos = useMemo(() => {
-  const hero = config.sections.hero.coverImage ? [config.sections.hero.coverImage] : [];
-  const gallery = config.sections.gallery.photos;
-  const backgrounds = config.backgroundPhotos;
-  return Array.from(new Set([...hero, ...gallery, ...backgrounds])).filter(Boolean);
-  }, [config.backgroundPhotos, config.sections.gallery.photos, config.sections.hero.coverImage]);
+  return pickDeterministicRandomSubset(
+    config.sections.gallery.photos ?? [],
+    config.id,
+    5,
+  );
+  }, [config.id, config.sections.gallery.photos]);
 
   const quoteBackgroundImage = useMemo(() => {
   if (persistentBackgroundPhotos.length >= 2) return persistentBackgroundPhotos[1];
-  return persistentBackgroundPhotos[0] || config.sections.hero.coverImage;
-  }, [config.sections.hero.coverImage, persistentBackgroundPhotos]);
+  return persistentBackgroundPhotos[0] || "";
+  }, [persistentBackgroundPhotos]);
 
   useEffect(() => {
   if (typeof window === "undefined") return;
@@ -81,16 +83,8 @@ export function Venus({ config }: VenusProps) {
 
   const guestName = inviteeName || searchParams.get("guest") || "Tamu";
 
-  const hosts = Array.isArray(config.hosts) && config.hosts.length
-    ? config.hosts
-    : [config.couple.groom, config.couple.bride].filter(Boolean);
-
-  const effectiveCouple = {
-    groom: hosts[0] ?? config.couple.groom,
-    bride: hosts[1] ?? config.couple.bride,
-  };
-
-  const hostsSection = config.sections.hosts ?? config.sections.couple;
+  const hosts = config.hosts;
+  const hostsSection = config.sections.hosts;
 
   const navItems = useMemo(
   () =>
@@ -206,7 +200,7 @@ export function Venus({ config }: VenusProps) {
       >
       <Hero
       onOpen={openInvitation}
-      couple={effectiveCouple}
+      hosts={hosts}
       date={config.weddingDate.displayShort}
       subtitle={config.sections.hero.subtitle}
       coverImage={config.sections.hero.coverImage}
@@ -221,7 +215,7 @@ export function Venus({ config }: VenusProps) {
   <div className={isContentReady ? "" : "h-[100dvh] overflow-hidden"}>
   {isContentReady ? (
   <>
-  <HeaderIntroSection couple={effectiveCouple} />
+  <HeaderIntroSection hosts={hosts} />
 
   {config.sections.quote.enabled ? (
   <QuoteSection
@@ -232,7 +226,7 @@ export function Venus({ config }: VenusProps) {
   ) : null}
 
   {hostsSection.enabled ? (
-  <CoupleSection couple={effectiveCouple} title="Milea & Dilan" />
+  <CoupleSection hosts={hosts} title="Milea & Dilan" />
   ) : null}
 
   {config.sections.event.enabled ? (
@@ -276,7 +270,7 @@ export function Venus({ config }: VenusProps) {
   />
   ) : null}
 
-  <FooterSection couple={effectiveCouple} />
+  <FooterSection hosts={hosts} />
 
   {isOpen ? (
       <FloatingNav

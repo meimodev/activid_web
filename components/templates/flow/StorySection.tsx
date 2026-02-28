@@ -4,11 +4,8 @@ import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 import { GoldLeafBorder, DiamondAccent, HeartDivider, RingsDivider } from "./graphics";
-
-interface StoryItem {
-    date: string;
-    description: string;
-}
+import type { StoryItem } from "@/types/invitation";
+import { formatInvitationMonthYear } from "@/lib/date-utils";
 
 interface StorySectionProps {
     stories: StoryItem[];
@@ -51,7 +48,7 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                                             <div className="relative">
                                                 <div className="absolute inset-0 bg-wedding-bg blur-md rounded-full" />
                                                 <span className="relative z-10 inline-block py-2 px-8 border border-wedding-accent/40 rounded-full font-heading text-sm tracking-[0.15em] bg-white/80 backdrop-blur-sm shadow-sm text-wedding-accent font-bold uppercase">
-                                                    {story.date}
+                                                    {formatInvitationMonthYear(story.date)}
                                                 </span>
                                             </div>
 

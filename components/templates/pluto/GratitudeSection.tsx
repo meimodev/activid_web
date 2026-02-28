@@ -4,15 +4,15 @@ import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { OverlayReveal } from "./graphics";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
-import type { CoupleInfo } from "./InfoSections.types";
+import type { Host } from "@/types/invitation";
 
 interface GratitudeSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
   message?: string;
 }
 
-export function GratitudeSection({ couple, message }: GratitudeSectionProps) {
-  const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
+  const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
   return (
     <section className="relative overflow-hidden bg-[#EFE7D6] pb-20 text-[#2B2424]">

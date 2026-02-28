@@ -5,12 +5,18 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Allura, Plus_Jakarta_Sans } from "next/font/google";
 import { IconPause, IconPlay, WaveSeparator } from "./graphics";
-import { InvitationConfig } from "@/types/invitation";
+import { Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, onSnapshot, query, runTransaction, Timestamp, where } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
+import {
+  formatInvitationDateLong,
+  formatInvitationMonthYear,
+  formatInvitationTime,
+} from "@/lib/date-utils";
 
 interface JupiterProps {
   config: InvitationConfig;
@@ -127,23 +133,13 @@ export function Jupiter({ config }: JupiterProps) {
   return sp.get("guest") || "Tamu";
   }, [inviteeName]);
 
-  const persistentBackgroundPhotos = useMemo(() => {
-  const hero = config.sections.hero.coverImage ? [config.sections.hero.coverImage] : [];
-  const gallery = config.sections.gallery.photos;
-  const backgrounds = config.backgroundPhotos;
-  return Array.from(new Set([...hero, ...gallery, ...backgrounds])).filter(Boolean);
-  }, [config.backgroundPhotos, config.sections.gallery.photos, config.sections.hero.coverImage]);
+  const derivedPhotos = useMemo(
+    () => pickDeterministicRandomSubset(config.sections.gallery.photos ?? [], config.id, 5),
+    [config.id, config.sections.gallery.photos],
+  );
 
-  const hosts = Array.isArray(config.hosts) && config.hosts.length
-  ? config.hosts
-  : [config.couple.groom, config.couple.bride].filter(Boolean);
-
-  const effectiveCouple = {
-  groom: hosts[0] ?? config.couple.groom,
-  bride: hosts[1] ?? config.couple.bride,
-  };
-
-  const hostsSection = config.sections.hosts ?? config.sections.couple;
+  const hosts = config.hosts;
+  const hostsSection = config.sections.hosts;
 
   useEffect(() => {
   if (!isOpen || !contentReady) return;
@@ -185,10 +181,10 @@ export function Jupiter({ config }: JupiterProps) {
   <main
   className={`relative min-h-screen overflow-x-hidden bg-[#F7F3EA] text-[#1F1B16] font-body ${jupiterBody.variable} [--font-body:var(--font-jupiter-body)]`}
   >
-  {isOpen && persistentBackgroundPhotos.length > 0 ? (
+  {isOpen && derivedPhotos.length > 0 ? (
   <div className="absolute inset-0 z-0 pointer-events-none">
   <BackgroundSlideshow
-  photos={persistentBackgroundPhotos}
+  photos={derivedPhotos}
   className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"
   />
   <div className="absolute inset-0 bg-linear-to-b from-[#F7F3EA]/85 via-[#F7F3EA]/70 to-[#F7F3EA]/90" />
@@ -214,7 +210,7 @@ export function Jupiter({ config }: JupiterProps) {
   }}
   >
   <JupiterCoverOverlay
-  couple={effectiveCouple}
+  hosts={hosts}
   date={config.weddingDate.display}
   subtitle={config.sections.hero.subtitle}
   coverImage={config.sections.hero.coverImage}
@@ -228,11 +224,11 @@ export function Jupiter({ config }: JupiterProps) {
   <div className="relative z-10">
   <div className="relative">
   <JupiterTitleCountdown
-  couple={effectiveCouple}
+  hosts={hosts}
   targetDate={config.weddingDate.countdownTarget}
   heading={config.sections.title.heading}
   coverImage={config.sections.hero.coverImage}
-  photos={config.sections.countdown.photos}
+  photos={derivedPhotos}
   />
 
   {config.sections.quote.enabled && (
@@ -244,10 +240,7 @@ export function Jupiter({ config }: JupiterProps) {
   )}
 
   {hostsSection.enabled && (
-  <JupiterCouple
-  groom={effectiveCouple.groom}
-  bride={effectiveCouple.bride}
-  />
+  <JupiterCouple hosts={hosts} />
   )}
 
   {config.sections.event.enabled && (
@@ -266,7 +259,7 @@ export function Jupiter({ config }: JupiterProps) {
   )}
 
   <JupiterGratitude
-  couple={effectiveCouple}
+  hosts={hosts}
   message={config.sections.footer.message}
   />
 
@@ -283,7 +276,7 @@ export function Jupiter({ config }: JupiterProps) {
   </JupiterSectionWrap>
   )}
 
-  <JupiterFooter couple={effectiveCouple} />
+  <JupiterFooter hosts={hosts} />
 
   {isOpen ? (
   <button
@@ -320,20 +313,23 @@ export function Jupiter({ config }: JupiterProps) {
 }
 
 function JupiterCoverOverlay({
-  couple,
+  hosts,
   date,
   subtitle,
   coverImage,
   guestName,
   onOpen,
 }: {
-  couple: InvitationConfig["couple"];
+  hosts: Host[];
   date: string;
   subtitle: string;
   coverImage: string;
   guestName: string;
   onOpen: () => void;
 }) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
   return (
   <div className="relative h-screen w-full overflow-hidden bg-[#0d0d1f] text-white">
   <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${coverImage})` }}>
@@ -356,11 +352,11 @@ function JupiterCoverOverlay({
   <p className="text-xs tracking-[0.35em] uppercase opacity-90 font-body">{subtitle || "The Wedding Of"}</p>
 
   <h1 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-amber-100`}>
-  {couple.bride.firstName}
+  {primary?.firstName ?? ""}
   </h1>
   <div className="mt-2 mb-2 text-3xl opacity-90">&</div>
   <h1 className={`${jupiterScript.className} text-6xl leading-none text-amber-100`}>
-  {couple.groom.firstName}
+  {secondary?.firstName ?? ""}
   </h1>
 
   <div className="mt-8 w-full max-w-sm border border-white/25 bg-white/10 backdrop-blur-md rounded-2xl p-5">
@@ -383,13 +379,13 @@ function JupiterCoverOverlay({
 }
 
 function JupiterTitleCountdown({
-  couple,
+  hosts,
   targetDate,
   heading,
   coverImage,
   photos,
 }: {
-  couple: InvitationConfig["couple"];
+  hosts: Host[];
   targetDate: string;
   heading: string;
   coverImage: string;
@@ -397,6 +393,9 @@ function JupiterTitleCountdown({
 }) {
   const timeLeft = useCountdown(targetDate);
   const { month, day, year } = useMemo(() => formatJupiterDateParts(targetDate), [targetDate]);
+
+  const primary = hosts[0];
+  const secondary = hosts[1];
 
   const topPhoto = photos?.[0] || coverImage;
 
@@ -421,11 +420,11 @@ function JupiterTitleCountdown({
   <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-body">{heading || "The Wedding"}</p>
 
   <h2 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-[#1F1B16]`}>
-  {couple.bride.firstName}
+  {primary?.firstName ?? ""}
   </h2>
   <div className="mt-2 mb-2 text-3xl opacity-80 text-[#1F1B16]">&</div>
   <h2 className={`${jupiterScript.className} text-6xl leading-none text-[#1F1B16]`}>
-  {couple.groom.firstName}
+  {secondary?.firstName ?? ""}
   </h2>
 
   <div className="mt-10 grid grid-cols-1 gap-6 items-center">
@@ -505,35 +504,34 @@ function JupiterQuote({ text, author, thumbnails }: { text: string; author: stri
   );
 }
 
-function JupiterCouple({
-  groom,
-  bride,
-}: {
-  groom: InvitationConfig["couple"]["groom"];
-  bride: InvitationConfig["couple"]["bride"];
-}) {
+function JupiterCouple({ hosts }: { hosts: Host[] }) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
   return (
   <section className="relative px-6 py-20">
   <div className="max-w-5xl mx-auto">
-  <JupiterSectionHeading title="Bride & Groom" />
+  <JupiterSectionHeading title="Hosts" />
 
   <div className="grid grid-cols-1 gap-8">
   <JupiterPersonCard
-  label="Mempelai Pria"
-  name={groom.firstName}
-  fullName={groom.fullName}
-  parents={groom.parents}
-  photo={groom.photo}
+  label="Host 1"
+  name={primary?.firstName ?? ""}
+  fullName={primary?.fullName ?? ""}
+  parents={primary?.parents ?? ""}
+  photo={primary?.photo ?? ""}
   delay={0.35}
   />
+  {secondary ? (
   <JupiterPersonCard
-  label="Mempelai Wanita"
-  name={bride.firstName}
-  fullName={bride.fullName}
-  parents={bride.parents}
-  photo={bride.photo}
+  label="Host 2"
+  name={secondary.firstName}
+  fullName={secondary.fullName}
+  parents={secondary.parents}
+  photo={secondary.photo}
   delay={0.55}
   />
+  ) : null}
   </div>
   </div>
   </section>
@@ -601,7 +599,6 @@ function JupiterEvent({
   key={`${e.title}-${idx}`}
   title={e.title}
   date={e.date}
-  time={e.time}
   venue={e.venue}
   address={e.address}
   mapUrl={e.mapUrl}
@@ -617,15 +614,13 @@ function JupiterEvent({
 function JupiterEventCard({
   title,
   date,
-  time,
   venue,
   address,
   mapUrl,
   delay,
 }: {
   title: string;
-  date: string;
-  time: string;
+  date: InvitationDateTime;
   venue: string;
   address: string;
   mapUrl: string;
@@ -648,8 +643,8 @@ function JupiterEventCard({
   <h4 className={`${jupiterScript.className} text-5xl leading-none text-[#1F1B16]`}>{title}</h4>
 
   <div className="mt-6 space-y-2 text-sm text-[#1F1B16]">
-  {date ? <p className="font-body">{date}</p> : null}
-  {time ? <p className="text-[#6B5B5B]">{time}</p> : null}
+  {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
+  {date ? <p className="text-[#6B5B5B]">{formatInvitationTime(date.time)}</p> : null}
   {venue ? <p className="font-body">{venue}</p> : null}
   {address ? <p className="text-[#6B5B5B] whitespace-pre-line">{address}</p> : null}
   </div>
@@ -697,9 +692,9 @@ function JupiterStory({
 
   <div className=" space-y-5">
   {stories.map((s, idx) => (
-  <JupiterReveal key={`${s.date}-${idx}`} direction="up" width="100%" delay={0.45 + idx * 0.15}>
+  <JupiterReveal key={idx} direction="up" width="100%" delay={0.45 + idx * 0.15}>
   <div className="rounded-[2.25rem] border border-black/10 bg-white/70 backdrop-blur p-7">
-  <p className="text-[10px] uppercase tracking-[0.35em] text-[#6B5B5B]">{s.date}</p>
+  <p className="text-[10px] uppercase tracking-[0.35em] text-[#6B5B5B]">{formatInvitationMonthYear(s.date)}</p>
   <p className="mt-4 text-sm leading-relaxed text-[#1F1B16] whitespace-pre-line">
   {s.description}
   </p>
@@ -713,7 +708,10 @@ function JupiterStory({
   );
 }
 
-function JupiterGratitude({ couple, message }: { couple: InvitationConfig["couple"]; message: string }) {
+function JupiterGratitude({ hosts, message }: { hosts: Host[]; message: string }) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
   return (
   <section className="relative px-6 py-24">
   <div className="max-w-4xl mx-auto">
@@ -727,7 +725,7 @@ function JupiterGratitude({ couple, message }: { couple: InvitationConfig["coupl
 
   <div className="mt-8">
   <p className={`text-5xl leading-none ${jupiterScript.className} text-[#1F1B16]`}>
-  {couple.bride.firstName} & {couple.groom.firstName}
+  {primary?.firstName ?? ""} {secondary?.firstName ? "&" : ""} {secondary?.firstName ?? ""}
   </p>
   </div>
 
@@ -989,8 +987,8 @@ function JupiterWishesFirestore({
   );
 }
 
-function JupiterFooter({ couple }: { couple: InvitationConfig["couple"] }) {
-  const names = `${couple.bride.firstName} & ${couple.groom.firstName}`;
+function JupiterFooter({ hosts }: { hosts: Host[] }) {
+  const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
   const stars = useMemo(() => {
   const count = 28;

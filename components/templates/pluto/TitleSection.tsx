@@ -8,7 +8,7 @@ import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
 import type { TitleSectionProps } from "./InfoSections.types";
 
 export function TitleSection({
-  couple,
+  hosts,
   date,
   heading,
   countdownTarget,
@@ -64,7 +64,9 @@ export function TitleSection({
     const fmt = (dt: Date) =>
       `${dt.getFullYear()}${pad2(dt.getMonth() + 1)}${pad2(dt.getDate())}`;
 
-    const title = `Wedding of ${couple.groom.firstName} & ${couple.bride.firstName}`;
+    const primary = hosts[0];
+    const secondary = hosts[1];
+    const title = `Wedding of ${primary?.firstName ?? ""}${secondary?.firstName ? ` & ${secondary.firstName}` : ""}`;
 
     const params = new URLSearchParams({
       action: "TEMPLATE",
@@ -74,7 +76,7 @@ export function TitleSection({
     });
 
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
-  }, [countdownTarget, couple.bride.firstName, couple.groom.firstName]);
+  }, [countdownTarget, hosts]);
 
   return (
     <section className="relative h-screen overflow-hidden bg-[#EFE7D6]">
@@ -171,7 +173,7 @@ export function TitleSection({
                 {displayHeading}
               </p>
               <p className="mt-2 font-tan-mon-cheri text-[30px] font-bold leading-none text-[#7C5A2A] ">
-                {couple.groom.firstName} & {couple.bride.firstName}
+                {hosts[0]?.firstName ?? ""}{hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}
               </p>
               <p className="mt-4 font-garet-book text-[16px] tracking-[0.12em] text-[#7C5A2A] ">
                 {date}

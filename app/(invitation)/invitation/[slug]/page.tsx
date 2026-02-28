@@ -10,9 +10,29 @@ import { Neptune } from "@/components/templates/neptune";
 import { InvitationScaleWrapper } from "@/components/invitation/InvitationScaleWrapper";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import type { InvitationConfig } from "@/types/invitation";
+import type { InvitationConfig, InvitationDateTime } from "@/types/invitation";
 import { notFound } from "next/navigation";
 import { getInvitationConfig } from "@/lib/invitation-config";
+
+function makeDateTime(
+    year: number,
+    month: number,
+    day: number,
+    hour: number,
+    minute: number,
+): InvitationDateTime {
+    return {
+        date: { year, month, day },
+        time: { hour, minute },
+    };
+}
+
+function withTime(value: InvitationDateTime, hour: number, minute: number): InvitationDateTime {
+    return {
+        ...value,
+        time: { hour, minute },
+    };
+}
 
 const SITE_ORIGIN = "https://activid.web.id";
 
@@ -248,32 +268,6 @@ export default async function InvitationPage({ params }: PageProps) {
                             url: `https://activid.web.id/invitation/${slug}`,
                         }
                     },
-                    couple: {
-                        groom: {
-                            firstName: isMileaDilanDemo ? "Dilan" : "Romeo",
-                            fullName: isMileaDilanDemo ? "Dilan Saputra" : "Romeo Montague",
-                            shortName: isMileaDilanDemo ? "Dilan" : "Romeo",
-                            role: isMileaDilanDemo ? "Bandung" : "The Groom",
-                            parents: isMileaDilanDemo
-                                ? "Putra dari Bapak Fikri Fahreza dan Ibu Elsa Melisa"
-                                : "Putra dari Mr. Montague & Mrs. Montague",
-                            photo: isMileaDilanDemo
-                                ? "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800"
-                                : "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
-                        },
-                        bride: {
-                            firstName: isMileaDilanDemo ? "Milea" : "Juliet",
-                            fullName: isMileaDilanDemo ? "Milea Dewi" : "Juliet Capulet",
-                            shortName: isMileaDilanDemo ? "Milea" : "Juliet",
-                            role: isMileaDilanDemo ? "Jakarta" : "The Bride",
-                            parents: isMileaDilanDemo
-                                ? "Putri dari Bapak Ikhsan Fauzi dan Ibu Putri Saumi"
-                                : "Putri dari Mr. Capulet & Mrs. Capulet",
-                            photo: isMileaDilanDemo
-                                ? "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800"
-                                : "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
-                        },
-                    },
                     hosts: [
                         {
                             firstName: isMileaDilanDemo ? "Dilan" : "Romeo",
@@ -306,12 +300,7 @@ export default async function InvitationPage({ params }: PageProps) {
                         countdownTarget: isMileaDilanDemo ? "2024-12-30T00:00:00" : "2026-01-01T00:00:00",
                         rsvpDeadline: isMileaDilanDemo ? "30 Desember 2024" : "2025-12-31",
                     },
-                    backgroundPhotos: [
-                        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
-                        "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=1200",
-                        "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=1200",
-                        "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                    ],
+                    backgroundPhotos: [],
                     sections: {
                         ...base.sections,
                         hero: {
@@ -329,11 +318,7 @@ export default async function InvitationPage({ params }: PageProps) {
                         countdown: {
                             ...base.sections.countdown,
                             heading: isMileaDilanDemo ? "Save The Date" : "Coming Soon",
-                            photos: [
-                                "https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg?auto=compress&cs=tinysrgb&w=800",
-                                "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=800",
-                                "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800"
-                            ]
+                            photos: [],
                         },
                         quote: {
                             ...base.sections.quote,
@@ -348,25 +333,35 @@ export default async function InvitationPage({ params }: PageProps) {
                             stories: isMileaDilanDemo
                                 ? [
                                     {
-                                        date: "DESEMBER 2013",
+                                        date: makeDateTime(2013, 12, 1, 0, 0),
                                         description:
                                             "Dari yang pacarannya nanya “Lagi apa?” lewat SMS bergeser jadi dikit-dikit Vidcall WA. Dari yang pacarannya sama-sama kurus hingga akhirnya melebar bersama. Dari yang biasanya kalo mau main bingung harus cari tempat wisata, sekarang cukup dengan chill di cafe / kulineran. Dan dengan bumbu drama LDR 5 tahun lamanya.",
                                     },
                                     {
-                                        date: "DESEMBER 2021",
+                                        date: makeDateTime(2021, 12, 1, 0, 0),
                                         description:
                                             "#SewinduBerkasih (8 tahun yang utuh dan menggenapkan). Sebuah perayaan sederhana atas rasa syukur yang telah mengantarkan kami ke 8 tahun berproses, juga telah merangkum 8 tahun gelap terang perjalanan kami.",
                                     },
                                 ]
                                 : [
-                                    { date: "First Met", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-                                    { date: "The Proposal", description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." }
+                                    {
+                                        date: makeDateTime(2024, 1, 1, 0, 0),
+                                        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                    },
+                                    {
+                                        date: makeDateTime(2024, 6, 1, 0, 0),
+                                        description: "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                                    },
                                 ]
                         },
                         event: {
                             ...base.sections.event,
                             heading: isMileaDilanDemo ? "Event" : base.sections.event.heading,
                             events: (() => {
+                                const defaultDate = isMileaDilanDemo
+                                    ? makeDateTime(2024, 12, 30, 8, 0)
+                                    : makeDateTime(2026, 1, 1, 8, 0);
+
                                 const baseEvents = Array.isArray(base.sections.event.events)
                                     ? base.sections.event.events
                                     : [
@@ -379,8 +374,7 @@ export default async function InvitationPage({ params }: PageProps) {
 
                                 const first = baseEvents[0] ?? {
                                     title: "",
-                                    date: "",
-                                    time: "",
+                                    date: defaultDate,
                                     venue: "",
                                     address: "",
                                     mapUrl: "",
@@ -388,8 +382,7 @@ export default async function InvitationPage({ params }: PageProps) {
 
                                 const second = baseEvents[1] ?? {
                                     title: "",
-                                    date: "",
-                                    time: "",
+                                    date: defaultDate,
                                     venue: "",
                                     address: "",
                                     mapUrl: "",
@@ -399,8 +392,7 @@ export default async function InvitationPage({ params }: PageProps) {
                                     {
                                         ...first,
                                         title: isMileaDilanDemo ? "Akad" : "Wedding Ceremony",
-                                        date: isMileaDilanDemo ? "Senin, 30 Desember 2024" : first.date,
-                                        time: isMileaDilanDemo ? "08:00" : first.time,
+                                        date: isMileaDilanDemo ? withTime(defaultDate, 8, 0) : first.date,
                                         venue: isMileaDilanDemo ? "Kediaman Mempelai Wanita" : "Grand Cathedral",
                                         address: isMileaDilanDemo ? "Jalan Keramat Jati Nomer 45" : "123 Wedding Street, Love City",
                                         mapUrl: isMileaDilanDemo
@@ -410,8 +402,7 @@ export default async function InvitationPage({ params }: PageProps) {
                                     {
                                         ...second,
                                         title: isMileaDilanDemo ? "Resepsi" : "Wedding Reception",
-                                        date: isMileaDilanDemo ? "Senin, 30 Desember 2024" : second.date,
-                                        time: isMileaDilanDemo ? "19:00" : second.time,
+                                        date: isMileaDilanDemo ? withTime(defaultDate, 19, 0) : second.date,
                                         venue: isMileaDilanDemo ? "Kediaman Mempelai Wanita" : "Royal Ballroom",
                                         address: isMileaDilanDemo ? "Jalan Keramat Jati Nomer 45" : "456 Party Lane, Celebration City",
                                         mapUrl: isMileaDilanDemo
@@ -422,8 +413,7 @@ export default async function InvitationPage({ params }: PageProps) {
                                         ? [
                                             {
                                                 title: "Live Streaming",
-                                                date: "",
-                                                time: "",
+                                                date: withTime(defaultDate, 12, 0),
                                                 venue: "Instagram",
                                                 address: "",
                                                 mapUrl: "https://ringvitation.com",

@@ -3,12 +3,8 @@
 import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { MERCURY_OVERLAY_ASSETS } from "./graphics/overlays";
-
-interface StoryItem {
- date: string;
- description: string;
- imageUrl?: string;
-}
+import { formatInvitationMonthYear } from "@/lib/date-utils";
+import { type StoryItem } from "@/types/invitation";
 
 interface StorySectionProps {
  stories: StoryItem[];
@@ -113,7 +109,7 @@ export function StorySection({
   className="pointer-events-none h-3 w-3 rounded-full bg-white/70 ring-4 ring-[#612A35]/90"
   />
   <p className="flex-1 font-poppins-bold italic text-[16px] tracking-wide text-white ">
-  {story.date}
+  {formatInvitationMonthYear(story.date)}
   </p>
   </div>
   <p className="mt-4 font-poppins text-[14px] leading-relaxed text-white/85 ">

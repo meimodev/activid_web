@@ -19,6 +19,7 @@ import {
   FooterSection,
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 const PLUTO_DEMO_ASSETS = {
   groomPhoto:
@@ -27,12 +28,6 @@ const PLUTO_DEMO_ASSETS = {
     "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
   coverImage:
     "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  backgroundPhotos: [
-    "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  ],
   galleryPhotos: [
     "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
     "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -57,36 +52,30 @@ export function Pluto({ config }: PlutoProps) {
 
   const isDemo = config.id.endsWith("-demo");
 
-  const { music, backgroundPhotos, weddingDate, couple, sections } = config;
+  const { music, weddingDate, sections } = config;
 
-  const hosts = Array.isArray(config.hosts) && config.hosts.length
-    ? config.hosts
-    : [couple.groom, couple.bride].filter(Boolean);
+  const hosts = config.hosts;
+  const hostsSection = sections.hosts;
 
-  const hostsSection = sections.hosts ?? sections.couple;
+  const effectiveHosts = useMemo(() => {
+    if (!isDemo) return hosts;
+    const next = hosts.map((h) => ({ ...h }));
+    if (next[0]) next[0] = { ...next[0], photo: PLUTO_DEMO_ASSETS.groomPhoto };
+    if (next[1]) next[1] = { ...next[1], photo: PLUTO_DEMO_ASSETS.bridePhoto };
+    return next;
+  }, [hosts, isDemo]);
 
-  const baseCouple = {
-    groom: hosts[0] ?? couple.groom,
-    bride: hosts[1] ?? couple.bride,
-  };
-
-  const effectiveCouple = isDemo
-    ? {
-        ...baseCouple,
-        groom: { ...baseCouple.groom, photo: PLUTO_DEMO_ASSETS.groomPhoto },
-        bride: { ...baseCouple.bride, photo: PLUTO_DEMO_ASSETS.bridePhoto },
-      }
-    : baseCouple;
-
-  const effectiveBackgroundPhotos = isDemo
-    ? [...PLUTO_DEMO_ASSETS.backgroundPhotos]
-    : backgroundPhotos;
   const effectiveGalleryPhotos = isDemo
     ? [...PLUTO_DEMO_ASSETS.galleryPhotos]
     : (sections.gallery?.photos ?? []);
   const effectiveCoverImage = isDemo
     ? PLUTO_DEMO_ASSETS.coverImage
     : sections.hero.coverImage;
+
+  const derivedPhotos = useMemo(
+    () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
+    [config.id, effectiveGalleryPhotos],
+  );
 
   const demoCountdownTarget = useMemo(() => {
     const dt = new Date();
@@ -113,7 +102,7 @@ export function Pluto({ config }: PlutoProps) {
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#EFE7D6] text-[#2B2424]">
       <BackgroundSlideshow
-        photos={effectiveBackgroundPhotos}
+        photos={derivedPhotos}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10"
       />
 
@@ -138,7 +127,7 @@ export function Pluto({ config }: PlutoProps) {
             onOpen={() => {
               setIsOpen(true);
             }}
-            couple={effectiveCouple}
+            hosts={effectiveHosts}
             date={weddingDate.displayShort}
             subtitle={sections.hero.subtitle}
             coverImage={effectiveCoverImage}
@@ -155,7 +144,7 @@ export function Pluto({ config }: PlutoProps) {
             <>
               {sections.title.enabled ? (
                 <TitleSection
-                  couple={effectiveCouple}
+                  hosts={effectiveHosts}
                   date={effectiveWeddingDateDisplay}
                   heading={sections.title.heading}
                   countdownTarget={effectiveCountdownTarget}
@@ -169,7 +158,7 @@ export function Pluto({ config }: PlutoProps) {
               ) : null}
 
               {hostsSection.enabled ? (
-                <CoupleSection couple={effectiveCouple} />
+                <CoupleSection hosts={effectiveHosts} />
               ) : null}
               {sections.event.enabled ? (
                 <EventSection
@@ -222,11 +211,11 @@ export function Pluto({ config }: PlutoProps) {
                 </Suspense>
               ) : null}
 
-              <GratitudeSection couple={effectiveCouple} />
+              <GratitudeSection hosts={effectiveHosts} />
 
               {sections.footer.enabled ? (
                 <FooterSection
-                  couple={effectiveCouple}
+                  hosts={effectiveHosts}
                   message={sections.footer.message}
                 />
               ) : null}

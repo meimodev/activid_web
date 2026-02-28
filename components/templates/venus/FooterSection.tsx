@@ -2,16 +2,16 @@
 
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import type { InvitationConfig } from "@/types/invitation";
+import type { Host } from "@/types/invitation";
 import { venusScript } from "./fonts";
 import { VenusReveal } from "./reveal";
 
 export function FooterSection({
-  couple,
+  hosts,
 }: {
-  couple: InvitationConfig["couple"];
+  hosts: Host[];
 }) {
-  const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+  const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
   const stars = useMemo(() => {
     return Array.from({ length: 34 }, (_, i) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Hero } from "./Hero";
 import { QuoteSection } from "./QuoteSection";
@@ -18,17 +18,12 @@ import {
     FooterSection
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 const MERCURY_DEMO_ASSETS = {
-    groomPhoto: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
-    bridePhoto: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+    host1Photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+    host2Photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
     coverImage: "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    backgroundPhotos: [
-        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=1200",
-        "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    ],
     galleryPhotos: [
         "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
         "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -53,40 +48,36 @@ export function Mercury({ config }: MercuryProps) {
 
     const {
         music,
-        backgroundPhotos,
         weddingDate,
-        couple,
         sections
     } = config;
 
-    const hosts = Array.isArray(config.hosts) && config.hosts.length
-        ? config.hosts
-        : [couple.groom, couple.bride].filter(Boolean);
+    const hosts = config.hosts;
+    const hostsSection = sections.hosts;
 
-    const hostsSection = sections.hosts ?? sections.couple;
+    const effectiveHosts = isDemo
+        ? hosts.map((h, idx) => {
+            if (idx === 0) return { ...h, photo: MERCURY_DEMO_ASSETS.host1Photo };
+            if (idx === 1) return { ...h, photo: MERCURY_DEMO_ASSETS.host2Photo };
+            return h;
+        })
+        : hosts;
 
-    const baseCouple = {
-        groom: hosts[0] ?? couple.groom,
-        bride: hosts[1] ?? couple.bride,
-    };
-
-    const effectiveCouple = isDemo
-        ? {
-            ...baseCouple,
-            groom: { ...baseCouple.groom, photo: MERCURY_DEMO_ASSETS.groomPhoto },
-            bride: { ...baseCouple.bride, photo: MERCURY_DEMO_ASSETS.bridePhoto },
-        }
-        : baseCouple;
-
-    const effectiveBackgroundPhotos = isDemo ? [...MERCURY_DEMO_ASSETS.backgroundPhotos] : backgroundPhotos;
-    const effectiveGalleryPhotos = isDemo ? [...MERCURY_DEMO_ASSETS.galleryPhotos] : (sections.gallery?.photos ?? []);
+    const effectiveGalleryPhotos = isDemo
+        ? [...MERCURY_DEMO_ASSETS.galleryPhotos]
+        : (sections.gallery?.photos ?? []);
     const effectiveCoverImage = isDemo ? MERCURY_DEMO_ASSETS.coverImage : sections.hero.coverImage;
+
+    const derivedPhotos = useMemo(
+        () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
+        [config.id, effectiveGalleryPhotos],
+    );
 
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-stone-50 text-stone-900 font-serif">
             {/* Background Slideshow (Fades out or stays subtle) */}
             <BackgroundSlideshow
-                photos={effectiveBackgroundPhotos}
+                photos={derivedPhotos}
                 className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10"
             />
 
@@ -112,7 +103,7 @@ export function Mercury({ config }: MercuryProps) {
                         onOpen={() => {
                             setIsOpen(true);
                         }}
-                        couple={effectiveCouple}
+                        hosts={effectiveHosts}
                         date={weddingDate.displayShort}
                         subtitle={sections.hero.subtitle}
                         coverImage={effectiveCoverImage}
@@ -129,7 +120,7 @@ export function Mercury({ config }: MercuryProps) {
                         <>
                             {sections.title.enabled && (
                                 <TitleSection
-                                    couple={effectiveCouple}
+                                    hosts={effectiveHosts}
                                     date={weddingDate.display}
                                     heading={sections.title.heading}
                                     countdownTarget={weddingDate.countdownTarget}
@@ -143,7 +134,7 @@ export function Mercury({ config }: MercuryProps) {
                             )}
 
                             {hostsSection.enabled && (
-                                <CoupleSection couple={effectiveCouple} />
+                                <CoupleSection hosts={effectiveHosts} />
                             )}
 
                             {sections.story.enabled && (
@@ -179,7 +170,7 @@ export function Mercury({ config }: MercuryProps) {
                             )}
 
                             {sections.footer.enabled && (
-                                <FooterSection couple={effectiveCouple} message={sections.footer.message} />
+                                <FooterSection hosts={effectiveHosts} message={sections.footer.message} />
                             )}
                         </>
                     )}

@@ -39,7 +39,9 @@ function FramedPhoto({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export function CoupleSection({ couple }: CoupleSectionProps) {
+export function CoupleSection({ hosts }: CoupleSectionProps) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
   const petals = useMemo(() => {
     const count = 14;
     return Array.from({ length: count }, (_, i) => {
@@ -147,7 +149,7 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
             delay={0.18}
             width="100%"
           >
-            <FramedPhoto src={couple.groom.photo} alt="Groom" />
+            <FramedPhoto src={primary?.photo ?? ""} alt="Host" />
           </RevealOnScroll>
 
           <div className="mt-10">
@@ -158,7 +160,7 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
               width="100%"
             >
               <p className="font-stoic text-[52px] leading-none text-[#7C5A2A] ">
-                {couple.groom.firstName}
+                {primary?.firstName ?? ""}
               </p>
             </RevealOnScroll>
 
@@ -169,7 +171,7 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
               width="100%"
             >
               <p className="mt-2 font-poppins-bold text-[18px] text-[#2B2424] ">
-                {couple.groom.fullName}
+                {primary?.fullName ?? ""}
               </p>
             </RevealOnScroll>
 
@@ -180,78 +182,97 @@ export function CoupleSection({ couple }: CoupleSectionProps) {
               width="100%"
             >
               <p className="mt-4 font-poppins text-[13px] leading-relaxed text-[#3A2F2F]/70 ">
-                {couple.groom.parents}
+                {primary?.parents ?? ""}
               </p>
             </RevealOnScroll>
+
+            {primary?.role ? (
+              <RevealOnScroll
+                direction="up"
+                distance={18}
+                delay={0.52}
+                width="100%"
+              >
+                <p className="mt-3 font-poppins italic text-[14px] text-[#3A2F2F]/70">
+                  {primary.role}
+                </p>
+              </RevealOnScroll>
+            ) : null}
           </div>
         </div>
 
-        <RevealOnScroll direction="up" distance={18} delay={0.56} width="100%">
-          <div className="mt-14 flex items-center justify-center">
-            <div className="h-px flex-1 bg-[#4F5B4B]/25" />
-            <div className="mx-5 font-poppins-bold text-xs tracking-[0.3em] text-[#4F5B4B]/70">
-              AND
+        {secondary ? (
+          <>
+            <RevealOnScroll direction="up" distance={18} delay={0.56} width="100%">
+              <div className="mt-14 flex items-center justify-center">
+                <div className="h-px flex-1 bg-[#4F5B4B]/25" />
+                <div className="mx-5 font-poppins-bold text-xs tracking-[0.3em] text-[#4F5B4B]/70">
+                  AND
+                </div>
+                <div className="h-px flex-1 bg-[#4F5B4B]/25" />
+              </div>
+            </RevealOnScroll>
+
+            <div className="mt-14">
+              <RevealOnScroll
+                direction="up"
+                distance={18}
+                delay={0.64}
+                width="100%"
+              >
+                <FramedPhoto src={secondary.photo} alt="Host" />
+              </RevealOnScroll>
+
+              <div className="mt-10">
+                <RevealOnScroll
+                  direction="up"
+                  distance={18}
+                  delay={0.74}
+                  width="100%"
+                >
+                  <p className="font-stoic text-[52px] leading-none text-[#7C5A2A] ">
+                    {secondary.firstName}
+                  </p>
+                </RevealOnScroll>
+
+                <RevealOnScroll
+                  direction="up"
+                  distance={18}
+                  delay={0.8}
+                  width="100%"
+                >
+                  <p className="mt-2 font-poppins-bold text-[18px] text-[#2B2424] ">
+                    {secondary.fullName}
+                  </p>
+                </RevealOnScroll>
+
+                {secondary.role ? (
+                  <RevealOnScroll
+                    direction="up"
+                    distance={18}
+                    delay={0.86}
+                    width="100%"
+                  >
+                    <p className="mt-3 font-poppins italic text-[14px] text-[#3A2F2F]/70">
+                      {secondary.role}
+                    </p>
+                  </RevealOnScroll>
+                ) : null}
+
+                <RevealOnScroll
+                  direction="up"
+                  distance={18}
+                  delay={0.92}
+                  width="100%"
+                >
+                  <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-[#3A2F2F]/70 ">
+                    {secondary.parents}
+                  </p>
+                </RevealOnScroll>
+              </div>
             </div>
-            <div className="h-px flex-1 bg-[#4F5B4B]/25" />
-          </div>
-        </RevealOnScroll>
-
-        <div className="mt-14">
-          <RevealOnScroll
-            direction="up"
-            distance={18}
-            delay={0.64}
-            width="100%"
-          >
-            <FramedPhoto src={couple.bride.photo} alt="Bride" />
-          </RevealOnScroll>
-
-          <div className="mt-10">
-            <RevealOnScroll
-              direction="up"
-              distance={18}
-              delay={0.74}
-              width="100%"
-            >
-              <p className="font-stoic text-[52px] leading-none text-[#7C5A2A] ">
-                {couple.bride.firstName}
-              </p>
-            </RevealOnScroll>
-
-            <RevealOnScroll
-              direction="up"
-              distance={18}
-              delay={0.8}
-              width="100%"
-            >
-              <p className="mt-2 font-poppins-bold text-[18px] text-[#2B2424] ">
-                {couple.bride.fullName}
-              </p>
-            </RevealOnScroll>
-
-            <RevealOnScroll
-              direction="up"
-              distance={18}
-              delay={0.86}
-              width="100%"
-            >
-              <p className="mt-3 font-poppins italic text-[14px] text-[#3A2F2F]/70">
-                {couple.bride.role}
-              </p>
-            </RevealOnScroll>
-
-            <RevealOnScroll
-              direction="up"
-              distance={18}
-              delay={0.92}
-              width="100%"
-            >
-              <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-[#3A2F2F]/70 ">
-                {couple.bride.parents}
-              </p>
-            </RevealOnScroll>
-          </div>
-        </div>
+          </>
+        ) : null}
       </div>
     </section>
   );

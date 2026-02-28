@@ -4,12 +4,8 @@ import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { OverlayReveal } from "./graphics";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
-
-interface StoryItem {
-  date: string;
-  description: string;
-  imageUrl?: string;
-}
+import type { StoryItem } from "@/types/invitation";
+import { formatInvitationMonthYear } from "@/lib/date-utils";
 
 interface StorySectionProps {
   stories: StoryItem[];
@@ -120,7 +116,7 @@ export function StorySection({
                   <div className="mt-4 space-y-10 mb-8">
                     {stories.map((story, idx) => (
                       <RevealOnScroll
-                        key={`${story.date}-${idx}`}
+                        key={idx}
                         direction="up"
                         distance={16}
                         delay={0.22 + idx * 0.08}
@@ -130,7 +126,7 @@ export function StorySection({
                           <div className="mx-auto h-6 w-[2px] bg-[#38BDF8] mb-2" />
 
                           <p className="font-poppins-bold italic text-[14px] text-[#0284C7]">
-                            {story.date}
+                            {formatInvitationMonthYear(story.date)}
                           </p>
                           <p className="mt-3 font-poppins text-[13px] leading-relaxed text-[#0B1B2A]/75">
                             {story.description}

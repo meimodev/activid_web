@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Hero } from "./Hero";
 import { Countdown } from "./Countdown";
@@ -25,6 +25,7 @@ import {
     FooterSection
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 interface SaturnProps {
     config: InvitationConfig;
@@ -35,22 +36,17 @@ export function Saturn({ config }: SaturnProps) {
 
     const {
         music,
-        backgroundPhotos,
         weddingDate,
-        couple,
         sections
     } = config;
 
-    const hosts = Array.isArray(config.hosts) && config.hosts.length
-        ? config.hosts
-        : [couple.groom, couple.bride].filter(Boolean);
+    const hosts = config.hosts;
+    const hostsSection = sections.hosts;
 
-    const effectiveCouple = {
-        groom: hosts[0] ?? couple.groom,
-        bride: hosts[1] ?? couple.bride,
-    };
-
-    const hostsSection = sections.hosts ?? sections.couple;
+    const derivedPhotos = useMemo(
+        () => pickDeterministicRandomSubset(sections.gallery.photos ?? [], config.id, 5),
+        [config.id, sections.gallery.photos],
+    );
 
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-[#0B0D17]">
@@ -62,7 +58,7 @@ export function Saturn({ config }: SaturnProps) {
 
             {/* Background Slideshow (Fades out or stays subtle) */}
             <BackgroundSlideshow
-                photos={backgroundPhotos}
+                photos={derivedPhotos}
                 className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20"
             />
 
@@ -83,7 +79,7 @@ export function Saturn({ config }: SaturnProps) {
                 >
                     <Hero
                         onOpen={() => setIsOpen(true)}
-                        couple={effectiveCouple}
+                        hosts={hosts}
                         date={weddingDate.displayShort}
                         subtitle={sections.hero.subtitle}
                         coverImage={sections.hero.coverImage}
@@ -96,11 +92,11 @@ export function Saturn({ config }: SaturnProps) {
                 {/* Only allow scrolling when open */}
                 <div className={isOpen ? "" : "h-screen overflow-hidden"}>
                     {sections.title.enabled && (
-                        <TitleSection couple={effectiveCouple} date={weddingDate.display} heading={sections.title.heading} />
+                        <TitleSection hosts={hosts} date={weddingDate.display} heading={sections.title.heading} />
                     )}
 
                     {sections.countdown.enabled && (
-                        <Countdown targetDate={weddingDate.countdownTarget} photos={sections.countdown.photos} heading={sections.countdown.heading} />
+                        <Countdown targetDate={weddingDate.countdownTarget} photos={derivedPhotos} heading={sections.countdown.heading} />
                     )}
 
                     {sections.quote.enabled && (
@@ -108,7 +104,7 @@ export function Saturn({ config }: SaturnProps) {
                     )}
 
                     {hostsSection.enabled && (
-                        <CoupleSection couple={effectiveCouple} disableGrayscale={hostsSection.disableGrayscale} />
+                        <CoupleSection hosts={hosts} disableGrayscale={hostsSection.disableGrayscale} />
                     )}
 
                     {sections.story.enabled && (
@@ -140,7 +136,7 @@ export function Saturn({ config }: SaturnProps) {
                     )}
 
                     {sections.footer.enabled && (
-                        <FooterSection couple={effectiveCouple} message={sections.footer.message} />
+                        <FooterSection hosts={hosts} message={sections.footer.message} />
                     )}
                 </div>
             </div>

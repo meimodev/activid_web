@@ -1,21 +1,19 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-
-interface CoupleInfo {
-  groom: { firstName: string };
-  bride: { firstName: string };
-}
+import type { Host } from "@/types/invitation";
 
 interface HeroProps {
   onOpen: () => void;
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   subtitle: string;
   coverImage: string;
 }
 
-export function Hero({ onOpen, couple, date, subtitle, coverImage }: HeroProps) {
+export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const scale = useTransform(scrollY, [0, 500], [1, 1.2]);
@@ -60,9 +58,13 @@ export function Hero({ onOpen, couple, date, subtitle, coverImage }: HeroProps) 
   {/* Names - Massive & Glowing */}
   <div className="relative py-4">
   <h1 className="font-heading text-5xl  text-white leading-tight filter drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]">
-  <span className="block">{couple.groom.firstName}</span>
+  <span className="block">{primary?.firstName ?? ""}</span>
+  {secondary ? (
+  <>
   <span className="block text-2xl  text-cyan-500 my-2 opacity-80">&</span>
-  <span className="block">{couple.bride.firstName}</span>
+  <span className="block">{secondary.firstName}</span>
+  </>
+  ) : null}
   </h1>
 
   {/* Decorative Brackets around Names */}
@@ -74,7 +76,7 @@ export function Hero({ onOpen, couple, date, subtitle, coverImage }: HeroProps) 
 
   {/* Date / Stardate */}
   <p className="mt-4 font-mono text-sm text-cyan-200/60 tracking-[0.3em]">
-  STARDATE {date.replace(/ /g, ".")} // SECTOR 001
+  STARDATE {date.replace(/ /g, ".")}{" // SECTOR 001"}
   </p>
 
   {/* Initialize Button */}

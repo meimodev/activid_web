@@ -29,7 +29,7 @@ import {
  NEPTUNE_OVERLAY_URLS,
  TitleDecoration10,
 } from "./graphics";
-import { InvitationConfig } from "@/types/invitation";
+import { Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { SplitText } from "@/components/animations";
@@ -48,6 +48,12 @@ import {
  where,
 } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
+import {
+ formatInvitationDateLong,
+ formatInvitationMonthYear,
+ formatInvitationTime,
+} from "@/lib/date-utils";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 interface NeptuneProps {
  config: InvitationConfig;
@@ -238,53 +244,17 @@ export function Neptune({ config }: NeptuneProps) {
   return deriveMusicTitle(config.music.url);
  }, [config.music.title, config.music.url]);
 
- const persistentBackgroundPhotos = useMemo(() => {
-  const hero = config.sections.hero.coverImage
-  ? [config.sections.hero.coverImage]
-  : [];
-  const gallery = config.sections.gallery.photos;
-  const backgrounds = config.backgroundPhotos;
-  return Array.from(new Set([...hero, ...gallery, ...backgrounds])).filter(
-  Boolean,
-  );
- }, [
-  config.backgroundPhotos,
-  config.sections.gallery.photos,
-  config.sections.hero.coverImage,
- ]);
+ const derivedPhotos = useMemo(
+  () => pickDeterministicRandomSubset(config.sections.gallery.photos ?? [], config.id, 5),
+  [config.id, config.sections.gallery.photos],
+ );
 
- const quoteBackgroundImage = useMemo(() => {
-  if (persistentBackgroundPhotos.length >= 2)
-  return persistentBackgroundPhotos[1];
-  return persistentBackgroundPhotos[0] || config.sections.hero.coverImage;
- }, [config.sections.hero.coverImage, persistentBackgroundPhotos]);
+ const storyPhoto = useMemo(() => derivedPhotos[0] ?? "", [derivedPhotos]);
 
- const titleBackgroundPhotos = useMemo(() => {
-  const gallery = config.sections.gallery.photos ?? [];
-  const hero = config.sections.hero.coverImage
-  ? [config.sections.hero.coverImage]
-  : [];
-  return Array.from(new Set([...gallery, ...hero])).filter(Boolean);
- }, [config.sections.gallery.photos, config.sections.hero.coverImage]);
+ const hosts = config.hosts;
+ const hostsSection = config.sections.hosts;
 
- const storyPhoto = useMemo(() => {
-  const list = config.sections.gallery.photos ?? [];
-  if (list.length > 0) return list[0]!;
-  return config.sections.hero.coverImage;
- }, [config.sections.gallery.photos, config.sections.hero.coverImage]);
-
- const hosts = Array.isArray(config.hosts) && config.hosts.length
-  ? config.hosts
-  : [config.couple.groom, config.couple.bride].filter(Boolean);
-
- const effectiveCouple = {
-  groom: hosts[0] ?? config.couple.groom,
-  bride: hosts[1] ?? config.couple.bride,
- };
-
- const hostsSection = config.sections.hosts ?? config.sections.couple;
-
- const coupleTitle = `${effectiveCouple.bride.firstName} & ${effectiveCouple.groom.firstName}`;
+ const coupleTitle = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
  const inviteLine =
   "Tanpa mengurangi rasa hormat dengan ini kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada acara pernikahan kami";
@@ -297,7 +267,7 @@ export function Neptune({ config }: NeptuneProps) {
   new Set(
   [
   config.sections.hero.coverImage,
-  titleBackgroundPhotos[0],
+  derivedPhotos[0],
   ...NEPTUNE_OVERLAY_URLS,
   ].filter(Boolean),
   ),
@@ -328,7 +298,7 @@ export function Neptune({ config }: NeptuneProps) {
  }, [
   config.sections.hero.coverImage,
   config.sections.hero.enabled,
-  titleBackgroundPhotos,
+  derivedPhotos,
  ]);
 
  useEffect(() => {
@@ -406,7 +376,6 @@ export function Neptune({ config }: NeptuneProps) {
   key: e.key,
   title: e.title,
   date: e.date,
-  time: e.time,
   venue: e.venue,
   address: e.address,
   mapUrl: e.mapUrl,
@@ -416,9 +385,9 @@ export function Neptune({ config }: NeptuneProps) {
   <main
   className={`relative min-h-screen overflow-x-hidden bg-[#020615] text-[#EAF7FF] font-body ${neptuneBody.variable} ${neptuneSerif.variable} [--font-body:var(--font-neptune-body)]`}
   >
-  {backgroundReady && persistentBackgroundPhotos.length > 0 ? (
+  {backgroundReady && derivedPhotos.length > 0 ? (
   <div className="fixed inset-0 z-0 pointer-events-none">
-  <BackgroundSlideshow photos={persistentBackgroundPhotos} />
+  <BackgroundSlideshow photos={derivedPhotos} />
   <div className="absolute inset-0 bg-[#020615]/70" />
   <div className="absolute inset-0 bg-linear-to-b from-[#020615]/80 via-[#020615]/55 to-[#020615]/90" />
   <AuroraLayer />
@@ -450,7 +419,7 @@ export function Neptune({ config }: NeptuneProps) {
   }}
   >
   <CoverOverlay
-  couple={effectiveCouple}
+  hosts={hosts}
   targetDate={config.weddingDate.countdownTarget}
   subtitle={config.sections.hero.subtitle}
   coverImage={config.sections.hero.coverImage}
@@ -466,7 +435,7 @@ export function Neptune({ config }: NeptuneProps) {
   <TitleCountdownSection
   id="home"
   coverImage={config.sections.hero.coverImage}
-  backgroundPhotos={titleBackgroundPhotos}
+  backgroundPhotos={derivedPhotos}
   date={config.weddingDate.display}
   coupleLabel={coupleTitle}
   targetDate={config.weddingDate.countdownTarget}
@@ -481,7 +450,7 @@ export function Neptune({ config }: NeptuneProps) {
 
   {hostsSection.enabled ? (
   <CoupleProfileSection
-  couple={effectiveCouple}
+  hosts={hosts}
   inviteLine={inviteLine}
   nextSectionId={
   config.sections.event.enabled
@@ -564,14 +533,11 @@ export function Neptune({ config }: NeptuneProps) {
   )}
 
   <ThankYouSection
-  couple={effectiveCouple}
-  backgroundPhotos={config.sections.gallery.photos}
-  fallbackImage={
-  persistentBackgroundPhotos[0] || config.sections.hero.coverImage
-  }
+  hosts={hosts}
+  backgroundPhotos={derivedPhotos}
   />
 
-  <FooterMark couple={effectiveCouple} />
+  <FooterMark hosts={hosts} />
   </div>
   ) : null}
 
@@ -629,7 +595,7 @@ export function Neptune({ config }: NeptuneProps) {
 }
 
 function CoverOverlay({
- couple,
+ hosts,
  targetDate,
  subtitle,
  coverImage,
@@ -637,7 +603,7 @@ function CoverOverlay({
  isOpening,
  onOpen,
 }: {
- couple: InvitationConfig["couple"];
+ hosts: Host[];
  targetDate: string;
  subtitle: string;
  coverImage: string;
@@ -645,6 +611,9 @@ function CoverOverlay({
  isOpening: boolean;
  onOpen: () => void;
 }) {
+ const primary = hosts[0];
+ const secondary = hosts[1];
+
  const heroDate = useMemo(() => {
   const raw = `${targetDate ?? ""}`.trim();
   if (!raw) return raw;
@@ -817,7 +786,7 @@ function CoverOverlay({
   className={`${neptuneScript.className} mt-4 text-4xl leading-none text-[#546058]`}
   >
   <SplitText
-  text={`${couple.bride.firstName} & ${couple.groom.firstName}`}
+  text={`${primary?.firstName ?? ""}${secondary?.firstName ? ` & ${secondary.firstName}` : ""}`}
   splitBy="character"
   once
   staggerDelay={0.055}
@@ -940,9 +909,8 @@ function TitleCountdownSection({
  const photos = useMemo(() => {
   const list = backgroundPhotos ?? [];
   const safe = list.filter(Boolean);
-  if (safe.length > 0) return safe;
-  return coverImage ? [coverImage] : [];
- }, [backgroundPhotos, coverImage]);
+  return safe;
+ }, [backgroundPhotos]);
 
  const [activeIndex, setActiveIndex] = useState(0);
 
@@ -955,7 +923,7 @@ function TitleCountdownSection({
  }, [photos.length]);
 
  const safeActiveIndex = photos.length > 0 ? activeIndex % photos.length : 0;
- const activePhoto = photos[safeActiveIndex] ?? coverImage;
+ const activePhoto = photos[safeActiveIndex];
 
  return (
   <section
@@ -1222,14 +1190,17 @@ function CountdownRow({ targetDate }: { targetDate: string }) {
 }
 
 function CoupleProfileSection({
- couple,
+ hosts,
  inviteLine,
  nextSectionId,
 }: {
- couple: InvitationConfig["couple"];
+ hosts: Host[];
  inviteLine: string;
  nextSectionId: NavSectionId;
 }) {
+ const primary = hosts[0];
+ const secondary = hosts[1];
+
  const scrollToId = (id: string) => {
   const el = document.getElementById(id);
   if (!el) return;
@@ -1239,29 +1210,31 @@ function CoupleProfileSection({
  return (
   <section id="couple" className="relative scroll-mt-24">
   <CoupleProfileCard
-  id="couple-groom"
+  id="hosts-1"
   intro={inviteLine}
-  nameScript={couple.groom.firstName}
-  nameFull={couple.groom.fullName}
-  city={couple.groom.role}
-  parents={couple.groom.parents}
-  photo={couple.groom.photo}
+  nameScript={primary?.firstName ?? ""}
+  nameFull={primary?.fullName ?? ""}
+  city={primary?.role ?? ""}
+  parents={primary?.parents ?? ""}
+  photo={primary?.photo ?? ""}
   isBride={false}
   showAnd={false}
-  onNext={() => scrollToId("couple-bride")}
+  onNext={() => (secondary ? scrollToId("hosts-2") : scrollToId(nextSectionId))}
   />
+  {secondary ? (
   <CoupleProfileCard
-  id="couple-bride"
+  id="hosts-2"
   intro={null}
-  nameScript={couple.bride.firstName}
-  nameFull={couple.bride.fullName}
-  city={couple.bride.role}
-  parents={couple.bride.parents}
-  photo={couple.bride.photo}
+  nameScript={secondary.firstName}
+  nameFull={secondary.fullName}
+  city={secondary.role}
+  parents={secondary.parents}
+  photo={secondary.photo}
   isBride={true}
   showAnd
   onNext={() => scrollToId(nextSectionId)}
   />
+  ) : null}
   </section>
  );
 }
@@ -1440,8 +1413,7 @@ function WeddingEventSection({
  events: Array<{
   key: string;
   title: string;
-  date: string;
-  time: string;
+  date: InvitationDateTime;
   venue: string;
   address: string;
   mapUrl: string;
@@ -1530,7 +1502,6 @@ function WeddingEventSection({
   <EventCardClassic
   title={e.title}
   date={e.date}
-  time={e.time}
   venue={e.venue}
   address={e.address}
   mapUrl={e.mapUrl}
@@ -1546,19 +1517,17 @@ function WeddingEventSection({
 function EventCardClassic({
  title,
  date,
- time,
  venue,
  address,
  mapUrl,
 }: {
  title: string;
- date: string;
- time: string;
+ date: InvitationDateTime;
  venue: string;
  address: string;
  mapUrl: string;
 }) {
- const isLinkOnly = Boolean(mapUrl) && !address && !time && !date;
+ const isLinkOnly = Boolean(mapUrl) && !address && !venue;
 
  return (
   <div className="relative rounded-[28px] bg-white text-[#2E343A] shadow-[0_26px_70px_rgba(0,0,0,0.35)]">
@@ -1577,16 +1546,16 @@ function EventCardClassic({
   <div className="mt-7 text-center">
   {date ? (
   <p className="text-md leading-none tracking-[0.14em] uppercase text-[#3A3F45] font-body">
-  {date}
+  {formatInvitationDateLong(date)}
   </p>
   ) : null}
 
   <div className="mt-7 flex items-center justify-center gap-3 text-[#6B747C]">
-  {time ? (
+  {date ? (
   <>
   <IconClock />
   <p className="text-[22px] tracking-[0.22em] uppercase font-body">
-  {time}
+  {formatInvitationTime(date.time)}
   </p>
   </>
   ) : null}
@@ -1725,14 +1694,14 @@ function StorySectionClassic({
   <div className="mt-10 space-y-10">
   {stories.map((s, idx) => (
   <NeptuneReveal
-  key={`${s.date}-${idx}`}
+  key={idx}
   direction="up"
   width="100%"
   delay={0.75 + idx * 0.22}
   >
   <div className="text-center">
   <p className="text-xs tracking-[0.28em] uppercase text-[#6B747C] font-body">
-  {s.date}
+  {formatInvitationMonthYear(s.date)}
   </p>
   <p className="mt-5 text-[15px] leading-relaxed text-[#6B747C] whitespace-pre-line">
   {s.description}
@@ -2993,20 +2962,16 @@ function nowId() {
 }
 
 function ThankYouSection({
- couple,
+ hosts,
  backgroundPhotos,
- fallbackImage,
 }: {
- couple: InvitationConfig["couple"];
+ hosts: Host[];
  backgroundPhotos?: string[];
- fallbackImage: string;
 }) {
- const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+ const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
  const photos = useMemo(() => {
-  const list = backgroundPhotos?.filter(Boolean) ?? [];
-  if (list.length > 0) return list;
-  return fallbackImage ? [fallbackImage] : [];
- }, [backgroundPhotos, fallbackImage]);
+  return backgroundPhotos?.filter(Boolean) ?? [];
+ }, [backgroundPhotos]);
 
  const [activeIndex, setActiveIndex] = useState(0);
 
@@ -3019,7 +2984,7 @@ function ThankYouSection({
  }, [photos.length]);
 
  const safeActiveIndex = photos.length > 0 ? activeIndex % photos.length : 0;
- const activePhoto = photos[safeActiveIndex] ?? fallbackImage;
+ const activePhoto = photos[safeActiveIndex];
 
  return (
   <section
@@ -3088,9 +3053,9 @@ function ThankYouSection({
  );
 }
 
-function FooterMark({ couple }: { couple: InvitationConfig["couple"] }) {
+function FooterMark({ hosts }: { hosts: Host[] }) {
  const year = new Date().getFullYear();
- const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+ const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
  const stars = useMemo(() => {
   return Array.from({ length: 42 }, (_, i) => {

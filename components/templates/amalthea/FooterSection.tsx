@@ -3,8 +3,8 @@
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import type { FooterSectionProps } from "./InfoSections.types";
 
-export function FooterSection({ couple, message }: FooterSectionProps) {
-  const names = `${couple.groom.firstName} ${couple.bride?.firstName ? "&" : ""} ${couple.bride?.firstName}`;
+export function FooterSection({ hosts, message }: FooterSectionProps) {
+  const names = `${hosts[0]?.firstName ?? ""} ${hosts[1]?.firstName ? "&" : ""} ${hosts[1]?.firstName ?? ""}`;
   const year = new Date().getFullYear();
 
   void message;

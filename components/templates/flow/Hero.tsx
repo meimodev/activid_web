@@ -2,24 +2,20 @@
 
 import { motion } from "framer-motion";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
+import type { Host } from "@/types/invitation";
 
 // Using a placeholder image with a more elegant, warm tone
 // const HERO_IMAGE = "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop";
 
-interface CoupleInfo {
-  groom: { firstName: string };
-  bride: { firstName: string };
-}
-
 interface HeroProps {
   onOpen: () => void;
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   subtitle: string;
   coverImage: string;
 }
 
-export function Hero({ onOpen, couple, date, subtitle, coverImage }: HeroProps) {
+export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   return (
   <div className="relative h-screen w-full overflow-hidden bg-wedding-dark">
   {/* Background Image with animated scale */}
@@ -46,7 +42,7 @@ export function Hero({ onOpen, couple, date, subtitle, coverImage }: HeroProps) 
   </FloatingParallax>
   <FloatingParallax speed={-0.1}>
   <h1 className="font-script text-7xl  mb-8 text-white drop-shadow-2xl opacity-90">
-  {couple.groom.firstName} {couple.bride.firstName}
+  {hosts[0]?.firstName ?? ""} {hosts[1]?.firstName ?? ""}
   </h1>
   </FloatingParallax>
   <FloatingParallax speed={0.1}>

@@ -3,15 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { MERCURY_OVERLAY_ASSETS } from "./graphics/overlays";
-
-interface CoupleInfo {
-  groom: { firstName: string; shortName?: string; fullName?: string };
-  bride: { firstName: string; shortName?: string; fullName?: string };
-}
+import { Host } from "@/types/invitation";
 
 interface HeroProps {
   onOpen: () => void;
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   subtitle: string;
   coverImage: string;
@@ -22,7 +18,7 @@ const revealEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export function Hero({
   onOpen,
-  couple,
+  hosts,
   date,
   subtitle,
   coverImage,
@@ -57,12 +53,15 @@ export function Hero({
     };
   }, []);
 
-  const groomInitial = couple.groom.firstName?.charAt(0).toUpperCase() || "G";
-  const brideInitial = couple.bride.firstName?.charAt(0).toUpperCase() || "B";
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
+  const primaryInitial = primary?.firstName?.charAt(0).toUpperCase() || "H";
+  const secondaryInitial = secondary?.firstName?.charAt(0).toUpperCase() || "";
   const displayGuest = guestName?.trim() || "NAMA TAMU";
   const heading = subtitle?.trim() || "The Wedding ";
-  const groomName = couple.groom.shortName || couple.groom.firstName;
-  const brideName = couple.bride.shortName || couple.bride.firstName;
+  const primaryName = primary?.shortName || primary?.firstName || "";
+  const secondaryName = secondary?.shortName || secondary?.firstName || "";
 
   const handleOpen = () => {
     if (isOpening) return;
@@ -212,19 +211,23 @@ export function Hero({
             className="relative flex w-full max-h-[750px] min-h-[500px] flex-col items-center overflow-hidden rounded-[210px] border border-[#f3d8df] bg-[#fffefe] px-6 pb-12 pt-11 text-center shadow-[0_25px_90px_rgba(44,11,19,0.5)] "
           >
             <motion.div
-            className="flex gap-4 font-brittany-signature font-bold text-shadow-lg text-[#8b5864] z-10 mt-15"
-            initial={{ opacity: 0, y: 16 }}
-            animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
-            transition={
-              isOpening
-                ? { duration: 0.48, delay: 0.3, ease: revealEase }
-                : { duration: 0.82, delay: 0.7, ease: revealEase }
-            }
-          >
-            <h1 className="relative text-[86px]  pb-10">{groomInitial}</h1>
-            <h1 className="relative self-center text-[60px]  ">&</h1>
-            <h1 className="relative text-[86px]  pt-24">{brideInitial}</h1>
-          </motion.div>
+              className="flex gap-4 font-brittany-signature font-bold text-shadow-lg text-[#8b5864] z-10 mt-15"
+              initial={{ opacity: 0, y: 16 }}
+              animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
+              transition={
+                isOpening
+                  ? { duration: 0.48, delay: 0.3, ease: revealEase }
+                  : { duration: 0.82, delay: 0.7, ease: revealEase }
+              }
+            >
+              <h1 className="relative text-[86px] pb-10">{primaryInitial}</h1>
+              {secondary ? (
+                <>
+                  <h1 className="relative self-center text-[60px]">&</h1>
+                  <h1 className="relative text-[86px] pt-24">{secondaryInitial}</h1>
+                </>
+              ) : null}
+            </motion.div>
 
           <motion.div
             className="relative z-10 mt-14 px-2"
@@ -240,7 +243,8 @@ export function Hero({
               {heading}
             </p>
             <p className="mt-3 font-tan-mon-cheri text-[30px] leading-tight text-[#5f323c] ">
-              {groomName} & {brideName}
+              {primaryName}
+              {secondaryName ? ` & ${secondaryName}` : ""}
             </p>
             <p className="font-garet-book mt-4 text-[20px] tracking-[0.22em] text-[#5f323c] ">
               {date}

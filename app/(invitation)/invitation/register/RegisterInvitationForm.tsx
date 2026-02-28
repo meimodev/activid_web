@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { CoupleData, EventDetail, InvitationConfig } from "@/types/invitation";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { EventDetail, Host, InvitationConfig, InvitationDateTime } from "@/types/invitation";
+import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
 import { RegisterInvitationState, VerifyRegisterPasswordState } from "./actions";
 
 type TemplateOption = {
@@ -357,7 +358,7 @@ function ImageUrlListPicker({
   );
 }
 
-const COUPLE_FIELDS: Array<[keyof CoupleData, string]> = [
+const HOST_FIELDS: Array<[keyof Host, string]> = [
   ["firstName", "First Name"],
   ["fullName", "Full Name"],
   ["shortName", "Short Name"],
@@ -386,127 +387,203 @@ const EVENT_FIELDS: Array<["title" | "venue" | "address" | "mapUrl", string]> = 
   ["mapUrl", "Map URL"],
 ];
 
-function normalizeHostsList(raw: InvitationConfig["hosts"] | undefined, fallback: InvitationConfig["couple"]) {
-  const emptyHost: CoupleData = {
-    firstName: "",
-    fullName: "",
-    shortName: "",
-    role: "",
-    parents: "",
-    photo: "",
-  };
-
-  const list = Array.isArray(raw) ? raw.filter(Boolean) : [];
-  if (list.length) return list;
-  return [fallback.groom, fallback.bride].filter(Boolean).length
-    ? [fallback.groom, fallback.bride]
-    : [emptyHost];
-}
-
-function deriveCoupleFromHosts(hosts: CoupleData[]): InvitationConfig["couple"] {
-  const empty: CoupleData = {
-    firstName: "",
-    fullName: "",
-    shortName: "",
-    role: "",
-    parents: "",
-    photo: "",
-  };
-
-  return {
-    groom: hosts[0] ?? empty,
-    bride: hosts[1] ?? empty,
-  };
-}
-
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
 
-function tryParseIsoDate(value: string): string | null {
-  const v = (value || "").trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-  return null;
+function createTodayDateTime(): InvitationDateTime {
+  const now = new Date();
+  return {
+    date: { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() },
+    time: { hour: 0, minute: 0 },
+  };
 }
 
-function tryParseIndonesianDate(value: string): string | null {
-  const raw = (value || "").trim();
+function isInvitationDateTime(value: unknown): value is InvitationDateTime {
+  if (!value || typeof value !== "object") return false;
+
+  const v = value as {
+    date?: { year?: unknown; month?: unknown; day?: unknown };
+    time?: { hour?: unknown; minute?: unknown };
+  };
+
+  return (
+    !!v.date &&
+    Number.isInteger(v.date.year) &&
+    Number.isInteger(v.date.month) &&
+    Number.isInteger(v.date.day) &&
+    !!v.time &&
+    Number.isInteger(v.time.hour) &&
+    Number.isInteger(v.time.minute)
+  );
+}
+
+function tryParseDateStringToDateTime(input: string): InvitationDateTime | null {
+  const raw = (input || "").trim();
   if (!raw) return null;
 
-  const normalized = raw
-    .replace(/^[A-Za-z]+\s*,\s*/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  const normalized = raw.replace(/,/g, " ").replace(/\s+/g, " ").trim();
+
+  const iso = normalized.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) {
+    const year = Number(iso[1]);
+    const month = Number(iso[2]);
+    const day = Number(iso[3]);
+    if (year && month && day) {
+      return { date: { year, month, day }, time: { hour: 0, minute: 0 } };
+    }
+  }
 
   const monthMap: Record<string, number> = {
-    januari: 1,
+    january: 1,
     jan: 1,
-    februari: 2,
+    januari: 1,
+    february: 2,
     feb: 2,
-    maret: 3,
+    februari: 2,
+    march: 3,
     mar: 3,
+    maret: 3,
     april: 4,
     apr: 4,
+    may: 5,
     mei: 5,
-    juni: 6,
+    june: 6,
     jun: 6,
-    juli: 7,
+    juni: 6,
+    july: 7,
     jul: 7,
+    juli: 7,
+    august: 8,
+    aug: 8,
     agustus: 8,
     agu: 8,
     ags: 8,
     september: 9,
     sep: 9,
+    october: 10,
+    oct: 10,
     oktober: 10,
     okt: 10,
     november: 11,
     nov: 11,
+    december: 12,
+    dec: 12,
     desember: 12,
     des: 12,
   };
 
-  const parts = normalized.split(" ").filter(Boolean);
-  if (parts.length < 3) return null;
+  const lower = normalized.toLowerCase();
 
-  const day = Number(parts[0]);
-  const monthToken = parts[1]!.toLowerCase().replace(/[^a-z]/g, "");
-  const year = Number(parts[2]!.replace(/[^0-9]/g, ""));
-  const month = monthMap[monthToken];
+  const dmy = lower.match(/^(?:[a-z]+\s+)?(\d{1,2})\s+([a-z]+)\s+(\d{4})$/);
+  if (dmy) {
+    const day = Number(dmy[1]);
+    const month = monthMap[dmy[2]] ?? 0;
+    const year = Number(dmy[3]);
+    if (year && month && day) {
+      return { date: { year, month, day }, time: { hour: 0, minute: 0 } };
+    }
+  }
 
-  if (!day || !year || !month) return null;
-  if (day < 1 || day > 31) return null;
-  if (month < 1 || month > 12) return null;
-  if (year < 1900) return null;
+  const my = lower.match(/^([a-z]+)\s+(\d{4})$/);
+  if (my) {
+    const month = monthMap[my[1]] ?? 0;
+    const year = Number(my[2]);
+    if (year && month) {
+      return { date: { year, month, day: 1 }, time: { hour: 0, minute: 0 } };
+    }
+  }
 
-  return `${year}-${pad2(month)}-${pad2(day)}`;
+  const tahun = lower.match(/^tahun\s+(\d{4})$/);
+  if (tahun) {
+    const year = Number(tahun[1]);
+    if (year) {
+      return { date: { year, month: 1, day: 1 }, time: { hour: 0, minute: 0 } };
+    }
+  }
+
+  return null;
 }
 
-function toDateInputValue(value: string) {
-  return tryParseIsoDate(value) ?? tryParseIndonesianDate(value) ?? "";
+function coerceInvitationDateTime(value: unknown): InvitationDateTime {
+  if (isInvitationDateTime(value)) return value;
+
+  if (value && typeof value === "object") {
+    const v = value as { year?: unknown; month?: unknown; day?: unknown };
+    if (
+      Number.isInteger(v.year) &&
+      Number.isInteger(v.month) &&
+      Number.isInteger(v.day)
+    ) {
+      return {
+        date: {
+          year: v.year as number,
+          month: v.month as number,
+          day: v.day as number,
+        },
+        time: { hour: 0, minute: 0 },
+      };
+    }
+  }
+
+  if (typeof value === "string") {
+    const parsed = tryParseDateStringToDateTime(value);
+    if (parsed) return parsed;
+  }
+
+  return createTodayDateTime();
 }
 
-function toTimeInputValue(value: string) {
-  const m = (value || "").match(/(\d{1,2}:\d{2})/);
-  if (!m) return "";
-  const parts = m[1]!.split(":");
-  const hh = Number(parts[0]);
-  const mm = Number(parts[1]);
-  if (!Number.isFinite(hh) || !Number.isFinite(mm)) return "";
-  return `${pad2(hh)}:${pad2(mm)}`;
+function toDateInputValue(value: InvitationDateTime) {
+  if (!value?.date) return "";
+  return `${value.date.year}-${pad2(value.date.month)}-${pad2(value.date.day)}`;
+}
+
+function toTimeInputValue(value: InvitationDateTime) {
+  if (!value?.time) return "00:00";
+  return `${pad2(value.time.hour)}:${pad2(value.time.minute)}`;
+}
+
+function withDateFromInput(value: InvitationDateTime, input: string): InvitationDateTime {
+  const parts = (input || "").split("-");
+  if (parts.length !== 3) return value;
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  if (!Number.isInteger(year) || year < 1900) return value;
+  if (!Number.isInteger(month) || month < 1 || month > 12) return value;
+  if (!Number.isInteger(day) || day < 1 || day > 31) return value;
+  const dt = new Date(year, month - 1, day);
+  if (dt.getFullYear() !== year || dt.getMonth() !== month - 1 || dt.getDate() !== day) return value;
+  return { ...value, date: { year, month, day } };
+}
+
+function withTimeFromInput(value: InvitationDateTime, input: string): InvitationDateTime {
+  const parts = (input || "").split(":");
+  if (parts.length !== 2) return value;
+  const hour = Number(parts[0]);
+  const minute = Number(parts[1]);
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return value;
+  if (!Number.isInteger(minute) || minute < 0 || minute > 59) return value;
+  return { ...value, time: { hour, minute } };
 }
 
 function normalizeEventList(raw: InvitationConfig["sections"]["event"]["events"]): EventDetail[] {
   const emptyEvent: EventDetail = {
     title: "",
-    date: "",
-    time: "",
+    date: createTodayDateTime(),
     venue: "",
     address: "",
     mapUrl: "",
   };
 
   if (Array.isArray(raw)) {
-    return raw.length ? raw : [emptyEvent];
+    const list = raw.length ? raw : [emptyEvent];
+    return list.map((e) => ({
+      ...emptyEvent,
+      ...(e as unknown as Partial<EventDetail>),
+      date: coerceInvitationDateTime((e as { date?: unknown })?.date),
+    })) as EventDetail[];
   }
   if (!raw || typeof raw !== "object") return [emptyEvent];
 
@@ -518,7 +595,12 @@ function normalizeEventList(raw: InvitationConfig["sections"]["event"]["events"]
     .map(([, value]) => value)
     .filter(Boolean);
   const list = [...prioritized, ...rest];
-  return list.length ? list : [emptyEvent];
+  const ensured = list.length ? list : [emptyEvent];
+  return ensured.map((e) => ({
+    ...emptyEvent,
+    ...(e as unknown as Partial<EventDetail>),
+    date: coerceInvitationDateTime((e as { date?: unknown })?.date),
+  })) as EventDetail[];
 }
 
 function TextInput({
@@ -551,8 +633,8 @@ function DateInput({
   onChange,
 }: {
   label: string;
-  value: string;
-  onChange: (value: string) => void;
+  value: InvitationDateTime;
+  onChange: (value: InvitationDateTime) => void;
 }) {
   return (
     <label className="grid gap-1 text-sm">
@@ -561,7 +643,7 @@ function DateInput({
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
         value={toDateInputValue(value)}
         type="date"
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(withDateFromInput(value, e.target.value))}
       />
     </label>
   );
@@ -573,8 +655,8 @@ function TimeInput({
   onChange,
 }: {
   label: string;
-  value: string;
-  onChange: (value: string) => void;
+  value: InvitationDateTime;
+  onChange: (value: InvitationDateTime) => void;
 }) {
   return (
     <label className="grid gap-1 text-sm">
@@ -583,7 +665,7 @@ function TimeInput({
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
         value={toTimeInputValue(value)}
         type="time"
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(withTimeFromInput(value, e.target.value))}
       />
     </label>
   );
@@ -623,14 +705,33 @@ function Checkbox({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-white/70">
-      <input
-        type="checkbox"
-        className="h-4 w-4 rounded border-white/20 bg-white/10"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <span>{label}</span>
+    <label className="group inline-flex items-center gap-2.5 text-sm text-white/80 select-none cursor-pointer">
+      <span className="relative grid h-5 w-5 place-items-center">
+        <input
+          type="checkbox"
+          className="peer sr-only"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <span
+          aria-hidden
+          className="absolute inset-0 rounded-md border border-white/20 bg-white/5 shadow-[0_1px_0_rgba(255,255,255,0.06)] transition-colors peer-checked:border-indigo-400/60 peer-checked:bg-indigo-500/20 group-hover:border-white/30 peer-focus-visible:ring-2 peer-focus-visible:ring-indigo-500/60"
+        />
+        <svg
+          viewBox="0 0 20 20"
+          fill="none"
+          className="relative z-10 h-3.5 w-3.5 text-indigo-100 opacity-0 scale-90 transition-all peer-checked:opacity-100 peer-checked:scale-100"
+        >
+          <path
+            d="M16.667 5.833 8.333 14.167 4.167 10"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      <span className="leading-none">{label}</span>
     </label>
   );
 }
@@ -646,20 +747,20 @@ function SectionCard({
   onEnabledChange: (enabled: boolean) => void;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const effectiveOpen = enabled && open;
 
   return (
     <details
       open={effectiveOpen}
-      className="grid gap-4 rounded-2xl border border-white/10 bg-black/20 p-4"
+      className="group rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-5 shadow-[0_0_30px_-10px_rgba(34,211,238,0.05)] transition-all overflow-hidden relative"
       onToggle={(e) => {
         if (!enabled) return;
         setOpen((e.currentTarget as HTMLDetailsElement).open);
       }}
     >
       <summary
-        className={`flex list-none items-center justify-between gap-3 text-sm font-black text-white ${
+        className={`cursor-pointer text-lg font-black tracking-tight text-white flex items-center justify-between gap-3 list-none ${
           enabled ? "cursor-pointer" : "cursor-not-allowed opacity-70"
         }`}
         onClick={(e) => {
@@ -667,27 +768,37 @@ function SectionCard({
         }}
       >
         <span>{title}</span>
-        <span
-          className="cursor-default"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          <Checkbox
-            label="Enabled"
-            checked={enabled}
-            onChange={(nextEnabled) => {
+        <span className="flex items-center gap-3">
+          <button
+            type="button"
+            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 ${
+              enabled
+                ? "border-indigo-400/40 bg-indigo-500/15 text-indigo-100 hover:bg-indigo-500/20"
+                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const nextEnabled = !enabled;
               if (!nextEnabled) {
                 setOpen(false);
               }
               onEnabledChange(nextEnabled);
             }}
-          />
+            role="switch"
+            aria-checked={enabled}
+          >
+            <span
+              aria-hidden
+              className={`h-2 w-2 rounded-full ${enabled ? "bg-emerald-400" : "bg-white/25"}`}
+            />
+            Enabled
+          </button>
+          <span className="text-white/40 group-open:rotate-180 transition-transform duration-300">▼</span>
         </span>
       </summary>
 
-      {children}
+      <div className="mt-6 grid gap-6 relative z-10">{children}</div>
     </details>
   );
 }
@@ -758,23 +869,19 @@ export function RegisterInvitationForm({
     initialConfig.purpose ?? "marriage",
   );
 
-  const initialHosts = useMemo(
-    () => normalizeHostsList(initialConfig.hosts, initialConfig.couple),
-    [initialConfig.couple, initialConfig.hosts],
-  );
-
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
     id: "",
     templateId: templateId,
     purpose: initialConfig.purpose ?? "marriage",
-    hosts: initialHosts,
-    couple: deriveCoupleFromHosts(initialHosts),
     sections: {
       ...initialConfig.sections,
-      hosts: initialConfig.sections.hosts ?? {
-        enabled: initialConfig.sections.couple.enabled,
-        disableGrayscale: initialConfig.sections.couple.disableGrayscale,
+      story: {
+        ...initialConfig.sections.story,
+        stories: (initialConfig.sections.story.stories ?? []).map((s) => ({
+          ...s,
+          date: coerceInvitationDateTime((s as { date?: unknown }).date),
+        })),
       },
       event: {
         ...initialConfig.sections.event,
@@ -783,11 +890,10 @@ export function RegisterInvitationForm({
     },
   }));
 
-  function setHosts(nextHosts: CoupleData[]) {
+  function setHosts(nextHosts: Host[]) {
     setConfig((prev) => ({
       ...prev,
       hosts: nextHosts,
-      couple: deriveCoupleFromHosts(nextHosts),
     }));
   }
 
@@ -815,29 +921,117 @@ export function RegisterInvitationForm({
     }));
   };
 
+  const templateListingByTemplateId = useMemo(() => {
+    return new Map(INVITATION_TEMPLATE_LISTINGS.map((t) => [t.templateId, t] as const));
+  }, []);
+
+  const templateCards = useMemo(() => {
+    return templateOptions.map((opt) => {
+      const listing = templateListingByTemplateId.get(opt.id);
+
+      return {
+        id: opt.id,
+        label: opt.label,
+        image: listing?.image ?? "",
+        priceDiscount: listing?.priceDiscount ?? "",
+      };
+    });
+  }, [templateListingByTemplateId, templateOptions]);
+
+  const templateScrollerRef = useRef<HTMLDivElement | null>(null);
+  const templateDragRef = useRef<{
+    active: boolean;
+    pointerId: number | null;
+    startClientX: number;
+    startScrollLeft: number;
+    moved: boolean;
+  }>({
+    active: false,
+    pointerId: null,
+    startClientX: 0,
+    startScrollLeft: 0,
+    moved: false,
+  });
+  const templateIgnoreClickRef = useRef(false);
+  const [templateDragging, setTemplateDragging] = useState(false);
+
+  const handleTemplateScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    const el = templateScrollerRef.current;
+    if (!el) return;
+
+    templateDragRef.current = {
+      active: true,
+      pointerId: e.pointerId,
+      startClientX: e.clientX,
+      startScrollLeft: el.scrollLeft,
+      moved: false,
+    };
+    setTemplateDragging(true);
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const handleTemplateScrollerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = templateScrollerRef.current;
+    const drag = templateDragRef.current;
+    if (!el || !drag.active) return;
+
+    const deltaX = e.clientX - drag.startClientX;
+    if (!drag.moved && Math.abs(deltaX) > 4) {
+      drag.moved = true;
+    }
+    el.scrollLeft = drag.startScrollLeft - deltaX;
+    if (drag.moved) {
+      e.preventDefault();
+    }
+  };
+
+  const handleTemplateScrollerPointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = templateScrollerRef.current;
+    const drag = templateDragRef.current;
+    if (!el || !drag.active) return;
+
+    templateIgnoreClickRef.current = drag.moved;
+    if (drag.moved) {
+      window.setTimeout(() => {
+        templateIgnoreClickRef.current = false;
+      }, 0);
+    }
+    if (drag.pointerId !== null && el.hasPointerCapture(drag.pointerId)) {
+      el.releasePointerCapture(drag.pointerId);
+    }
+    templateDragRef.current.active = false;
+    templateDragRef.current.pointerId = null;
+    setTemplateDragging(false);
+  };
+
   const configJson = useMemo(() => JSON.stringify(config), [config]);
 
   if (!isUnlocked) {
     return (
       <form action={verifyAction} className="grid gap-6">
         <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-5">
-          <div className="text-lg font-black text-white">Register Invitation</div>
+          <div className="text-xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent relative z-10">
+            Command Station Access
+          </div>
 
           {verifyState.error ? (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200 relative z-10">
               {verifyState.error}
             </div>
           ) : null}
 
-          <TextInput label="Password" value={password} type="password" onChange={setPassword} />
+          <div className="relative z-10">
+            <TextInput label="Access Password" value={password} type="password" onChange={setPassword} />
+          </div>
           <input type="hidden" name="password" value={password} />
 
           <button
             type="submit"
             disabled={verifying}
-            className="rounded-2xl bg-indigo-500 px-6 py-3 text-sm font-black text-white hover:bg-indigo-400 disabled:opacity-60"
+            className="mt-2 relative z-10 inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-indigo-500/20 via-purple-500/20 to-cyan-500/20 border border-indigo-400/40 px-6 py-3 text-sm font-black uppercase tracking-wider text-indigo-100 hover:bg-indigo-500/30 hover:border-indigo-300/70 transition-all disabled:opacity-60 disabled:hover:bg-indigo-500/20 disabled:hover:border-indigo-400/40"
           >
-            {verifying ? "Verifying..." : "Unlock"}
+            {verifying ? "Verifying..." : "Unlock Access"}
           </button>
         </div>
       </form>
@@ -851,61 +1045,117 @@ export function RegisterInvitationForm({
       <input type="hidden" name="password" value={password} />
       <input type="hidden" name="configJson" value={configJson} />
 
-      <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-5">
-        <div className="text-lg font-black text-white">Register Invitation</div>
+      <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
+        {/* Decorative background glow */}
+        <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-indigo-500/10 blur-[60px] pointer-events-none" />
+        
+        <div className="text-xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
+          <span className="text-xl">🚀</span> Create New Mission
+        </div>
 
         {state.error ? (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200 relative z-10">
             {state.error}
           </div>
         ) : null}
 
-        <TextInput label="Slug (document id)" value={slug} onChange={handleSlugChange} />
+        <div className="grid gap-4 relative z-10 sm:grid-cols-2">
+          <TextInput label="Mission Code (slug/document id)" value={slug} onChange={handleSlugChange} />
 
-        <label className="grid gap-1 text-sm">
-          <span className="text-white/70">Template</span>
-          <select
-            className="rounded-xl border border-white/10 bg-[#0b0b16] px-3 py-2 text-white outline-none focus:border-indigo-500/60"
-            value={templateId}
-            onChange={(e) => handleTemplateChange(e.target.value)}
-          >
-            {templateOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div className="grid gap-2 text-sm sm:col-span-2">
+            <span className="text-indigo-200/70 font-medium tracking-wide">Ship Template</span>
+            <div
+              ref={templateScrollerRef}
+              className={`-mx-1 px-1 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+                templateDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
+              style={{ touchAction: "pan-y" }}
+              onPointerDown={handleTemplateScrollerPointerDown}
+              onPointerMove={handleTemplateScrollerPointerMove}
+              onPointerUp={handleTemplateScrollerPointerEnd}
+              onPointerCancel={handleTemplateScrollerPointerEnd}
+              onPointerLeave={handleTemplateScrollerPointerEnd}
+            >
+              {templateCards.map((card) => {
+                const selected = card.id === templateId;
 
-        <label className="grid gap-1 text-sm">
-          <span className="text-white/70">Purpose</span>
-          <select
-            name="purpose"
-            className="rounded-xl border border-white/10 bg-[#0b0b16] px-3 py-2 text-white outline-none focus:border-indigo-500/60"
-            value={purpose}
-            onChange={(e) =>
-              handlePurposeChange(e.target.value as "marriage" | "birthday" | "event")
-            }
-          >
-            <option value="marriage">Marriage</option>
-            <option value="birthday">Birthday</option>
-            <option value="event">Event</option>
-          </select>
-        </label>
-      </div>
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    className={`shrink-0 w-36 rounded-2xl border bg-[#0b0b16]/70 overflow-hidden text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 ${
+                      selected
+                        ? "border-indigo-400/70 shadow-[0_0_20px_-8px_rgba(99,102,241,0.5)]"
+                        : "border-white/10 hover:border-indigo-500/50"
+                    }`}
+                    onClick={() => {
+                      if (templateIgnoreClickRef.current) {
+                        templateIgnoreClickRef.current = false;
+                        return;
+                      }
+                      handleTemplateChange(card.id);
+                    }}
+                    aria-pressed={selected}
+                  >
+                    <div className="relative aspect-[4/5] bg-black/20">
+                      {card.image ? (
+                        <img
+                          src={card.image}
+                          alt={card.label}
+                          className="h-full w-full object-cover grayscale-[0.6]"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-white/5" />
+                      )}
+                      <div className="absolute inset-0 bg-linear-to-t from-[#020205]/70 via-black/10 to-transparent" />
+                      {selected ? (
+                        <div className="absolute top-2 right-2 rounded-full border border-indigo-400/40 bg-indigo-500/15 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-indigo-100">
+                          Selected
+                        </div>
+                      ) : null}
+                    </div>
 
-      <details className="rounded-3xl border border-white/10 bg-white/5 p-5">
-        <summary className="cursor-pointer text-base font-black text-white">Basics</summary>
-        <div className="mt-4 grid gap-6">
-          <details open className="grid gap-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <summary className="cursor-pointer text-sm font-black text-white">Music</summary>
+                    <div className="grid gap-1 p-2">
+                      <div className="text-sm font-black tracking-tight text-white">{card.label}</div>
+                      <div className="text-sm font-black tracking-tight text-white/90">
+                        {card.priceDiscount || "-"}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className="grid gap-1 text-sm sm:col-span-2">
+            <span className="text-indigo-200/70 font-medium tracking-wide">Mission Purpose</span>
+            <select
+              name="purpose"
+              className="rounded-xl border border-white/10 bg-[#0b0b16]/80 px-3 py-2 text-white outline-none focus:border-indigo-500/60 transition-colors"
+              value={purpose}
+              onChange={(e) =>
+                handlePurposeChange(e.target.value as "marriage" | "birthday" | "event")
+              }
+            >
+              <option value="marriage">Marriage</option>
+              <option value="birthday">Birthday</option>
+              <option value="event">Other Event</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="grid gap-4 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner relative z-10">
+          <div className="text-sm font-black text-indigo-100 uppercase tracking-wide">
+            Audio Transmission (Music)
+          </div>
+          <div className="grid gap-4">
             <TextInput
               label="Title (optional)"
               value={config.music.title ?? ""}
               onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "title"], v))}
             />
             <TextInput
-              label="URL"
+              label="Audio URL"
               value={config.music.url}
               onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "url"], v))}
             />
@@ -921,101 +1171,13 @@ export function RegisterInvitationForm({
                 onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "loop"], v))}
               />
             </div>
-          </details>
-
-          <details open className="grid gap-4 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <summary className="cursor-pointer text-sm font-black text-white">
-              Background Photos
-            </summary>
-            <StringListEditor
-              label="Photos"
-              items={config.backgroundPhotos}
-              onChange={(items) => setConfig((prev) => updateAtPath(prev, ["backgroundPhotos"], items))}
-            />
-          </details>
+          </div>
         </div>
-      </details>
+      </div>
 
-      <details className="rounded-3xl border border-white/10 bg-white/5 p-5">
-        <summary className="cursor-pointer text-base font-black text-white">Hosts</summary>
-        <div className="mt-4 grid gap-6">
-          {(config.hosts ?? []).map((host, idx) => (
-            <div
-              key={idx}
-              className="grid gap-4 rounded-2xl border border-white/10 bg-black/20 p-4"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-sm font-black text-white">
-                  {idx === 0 ? "Host 1 (Groom)" : idx === 1 ? "Host 2 (Bride)" : `Host ${idx + 1}`}
-                </div>
-                <button
-                  type="button"
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-50"
-                  disabled={(config.hosts?.length ?? 0) <= 1}
-                  onClick={() => {
-                    const next = (config.hosts ?? []).filter((_, i) => i !== idx);
-                    setHosts(next.length ? next : [host]);
-                  }}
-                >
-                  Remove
-                </button>
-              </div>
-
-              {COUPLE_FIELDS.map(([key, label]) =>
-                key === "photo" ? (
-                  <ImageUrlPicker
-                    key={key}
-                    label={label}
-                    value={host.photo}
-                    slug={slug}
-                    fieldKey={`host-${idx}-photo`}
-                    onChange={(v) => {
-                      const next = [...(config.hosts ?? [])];
-                      next[idx] = { ...next[idx]!, photo: v };
-                      setHosts(next);
-                    }}
-                  />
-                ) : (
-                  <TextInput
-                    key={key}
-                    label={label}
-                    value={host[key]}
-                    onChange={(v) => {
-                      const next = [...(config.hosts ?? [])];
-                      next[idx] = { ...next[idx]!, [key]: v };
-                      setHosts(next);
-                    }}
-                  />
-                ),
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-black text-white hover:bg-white/10"
-            onClick={() => {
-              const emptyHost: CoupleData = {
-                firstName: "",
-                fullName: "",
-                shortName: "",
-                role: "",
-                parents: "",
-                photo: "",
-              };
-              setHosts([...(config.hosts ?? []), emptyHost]);
-            }}
-          >
-            Add Host
-          </button>
-        </div>
-      </details>
-
-      <details className="rounded-3xl border border-white/10 bg-white/5 p-5">
-        <summary className="cursor-pointer text-base font-black text-white">Sections</summary>
-        <div className="mt-4 grid gap-6">
+      <div className="grid gap-5 relative z-10">
           <SectionCard
-            title="Hero"
+            title="👋 Greeting / Quote (Hero)"
             enabled={asBoolean(config.sections.hero.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1028,26 +1190,28 @@ export function RegisterInvitationForm({
               })
             }
           >
-            <TextInput
-              label="Subtitle"
-              value={config.sections.hero.subtitle}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "hero", "subtitle"], v))
-              }
-            />
-            <ImageUrlPicker
-              label="Cover Image"
-              value={config.sections.hero.coverImage}
-              slug={slug}
-              fieldKey="hero-cover"
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "hero", "coverImage"], v))
-              }
-            />
+            <div className="grid gap-4 mt-2">
+              <TextArea
+                label="Subtitle (Greeting)"
+                value={config.sections.hero.subtitle}
+                onChange={(v) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "hero", "subtitle"], v))
+                }
+              />
+              <ImageUrlPicker
+                label="Cover Image"
+                value={config.sections.hero.coverImage}
+                slug={slug}
+                fieldKey="hero-cover"
+                onChange={(v) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "hero", "coverImage"], v))
+                }
+              />
+            </div>
           </SectionCard>
 
           <SectionCard
-            title="Title"
+            title="🏷️ Main Title"
             enabled={asBoolean(config.sections.title.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1060,7 +1224,7 @@ export function RegisterInvitationForm({
             }
           >
             <TextInput
-              label="Heading"
+              label="Title"
               value={config.sections.title.heading}
               onChange={(v) =>
                 setConfig((prev) => updateAtPath(prev, ["sections", "title", "heading"], v))
@@ -1069,37 +1233,29 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="Countdown"
+            title="⏳ Countdown"
             enabled={asBoolean(config.sections.countdown.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
                 let next = updateAtPath(prev, ["sections", "countdown", "enabled"], v);
                 if (!v) {
                   next = updateAtPath(next, ["sections", "countdown", "heading"], "");
-                  next = updateAtPath(next, ["sections", "countdown", "photos"], []);
                 }
                 return next;
               })
             }
           >
             <TextInput
-              label="Heading"
+              label="Title"
               value={config.sections.countdown.heading}
               onChange={(v) =>
                 setConfig((prev) => updateAtPath(prev, ["sections", "countdown", "heading"], v))
               }
             />
-            <StringListEditor
-              label="Photos"
-              items={config.sections.countdown.photos}
-              onChange={(items) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "countdown", "photos"], items))
-              }
-            />
           </SectionCard>
 
           <SectionCard
-            title="Quote"
+            title="💬 Quote"
             enabled={asBoolean(config.sections.quote.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1113,13 +1269,13 @@ export function RegisterInvitationForm({
             }
           >
             <TextArea
-              label="Text"
+              label="Quote Text"
               value={config.sections.quote.text}
               onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "quote", "text"], v))}
               rows={3}
             />
             <TextInput
-              label="Author"
+              label="Author / Source"
               value={config.sections.quote.author}
               onChange={(v) =>
                 setConfig((prev) => updateAtPath(prev, ["sections", "quote", "author"], v))
@@ -1128,39 +1284,103 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="Hosts Section"
-            enabled={asBoolean(config.sections.hosts?.enabled ?? config.sections.couple.enabled)}
+            title="🧑‍🤝‍🧑 Hosts"
+            enabled={asBoolean(config.sections.hosts.enabled)}
             onEnabledChange={(v) =>
-              setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "couple", "enabled"], v);
-                next = updateAtPath(next, ["sections", "hosts", "enabled"], v);
-                if (!v) {
-                  next = updateAtPath(next, ["sections", "couple", "disableGrayscale"], false);
-                  next = updateAtPath(next, ["sections", "hosts", "disableGrayscale"], false);
-                }
-                return next;
-              })
+              setConfig((prev) => updateAtPath(prev, ["sections", "hosts", "enabled"], v))
             }
           >
             <Checkbox
-              label="Disable Grayscale"
-              checked={asBoolean(
-                config.sections.hosts?.disableGrayscale ?? config.sections.couple.disableGrayscale,
-              )}
+              label="Disable Grayscale Effect"
+              checked={asBoolean(config.sections.hosts.disableGrayscale)}
               onChange={(v) =>
                 setConfig((prev) =>
                   updateAtPath(
-                    updateAtPath(prev, ["sections", "couple", "disableGrayscale"], v),
+                    prev,
                     ["sections", "hosts", "disableGrayscale"],
                     v,
                   ),
                 )
               }
             />
+
+            {(config.hosts ?? []).map((host, idx) => (
+              <div
+                key={idx}
+                className="grid gap-5 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner relative"
+              >
+                <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500/40 rounded-l-2xl" />
+                <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
+                  <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">
+                    {`Host ${idx + 1}`}
+                  </div>
+                  <button
+                    type="button"
+                    className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                    disabled={(config.hosts?.length ?? 0) <= 1}
+                    onClick={() => {
+                      const next = (config.hosts ?? []).filter((_, i) => i !== idx);
+                      setHosts(next.length ? next : [host]);
+                    }}
+                  >
+                    Remove Host
+                  </button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {HOST_FIELDS.map(([key, label]) =>
+                    key === "photo" ? (
+                      <div key={key} className="sm:col-span-2">
+                        <ImageUrlPicker
+                          label={label}
+                          value={host.photo}
+                          slug={slug}
+                          fieldKey={`host-${idx}-photo`}
+                          onChange={(v) => {
+                            const next = [...(config.hosts ?? [])];
+                            next[idx] = { ...next[idx]!, photo: v };
+                            setHosts(next);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <TextInput
+                        key={key}
+                        label={label}
+                        value={host[key]}
+                        onChange={(v) => {
+                          const next = [...(config.hosts ?? [])];
+                          next[idx] = { ...next[idx]!, [key]: v };
+                          setHosts(next);
+                        }}
+                      />
+                    ),
+                  )}
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2"
+              onClick={() => {
+                const emptyHost: Host = {
+                  firstName: "",
+                  fullName: "",
+                  shortName: "",
+                  role: "",
+                  parents: "",
+                  photo: "",
+                };
+                setHosts([...(config.hosts ?? []), emptyHost]);
+              }}
+            >
+              + Add Host
+            </button>
           </SectionCard>
 
           <SectionCard
-            title="Story"
+            title="📖 Journey (Story)"
             enabled={asBoolean(config.sections.story.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1174,43 +1394,43 @@ export function RegisterInvitationForm({
             }
           >
             <TextInput
-              label="Heading"
+              label="Title"
               value={config.sections.story.heading}
               onChange={(v) =>
                 setConfig((prev) => updateAtPath(prev, ["sections", "story", "heading"], v))
               }
             />
 
-            <div className="grid gap-2">
+            <div className="grid gap-2 mt-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-white/70">Stories</div>
+                <div className="text-sm font-bold text-indigo-100">Story List</div>
                 <button
                   type="button"
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
                   onClick={() =>
                     setConfig((prev) =>
                       updateAtPath(prev, ["sections", "story", "stories"], [
                         ...prev.sections.story.stories,
-                        { date: "", description: "" },
+                        { date: createTodayDateTime(), description: "" },
                       ]),
                     )
                   }
                 >
-                  Add
+                  + Add
                 </button>
               </div>
 
-              <div className="grid gap-3">
+              <div className="grid gap-4 mt-2">
                 {config.sections.story.stories.map((story, idx) => (
                   <div
                     key={idx}
-                    className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4"
+                    className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-black text-white">Item {idx + 1}</div>
+                    <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                      <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Story {idx + 1}</div>
                       <button
                         type="button"
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-red-500/60"
+                        className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors"
                         onClick={() => {
                           const nextStories = config.sections.story.stories.filter((_, i) => i !== idx);
                           setConfig((prev) =>
@@ -1221,12 +1441,15 @@ export function RegisterInvitationForm({
                         Remove
                       </button>
                     </div>
-                    <TextInput
+                    <DateInput
                       label="Date"
                       value={story.date}
                       onChange={(v) => {
                         const nextStories = [...config.sections.story.stories];
-                        nextStories[idx] = { ...nextStories[idx], date: v };
+                        nextStories[idx] = {
+                          ...nextStories[idx],
+                          date: { ...v, time: { hour: 0, minute: 0 } },
+                        };
                         setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
                       }}
                     />
@@ -1240,24 +1463,26 @@ export function RegisterInvitationForm({
                       }}
                       rows={3}
                     />
-                    <TextInput
-                      label="Title (optional)"
-                      value={story.title ?? ""}
-                      onChange={(v) => {
-                        const nextStories = [...config.sections.story.stories];
-                        nextStories[idx] = { ...nextStories[idx], title: v };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
-                      }}
-                    />
-                    <TextInput
-                      label="Image URL (optional)"
-                      value={story.imageUrl ?? ""}
-                      onChange={(v) => {
-                        const nextStories = [...config.sections.story.stories];
-                        nextStories[idx] = { ...nextStories[idx], imageUrl: v };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
-                      }}
-                    />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <TextInput
+                        label="Story Title (optional)"
+                        value={story.title ?? ""}
+                        onChange={(v) => {
+                          const nextStories = [...config.sections.story.stories];
+                          nextStories[idx] = { ...nextStories[idx], title: v };
+                          setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
+                        }}
+                      />
+                      <TextInput
+                        label="Image URL (optional)"
+                        value={story.imageUrl ?? ""}
+                        onChange={(v) => {
+                          const nextStories = [...config.sections.story.stories];
+                          nextStories[idx] = { ...nextStories[idx], imageUrl: v };
+                          setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
+                        }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1265,7 +1490,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="Event"
+            title="📅 Event Schedule (Event Section)"
             enabled={asBoolean(config.sections.event.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1278,110 +1503,114 @@ export function RegisterInvitationForm({
               })
             }
           >
-            <TextInput
-              label="Heading"
-              value={config.sections.event.heading}
-              onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "event", "heading"], v))}
-            />
+            <div className="grid gap-6 mt-2">
+              <TextInput
+                label="Title"
+                value={config.sections.event.heading}
+                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "event", "heading"], v))}
+              />
 
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-white/70">Events</div>
-                <button
-                  type="button"
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60"
-                  onClick={() => {
-                    const nextEvents = [
-                      ...(config.sections.event.events as EventDetail[]),
-                      {
-                        title: "",
-                        date: "",
-                        time: "",
-                        venue: "",
-                        address: "",
-                        mapUrl: "",
-                      },
-                    ];
-                    setConfig((prev) =>
-                      updateAtPath(prev, ["sections", "event", "events"], nextEvents),
-                    );
-                  }}
-                >
-                  Add
-                </button>
-              </div>
-
-              <div className="grid gap-3">
-                {(config.sections.event.events as EventDetail[]).map((event, idx) => (
-                  <div
-                    key={idx}
-                    className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4"
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-bold text-indigo-100">Event List</div>
+                  <button
+                    type="button"
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
+                    onClick={() => {
+                      const nextEvents = [
+                        ...(config.sections.event.events as EventDetail[]),
+                        {
+                          title: "",
+                          date: createTodayDateTime(),
+                          venue: "",
+                          address: "",
+                          mapUrl: "",
+                        },
+                      ];
+                      setConfig((prev) =>
+                        updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                      );
+                    }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-black text-white">Event {idx + 1}</div>
-                      <button
-                        type="button"
-                        disabled={(config.sections.event.events as EventDetail[]).length <= 1}
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-red-500/60 disabled:opacity-50"
-                        onClick={() => {
-                          const nextEvents = (config.sections.event.events as EventDetail[]).filter(
-                            (_, i) => i !== idx,
-                          );
-                          setConfig((prev) =>
-                            updateAtPath(prev, ["sections", "event", "events"], nextEvents),
-                          );
-                        }}
-                      >
-                        Remove
-                      </button>
+                    + Add
+                  </button>
+                </div>
+
+                <div className="grid gap-4">
+                  {(config.sections.event.events as EventDetail[]).map((event, idx) => (
+                    <div
+                      key={idx}
+                      className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
+                    >
+                      <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                        <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Event {idx + 1}</div>
+                        <button
+                          type="button"
+                          disabled={(config.sections.event.events as EventDetail[]).length <= 1}
+                          className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                          onClick={() => {
+                            const nextEvents = (config.sections.event.events as EventDetail[]).filter(
+                              (_, i) => i !== idx,
+                            );
+                            setConfig((prev) =>
+                              updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                            );
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {EVENT_FIELDS.map(([field, fieldLabel]) => (
+                          <div key={field} className={field === "address" || field === "mapUrl" ? "sm:col-span-2" : ""}>
+                            <TextInput
+                              label={fieldLabel}
+                              value={event[field]}
+                              onChange={(v) => {
+                                const nextEvents = [...(config.sections.event.events as EventDetail[])];
+                                nextEvents[idx] = { ...nextEvents[idx]!, [field]: v };
+                                setConfig((prev) =>
+                                  updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                                );
+                              }}
+                            />
+                          </div>
+                        ))}
+
+                        <DateInput
+                          label="Date"
+                          value={event.date}
+                          onChange={(v) => {
+                            const nextEvents = [...(config.sections.event.events as EventDetail[])];
+                            nextEvents[idx] = { ...nextEvents[idx]!, date: v };
+                            setConfig((prev) =>
+                              updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                            );
+                          }}
+                        />
+
+                        <TimeInput
+                          label="Time"
+                          value={event.date}
+                          onChange={(v) => {
+                            const nextEvents = [...(config.sections.event.events as EventDetail[])];
+                            nextEvents[idx] = { ...nextEvents[idx]!, date: v };
+                            setConfig((prev) =>
+                              updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                            );
+                          }}
+                        />
+                      </div>
                     </div>
-
-                    {EVENT_FIELDS.map(([field, fieldLabel]) => (
-                      <TextInput
-                        key={field}
-                        label={fieldLabel}
-                        value={event[field]}
-                        onChange={(v) => {
-                          const nextEvents = [...(config.sections.event.events as EventDetail[])];
-                          nextEvents[idx] = { ...nextEvents[idx]!, [field]: v };
-                          setConfig((prev) =>
-                            updateAtPath(prev, ["sections", "event", "events"], nextEvents),
-                          );
-                        }}
-                      />
-                    ))}
-
-                    <DateInput
-                      label="Date"
-                      value={event.date}
-                      onChange={(v) => {
-                        const nextEvents = [...(config.sections.event.events as EventDetail[])];
-                        nextEvents[idx] = { ...nextEvents[idx]!, date: v };
-                        setConfig((prev) =>
-                          updateAtPath(prev, ["sections", "event", "events"], nextEvents),
-                        );
-                      }}
-                    />
-
-                    <TimeInput
-                      label="Time"
-                      value={event.time}
-                      onChange={(v) => {
-                        const nextEvents = [...(config.sections.event.events as EventDetail[])];
-                        nextEvents[idx] = { ...nextEvents[idx]!, time: v };
-                        setConfig((prev) =>
-                          updateAtPath(prev, ["sections", "event", "events"], nextEvents),
-                        );
-                      }}
-                    />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="Gallery"
+            title="🖼️ Visual Gallery"
             enabled={asBoolean(config.sections.gallery.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1394,26 +1623,28 @@ export function RegisterInvitationForm({
               })
             }
           >
-            <TextInput
-              label="Heading"
-              value={config.sections.gallery.heading}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "heading"], v))
-              }
-            />
-            <ImageUrlListPicker
-              label="Photos"
-              items={config.sections.gallery.photos}
-              slug={slug}
-              fieldKey="gallery-photo"
-              onChange={(items) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "photos"], items))
-              }
-            />
+            <div className="grid gap-4 mt-2">
+              <TextInput
+                label="Title"
+                value={config.sections.gallery.heading}
+                onChange={(v) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "heading"], v))
+                }
+              />
+              <ImageUrlListPicker
+                label="Gallery Photos"
+                items={config.sections.gallery.photos}
+                slug={slug}
+                fieldKey="gallery-photo"
+                onChange={(items) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "photos"], items))
+                }
+              />
+            </div>
           </SectionCard>
 
           <SectionCard
-            title="RSVP"
+            title="RSVP (Confirmation)"
             enabled={asBoolean(config.sections.rsvp.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1429,19 +1660,21 @@ export function RegisterInvitationForm({
               })
             }
           >
-            {RSVP_FIELDS.map(([field, label]) => (
-              <TextArea
-                key={field}
-                label={label}
-                value={config.sections.rsvp[field]}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "rsvp", field], v))}
-                rows={2}
-              />
-            ))}
+            <div className="grid gap-4 mt-2">
+              {RSVP_FIELDS.map(([field, label]) => (
+                <TextArea
+                  key={field}
+                  label={label}
+                  value={config.sections.rsvp[field]}
+                  onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "rsvp", field], v))}
+                  rows={2}
+                />
+              ))}
+            </div>
           </SectionCard>
 
           <SectionCard
-            title="Gift"
+            title="🎁 Gift / Angpao"
             enabled={asBoolean(config.sections.gift.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1455,93 +1688,106 @@ export function RegisterInvitationForm({
               })
             }
           >
-            <TextInput
-              label="Heading"
-              value={config.sections.gift.heading}
-              onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "gift", "heading"], v))}
-            />
-            <TextArea
-              label="Description"
-              value={config.sections.gift.description}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "gift", "description"], v))
-              }
-              rows={2}
-            />
+            <div className="grid gap-6 mt-2">
+              <TextInput
+                label="Title"
+                value={config.sections.gift.heading}
+                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "gift", "heading"], v))}
+              />
+              <TextArea
+                label="Description"
+                value={config.sections.gift.description}
+                onChange={(v) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "gift", "description"], v))
+                }
+                rows={2}
+              />
 
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-white/70">Bank Accounts</div>
-                <button
-                  type="button"
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60"
-                  onClick={() => {
-                    const nextAccounts = [
-                      ...config.sections.gift.bankAccounts,
-                      { bankName: "", accountNumber: "", accountHolder: "" },
-                    ];
-                    setConfig((prev) => updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts));
-                  }}
-                >
-                  Add
-                </button>
-              </div>
-              <div className="grid gap-3">
-                {config.sections.gift.bankAccounts.map((acc, idx) => (
-                  <div
-                    key={idx}
-                    className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-4"
+              <div className="grid gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-bold text-indigo-100">Bank Accounts / E-Wallet</div>
+                  <button
+                    type="button"
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
+                    onClick={() => {
+                      const nextAccounts = [
+                        ...config.sections.gift.bankAccounts,
+                        { bankName: "", accountNumber: "", accountHolder: "" },
+                      ];
+                      setConfig((prev) => updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts));
+                    }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-black text-white">Item {idx + 1}</div>
-                      <button
-                        type="button"
-                        className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-red-500/60"
-                        onClick={() => {
-                          const nextAccounts = config.sections.gift.bankAccounts.filter((_, i) => i !== idx);
-                          setConfig((prev) =>
-                            updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
-                          );
-                        }}
-                      >
-                        Remove
-                      </button>
+                    + Add
+                  </button>
+                </div>
+                <div className="grid gap-4">
+                  {config.sections.gift.bankAccounts.map((acc, idx) => (
+                    <div
+                      key={idx}
+                      className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
+                    >
+                      <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                        <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Account {idx + 1}</div>
+                        <button
+                          type="button"
+                          className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors"
+                          onClick={() => {
+                            const nextAccounts = config.sections.gift.bankAccounts.filter((_, i) => i !== idx);
+                            setConfig((prev) =>
+                              updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                            );
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <TextInput
+                          label="Bank / Platform Name"
+                          value={acc.bankName}
+                          onChange={(v) => {
+                            const nextAccounts = [...config.sections.gift.bankAccounts];
+                            nextAccounts[idx] = { ...nextAccounts[idx], bankName: v };
+                            setConfig((prev) =>
+                              updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                            );
+                          }}
+                        />
+                        <TextInput
+                          label="Account Number"
+                          value={acc.accountNumber}
+                          onChange={(v) => {
+                            const nextAccounts = [...config.sections.gift.bankAccounts];
+                            nextAccounts[idx] = { ...nextAccounts[idx], accountNumber: v };
+                            setConfig((prev) =>
+                              updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                            );
+                          }}
+                        />
+                        <div className="sm:col-span-2">
+                          <TextInput
+                            label="Account Holder Name"
+                            value={acc.accountHolder}
+                            onChange={(v) => {
+                              const nextAccounts = [...config.sections.gift.bankAccounts];
+                              nextAccounts[idx] = { ...nextAccounts[idx], accountHolder: v };
+                              setConfig((prev) =>
+                                updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                              );
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <TextInput
-                      label="Bank Name"
-                      value={acc.bankName}
-                      onChange={(v) => {
-                        const nextAccounts = [...config.sections.gift.bankAccounts];
-                        nextAccounts[idx] = { ...nextAccounts[idx], bankName: v };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts));
-                      }}
-                    />
-                    <TextInput
-                      label="Account Number"
-                      value={acc.accountNumber}
-                      onChange={(v) => {
-                        const nextAccounts = [...config.sections.gift.bankAccounts];
-                        nextAccounts[idx] = { ...nextAccounts[idx], accountNumber: v };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts));
-                      }}
-                    />
-                    <TextInput
-                      label="Account Holder"
-                      value={acc.accountHolder}
-                      onChange={(v) => {
-                        const nextAccounts = [...config.sections.gift.bankAccounts];
-                        nextAccounts[idx] = { ...nextAccounts[idx], accountHolder: v };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts));
-                      }}
-                    />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="Wishes"
+            title="📝 Guestbook / Wishes"
             enabled={asBoolean(config.sections.wishes.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1555,32 +1801,28 @@ export function RegisterInvitationForm({
               })
             }
           >
-            <TextInput
-              label="Heading"
-              value={config.sections.wishes.heading}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "heading"], v))
-              }
-            />
-            <TextInput
-              label="Placeholder"
-              value={config.sections.wishes.placeholder}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "placeholder"], v))
-              }
-            />
-            <TextArea
-              label="Thank You Message"
-              value={config.sections.wishes.thankYouMessage}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "thankYouMessage"], v))
-              }
-              rows={2}
-            />
+            <div className="grid gap-4 mt-2">
+              <TextInput
+                label="Title"
+                value={config.sections.wishes.heading ?? ""}
+                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "heading"], v))}
+              />
+              <TextInput
+                label="Placeholder Text"
+                value={config.sections.wishes.placeholder ?? ""}
+                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "placeholder"], v))}
+              />
+              <TextArea
+                label="Thank You Message"
+                value={config.sections.wishes.thankYouMessage ?? ""}
+                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "thankYouMessage"], v))}
+                rows={2}
+              />
+            </div>
           </SectionCard>
 
           <SectionCard
-            title="Footer"
+            title="🔻 Footer"
             enabled={asBoolean(config.sections.footer.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1592,24 +1834,25 @@ export function RegisterInvitationForm({
               })
             }
           >
-            <TextArea
-              label="Message"
-              value={config.sections.footer.message}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "footer", "message"], v))
-              }
-              rows={3}
-            />
+            <div className="mt-2">
+              <TextArea
+                label="Footer Message"
+                value={config.sections.footer.message}
+                onChange={(v) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "footer", "message"], v))
+                }
+                rows={3}
+              />
+            </div>
           </SectionCard>
-        </div>
-      </details>
+      </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-2xl bg-indigo-500 px-6 py-3 text-sm font-black text-white hover:bg-indigo-400 disabled:opacity-60"
+        className="sticky bottom-6 z-50 rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-8 py-4 text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none mb-10 w-full"
       >
-        {pending ? "Saving..." : "Save (overwrite)"}
+        {pending ? "Launching Mission..." : "Launch Mission (Save)"}
       </button>
     </form>
   );

@@ -4,11 +4,8 @@ import { motion } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 import { CosmicDivider, StarDivider, SatrunIcon } from "./graphics";
-
-interface StoryItem {
-    date: string;
-    description: string;
-}
+import { formatInvitationMonthYear } from "@/lib/date-utils";
+import type { StoryItem } from "@/types/invitation";
 
 interface StorySectionProps {
     stories: StoryItem[];
@@ -51,7 +48,7 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                                             <div className="relative">
                                                 <div className="absolute inset-0 bg-[#D4AF37] blur-md rounded-full opacity-30" />
                                                 <span className="relative z-10 inline-block py-2 px-8 border border-[#D4AF37]/40 rounded-full font-heading text-sm tracking-[0.15em] bg-black/80 backdrop-blur-sm shadow-sm text-[#D4AF37] font-bold uppercase">
-                                                    {story.date}
+                                                    {formatInvitationMonthYear(story.date)}
                                                 </span>
                                             </div>
 
@@ -62,7 +59,7 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                                             <div className="max-w-md mx-auto relative px-4 py-2">
                                                 <div className="absolute inset-0 bg-white/5 blur-xl rounded-full -z-10" />
                                                 <p className="font-body text-white/90 text-lg leading-relaxed italic">
-                                                    "{story.description}"
+                                                    &ldquo;{story.description}&rdquo;
                                                 </p>
                                             </div>
                                         </div>

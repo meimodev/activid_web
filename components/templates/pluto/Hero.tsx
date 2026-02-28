@@ -4,15 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { OverlayReveal } from "./graphics";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
-
-interface CoupleInfo {
-  groom: { firstName: string; shortName?: string; fullName?: string };
-  bride: { firstName: string; shortName?: string; fullName?: string };
-}
+import type { Host } from "@/types/invitation";
 
 interface HeroProps {
   onOpen: () => void;
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   subtitle: string;
   coverImage: string;
@@ -23,12 +19,15 @@ const revealEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export function Hero({
   onOpen,
-  couple,
+  hosts,
   date,
   subtitle,
   coverImage,
   guestName,
 }: HeroProps) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
   const [isOpening, setIsOpening] = useState(false);
   const openTimeoutRef = useRef<number | null>(null);
 
@@ -72,12 +71,13 @@ export function Hero({
     };
   }, []);
 
-  const groomInitial = couple.groom.firstName?.charAt(0).toUpperCase() || "D";
-  const brideInitial = couple.bride.firstName?.charAt(0).toUpperCase() || "A";
+  const primaryInitial = primary?.firstName?.charAt(0).toUpperCase() || "D";
+  const secondaryInitial = secondary?.firstName?.charAt(0).toUpperCase() || "A";
   const displayGuest = guestName?.trim() || "NAMA TAMU";
   const heading = subtitle?.trim() || "The Wedding of";
-  const groomName = couple.groom.shortName || couple.groom.firstName;
-  const brideName = couple.bride.shortName || couple.bride.firstName;
+  const primaryName = primary?.shortName || primary?.firstName || "";
+  const secondaryName = secondary?.shortName || secondary?.firstName || "";
+  const nameLine = secondaryName ? `${primaryName} & ${secondaryName}` : primaryName;
 
   const handleOpen = () => {
     if (isOpening) return;
@@ -154,11 +154,11 @@ export function Hero({
               <div className="font-great-vibes font-bold text-white drop-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
                 <div className="flex items-center uppercase">
                   <span className="text-[70px] leading-none pb-24">
-                    {groomInitial}
+                    {primaryInitial}
                   </span>
                   <span className="text-[40px] leading-none">&</span>
                   <span className="text-[70px] leading-none pt-24">
-                    {brideInitial}
+                    {secondaryInitial}
                   </span>
                 </div>
               </div>
@@ -172,7 +172,7 @@ export function Hero({
               {heading}
             </p>
             <p className="mt-4 font-tan-mon-cheri text-[35px] leading-none text-[#7C5A2A]">
-              {groomName} & {brideName}
+              {nameLine}
             </p>
             <p className="mt-1 font-garet-book text-[18px] tracking-[0.18em] text-[#7C5A2A]">
               {date}

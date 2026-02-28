@@ -5,7 +5,7 @@ import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { OverlayReveal } from "./graphics";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
 import type { EventSectionProps } from "./InfoSections.types";
-import { formatIndonesianDate } from "@/lib/date-utils";
+import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils";
 
 export function EventSection({ events, heading, purpose }: EventSectionProps) {
   void heading;
@@ -121,10 +121,10 @@ export function EventSection({ events, heading, purpose }: EventSectionProps) {
                     />
 
                   <p className="relative mt-6 font-poppins-bold text-[18px] text-[#0B1B2A] ">
-                    {formatIndonesianDate(data.date)}
+                    {formatInvitationDateLong(data.date)}
                   </p>
                   <p className="relative mt-2 font-poppins text-[16px] text-[#0B1B2A]/70">
-                    {data.time}
+                    {formatInvitationTime(data.date.time)}
                   </p>
                   <p className="relative font-poppins text-[16px] text-[#0B1B2A]/70">
                     {data.venue}

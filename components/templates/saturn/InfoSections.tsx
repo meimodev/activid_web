@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, Timestamp, query, where, getDocs } from "firebase/firestore";
+import type { Host, InvitationConfig } from "@/types/invitation";
 import {
   BankBuildingIcon,
   CheckIcon,
@@ -17,45 +18,12 @@ import {
 } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
+import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils";
 
 // ============================================
 // TYPE DEFINITIONS
 // ============================================
-interface CoupleInfo {
-  groom: {
-  firstName: string;
-  fullName: string;
-  shortName: string;
-  role: string;
-  parents: string;
-  photo: string;
-  };
-  bride: {
-  firstName: string;
-  fullName: string;
-  shortName: string;
-  role: string;
-  parents: string;
-  photo: string;
-  };
-}
-
-interface EventInfo {
-  title: string;
-  date: string;
-  time: string;
-  venue: string;
-  address: string;
-  mapUrl: string;
-}
-
-type EventsConfig =
-  | {
-      holyMatrimony: EventInfo;
-      reception: EventInfo;
-      [key: string]: EventInfo;
-    }
-  | EventInfo[];
+type EventsConfig = InvitationConfig["sections"]["event"]["events"];
 
 interface BankAccount {
   bankName: string;
@@ -67,12 +35,15 @@ interface BankAccount {
 // TITLE SECTION
 // ============================================
 interface TitleSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   heading: string;
 }
 
-export function TitleSection({ couple, date, heading }: TitleSectionProps) {
+export function TitleSection({ hosts, date, heading }: TitleSectionProps) {
+  const primaryName = hosts[0]?.firstName ?? "";
+  const secondaryName = hosts[1]?.firstName;
+
   return (
   <section className="min-h-screen relative flex flex-col items-center justify-center overflow-hidden bg-[#0B0D17] text-white py-24">
 
@@ -115,9 +86,13 @@ export function TitleSection({ couple, date, heading }: TitleSectionProps) {
 
   <div className="font-heading text-5xl  text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-100 to-cyan-900 mb-8 drop-shadow-[0_0_35px_rgba(6,182,212,0.4)] tracking-wide">
   <div className="flex flex-col gap-4 items-center">
-  <span className="relative z-10">{couple.groom.firstName}</span>
+  <span className="relative z-10">{primaryName}</span>
+  {secondaryName ? (
+  <>
   <div className="text-xl font-mono text-cyan-500/60 tracking-[0.5em] my-2">&</div>
-  <span className="relative z-10">{couple.bride.firstName}</span>
+  <span className="relative z-10">{secondaryName}</span>
+  </>
+  ) : null}
   </div>
   </div>
   </div>
@@ -152,30 +127,29 @@ export function TitleSection({ couple, date, heading }: TitleSectionProps) {
 // COUPLE SECTION
 // ============================================
 interface CoupleSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
   disableGrayscale?: boolean;
 }
 
-export function CoupleSection({ couple, disableGrayscale = false }: CoupleSectionProps) {
+export function CoupleSection({ hosts, disableGrayscale = false }: CoupleSectionProps) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
   return (
   <section className="py-32 relative text-white">
   <div className="absolute inset-0 bg-radial-gradient from-[#1e1b4b]/20 to-transparent opacity-50 pointer-events-none" />
 
   <div className="container mx-auto px-4 relative z-10">
   <div className="flex flex-col items-center justify-center gap-16 ">
-
-  {/* Groom Card */}
   <div className="text-center group w-full max-w-sm">
   <RevealOnScroll direction="right" delay={0.2} width="100%">
   <div className="relative w-64 h-64 mx-auto mb-10">
-  {/* Orbit Rings */}
   <div className="absolute inset-0 rounded-full border border-[#D4AF37]/30 scale-110 group-hover:scale-125 transition-transform duration-1000" />
   <div className="absolute inset-0 rounded-full border border-dashed border-[#D4AF37]/20 scale-125 group-hover:rotate-180 transition-transform duration-[20s] ease-linear" />
-
   <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#D4AF37]/50 shadow-[0_0_30px_rgba(212,175,55,0.15)] relative z-10">
   <img
-  src={couple.groom.photo}
-  alt="Groom"
+  src={primary?.photo ?? ""}
+  alt="Host"
   className={`w-full h-full object-cover transition-all duration-700 hover:scale-110 ${disableGrayscale ? "" : "grayscale group-hover:grayscale-0"}`}
   />
   </div>
@@ -184,11 +158,11 @@ export function CoupleSection({ couple, disableGrayscale = false }: CoupleSectio
 
   <RevealOnScroll delay={0.4} width="100%">
   <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors duration-500">
-  <h3 className="font-script text-5xl text-[#D4AF37] mb-2">{couple.groom.firstName}</h3>
-  <p className="font-heading text-lg mb-4 text-white/90 tracking-widest">{couple.groom.fullName}</p>
+  <h3 className="font-script text-5xl text-[#D4AF37] mb-2">{primary?.firstName ?? ""}</h3>
+  <p className="font-heading text-lg mb-4 text-white/90 tracking-widest">{primary?.fullName ?? ""}</p>
   <div className="h-px w-16 bg-[#D4AF37]/50 mx-auto mb-4" />
-  <p className="font-body text-sm text-white/60 italic mb-2">{couple.groom.role}</p>
-  <p className="font-heading text-xs text-white/40 uppercase tracking-wider leading-relaxed">{couple.groom.parents}</p>
+  <p className="font-body text-sm text-white/60 italic mb-2">{primary?.role ?? ""}</p>
+  <p className="font-heading text-xs text-white/40 uppercase tracking-wider leading-relaxed">{primary?.parents ?? ""}</p>
   </div>
   </RevealOnScroll>
   </div>
@@ -199,18 +173,16 @@ export function CoupleSection({ couple, disableGrayscale = false }: CoupleSectio
   <VerticalCosmicLine />
   </div>
 
-  {/* Bride Card */}
+  {secondary ? (
   <div className="text-center group w-full max-w-sm">
   <RevealOnScroll direction="left" delay={0.2} width="100%">
   <div className="relative w-64 h-64 mx-auto mb-10">
-  {/* Orbit Rings */}
   <div className="absolute inset-0 rounded-full border border-[#D4AF37]/30 scale-110 group-hover:scale-125 transition-transform duration-1000" />
   <div className="absolute inset-0 rounded-full border border-dashed border-[#D4AF37]/20 scale-125 group-hover:-rotate-180 transition-transform duration-[20s] ease-linear" />
-
   <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#D4AF37]/50 shadow-[0_0_30px_rgba(212,175,55,0.15)] relative z-10">
   <img
-  src={couple.bride.photo}
-  alt="Bride"
+  src={secondary.photo}
+  alt="Host"
   className={`w-full h-full object-cover transition-all duration-700 hover:scale-110 ${disableGrayscale ? "" : "grayscale group-hover:grayscale-0"}`}
   />
   </div>
@@ -219,14 +191,15 @@ export function CoupleSection({ couple, disableGrayscale = false }: CoupleSectio
 
   <RevealOnScroll delay={0.4} width="100%">
   <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-2xl hover:bg-white/10 transition-colors duration-500">
-  <h3 className="font-script text-5xl text-[#D4AF37] mb-2">{couple.bride.firstName}</h3>
-  <p className="font-heading text-lg mb-4 text-white/90 tracking-widest">{couple.bride.fullName}</p>
+  <h3 className="font-script text-5xl text-[#D4AF37] mb-2">{secondary.firstName}</h3>
+  <p className="font-heading text-lg mb-4 text-white/90 tracking-widest">{secondary.fullName}</p>
   <div className="h-px w-16 bg-[#D4AF37]/50 mx-auto mb-4" />
-  <p className="font-body text-sm text-white/60 italic mb-2">{couple.bride.role}</p>
-  <p className="font-heading text-xs text-white/40 uppercase tracking-wider leading-relaxed">{couple.bride.parents}</p>
+  <p className="font-body text-sm text-white/60 italic mb-2">{secondary.role}</p>
+  <p className="font-heading text-xs text-white/40 uppercase tracking-wider leading-relaxed">{secondary.parents}</p>
   </div>
   </RevealOnScroll>
   </div>
+  ) : null}
   </div>
   </div>
   </section>
@@ -250,7 +223,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
         ...Object.entries(events)
           .filter(([key]) => key !== "holyMatrimony" && key !== "reception")
           .map(([, v]) => v),
-      ].filter(Boolean);
+      ].filter((e): e is NonNullable<typeof e> => Boolean(e));
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -285,12 +258,12 @@ export function EventSection({ events, heading }: EventSectionProps) {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
-                    <p className="font-mono text-sm text-white/80">{e.date}</p>
+                    <p className="font-mono text-sm text-white/80">{formatInvitationDateLong(e.date)}</p>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-[#D4AF37] rounded-full" />
-                    <p className="font-mono text-sm text-white/60">{e.time}</p>
+                    <p className="font-mono text-sm text-white/60">{formatInvitationTime(e.date.time)}</p>
                   </div>
 
                   <div className="pt-4 border-t border-white/10">
@@ -521,11 +494,13 @@ export function GiftSection({ bankAccounts, heading, description }: GiftSectionP
 // FOOTER SECTION
 // ============================================
 interface FooterSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
   message: string;
 }
 
-export function FooterSection({ couple, message }: FooterSectionProps) {
+export function FooterSection({ hosts, message }: FooterSectionProps) {
+  const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
+
   return (
   <footer className="py-24 bg-[#0B0D17] text-center text-white/80 relative overflow-hidden">
   {/* Simple stars background just for footer */}
@@ -535,7 +510,7 @@ export function FooterSection({ couple, message }: FooterSectionProps) {
   <RevealOnScroll direction="up" delay={0.1} width="100%">
   <FloatingParallax speed={0.4}>
   <div className="mb-12">
-  <h2 className="font-script text-5xl text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{couple.groom.firstName} & {couple.bride.firstName}</h2>
+  <h2 className="font-script text-5xl text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{names}</h2>
   </div>
   <p className="font-heading text-[10px] uppercase tracking-[0.4em] text-white/40 max-w-md mx-auto leading-loose">{message}</p>
   </FloatingParallax>

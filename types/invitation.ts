@@ -1,10 +1,26 @@
-export interface CoupleData {
+export interface Host {
     firstName: string;
     fullName: string;
     shortName: string;
     role: string;
     parents: string;
     photo: string;
+}
+
+export interface InvitationDate {
+    year: number;
+    month: number;
+    day: number;
+}
+
+export interface InvitationTime {
+    hour: number;
+    minute: number;
+}
+
+export interface InvitationDateTime {
+    date: InvitationDate;
+    time: InvitationTime;
 }
 
 export interface WeddingDate {
@@ -16,15 +32,14 @@ export interface WeddingDate {
 
 export interface EventDetail {
     title: string;
-    date: string;
-    time: string;
+    date: InvitationDateTime;
     venue: string;
     address: string;
     mapUrl: string;
 }
 
 export interface StoryItem {
-    date: string; // e.g., "Jan 2020"
+    date: InvitationDateTime;
     description: string;
     imageUrl?: string;
     title?: string;
@@ -157,20 +172,14 @@ export interface InvitationConfig {
     backgroundPhotos: string[];
     weddingDate: WeddingDate;
 
-    hosts?: CoupleData[];
-    
-    couple: {
-        groom: CoupleData;
-        bride: CoupleData;
-    };
+    hosts: Host[];
 
     sections: {
         hero: HeroSection;
         title: TitleSection;
         countdown: CountdownSection;
         quote: QuoteSection;
-        couple: CoupleSection;
-        hosts?: HostsSection;
+        hosts: HostsSection;
         story: StorySection;
         event: EventSection;
         gallery: GallerySection;

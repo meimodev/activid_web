@@ -1,6 +1,8 @@
 "use client";
 
 import type { InvitationConfig } from "@/types/invitation";
+import type { InvitationDateTime } from "@/types/invitation";
+import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils";
 import { SectionWrap } from "./SectionWrap";
 import { venusScript } from "./fonts";
 import { VenusReveal } from "./reveal";
@@ -21,7 +23,6 @@ export function EventSection({
       key: e.key,
       title: e.title,
       date: e.date,
-      time: e.time,
       venue: e.venue,
       address: e.address,
       mapUrl: e.mapUrl,
@@ -35,7 +36,6 @@ export function EventSection({
             key={e.key}
             title={e.title}
             date={e.date}
-            time={e.time}
             venue={e.venue}
             address={e.address}
             mapUrl={e.mapUrl}
@@ -50,21 +50,19 @@ export function EventSection({
 function EventCard({
   title,
   date,
-  time,
   venue,
   address,
   mapUrl,
   revealDelay,
 }: {
   title: string;
-  date: string;
-  time: string;
+  date: InvitationDateTime;
   venue: string;
   address: string;
   mapUrl: string;
   revealDelay?: number;
 }) {
-  const isLinkOnly = Boolean(mapUrl) && (!address && !time && !date);
+  const isLinkOnly = Boolean(mapUrl) && !address && !venue;
 
   return (
     <VenusReveal direction="up" width="100%" delay={revealDelay}>
@@ -76,8 +74,10 @@ function EventCard({
 
           {!isLinkOnly ? (
             <div className="mt-5 space-y-2 text-sm text-[#3A2F2F]">
-              {date ? <p className="font-body">{date}</p> : null}
-              {time ? <p className="text-[#6B5B5B]">{time}</p> : null}
+              {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
+              {date ? (
+                <p className="text-[#6B5B5B]">{formatInvitationTime(date.time)}</p>
+              ) : null}
               {venue ? <p className="font-body">{venue}</p> : null}
               {address ? (
                 <p className="text-[#6B5B5B] whitespace-pre-line">{address}</p>

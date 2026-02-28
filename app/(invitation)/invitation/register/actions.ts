@@ -7,8 +7,10 @@ import {
   isInvitationRegisterSessionValid,
 } from "@/lib/invitation-register-session";
 import {
-  CoupleData,
   EventDetail,
+  Host,
+  InvitationDate,
+  InvitationDateTime,
   InvitationConfig,
   MetadataConfig,
 } from "@/types/invitation";
@@ -41,45 +43,6 @@ function readString(formData: FormData, key: string): string {
   return value;
 }
 
-function normalizeHostsList(
-  raw: InvitationConfig["hosts"] | undefined,
-  legacyCouple: InvitationConfig["couple"] | undefined,
-): CoupleData[] {
-  const emptyHost: CoupleData = {
-    firstName: "",
-    fullName: "",
-    shortName: "",
-    role: "",
-    parents: "",
-    photo: "",
-  };
-
-  const list = Array.isArray(raw) ? raw.filter(Boolean) : [];
-  if (list.length) return list;
-
-  const fallback = legacyCouple
-    ? [legacyCouple.groom, legacyCouple.bride].filter(Boolean)
-    : [];
-
-  return fallback.length ? (fallback as CoupleData[]) : [emptyHost];
-}
-
-function deriveCoupleFromHosts(hosts: CoupleData[]): InvitationConfig["couple"] {
-  const empty: CoupleData = {
-    firstName: "",
-    fullName: "",
-    shortName: "",
-    role: "",
-    parents: "",
-    photo: "",
-  };
-
-  return {
-    groom: hosts[0] ?? empty,
-    bride: hosts[1] ?? empty,
-  };
-}
-
 function getExpectedPassword(): string | null {
   return process.env.INVITATION_REGISTER_PASSWORD ?? null;
 }
@@ -95,9 +58,7 @@ function generateMetadata({
   purpose: "marriage" | "birthday" | "event";
   config: InvitationConfig;
 }): MetadataConfig {
-  const hosts = Array.isArray(config.hosts) && config.hosts.length
-    ? config.hosts
-    : [config.couple?.groom, config.couple?.bride].filter(Boolean);
+  const hosts = config.hosts;
 
   const primaryName =
     hosts[0]?.firstName || hosts[0]?.fullName || slug;
@@ -217,70 +178,36 @@ function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
 
-function tryParseIsoDate(value: string): string | null {
-  const v = (value || "").trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-  return null;
+function isValidInvitationDate(date: InvitationDate): boolean {
+  if (!date || typeof date !== "object") return false;
+  if (!Number.isInteger(date.year) || date.year < 1900) return false;
+  if (!Number.isInteger(date.month) || date.month < 1 || date.month > 12) return false;
+  if (!Number.isInteger(date.day) || date.day < 1 || date.day > 31) return false;
+  const dt = new Date(date.year, date.month - 1, date.day);
+  return (
+    dt.getFullYear() === date.year &&
+    dt.getMonth() === date.month - 1 &&
+    dt.getDate() === date.day
+  );
 }
 
-function tryParseIndonesianDate(value: string): string | null {
-  const raw = (value || "").trim();
-  if (!raw) return null;
+function isValidInvitationDateTime(value: InvitationDateTime): boolean {
+  if (!value || typeof value !== "object") return false;
+  if (!isValidInvitationDate(value.date)) return false;
+  const { hour, minute } = value.time ?? {};
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23) return false;
+  if (!Number.isInteger(minute) || minute < 0 || minute > 59) return false;
+  return true;
+}
 
-  const normalized = raw
-    .replace(/^[A-Za-z]+\s*,\s*/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const monthMap: Record<string, number> = {
-    januari: 1,
-    jan: 1,
-    februari: 2,
-    feb: 2,
-    maret: 3,
-    mar: 3,
-    april: 4,
-    apr: 4,
-    mei: 5,
-    juni: 6,
-    jun: 6,
-    juli: 7,
-    jul: 7,
-    agustus: 8,
-    agu: 8,
-    ags: 8,
-    september: 9,
-    sep: 9,
-    oktober: 10,
-    okt: 10,
-    november: 11,
-    nov: 11,
-    desember: 12,
-    des: 12,
-  };
-
-  const parts = normalized.split(" ").filter(Boolean);
-  if (parts.length < 3) return null;
-
-  const day = Number(parts[0]);
-  const monthToken = parts[1]!.toLowerCase().replace(/[^a-z]/g, "");
-  const year = Number(parts[2]!.replace(/[^0-9]/g, ""));
-  const month = monthMap[monthToken];
-
-  if (!day || !year || !month) return null;
-  if (day < 1 || day > 31) return null;
-  if (month < 1 || month > 12) return null;
-  if (year < 1900) return null;
-
-  return `${year}-${pad2(month)}-${pad2(day)}`;
+function toIsoDate(date: InvitationDate): string {
+  return `${date.year}-${pad2(date.month)}-${pad2(date.day)}`;
 }
 
 function deriveWeddingDateFromFirstEvent(firstEvent: EventDetail) {
-  const iso = tryParseIsoDate(firstEvent.date) ?? tryParseIndonesianDate(firstEvent.date);
-  if (!iso) {
-    return null;
-  }
+  if (!isValidInvitationDateTime(firstEvent.date)) return null;
 
+  const iso = toIsoDate(firstEvent.date.date);
   const dt = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(dt.getTime())) return null;
 
@@ -302,6 +229,11 @@ function deriveWeddingDateFromFirstEvent(firstEvent: EventDetail) {
     countdownTarget: `${iso}T00:00:00`,
     rsvpDeadline: display,
   };
+}
+
+function normalizePhotoList(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return Array.from(new Set(raw)).filter((v): v is string => typeof v === "string" && Boolean(v));
 }
 
 export async function verifyInvitationRegisterPassword(
@@ -397,6 +329,14 @@ export async function registerInvitation(
     return { error: "Config payload is missing required fields." };
   }
 
+  if (!Array.isArray(config.hosts) || config.hosts.length < 1) {
+    return { error: "At least 1 host is required." };
+  }
+
+  if (!config.sections.hosts) {
+    return { error: "Hosts section config is required." };
+  }
+
   if (!config.sections.event || !config.sections.event.events) {
     return { error: "Event section is required." };
   }
@@ -413,42 +353,25 @@ export async function registerInvitation(
 
   const purpose = readPurpose(formData);
 
-  const hosts = normalizeHostsList(config.hosts, config.couple);
-  const derivedCouple = deriveCoupleFromHosts(hosts);
-  const derivedHostsSection =
-    config.sections.hosts ?? {
-      enabled: config.sections.couple?.enabled ?? true,
-      disableGrayscale: config.sections.couple?.disableGrayscale,
-    };
+  const derivedPhotos = normalizePhotoList(config.sections?.gallery?.photos);
 
   const toSave: InvitationConfig = {
     ...config,
     id: slug,
     templateId,
     purpose,
-    hosts,
-    couple: derivedCouple,
     metadata: generateMetadata({
       slug,
       purpose,
-      config: {
-        ...config,
-        hosts,
-        couple: derivedCouple,
-        sections: {
-          ...config.sections,
-          hosts: derivedHostsSection,
-        },
-      },
+      config,
     }),
     weddingDate: derivedWeddingDate,
+    backgroundPhotos: derivedPhotos,
     sections: {
       ...config.sections,
-      hosts: derivedHostsSection,
-      couple: {
-        ...config.sections.couple,
-        enabled: derivedHostsSection.enabled,
-        disableGrayscale: derivedHostsSection.disableGrayscale,
+      countdown: {
+        ...config.sections.countdown,
+        photos: derivedPhotos,
       },
       event: {
         ...config.sections.event,

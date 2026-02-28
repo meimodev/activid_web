@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Hero } from "./Hero";
 import { Countdown } from "./Countdown";
@@ -26,7 +26,8 @@ import {
 import Link from "next/link";
 import { FloatingParallax } from "@/components/invitation/ParallaxText";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { InvitationConfig } from "@/types/invitation";
+import { Host, InvitationConfig } from "@/types/invitation";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 interface FlowProps {
   config: InvitationConfig;
@@ -37,27 +38,22 @@ export function Flow({ config }: FlowProps) {
 
   const {
   music,
-  backgroundPhotos,
   weddingDate,
-  couple,
   sections
   } = config;
 
-  const hosts = Array.isArray(config.hosts) && config.hosts.length
-    ? config.hosts
-    : [couple.groom, couple.bride].filter(Boolean);
+  const hosts = config.hosts;
+  const hostsSection = sections.hosts;
 
-  const effectiveCouple = {
-    groom: hosts[0] ?? couple.groom,
-    bride: hosts[1] ?? couple.bride,
-  };
-
-  const hostsSection = sections.hosts ?? sections.couple;
+  const derivedPhotos = useMemo(
+    () => pickDeterministicRandomSubset(sections.gallery.photos, config.id, 5),
+    [config.id, sections.gallery.photos],
+  );
 
   return (
   <main className="relative min-h-screen overflow-x-hidden">
   <BackgroundSlideshow
-    photos={backgroundPhotos}
+    photos={derivedPhotos}
     className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
   />
   <GoldenRings />
@@ -81,7 +77,7 @@ export function Flow({ config }: FlowProps) {
   >
   <Hero
   onOpen={() => setIsOpen(true)}
-  couple={effectiveCouple}
+  hosts={hosts}
   date={weddingDate.displayShort}
   subtitle={sections.hero.subtitle}
   coverImage={sections.hero.coverImage}
@@ -94,11 +90,11 @@ export function Flow({ config }: FlowProps) {
   {/* Only allow scrolling when open */}
   <div className={isOpen ? "" : "h-screen overflow-hidden"}>
   {sections.title.enabled && (
-  <TitleSection couple={effectiveCouple} date={weddingDate.display} heading={sections.title.heading} />
+  <TitleSection hosts={hosts} date={weddingDate.display} heading={sections.title.heading} />
   )}
 
   {sections.countdown.enabled && (
-  <Countdown targetDate={weddingDate.countdownTarget} photos={sections.countdown.photos} heading={sections.countdown.heading} />
+  <Countdown targetDate={weddingDate.countdownTarget} photos={derivedPhotos} heading={sections.countdown.heading} />
   )}
 
   {sections.quote.enabled && (
@@ -106,7 +102,7 @@ export function Flow({ config }: FlowProps) {
   )}
 
   {hostsSection.enabled && (
-  <CoupleSection couple={effectiveCouple} disableGrayscale={hostsSection.disableGrayscale} />
+  <CoupleSection hosts={hosts} disableGrayscale={hostsSection.disableGrayscale} />
   )}
 
   {sections.story.enabled && (
@@ -138,7 +134,7 @@ export function Flow({ config }: FlowProps) {
   )}
 
   {sections.footer.enabled && (
-  <SpaceFooter couple={effectiveCouple} message={sections.footer.message} />
+  <SpaceFooter hosts={hosts} message={sections.footer.message} seedKey={config.id} />
   )}
   </div>
   </div>
@@ -146,16 +142,46 @@ export function Flow({ config }: FlowProps) {
   );
 }
 
-function SpaceFooter({ couple, message }: { couple: InvitationConfig['couple'], message: string }) {
-  // Generate static stars to avoid hydration mismatch
-  const stars = Array.from({ length: 50 }).map((_, i) => ({
-  id: i,
-  top: `${Math.random() * 100}%`,
-  left: `${Math.random() * 100}%`,
-  size: Math.random() * 3 + 1,
-  duration: Math.random() * 3 + 2,
-  delay: Math.random() * 2
-  }));
+function fnv1a32(input: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function SpaceFooter({
+  hosts,
+  message,
+  seedKey,
+}: {
+  hosts: Host[];
+  message: string;
+  seedKey: string;
+}) {
+  const stars = useMemo(() => {
+    const rand = mulberry32(fnv1a32(seedKey || "0"));
+    return Array.from({ length: 50 }).map((_, i) => ({
+      id: i,
+      top: `${rand() * 100}%`,
+      left: `${rand() * 100}%`,
+      size: rand() * 3 + 1,
+      duration: rand() * 3 + 2,
+      delay: rand() * 2,
+    }));
+  }, [seedKey]);
 
   return (
   <footer className="relative py-24 bg-[#0B0D17] text-center text-white overflow-hidden">
@@ -191,12 +217,12 @@ function SpaceFooter({ couple, message }: { couple: InvitationConfig['couple'], 
   <FloatingParallax speed={0.2}>
   {/* Couple Names */}
   <h2 className="font-script text-5xl text-transparent bg-clip-text bg-linear-to-r from-purple-200 via-white to-blue-200 mb-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-  {couple.groom.firstName} & {couple.bride.firstName}
+  {hosts[0]?.firstName ?? ""} {hosts[1]?.firstName ? "&" : ""} {hosts[1]?.firstName ?? ""}
   </h2>
 
   {/* Message */}
-  <p className="font-heading text-xs uppercase tracking-[0.4em] text-blue-100/60 mb-12 max-w-lg mx-auto leading-loose">
-  MISI BERHASIL <br /> Terimakasih untuk perjalananya bersama Activid Invitation
+  <p className="font-heading text-xs uppercase tracking-[0.4em] text-blue-100/60 mb-12 max-w-lg mx-auto leading-loose whitespace-pre-line">
+  {message}
   </p>
   </FloatingParallax>
   </RevealOnScroll>

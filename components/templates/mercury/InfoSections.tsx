@@ -16,45 +16,13 @@ import {
 import { FloralDivider } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { MERCURY_OVERLAY_ASSETS } from "./graphics/overlays";
+import { Host, InvitationConfig } from "@/types/invitation";
+import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils";
 
 // ============================================
 // TYPE DEFINITIONS
 // ============================================
-interface CoupleInfo {
- groom: {
-  firstName: string;
-  fullName: string;
-  shortName: string;
-  role: string;
-  parents: string;
-  photo: string;
- };
- bride: {
-  firstName: string;
-  fullName: string;
-  shortName: string;
-  role: string;
-  parents: string;
-  photo: string;
- };
-}
-
-interface EventInfo {
- title: string;
- date: string;
- time: string;
- venue: string;
- address: string;
- mapUrl: string;
-}
-
-type EventsConfig =
- | {
-   holyMatrimony: EventInfo;
-   reception: EventInfo;
-   [key: string]: EventInfo;
-  }
- | EventInfo[];
+type EventsConfig = InvitationConfig["sections"]["event"]["events"];
 
 interface BankAccount {
  bankName: string;
@@ -66,7 +34,7 @@ interface BankAccount {
 // TITLE SECTION
 // ============================================
 interface TitleSectionProps {
- couple: CoupleInfo;
+ hosts: Host[];
  date: string;
  heading: string;
  countdownTarget: string;
@@ -75,7 +43,7 @@ interface TitleSectionProps {
 }
 
 export function TitleSection({
- couple,
+ hosts,
  date,
  heading,
  countdownTarget,
@@ -115,7 +83,7 @@ export function TitleSection({
   const pool = (galleryPhotos || []).filter(Boolean);
   if (pool.length === 0) return [];
 
-  const seedSource = `${couple.groom.firstName}|${couple.bride.firstName}|${countdownTarget}`;
+  const seedSource = `${hosts[0]?.firstName ?? ""}|${hosts[1]?.firstName ?? ""}|${countdownTarget}`;
 
   const hashToUint32 = (input: string) => {
   let h = 2166136261;
@@ -149,10 +117,9 @@ export function TitleSection({
 
   return selected;
  }, [
-  couple.bride.firstName,
-  couple.groom.firstName,
   countdownTarget,
   galleryPhotos,
+  hosts,
  ]);
 
  const calendarHref = useMemo(() => {
@@ -170,7 +137,7 @@ export function TitleSection({
   const fmt = (dt: Date) =>
   `${dt.getFullYear()}${pad2(dt.getMonth() + 1)}${pad2(dt.getDate())}`;
 
-  const title = `Wedding of ${couple.groom.firstName} & ${couple.bride.firstName}`;
+  const title = `Wedding of ${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
   const params = new URLSearchParams({
   action: "TEMPLATE",
@@ -180,7 +147,7 @@ export function TitleSection({
   });
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
- }, [countdownTarget, couple.bride.firstName, couple.groom.firstName]);
+ }, [countdownTarget, hosts]);
 
  return (
   <section className="h-[100svh] relative flex flex-col bg-[#612A35] text-[#fff4f6] overflow-hidden">
@@ -251,7 +218,7 @@ export function TitleSection({
   className="mt-[clamp(12px,2vh,18px)] font-tan-mon-cheri text-[clamp(52px,8vw,82px)] leading-[0.98] text-[#fffefe]"
   style={{ willChange: "transform, opacity" }}
   >
-  {couple.groom.firstName} & {couple.bride.firstName}
+  {hosts[0]?.firstName ?? ""}{hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}
   </motion.p>
   <motion.p
   initial={{ opacity: 0, y: 18, scale: 0.98 }}
@@ -445,12 +412,15 @@ export function TitleSection({
 // COUPLE SECTION
 // ============================================
 interface CoupleSectionProps {
- couple: CoupleInfo;
+ hosts: Host[];
 }
 
 export function CoupleSection({
- couple,
+ hosts,
 }: CoupleSectionProps) {
+ const primary = hosts[0];
+ const secondary = hosts[1];
+
  return (
   <section className="relative overflow-hidden bg-[#612A35] py-24 text-[#fff4f6] ">
   <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -552,8 +522,8 @@ export function CoupleSection({
   />
   <div className="absolute inset-[18px] overflow-hidden ">
   <img
-  src={couple.groom.photo}
-  alt="Groom"
+  src={primary?.photo ?? ""}
+  alt="Host"
   className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
   />
   </div>
@@ -564,30 +534,32 @@ export function CoupleSection({
   <div className="mt-10">
   <RevealOnScroll direction="none" scale={1} delay={0.36} width="100%">
   <p className="font-tan-mon-cheri text-[62px] leading-none text-white ">
-  {couple.groom.firstName}
+  {primary?.firstName ?? ""}
   </p>
   </RevealOnScroll>
 
   <RevealOnScroll direction="none" scale={1} delay={0.42} width="100%">
   <p className="mt-2 font-poppins-bold text-[18px] text-white/90 ">
-  {couple.groom.fullName}
+  {primary?.fullName ?? ""}
   </p>
   </RevealOnScroll>
 
   <RevealOnScroll direction="none" scale={1} delay={0.48} width="100%">
   <p className="mt-3 font-poppins italic text-[14px] text-white/80">
-  {couple.groom.role}
+  {primary?.role ?? ""}
   </p>
   </RevealOnScroll>
 
   <RevealOnScroll direction="none" scale={1} delay={0.54} width="100%">
   <p className="mt-5 font-poppins text-[13px] leading-relaxed text-white/80 ">
-  {couple.groom.parents}
+  {primary?.parents ?? ""}
   </p>
   </RevealOnScroll>
   </div>
   </div>
 
+  {secondary ? (
+  <>
   <RevealOnScroll direction="none" scale={1} delay={0.62} width="100%">
   <div className="mt-14 flex w-full items-center justify-center">
   <div
@@ -613,8 +585,8 @@ export function CoupleSection({
   />
   <div className="absolute inset-[18px] overflow-hidden ">
   <img
-  src={couple.bride.photo}
-  alt="Bride"
+  src={secondary.photo}
+  alt="Host"
   className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]"
   />
   </div>
@@ -625,29 +597,31 @@ export function CoupleSection({
   <div className="mt-10">
   <RevealOnScroll direction="none" scale={1} delay={0.78} width="100%">
   <p className="font-tan-mon-cheri text-[62px] leading-none text-white ">
-  {couple.bride.firstName}
+  {secondary.firstName}
   </p>
   </RevealOnScroll>
 
   <RevealOnScroll direction="none" scale={1} delay={0.84} width="100%">
   <p className="mt-2 font-poppins-bold text-[18px] text-white/90 ">
-  {couple.bride.fullName}
+  {secondary.fullName}
   </p>
   </RevealOnScroll>
 
   <RevealOnScroll direction="none" scale={1} delay={0.9} width="100%">
   <p className="mt-3 font-poppins italic text-[14px] text-white/80">
-  {couple.bride.role}
+  {secondary.role}
   </p>
   </RevealOnScroll>
 
   <RevealOnScroll direction="none" scale={1} delay={0.96} width="100%">
   <p className="mt-5 font-poppins text-[13px] leading-relaxed text-white/80 ">
-  {couple.bride.parents}
+  {secondary.parents}
   </p>
   </RevealOnScroll>
   </div>
   </div>
+  </>
+  ) : null}
   </div>
   </section>
  );
@@ -776,10 +750,10 @@ export function EventSection({ events, heading }: EventSectionProps) {
   {ev.title}
   </p>
   <p className="mt-7 font-poppins-bold text-[20px] text-white ">
-  {ev.date}
+  {formatInvitationDateLong(ev.date)}
   </p>
   <p className="mt-2 font-poppins text-[16px] text-white/85">
-  {ev.time}
+  {formatInvitationTime(ev.date.time)}
   </p>
   <p className="mt-2 font-poppins text-[16px] text-white/85">
   {ev.venue}
@@ -1229,12 +1203,12 @@ export function GiftSection({
 // FOOTER SECTION
 // ============================================
 interface FooterSectionProps {
- couple: CoupleInfo;
+ hosts: Host[];
  message: string;
 }
 
-export function FooterSection({ couple, message }: FooterSectionProps) {
- const names = `${couple.groom.firstName} & ${couple.bride.firstName}`;
+export function FooterSection({ hosts, message }: FooterSectionProps) {
+ const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
  const year = new Date().getFullYear();
 
  void message;

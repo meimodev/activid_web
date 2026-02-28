@@ -1,32 +1,4 @@
-import type { InvitationConfig } from "@/types/invitation";
-
-export interface CoupleInfo {
-  groom: {
-    firstName: string;
-    fullName: string;
-    shortName: string;
-    role: string;
-    parents: string;
-    photo: string;
-  };
-  bride: {
-    firstName: string;
-    fullName: string;
-    shortName: string;
-    role: string;
-    parents: string;
-    photo: string;
-  };
-}
-
-export interface EventInfo {
-  title: string;
-  date: string;
-  time: string;
-  venue: string;
-  address: string;
-  mapUrl: string;
-}
+import type { Host, InvitationConfig } from "@/types/invitation";
 
 export type EventsConfig = InvitationConfig["sections"]["event"]["events"];
 
@@ -37,7 +9,7 @@ export interface BankAccount {
 }
 
 export interface TitleSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   heading: string;
   countdownTarget: string;
@@ -46,7 +18,7 @@ export interface TitleSectionProps {
 }
 
 export interface CoupleSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
 }
 
 export interface EventSectionProps {
@@ -68,6 +40,6 @@ export interface GiftSectionProps {
 }
 
 export interface FooterSectionProps {
-  couple: CoupleInfo;
+  hosts: Host[];
   message: string;
 }

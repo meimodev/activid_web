@@ -39,7 +39,7 @@ function FramedPhoto({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export function HostSection({ couple, purpose }: HostSectionProps) {
+export function HostSection({ hosts, purpose }: HostSectionProps) {
   const petals = useMemo(() => {
     const count = 14;
     return Array.from({ length: count }, (_, i) => {
@@ -53,11 +53,13 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
   }, []);
 
   const isBirthday = purpose === "birthday";
-  const celebrantName = (couple.groom.fullName || couple.groom.firstName || "").trim();
+  const primary = hosts[0];
+  const secondary = hosts[1];
+  const celebrantName = (primary?.fullName || primary?.firstName || "").trim();
   const hasSecondHost = Boolean(
-    (couple.bride.firstName || "").trim() ||
-      (couple.bride.fullName || "").trim() ||
-      (couple.bride.photo || "").trim(),
+    (secondary?.firstName || "").trim() ||
+      (secondary?.fullName || "").trim() ||
+      (secondary?.photo || "").trim(),
   );
 
   return (
@@ -160,7 +162,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
             delay={0.18}
             width="100%"
           >
-            <FramedPhoto src={couple.groom.photo} alt={isBirthday ? "Celebrant" : "Groom"} />
+            <FramedPhoto src={primary?.photo ?? ""} alt={isBirthday ? "Host" : "Host"} />
           </RevealOnScroll>
 
           <div className="mt-10">
@@ -171,7 +173,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
               width="100%"
             >
               <p className="font-poppins-bold text-[44px] leading-none text-[#0B1B2A] ">
-                {couple.groom.firstName}
+                {primary?.firstName ?? ""}
               </p>
             </RevealOnScroll>
 
@@ -182,7 +184,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
               width="100%"
             >
               <p className="mt-3 font-poppins-bold text-[18px] text-[#0B1B2A] ">
-                {couple.groom.fullName}
+                {primary?.fullName ?? ""}
               </p>
             </RevealOnScroll>
 
@@ -193,7 +195,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
               width="100%"
             >
               <p className="mt-4 font-poppins text-[13px] leading-relaxed text-[#0B1B2A]/70 ">
-                {couple.groom.parents}
+                {primary?.parents ?? ""}
               </p>
             </RevealOnScroll>
           </div>
@@ -223,7 +225,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
                 delay={0.64}
                 width="100%"
               >
-                <FramedPhoto src={couple.bride.photo} alt={isBirthday ? "Co-host" : "Bride"} />
+                <FramedPhoto src={secondary?.photo ?? ""} alt={isBirthday ? "Host" : "Host"} />
               </RevealOnScroll>
 
               <div className="mt-10">
@@ -234,7 +236,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
                   width="100%"
                 >
                   <p className="font-poppins-bold text-[44px] leading-none text-[#0B1B2A] ">
-                    {couple.bride.firstName}
+                    {secondary?.firstName ?? ""}
                   </p>
                 </RevealOnScroll>
 
@@ -245,11 +247,11 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
                   width="100%"
                 >
                   <p className="mt-3 font-poppins-bold text-[18px] text-[#0B1B2A] ">
-                    {couple.bride.fullName}
+                    {secondary?.fullName ?? ""}
                   </p>
                 </RevealOnScroll>
 
-                {!isBirthday && couple.bride.role ? (
+                {!isBirthday && secondary?.role ? (
                   <RevealOnScroll
                     direction="up"
                     distance={18}
@@ -257,7 +259,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
                     width="100%"
                   >
                     <p className="mt-3 font-poppins italic text-[14px] text-[#0B1B2A]/65">
-                      {couple.bride.role}
+                      {secondary.role}
                     </p>
                   </RevealOnScroll>
                 ) : null}
@@ -269,7 +271,7 @@ export function HostSection({ couple, purpose }: HostSectionProps) {
                   width="100%"
                 >
                   <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-[#0B1B2A]/70 ">
-                    {couple.bride.parents}
+                    {secondary?.parents ?? ""}
                   </p>
                 </RevealOnScroll>
               </div>

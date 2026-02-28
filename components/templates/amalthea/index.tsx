@@ -18,6 +18,7 @@ import {
   FooterSection,
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
+import { pickDeterministicRandomSubset } from "@/lib/utils";
 
 const AMALTHEA_DEMO_ASSETS = {
   groomPhoto:
@@ -26,12 +27,6 @@ const AMALTHEA_DEMO_ASSETS = {
     "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
   coverImage:
     "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  backgroundPhotos: [
-    "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "https://images.pexels.com/photos/5138883/pexels-photo-5138883.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "https://images.pexels.com/photos/8102189/pexels-photo-8102189.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    "https://images.pexels.com/photos/17593652/pexels-photo-17593652.jpeg?auto=compress&cs=tinysrgb&w=1200",
-  ],
   galleryPhotos: [
     "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
     "https://images.pexels.com/photos/5138883/pexels-photo-5138883.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -48,77 +43,7 @@ interface AmaltheaProps {
 
 export function Amalthea({ config }: AmaltheaProps) {
   const pad2 = (n: number) => String(n).padStart(2, "0");
-
-  const tryParseIsoDate = (value: string): string | null => {
-    const v = (value || "").trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-    return null;
-  };
-
-  const tryParseIndonesianDate = (value: string): string | null => {
-    const raw = (value || "").trim();
-    if (!raw) return null;
-
-    const normalized = raw
-      .replace(/^[A-Za-z]+\s*,\s*/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    const monthMap: Record<string, number> = {
-      januari: 1,
-      jan: 1,
-      februari: 2,
-      feb: 2,
-      maret: 3,
-      mar: 3,
-      april: 4,
-      apr: 4,
-      mei: 5,
-      juni: 6,
-      jun: 6,
-      juli: 7,
-      jul: 7,
-      agustus: 8,
-      agu: 8,
-      ags: 8,
-      september: 9,
-      sep: 9,
-      oktober: 10,
-      okt: 10,
-      november: 11,
-      nov: 11,
-      desember: 12,
-      des: 12,
-    };
-
-    const parts = normalized.split(" ").filter(Boolean);
-    if (parts.length < 3) return null;
-
-    const day = Number(parts[0]);
-    const monthToken = parts[1]!.toLowerCase().replace(/[^a-z]/g, "");
-    const year = Number(parts[2]!.replace(/[^0-9]/g, ""));
-    const month = monthMap[monthToken];
-
-    if (!day || !year || !month) return null;
-    if (day < 1 || day > 31) return null;
-    if (month < 1 || month > 12) return null;
-    if (year < 1900) return null;
-
-    return `${year}-${pad2(month)}-${pad2(day)}`;
-  };
-
-  const tryParseTimeHM = (value: string): { h: number; m: number } | null => {
-    const raw = (value || "").trim();
-    if (!raw) return null;
-    const match = raw.match(/(\d{1,2})[\.:](\d{2})/);
-    if (!match) return null;
-    const h = Number(match[1]);
-    const m = Number(match[2]);
-    if (Number.isNaN(h) || Number.isNaN(m)) return null;
-    if (h < 0 || h > 23) return null;
-    if (m < 0 || m > 59) return null;
-    return { h, m };
-  };
+  const isInt = (value: unknown): value is number => Number.isInteger(value);
 
   const [isOpen, setIsOpen] = useState(() => !config.sections.hero.enabled);
   const [isContentReady, setIsContentReady] = useState(
@@ -129,36 +54,34 @@ export function Amalthea({ config }: AmaltheaProps) {
 
   const isDemo = config.id.endsWith("-demo");
 
-  const { music, backgroundPhotos, weddingDate, couple, sections, purpose } = config;
+  const { music, weddingDate, sections, purpose } = config;
 
-  const hosts = Array.isArray(config.hosts) && config.hosts.length
-    ? config.hosts
-    : [couple.groom, couple.bride].filter(Boolean);
+  const hostsSection = sections.hosts;
 
-  const hostsSection = sections.hosts ?? sections.couple;
+  const effectiveHosts = useMemo(() => {
+    if (!isDemo) return config.hosts;
 
-  const baseCouple = {
-    groom: hosts[0] ?? couple.groom,
-    bride: hosts[1] ?? couple.bride,
-  };
+    const next = [...config.hosts];
+    if (next[0]) {
+      next[0] = { ...next[0], photo: AMALTHEA_DEMO_ASSETS.groomPhoto };
+    }
+    if (next[1]) {
+      next[1] = { ...next[1], photo: AMALTHEA_DEMO_ASSETS.bridePhoto };
+    }
+    return next;
+  }, [config.hosts, isDemo]);
 
-  const effectiveCouple = isDemo
-    ? {
-        ...baseCouple,
-        groom: { ...baseCouple.groom, photo: AMALTHEA_DEMO_ASSETS.groomPhoto },
-        bride: { ...baseCouple.bride, photo: AMALTHEA_DEMO_ASSETS.bridePhoto },
-      }
-    : baseCouple;
-
-  const effectiveBackgroundPhotos = isDemo
-    ? [...AMALTHEA_DEMO_ASSETS.backgroundPhotos]
-    : backgroundPhotos;
   const effectiveGalleryPhotos = isDemo
     ? [...AMALTHEA_DEMO_ASSETS.galleryPhotos]
     : (sections.gallery?.photos ?? []);
   const effectiveCoverImage = isDemo
     ? AMALTHEA_DEMO_ASSETS.coverImage
     : sections.hero.coverImage;
+
+  const derivedPhotos = useMemo(
+    () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
+    [config.id, effectiveGalleryPhotos],
+  );
 
   const demoCountdownTarget = useMemo(() => {
     const dt = new Date();
@@ -178,14 +101,34 @@ export function Amalthea({ config }: AmaltheaProps) {
     const first = list[0];
     if (!first) return null;
 
-    const iso = tryParseIsoDate(first.date) ?? tryParseIndonesianDate(first.date);
-    if (!iso) return null;
+    const dateValue = (first as { date?: unknown } | null)?.date as
+      | {
+          date?: { year?: unknown; month?: unknown; day?: unknown };
+          time?: { hour?: unknown; minute?: unknown };
+          year?: unknown;
+          month?: unknown;
+          day?: unknown;
+          hour?: unknown;
+          minute?: unknown;
+        }
+      | undefined;
 
-    const tm = tryParseTimeHM(first.time);
-    const h = tm?.h ?? 0;
-    const m = tm?.m ?? 0;
+    const nestedDate = dateValue?.date;
+    const nestedTime = dateValue?.time;
 
-    return `${iso}T${pad2(h)}:${pad2(m)}:00`;
+    const year = isInt(nestedDate?.year) ? nestedDate.year : isInt(dateValue?.year) ? dateValue.year : null;
+    const month = isInt(nestedDate?.month) ? nestedDate.month : isInt(dateValue?.month) ? dateValue.month : null;
+    const day = isInt(nestedDate?.day) ? nestedDate.day : isInt(dateValue?.day) ? dateValue.day : null;
+    if (!year || !month || !day) return null;
+
+    const hour = isInt(nestedTime?.hour) ? nestedTime.hour : isInt(dateValue?.hour) ? dateValue.hour : 0;
+    const minute = isInt(nestedTime?.minute)
+      ? nestedTime.minute
+      : isInt(dateValue?.minute)
+        ? dateValue.minute
+        : 0;
+
+    return `${year}-${pad2(month)}-${pad2(day)}T${pad2(hour)}:${pad2(minute)}:00`;
   }, [sections.event?.events]);
 
   const effectiveCountdownTarget =
@@ -203,7 +146,7 @@ export function Amalthea({ config }: AmaltheaProps) {
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#F6FBFF] text-[#0B1B2A] ">
       {/* <BackgroundSlideshow
-        photos={effectiveBackgroundPhotos}
+        photos={derivedPhotos}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"
       /> */}
 
@@ -228,7 +171,7 @@ export function Amalthea({ config }: AmaltheaProps) {
             onOpen={() => {
               setIsOpen(true);
             }}
-            couple={effectiveCouple}
+            hosts={effectiveHosts}
             date={weddingDate.displayShort}
             subtitle={sections.hero.subtitle}
             coverImage={effectiveCoverImage}
@@ -246,7 +189,7 @@ export function Amalthea({ config }: AmaltheaProps) {
             <>
               {sections.title.enabled ? (
                 <TitleSection
-                  couple={effectiveCouple}
+                  hosts={effectiveHosts}
                   date={effectiveWeddingDateDisplay}
                   heading={sections.title.heading}
                   countdownTarget={effectiveCountdownTarget}
@@ -261,7 +204,7 @@ export function Amalthea({ config }: AmaltheaProps) {
               ) : null}
 
               {hostsSection.enabled ? (
-                <HostSection couple={effectiveCouple} purpose={purpose} />
+                <HostSection hosts={effectiveHosts} purpose={purpose} />
               ) : null}
               {sections.event.enabled ? (
                 <EventSection
@@ -315,11 +258,11 @@ export function Amalthea({ config }: AmaltheaProps) {
                 </Suspense>
               ) : null}
 
-              <GratitudeSection couple={effectiveCouple} />
+              <GratitudeSection hosts={effectiveHosts} />
 
               {sections.footer.enabled ? (
                 <FooterSection
-                  couple={effectiveCouple}
+                  hosts={effectiveHosts}
                   message={sections.footer.message}
                 />
               ) : null}

@@ -1,4 +1,5 @@
 import { INVITATION_DEFAULTS } from "@/data/invitations";
+import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
 import {
   getInvitationRegisterSessionCookieName,
   isInvitationRegisterSessionValid,
@@ -15,16 +16,10 @@ export default async function InvitationRegisterPage() {
     throw new Error("Missing base invitation config in INVITATION_DEFAULTS.");
   }
 
-  const templateOptions = [
-    { id: "flow", label: "Flow" },
-    { id: "saturn", label: "Saturn" },
-    { id: "mercury", label: "Mercury" },
-    { id: "pluto", label: "Pluto" },
-    { id: "amalthea", label: "Amalthea" },
-    { id: "venus", label: "Venus" },
-    { id: "jupiter", label: "Jupiter" },
-    { id: "neptune", label: "Neptune" },
-  ];
+  const templateOptions = INVITATION_TEMPLATE_LISTINGS.map((t) => ({
+    id: t.templateId,
+    label: t.title,
+  }));
 
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(getInvitationRegisterSessionCookieName())?.value;

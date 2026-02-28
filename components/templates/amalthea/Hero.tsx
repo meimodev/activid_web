@@ -3,15 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
-
-interface CoupleInfo {
-  groom: { firstName: string; shortName?: string; fullName?: string };
-  bride: { firstName: string; shortName?: string; fullName?: string };
-}
+import type { Host } from "@/types/invitation";
 
 interface HeroProps {
   onOpen: () => void;
-  couple: CoupleInfo;
+  hosts: Host[];
   date: string;
   subtitle: string;
   coverImage: string;
@@ -23,7 +19,7 @@ const revealEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export function Hero({
   onOpen,
-  couple,
+  hosts,
   date,
   subtitle,
   coverImage,
@@ -78,10 +74,13 @@ export function Hero({
   const heading =
     subtitle?.trim() ||
     (purpose === "birthday" ? "Birthday Invitation" : "The Wedding of");
-  const groomName = couple.groom.shortName || couple.groom.firstName;
-  const brideName = couple.bride.shortName || couple.bride.firstName;
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
+  const primaryName = primary?.shortName || primary?.firstName || "";
+  const secondaryName = secondary?.shortName || secondary?.firstName || "";
   const nameLine =
-    purpose === "birthday" ? groomName : `${groomName} & ${brideName}`;
+    purpose === "birthday" ? primaryName : `${primaryName}${secondaryName ? ` & ${secondaryName}` : ""}`;
 
   const handleOpen = () => {
     if (isOpening) return;

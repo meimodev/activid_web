@@ -1,39 +1,46 @@
 "use client";
 
 import Image from "next/image";
-import type { InvitationConfig } from "@/types/invitation";
+import type { Host } from "@/types/invitation";
 import { SectionWrap } from "./SectionWrap";
 import { venusScript } from "./fonts";
 import { VenusReveal } from "./reveal";
 
 export function CoupleSection({
-  couple,
+  hosts,
   title,
 }: {
-  couple: InvitationConfig["couple"];
+  hosts: Host[];
   title: string;
 }) {
+  const primary = hosts[0];
+  const secondary = hosts[1];
+
   return (
     <SectionWrap id="couple" title={title}>
       <div className="grid grid-cols-1 gap-10">
-        <PersonCard
-          variant="groom"
-          name={couple.groom.firstName}
-          fullName={couple.groom.fullName}
-          meta={couple.groom.role}
-          parents={couple.groom.parents}
-          photo={couple.groom.photo}
-          revealDelay={0.18}
-        />
-        <PersonCard
-          variant="bride"
-          name={couple.bride.firstName}
-          fullName={couple.bride.fullName}
-          meta={couple.bride.role}
-          parents={couple.bride.parents}
-          photo={couple.bride.photo}
-          revealDelay={0.28}
-        />
+        {primary ? (
+          <PersonCard
+            variant="groom"
+            name={primary.firstName}
+            fullName={primary.fullName}
+            meta={primary.role}
+            parents={primary.parents}
+            photo={primary.photo}
+            revealDelay={0.18}
+          />
+        ) : null}
+        {secondary ? (
+          <PersonCard
+            variant="bride"
+            name={secondary.firstName}
+            fullName={secondary.fullName}
+            meta={secondary.role}
+            parents={secondary.parents}
+            photo={secondary.photo}
+            revealDelay={0.28}
+          />
+        ) : null}
       </div>
     </SectionWrap>
   );
