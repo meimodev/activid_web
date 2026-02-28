@@ -90,7 +90,7 @@ export function Hero({
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg">
+    <div className=" h-screen w-full overflow-hidden bg-wedding-bg">
       <div className="relative z-10 mx-auto flex h-full w-full max-w-[610px] items-center justify-center px-4">
         <motion.div
           variants={containerVariants}
