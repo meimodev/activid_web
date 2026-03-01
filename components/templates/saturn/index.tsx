@@ -16,14 +16,13 @@ import {
     Nebula
 } from "./graphics";
 import { StorySection } from "./StorySection";
-import {
-    TitleSection,
-    CoupleSection,
-    EventSection,
-    GiftSection,
-    ConfirmationSection,
-    FooterSection
-} from "./InfoSections";
+import { TitleSection } from "./TitleSection";
+import { CoupleSection } from "./CoupleSection";
+import { EventSection } from "./EventSection";
+import { GiftSection } from "./GiftSection";
+import { ConfirmationSection } from "./ConfirmationSection";
+import { GratitudeSection } from "./GratitudeSection";
+import { FooterSection } from "./FooterSection";
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
 
@@ -134,6 +133,8 @@ export function Saturn({ config }: SaturnProps) {
                             <Wishes invitationId={config.id} heading={sections.wishes.heading} placeholder={sections.wishes.placeholder} thankYouMessage={sections.wishes.thankYouMessage} />
                         </Suspense>
                     )}
+
+                    <GratitudeSection hosts={hosts} />
 
                     {sections.footer.enabled && (
                         <FooterSection hosts={hosts} message={sections.footer.message} />
