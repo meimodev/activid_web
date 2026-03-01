@@ -90,8 +90,8 @@ export function Hero({
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg">
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-[610px] items-center justify-center px-4">
+    <div className="h-screen w-full overflow-hidden bg-wedding-bg">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-[610px] items-center justify-center px-4 py-[clamp(1.25rem,4vh,2.25rem)]">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -100,7 +100,7 @@ export function Hero({
         >
           <motion.div
             variants={itemVariants}
-            className="relative mx-auto h-[450px] w-full"
+            className="relative mx-auto h-[clamp(240px,44vh,410px)] w-full"
           >
             <div
               aria-hidden
@@ -150,13 +150,13 @@ export function Hero({
           
 
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="font-great-vibes font-bold text-white drop-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
+              <div className="font-great-vibes font-bold text-wedding-on-dark drop-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
                 <div className="flex items-center uppercase">
-                  <span className="text-[70px] leading-none pb-24">
+                  <span className="text-[clamp(54px,9vh,70px)] leading-none pb-[clamp(2.75rem,6vh,6rem)]">
                     {primaryInitial}
                   </span>
-                  <span className="text-[40px] leading-none">&</span>
-                  <span className="text-[70px] leading-none pt-24">
+                  <span className="text-[clamp(30px,5.5vh,40px)] leading-none">&</span>
+                  <span className="text-[clamp(54px,9vh,70px)] leading-none pt-[clamp(2.75rem,6vh,6rem)]">
                     {secondaryInitial}
                   </span>
                 </div>
@@ -167,24 +167,24 @@ export function Hero({
           <motion.div
             variants={itemVariants}
           >
-            <p className="font-stoic text-[30px] leading-none text-wedding-accent pt-8">
+            <p className="font-stoic text-[clamp(22px,3.6vh,30px)] leading-none text-wedding-accent pt-[clamp(1rem,2.6vh,2rem)]">
               {heading}
             </p>
-            <p className="mt-4 font-tan-mon-cheri text-[35px] leading-none text-wedding-accent">
+            <p className="mt-[clamp(0.5rem,1.6vh,1rem)] font-tan-mon-cheri text-[clamp(26px,4.2vh,35px)] leading-none text-wedding-accent">
               {nameLine}
             </p>
-            <p className="mt-1 font-garet-book text-[18px] tracking-[0.18em] text-wedding-accent">
+            <p className="mt-[clamp(0.15rem,0.8vh,0.35rem)] font-garet-book text-[clamp(14px,2.2vh,18px)] tracking-[0.18em] text-wedding-accent">
               {date}
             </p>
           </motion.div>
 
           <motion.div
-            className="mt-10 space-y-2 text-wedding-text-light"
+            className="mt-[clamp(1.25rem,3vh,2.5rem)] space-y-1 text-wedding-text-light"
             variants={itemVariants}
           >
             <p className="font-poppins text-sm">Kepada Yth.</p>
             <p className="font-poppins text-sm">Bapak/Ibu/Saudara-i</p>
-            <p className="pt-2 font-poppins-bold text-2xl tracking-wide text-wedding-accent">
+            <p className="pt-2 font-poppins-bold text-[clamp(18px,3vh,24px)] tracking-wide text-wedding-accent">
               {displayGuest}
             </p>
           </motion.div>
@@ -195,7 +195,7 @@ export function Hero({
               whileTap={isOpening ? {} : { scale: 0.98 }}
               onClick={handleOpen}
               disabled={isOpening}
-              className="mt-6 inline-flex items-center justify-center gap-3 rounded-full bg-wedding-accent px-10 py-3 font-poppins text-sm tracking-wide text-white shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-colors hover:bg-wedding-accent/90 disabled:opacity-70"
+              className="mt-[clamp(0.75rem,2vh,1.5rem)] inline-flex items-center justify-center gap-3 rounded-full bg-wedding-accent px-10 py-[0.7rem] font-poppins text-sm tracking-wide text-wedding-on-accent shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-colors hover:bg-wedding-accent/90 disabled:opacity-70"
               animate={
                 isOpening
                   ? undefined

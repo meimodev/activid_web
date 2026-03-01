@@ -116,15 +116,15 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
   };
 
   return (
-  <section className="py-24 relative border-b border-[#D4AF37]/10 text-white">
-  <div className="absolute inset-0 bg-[#0B0D17]/30 backdrop-blur-sm z-0" />
+  <section className="py-24 relative border-b border-wedding-accent/10 text-wedding-on-dark">
+  <div className="absolute inset-0 bg-wedding-dark/30 backdrop-blur-sm z-0" />
 
   <div className="container mx-auto px-4 max-w-4xl">
   <RevealOnScroll direction="down" width="100%">
   <div className="flex flex-col items-center">
   <SatrunIcon />
   <FloatingParallax speed={-0.2}>
-  <h2 className="text-center font-heading text-3xl text-[#D4AF37] mb-4 mt-4 uppercase tracking-[0.2em] text-glow">
+  <h2 className="text-center font-heading text-3xl text-wedding-accent mb-4 mt-4 uppercase tracking-[0.2em] text-glow">
   {heading}
   </h2>
   </FloatingParallax>
@@ -134,35 +134,35 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
 
   {/* Input Form */}
   <RevealOnScroll delay={0.2} width="100%">
-  <div className="bg-black/80 p-8 rounded-sm shadow-xl border border-[#D4AF37]/20 mb-16 relative overflow-hidden">
-  <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+  <div className="bg-wedding-dark/80 p-8 rounded-sm shadow-xl border border-wedding-accent/20 mb-16 relative overflow-hidden">
+  <div className="absolute top-0 right-0 w-32 h-32 bg-wedding-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
   {!inviteeName ? (
-  <div className="text-center font-body text-white/60 italic">
+  <div className="text-center font-body text-wedding-on-dark/60 italic">
   To leave a wish, please access this invitation via the link provided solely for you.
   </div>
   ) : hasPosted ? (
   <div className="text-center py-8">
-  <h3 className="font-script text-4xl text-[#D4AF37] mb-2">Thank you, {inviteeName}!</h3>
-  <p className="font-body text-white/80">{thankYouMessage}</p>
+  <h3 className="font-script text-4xl text-wedding-accent mb-2">Thank you, {inviteeName}!</h3>
+  <p className="font-body text-wedding-on-dark/80">{thankYouMessage}</p>
   </div>
   ) : (
   <form onSubmit={handleSubmit} className="space-y-6">
-  <div className="font-heading text-sm uppercase tracking-widest text-[#D4AF37]/80 mb-2">
-  From: <span className="text-[#D4AF37] font-bold ml-2">{inviteeName}</span>
+  <div className="font-heading text-sm uppercase tracking-widest text-wedding-accent/80 mb-2">
+  From: <span className="text-wedding-accent font-bold ml-2">{inviteeName}</span>
   </div>
   <textarea
   value={message}
   onChange={(e) => setMessage(e.target.value)}
-  className="w-full bg-[#0B0D17] border border-[#D4AF37]/30 p-4 rounded-sm focus:outline-none focus:border-[#D4AF37] transition-colors font-body text-white min-h-[120px]"
+  className="w-full bg-wedding-dark border border-wedding-accent/30 p-4 rounded-sm focus:outline-none focus:border-wedding-accent transition-colors font-body text-wedding-on-dark min-h-[120px]"
   placeholder={placeholder}
   disabled={isSubmitting}
   />
-  {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+  {error && <p className="text-wedding-accent/80 text-xs text-center">{error}</p>}
   <button
   type="submit"
   disabled={isSubmitting || !message.trim()}
-  className="w-full bg-[#D4AF37] text-[#0B0D17] py-4 text-xs font-heading uppercase tracking-[0.3em] hover:bg-[#D4AF37]/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-bold"
+  className="w-full bg-wedding-accent text-wedding-on-accent py-4 text-xs font-heading uppercase tracking-[0.3em] hover:bg-wedding-accent/80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-bold"
   >
   {isSubmitting ? "Sending..." : "Send Wishes"}
   </button>
@@ -181,24 +181,24 @@ export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: 
   initial={{ opacity: 0, y: 20 }}
   animate={{ opacity: 1, y: 0 }}
   exit={{ opacity: 0, scale: 0.95 }}
-  className="bg-black/50 p-6 rounded-sm shadow-sm border-l-4 border-[#D4AF37]/60"
+  className="bg-wedding-dark/50 p-6 rounded-sm shadow-sm border-l-4 border-wedding-accent/60"
   >
   <div className="flex justify-between items-start mb-3">
-  <h4 className="font-heading text-[#D4AF37] font-bold text-sm uppercase tracking-wider">
+  <h4 className="font-heading text-wedding-accent font-bold text-sm uppercase tracking-wider">
   {wish.name}
   </h4>
-  <span className="text-[10px] text-white/40 uppercase tracking-widest font-heading">
+  <span className="text-[10px] text-wedding-on-dark/40 uppercase tracking-widest font-heading">
   {wish.createdAt ? formatRelativeToNow(wish.createdAt) || "Just now" : "Just now"}
   </span>
   </div>
-  <p className="font-body text-white/90 leading-relaxed">
+  <p className="font-body text-wedding-on-dark/90 leading-relaxed">
   {wish.message}
   </p>
   </motion.div>
   ))}
   </AnimatePresence>
   {wishes.length === 0 && (
-  <div className="text-center font-body text-white/40 italic py-12">
+  <div className="text-center font-body text-wedding-on-dark/40 italic py-12">
   Be the first to wish them well.
   </div>
   )}

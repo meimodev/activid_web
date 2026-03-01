@@ -2,8 +2,6 @@ import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { AnimatedGradientBackground } from '@/components/ui';
 import Navigation from '@/components/layouts/Navigation';
-import type { HeroContent } from '@/types/hero.types';
-import type { Testimonial } from '@/components/sections/Testimonials';
 import type { Metadata } from 'next';
 import { siteContent } from '@/lib/site-content';
 

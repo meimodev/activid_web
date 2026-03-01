@@ -84,7 +84,7 @@ export function FloatingFlowers() {
   >
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
   <path d="M12 2C13.5 2 14.5 3.5 14.5 5C16 3.5 17.5 3.5 18.5 5C19.5 6.5 19 8.5 17.5 9.5C18.5 11 18.5 13 17 14C15.5 15 13.5 14.5 12.5 13C11.5 14.5 9.5 15 8 14C6.5 13 6.5 11 7.5 9.5C6 8.5 5.5 6.5 6.5 5C7.5 3.5 9 3.5 10.5 5C10.5 3.5 11.5 2 12 2Z" />
-  <circle cx="12" cy="8" r="1.5" className="text-white/50" />
+  <circle cx="12" cy="8" r="1.5" className="text-wedding-on-dark/50" />
   </svg>
   </motion.div>
   ))}
@@ -137,7 +137,7 @@ export function FloatingSparkles() {
   }}
   className="absolute w-1 h-1 bg-wedding-accent rounded-full"
   >
-  <div className="absolute inset-0 bg-white rounded-full blur-sm" />
+  <div className="absolute inset-0 bg-wedding-on-dark rounded-full blur-sm" />
   </motion.div>
   ))}
   </div>

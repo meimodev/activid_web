@@ -18,7 +18,6 @@ import {
   FooterSection,
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { DateTime } from "luxon";
 import { INVITATION_LOCALE, INVITATION_ZONE, parseInvitationDateTime } from "@/lib/date-time";
 
@@ -44,9 +43,6 @@ interface AmaltheaProps {
 }
 
 export function Amalthea({ config }: AmaltheaProps) {
-  const pad2 = (n: number) => String(n).padStart(2, "0");
-  const isInt = (value: unknown): value is number => Number.isInteger(value);
-
   const [isOpen, setIsOpen] = useState(() => !config.sections.hero.enabled);
   const [isContentReady, setIsContentReady] = useState(
     () => !config.sections.hero.enabled,
@@ -74,16 +70,11 @@ export function Amalthea({ config }: AmaltheaProps) {
   }, [config.hosts, isDemo]);
 
   const effectiveGalleryPhotos = isDemo
-    ? [...AMALTHEA_DEMO_ASSETS.galleryPhotos]
+    ? Array.from(AMALTHEA_DEMO_ASSETS.galleryPhotos)
     : (sections.gallery?.photos ?? []);
   const effectiveCoverImage = isDemo
     ? AMALTHEA_DEMO_ASSETS.coverImage
     : sections.hero.coverImage;
-
-  const derivedPhotos = useMemo(
-    () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
-    [config.id, effectiveGalleryPhotos],
-  );
 
   const demoCountdownTarget = useMemo(() => {
     const dt = DateTime.now()
@@ -226,7 +217,7 @@ export function Amalthea({ config }: AmaltheaProps) {
               {sections.wishes.enabled ? (
                 <Suspense
                   fallback={
-                    <div className="py-24 text-center text-[#0B1B2A]/55 font-poppins italic">
+                    <div className="py-24 text-center text-wedding-dark/55 font-poppins italic">
                       Loading Wishes...
                     </div>
                   }

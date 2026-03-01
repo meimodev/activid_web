@@ -174,6 +174,8 @@ export interface InvitationConfig {
     theme?: {
         mainColor: string;
         accentColor: string;
+        accent2Color?: string;
+        darkColor?: string;
     };
     purpose?: "marriage" | "birthday" | "event";
     metadata: MetadataConfig;

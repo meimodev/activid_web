@@ -7,7 +7,12 @@
   --invitation-text-light: #8E9196;
   --invitation-accent: #800020; /* Deep Maroon */
   --invitation-accent-light: #C5A059; /* Gold (Complementary) */
+  --invitation-accent-2: #C5A059;
+  --invitation-accent-2-light: #C5A059;
   --invitation-dark: #2A1B1B; /* Dark Warm Brown/Black */
+  --invitation-on-accent: #FFFFFF;
+  --invitation-on-accent-2: #FFFFFF;
+  --invitation-on-dark: #FFFFFF;
   --invitation-mobile-max-width: 430px;
 }
 
@@ -25,23 +30,16 @@
     ),
     radial-gradient(
       circle at 82% 84%,
-      color-mix(in srgb, var(--invitation-accent-light) 14%, transparent),
+      color-mix(in srgb, var(--invitation-accent-2-light) 14%, transparent),
       transparent 48%
     ),
     var(--invitation-bg-alt);
 }
 
-.invitation-scale-stage {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  overflow-x: hidden;
-}
-
 .invitation-mobile-frame {
   position: relative;
-  width: var(--invitation-mobile-max-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--invitation-mobile-max-width);
   min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: visible;
@@ -65,7 +63,12 @@
   --color-wedding-text-light: var(--invitation-text-light);
   --color-wedding-accent: var(--invitation-accent);
   --color-wedding-accent-light: var(--invitation-accent-light);
+  --color-wedding-accent-2: var(--invitation-accent-2);
+  --color-wedding-accent-2-light: var(--invitation-accent-2-light);
   --color-wedding-dark: var(--invitation-dark);
+  --color-wedding-on-accent: var(--invitation-on-accent);
+  --color-wedding-on-accent-2: var(--invitation-on-accent-2);
+  --color-wedding-on-dark: var(--invitation-on-dark);
 
   --animate-reveal: reveal 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   --animate-float: float 6s ease-in-out infinite;

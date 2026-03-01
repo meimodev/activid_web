@@ -71,11 +71,11 @@ function CountdownVertical({
           width="fit-content"
           delay={0.14 + idx * 0.08}
         >
-          <div className="text-center px-4 py-3 rounded-2xl border border-black/10 bg-white/60 backdrop-blur min-w-[88px]">
-            <div className="font-body text-2xl leading-none text-[#2B2424]">
+          <div className="text-center px-4 py-3 rounded-2xl border border-wedding-text/10 bg-wedding-bg/60 backdrop-blur min-w-[88px]">
+            <div className="font-body text-2xl leading-none text-wedding-text">
               {it.value}
             </div>
-            <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[#6B5B5B] font-body">
+            <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-wedding-text-light font-body">
               {it.label}
             </div>
           </div>

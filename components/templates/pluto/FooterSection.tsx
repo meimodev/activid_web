@@ -11,29 +11,29 @@ export function FooterSection({ hosts, message }: FooterSectionProps) {
   void message;
 
   return (
-    <footer className="relative overflow-hidden bg-[#4F5B4B] border-t border-white/10">
+    <footer className="relative overflow-hidden bg-wedding-dark border-t border-wedding-on-dark/10">
       <div className="absolute inset-0 opacity-12 bg-[url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png')]" />
-      <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/20 to-black/55" />
+      <div className="absolute inset-0 bg-linear-to-b from-wedding-dark/0 via-wedding-dark/20 to-wedding-dark/55" />
 
       <div className="relative px-6 py-14">
-        <div className="max-w-3xl mx-auto text-center text-white">
+        <div className="max-w-3xl mx-auto text-center text-wedding-on-dark">
           <RevealOnScroll
             direction="up"
             width="100%"
             delay={0.15}
             className="flex justify-center"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-mono text-white/90 backdrop-blur-md relative overflow-hidden">
-              <span className="relative w-2 h-2 rounded-full bg-[#B08B43] shadow-[0_0_10px_rgba(176,139,67,0.55)]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-wedding-on-dark/10 border border-wedding-on-dark/20 text-xs font-mono text-wedding-on-dark/90 backdrop-blur-md relative overflow-hidden">
+              <span className="relative w-2 h-2 rounded-full bg-wedding-accent shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-accent)_55%,transparent)]" />
               <span className="relative">{names}</span>
             </div>
           </RevealOnScroll>
 
           <RevealOnScroll direction="up" width="100%" delay={0.35}>
-            <h3 className="font-tan-mon-cheri mt-12 text-[44px] leading-none text-white">
+            <h3 className="font-tan-mon-cheri mt-12 text-[44px] leading-none text-wedding-on-dark">
               Misi Selesai!
             </h3>
-            <p className="font-poppins mt-4 text-sm text-white/75 whitespace-pre-line">
+            <p className="font-poppins mt-4 text-sm text-wedding-on-dark/75 whitespace-pre-line">
               Kabar bahagia berhasil disebar diseluruh pelosok antariksa
             </p>
           </RevealOnScroll>
@@ -44,7 +44,7 @@ export function FooterSection({ hosts, message }: FooterSectionProps) {
                 href="https://invitation.activid.id"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-md px-8 py-3 bg-white/10 border border-white/20 text-xs font-mono text-white backdrop-blur-md transition-all hover:border-white/35 hover:bg-white/15"
+                className="inline-flex items-center justify-center rounded-md px-8 py-3 bg-wedding-on-dark/10 border border-wedding-on-dark/20 text-xs font-mono text-wedding-on-dark backdrop-blur-md transition-all hover:border-wedding-on-dark/35 hover:bg-wedding-on-dark/15"
               >
                 <span className="uppercase tracking-[0.25em]">
                   Kembali Pulang 🚀
@@ -54,11 +54,11 @@ export function FooterSection({ hosts, message }: FooterSectionProps) {
           </RevealOnScroll>
 
           <RevealOnScroll direction="up" width="100%" delay={0.75}>
-            <div className="mt-10 h-px w-full bg-white/15" />
+            <div className="mt-10 h-px w-full bg-wedding-on-dark/15" />
           </RevealOnScroll>
 
           <RevealOnScroll direction="up" width="100%" delay={0.95}>
-            <p className="mt-6 text-[11px] tracking-[0.25em] uppercase text-white/55 font-poppins">
+            <p className="mt-6 text-[11px] tracking-[0.25em] uppercase text-wedding-on-dark/55 font-poppins">
               © {year} Activid Invitation
             </p>
           </RevealOnScroll>

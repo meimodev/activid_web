@@ -3,10 +3,7 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { SplitText } from '@/components/animations/SplitText';
-import { ANIMATION_VARIANTS } from '@/lib/animation-config';
 import type { HeroContent } from '@/types/hero.types';
-import { trackCTA } from '@/lib/analytics';
 import { DateTime } from 'luxon';
 
 export interface HeroProps {
@@ -23,7 +20,7 @@ export interface HeroProps {
  * - Bottom info section with company name and year
  */
 export function Hero({ content, className = '' }: HeroProps) {
-  const { title, subtitle, backgroundVideo } = content;
+  const { subtitle, backgroundVideo } = content;
   const sectionRef = useRef<HTMLDivElement>(null);
 
   const prng = (seed: number) => {
@@ -40,8 +37,6 @@ export function Hero({ content, className = '' }: HeroProps) {
   // Transform scroll progress to parallax values
   const logoScale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   const logoOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const titleY = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
     <section

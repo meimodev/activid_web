@@ -25,17 +25,20 @@ export function BackgroundSlideshow({ photos, className }: BackgroundSlideshowPr
     const safeIndex = index % photos.length;
 
     return (
-        <div className={className ?? "fixed inset-0 z-0 overflow-hidden pointer-events-none"}>
+        <div className={className ?? "absolute inset-0 z-0 overflow-hidden pointer-events-none"}>
             <AnimatePresence mode="popLayout" initial={false}>
                 <motion.div
                     key={photos[safeIndex]}
-                    initial={{ opacity: 0, scale: 1.1 }}
+                    initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 2.5, ease: "easeInOut" }}
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 3, ease: "easeInOut" }}
+                    className="absolute inset-0 w-full h-full"
                     style={{
                         backgroundImage: `url(${photos[safeIndex]})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
                         willChange: "opacity, transform"
                     }}
                 />

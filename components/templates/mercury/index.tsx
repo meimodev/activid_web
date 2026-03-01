@@ -63,9 +63,10 @@ export function Mercury({ config }: MercuryProps) {
         })
         : hosts;
 
-    const effectiveGalleryPhotos = isDemo
-        ? [...MERCURY_DEMO_ASSETS.galleryPhotos]
-        : (sections.gallery?.photos ?? []);
+    const effectiveGalleryPhotos = useMemo(
+        () => (isDemo ? Array.from(MERCURY_DEMO_ASSETS.galleryPhotos) : (sections.gallery?.photos ?? [])),
+        [isDemo, sections.gallery?.photos],
+    );
     const effectiveCoverImage = isDemo ? MERCURY_DEMO_ASSETS.coverImage : sections.hero.coverImage;
 
     const derivedPhotos = useMemo(

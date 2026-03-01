@@ -9,7 +9,6 @@ import { Gallery } from "./Gallery";
 import { Wishes } from "./Wishes";
 import { GratitudeSection } from "./GratitudeSection";
 import { MusicPlayer } from "@/components/invitation/MusicPlayer";
-import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { StorySection } from "./StorySection";
 import {
   TitleSection,
@@ -19,7 +18,6 @@ import {
   FooterSection,
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { DateTime } from "luxon";
 import { INVITATION_LOCALE, INVITATION_ZONE } from "@/lib/date-time";
 
@@ -74,11 +72,6 @@ export function Pluto({ config }: PlutoProps) {
     ? PLUTO_DEMO_ASSETS.coverImage
     : sections.hero.coverImage;
 
-  const derivedPhotos = useMemo(
-    () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
-    [config.id, effectiveGalleryPhotos],
-  );
-
   const demoCountdownTarget = useMemo(() => {
     const dt = DateTime.now()
       .setZone(INVITATION_ZONE)
@@ -100,11 +93,8 @@ export function Pluto({ config }: PlutoProps) {
   }, [isDemo, weddingDate.display]);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text">
-      <BackgroundSlideshow
-        photos={derivedPhotos}
-        className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10"
-      />
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-wedding-bg text-wedding-text">
+      
 
       <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 
@@ -197,7 +187,7 @@ export function Pluto({ config }: PlutoProps) {
               {sections.wishes.enabled ? (
                 <Suspense
                   fallback={
-                    <div className="py-24 text-center text-[#3A2F2F]/60 font-poppins italic">
+                    <div className="py-24 text-center text-wedding-text/60 font-poppins italic">
                       Loading Wishes...
                     </div>
                   }

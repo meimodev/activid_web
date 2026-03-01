@@ -186,7 +186,7 @@ export function Venus({ config }: VenusProps) {
 
   {config.sections.hero.enabled ? (
       <motion.div
-      className="fixed inset-0 z-[200] bg-[#EFE7D6]"
+      className="fixed inset-0 z-[200] bg-wedding-bg"
       style={heroViewportHeight ? { height: heroViewportHeight } : undefined}
       initial={false}
       animate={{
@@ -281,7 +281,7 @@ export function Venus({ config }: VenusProps) {
       <button
       type="button"
       onClick={togglePlay}
-      className="h-11 w-11 rounded-full flex items-center justify-center transition border bg-white/60 text-[#2B2424] border-black/10 hover:bg-white"
+      className="h-11 w-11 rounded-full flex items-center justify-center transition border bg-wedding-bg/60 text-wedding-text border-wedding-text/10 hover:bg-wedding-bg"
       aria-label={isPlaying ? "Pause Music" : "Play Music"}
       >
       {isPlaying ? <IconPause /> : <IconPlay />}

@@ -264,7 +264,7 @@ export function Jupiter({ config }: JupiterProps) {
   <button
   type="button"
   onClick={togglePlay}
-  className="absolute bottom-6 right-6 z-[120] h-12 w-12 rounded-full border border-white/10 bg-[#0d0d1f]/80 text-white backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.35)] hover:bg-[#0d0d1f] transition"
+  className="absolute bottom-6 right-6 z-[120] h-12 w-12 rounded-full border border-wedding-on-dark/10 bg-wedding-dark/80 text-wedding-on-dark backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.35)] hover:bg-wedding-dark transition"
   aria-label={isPlaying ? "Jeda Musik" : "Putar Musik"}
   >
   <span className="sr-only">{isPlaying ? "Jeda Musik" : "Putar Musik"}</span>
@@ -313,15 +313,15 @@ function JupiterCoverOverlay({
   const secondary = hosts[1];
 
   return (
-  <div className="relative h-screen w-full overflow-hidden bg-[#0d0d1f] text-white">
+  <div className="relative h-screen w-full overflow-hidden bg-wedding-dark text-wedding-on-dark">
   <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${coverImage})` }}>
   <div className="absolute inset-0 bg-black/55" />
   <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/35 to-black/65" />
   </div>
 
   <div className="absolute inset-0 pointer-events-none">
-  <div className="absolute -top-48 left-1/2 w-[640px] h-[640px] -translate-x-1/2 rounded-full bg-amber-400/10 blur-3xl" />
-  <div className="absolute -bottom-52 left-1/3 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+  <div className="absolute -top-48 left-1/2 w-[640px] h-[640px] -translate-x-1/2 rounded-full bg-wedding-accent/10 blur-3xl" />
+  <div className="absolute -bottom-52 left-1/3 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-wedding-accent-2/10 blur-3xl" />
   </div>
 
   <div className="relative z-10 h-full max-w-xl mx-auto px-6 flex flex-col items-center justify-center text-center">
@@ -333,11 +333,11 @@ function JupiterCoverOverlay({
   >
   <p className="text-xs tracking-[0.35em] uppercase opacity-90 font-body">{subtitle || "The Wedding Of"}</p>
 
-  <h1 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-amber-100`}>
+  <h1 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-wedding-accent-light`}>
   {primary?.firstName ?? ""}
   </h1>
   <div className="mt-2 mb-2 text-3xl opacity-90">&</div>
-  <h1 className={`${jupiterScript.className} text-6xl leading-none text-amber-100`}>
+  <h1 className={`${jupiterScript.className} text-6xl leading-none text-wedding-accent-light`}>
   {secondary?.firstName ?? ""}
   </h1>
 
@@ -348,7 +348,7 @@ function JupiterCoverOverlay({
 
   <button
   onClick={onOpen}
-  className="mt-10 inline-flex items-center justify-center rounded-full px-8 py-3 bg-amber-100 text-[#1F1B16] hover:bg-amber-50 active:scale-[0.99] transition"
+  className="mt-10 inline-flex items-center justify-center rounded-full px-8 py-3 bg-wedding-accent text-wedding-on-accent hover:bg-wedding-accent/90 active:scale-[0.99] transition"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">Buka Undangan</span>
   </button>
@@ -399,21 +399,21 @@ function JupiterTitleCountdown({
   </div>
 
   <div className="p-8 text-center">
-  <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-body">{heading || "The Wedding"}</p>
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-text-light font-body">{heading || "The Wedding"}</p>
 
-  <h2 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-[#1F1B16]`}>
+  <h2 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-wedding-text`}>
   {primary?.firstName ?? ""}
   </h2>
-  <div className="mt-2 mb-2 text-3xl opacity-80 text-[#1F1B16]">&</div>
-  <h2 className={`${jupiterScript.className} text-6xl leading-none text-[#1F1B16]`}>
+  <div className="mt-2 mb-2 text-3xl opacity-80 text-wedding-text">&</div>
+  <h2 className={`${jupiterScript.className} text-6xl leading-none text-wedding-text`}>
   {secondary?.firstName ?? ""}
   </h2>
 
   <div className="mt-10 grid grid-cols-1 gap-6 items-center">
-  <div className="rounded-3xl border border-black/10 bg-[#F7F3EA] p-7">
-  <p className="text-[10px] uppercase tracking-[0.35em] text-[#6B5B5B]">{month}</p>
-  <p className="mt-3 text-5xl font-bold tracking-tight text-[#1F1B16]">{day}</p>
-  <p className="mt-2 text-sm tracking-[0.25em] uppercase text-[#6B5B5B]">{year}</p>
+  <div className="rounded-3xl border border-wedding-text/10 bg-wedding-bg p-7">
+  <p className="text-[10px] uppercase tracking-[0.35em] text-wedding-text-light">{month}</p>
+  <p className="mt-3 text-5xl font-bold tracking-tight text-wedding-text">{day}</p>
+  <p className="mt-2 text-sm tracking-[0.25em] uppercase text-wedding-text-light">{year}</p>
   </div>
 
   <div className="">
@@ -424,7 +424,7 @@ function JupiterTitleCountdown({
   <JupiterCountdownCard label="Detik" value={timeLeft.seconds} />
   </div>
 
-  <p className="mt-6 text-xs tracking-[0.25em] uppercase text-[#6B5B5B] font-body">
+  <p className="mt-6 text-xs tracking-[0.25em] uppercase text-wedding-text-light font-body">
   Mohon doa restu
   </p>
   </div>
@@ -439,22 +439,22 @@ function JupiterTitleCountdown({
 
 function JupiterCountdownCard({ label, value }: { label: string; value: number }) {
   return (
-  <div className="rounded-2xl border border-black/10 bg-white/70 backdrop-blur px-4 py-4 text-center">
-  <div className="text-3xl font-semibold text-[#1F1B16] leading-none">{value}</div>
-  <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-[#6B5B5B] font-body">{label}</div>
+  <div className="rounded-2xl border border-wedding-text/10 bg-wedding-bg/70 backdrop-blur px-4 py-4 text-center">
+  <div className="text-3xl font-semibold text-wedding-text leading-none">{value}</div>
+  <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-wedding-text-light font-body">{label}</div>
   </div>
   );
 }
 
 function JupiterQuote({ text, author, thumbnails }: { text: string; author: string; thumbnails: string[] }) {
   return (
-  <section className="relative overflow-hidden bg-[#0B2F4A] text-white">
-  <WaveSeparator position="top" fill="#F7F3EA" />
+  <section className="relative overflow-hidden bg-wedding-dark text-wedding-on-dark">
+  <WaveSeparator position="top" fill="var(--invitation-bg)" />
 
   <div className="relative px-6 py-20">
   <div className="absolute inset-0 pointer-events-none">
-  <div className="absolute -top-40 left-1/4 w-[520px] h-[520px] -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
-  <div className="absolute -bottom-48 left-3/4 w-[520px] h-[520px] -translate-x-1/2 rounded-full bg-amber-400/10 blur-3xl" />
+  <div className="absolute -top-40 left-1/4 w-[520px] h-[520px] -translate-x-1/2 rounded-full bg-wedding-accent-2/10 blur-3xl" />
+  <div className="absolute -bottom-48 left-3/4 w-[520px] h-[520px] -translate-x-1/2 rounded-full bg-wedding-accent/10 blur-3xl" />
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.12),transparent_55%),radial-gradient(circle_at_80%_40%,rgba(255,255,255,0.08),transparent_60%)]" />
   </div>
 
@@ -470,7 +470,7 @@ function JupiterQuote({ text, author, thumbnails }: { text: string; author: stri
   <div className="mt-14 flex flex-wrap items-center justify-center gap-4">
   {thumbnails.slice(0, 4).map((src, idx) => (
   <JupiterReveal key={`${src}-${idx}`} direction="up" width="fit-content" delay={0.35 + idx * 0.12}>
-  <div className="relative h-20 w-20 rounded-full overflow-hidden border border-white/20 bg-white/5">
+  <div className="relative h-20 w-20 rounded-full overflow-hidden border border-wedding-on-dark/20 bg-wedding-on-dark/5">
   <Image src={src} alt="thumb" fill sizes="80px" className="object-cover" unoptimized />
   <div className="absolute inset-0 bg-black/10" />
   </div>
@@ -481,7 +481,7 @@ function JupiterQuote({ text, author, thumbnails }: { text: string; author: stri
   </div>
   </div>
 
-  <WaveSeparator position="bottom" fill="#F7F3EA" />
+  <WaveSeparator position="bottom" fill="var(--invitation-bg)" />
   </section>
   );
 }
@@ -543,10 +543,10 @@ function JupiterPersonCard({
   <Image src={photo} alt={name} fill sizes="160px" className="object-cover" unoptimized />
   </div>
 
-  <p className="mt-6 text-[10px] uppercase tracking-[0.35em] text-[#6B5B5B]">{label}</p>
-  <h4 className={`mt-3 ${jupiterScript.className} text-5xl leading-none text-[#1F1B16]`}>{name}</h4>
-  <p className="mt-2 text-sm font-body text-[#1F1B16]">{fullName}</p>
-  <p className="mt-4 text-xs text-[#6B5B5B] whitespace-pre-line">{parents}</p>
+  <p className="mt-6 text-[10px] uppercase tracking-[0.35em] text-wedding-text-light">{label}</p>
+  <h4 className={`mt-3 ${jupiterScript.className} text-5xl leading-none text-wedding-text`}>{name}</h4>
+  <p className="mt-2 text-sm font-body text-wedding-text">{fullName}</p>
+  <p className="mt-4 text-xs text-wedding-text-light whitespace-pre-line">{parents}</p>
   </div>
   </div>
   </JupiterReveal>
@@ -617,18 +617,18 @@ function JupiterEventCard({
   style={{
   clipPath: "ellipse(70% 52% at 50% 0%)",
   background:
-  "radial-gradient(circle at 50% 0%, rgba(251,191,36,0.18), transparent 60%), radial-gradient(circle at 20% 20%, rgba(56,189,248,0.10), transparent 65%)",
+  "radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--invitation-accent) 18%, transparent), transparent 60%), radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--invitation-accent-2) 10%, transparent), transparent 65%)",
   }}
   />
 
   <div className="relative text-center">
-  <h4 className={`${jupiterScript.className} text-5xl leading-none text-[#1F1B16]`}>{title}</h4>
+  <h4 className={`${jupiterScript.className} text-5xl leading-none text-wedding-text`}>{title}</h4>
 
-  <div className="mt-6 space-y-2 text-sm text-[#1F1B16]">
+  <div className="mt-6 space-y-2 text-sm text-wedding-text">
   {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
-  {date ? <p className="text-[#6B5B5B]">{formatInvitationTime(date)}</p> : null}
+  {date ? <p className="text-wedding-text-light">{formatInvitationTime(date)}</p> : null}
   {venue ? <p className="font-body">{venue}</p> : null}
-  {address ? <p className="text-[#6B5B5B] whitespace-pre-line">{address}</p> : null}
+  {address ? <p className="text-wedding-text-light whitespace-pre-line">{address}</p> : null}
   </div>
 
   {mapUrl ? (
@@ -636,7 +636,7 @@ function JupiterEventCard({
   href={mapUrl}
   target="_blank"
   rel="noreferrer"
-  className="mt-8 inline-flex items-center justify-center w-full rounded-full px-6 py-3 bg-[#0B2F4A] text-white hover:bg-[#082235] transition"
+  className="mt-8 inline-flex items-center justify-center w-full rounded-full px-6 py-3 bg-wedding-accent-2 text-wedding-on-accent-2 hover:bg-wedding-accent-2/90 transition"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">Buka Google Maps</span>
   </a>
@@ -676,8 +676,8 @@ function JupiterStory({
   {stories.map((s, idx) => (
   <JupiterReveal key={idx} direction="up" width="100%" delay={0.45 + idx * 0.15}>
   <div className="rounded-[2.25rem] border border-black/10 bg-white/70 backdrop-blur p-7">
-  <p className="text-[10px] uppercase tracking-[0.35em] text-[#6B5B5B]">{formatInvitationMonthYear(s.date)}</p>
-  <p className="mt-4 text-sm leading-relaxed text-[#1F1B16] whitespace-pre-line">
+  <p className="text-[10px] uppercase tracking-[0.35em] text-wedding-text-light">{formatInvitationMonthYear(s.date)}</p>
+  <p className="mt-4 text-sm leading-relaxed text-wedding-text whitespace-pre-line">
   {s.description}
   </p>
   </div>
@@ -701,18 +701,18 @@ function JupiterGratitude({ hosts, message }: { hosts: Host[]; message: string }
 
   <JupiterReveal direction="up" width="100%" delay={0.35}>
   <div className="rounded-[2.25rem] border border-black/10 bg-white/70 backdrop-blur p-10 text-center">
-  <p className="text-sm text-[#1F1B16] whitespace-pre-line">
+  <p className="text-sm text-wedding-text whitespace-pre-line">
   {message || "Terima kasih telah menjadi bagian dari momen bahagia kami."}
   </p>
 
   <div className="mt-8">
-  <p className={`text-5xl leading-none ${jupiterScript.className} text-[#1F1B16]`}>
+  <p className={`text-5xl leading-none ${jupiterScript.className} text-wedding-text`}>
   {primary?.firstName ?? ""} {secondary?.firstName ? "&" : ""} {secondary?.firstName ?? ""}
   </p>
   </div>
 
   <div className="mt-8 mx-auto h-px w-24 bg-black/10" />
-  <p className="mt-8 text-xs tracking-[0.25em] uppercase text-[#6B5B5B]">Dengan cinta</p>
+  <p className="mt-8 text-xs tracking-[0.25em] uppercase text-wedding-text-light">Dengan cinta</p>
   </div>
   </JupiterReveal>
   </div>
@@ -724,7 +724,7 @@ function JupiterSectionHeading({ title }: { title: string }) {
   return (
   <JupiterReveal direction="up" width="100%" delay={0.15}>
   <div className="text-center mb-10">
-  <h3 className={`${jupiterScript.className} text-5xl leading-none text-[#1F1B16]`}>{title}</h3>
+  <h3 className={`${jupiterScript.className} text-5xl leading-none text-wedding-text`}>{title}</h3>
   <div className="mt-5 mx-auto h-px w-24 bg-black/10" />
   </div>
   </JupiterReveal>
@@ -733,17 +733,17 @@ function JupiterSectionHeading({ title }: { title: string }) {
 
 function JupiterSectionWrap({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-  <section className="relative px-6 py-20 bg-[#0d0d1f] text-white overflow-hidden">
+  <section className="relative px-6 py-20 bg-wedding-dark text-wedding-on-dark overflow-hidden">
   <div className="absolute inset-0">
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.12),transparent_50%),radial-gradient(circle_at_80%_40%,rgba(251,191,36,0.10),transparent_55%)]" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--invitation-accent-2)_12%,transparent),transparent_50%),radial-gradient(circle_at_80%_40%,color-mix(in_srgb,var(--invitation-accent)_10%,transparent),transparent_55%)]" />
   <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/55 to-black/75" />
   </div>
 
   <div className="relative max-w-5xl mx-auto">
   <JupiterReveal direction="up" width="100%">
   <div className="text-center mb-10">
-  <h3 className={`${jupiterScript.className} text-5xl leading-none text-white`}>{title}</h3>
-  <div className="mt-5 mx-auto h-px w-24 bg-white/20" />
+  <h3 className={`${jupiterScript.className} text-5xl leading-none text-wedding-on-dark`}>{title}</h3>
+  <div className="mt-5 mx-auto h-px w-24 bg-wedding-on-dark/20" />
   </div>
   </JupiterReveal>
 
@@ -895,14 +895,14 @@ function JupiterWishesFirestore({
   <button
   type="button"
   onClick={() => setAttendance("hadir")}
-  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-amber-200 text-[#1F1B16] border-amber-200" : "bg-white/5 text-white border-white/10 hover:bg-white/10"}`}
+  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-wedding-accent text-wedding-on-accent border-wedding-accent" : "bg-wedding-on-dark/5 text-wedding-on-dark border-wedding-on-dark/10 hover:bg-wedding-on-dark/10"}`}
   >
   Hadir
   </button>
   <button
   type="button"
   onClick={() => setAttendance("tidak")}
-  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-amber-200 text-[#1F1B16] border-amber-200" : "bg-white/5 text-white border-white/10 hover:bg-white/10"}`}
+  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-wedding-accent text-wedding-on-accent border-wedding-accent" : "bg-wedding-on-dark/5 text-wedding-on-dark border-wedding-on-dark/10 hover:bg-wedding-on-dark/10"}`}
   >
   Tidak
   </button>
@@ -922,7 +922,7 @@ function JupiterWishesFirestore({
   type="button"
   onClick={submit}
   disabled={isSubmitting || !message.trim()}
-  className="rounded-full px-6 py-3 bg-amber-200 text-[#1F1B16] hover:bg-amber-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+  className="rounded-full px-6 py-3 bg-wedding-accent text-wedding-on-accent hover:bg-wedding-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">
   {isSubmitting ? "Mengirim..." : "Konfirmasi"}
@@ -947,7 +947,7 @@ function JupiterWishesFirestore({
   <div className="mt-2 flex items-center gap-2">
   {w.attendance ? (
   <span
-  className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.25em] font-body border ${w.attendance === "tidak" ? "bg-white/5 text-white border-white/10" : "bg-amber-200 text-[#1F1B16] border-amber-200"}`}
+  className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.25em] font-body border ${w.attendance === "tidak" ? "bg-wedding-on-dark/5 text-wedding-on-dark border-wedding-on-dark/10" : "bg-wedding-accent text-wedding-on-accent border-wedding-accent"}`}
   >
   {w.attendance === "tidak" ? "Tidak" : "Hadir"}
   </span>
@@ -986,8 +986,8 @@ function JupiterFooter({ hosts }: { hosts: Host[] }) {
   }, []);
 
   return (
-  <footer className="relative mt-0 overflow-hidden bg-[#070712] border-t border-white/5">
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.12),transparent)]" />
+  <footer className="relative mt-0 overflow-hidden bg-wedding-dark border-t border-wedding-on-dark/5">
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,color-mix(in_srgb,var(--invitation-accent-2)_12%,transparent),transparent)]" />
   <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/25 to-black/85" />
 
   <div className="absolute inset-0 pointer-events-none">
@@ -999,7 +999,7 @@ function JupiterFooter({ hosts }: { hosts: Host[] }) {
   {stars.map((s, idx) => (
   <motion.span
   key={idx}
-  className="absolute rounded-full bg-white"
+  className="absolute rounded-full bg-wedding-on-dark"
   style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.size, height: s.size, opacity: s.opacity }}
   animate={{ opacity: [s.opacity, Math.min(1, s.opacity + 0.55), s.opacity], scale: [1, 1.35, 1] }}
   transition={{ duration: s.dur, repeat: Infinity, ease: "easeInOut", delay: s.delay }}
@@ -1008,23 +1008,23 @@ function JupiterFooter({ hosts }: { hosts: Host[] }) {
   </motion.div>
 
   <motion.div
-  className="absolute left-1/2 top-[42%] w-[540px] h-[540px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-white/5"
+  className="absolute left-1/2 top-[42%] w-[540px] h-[540px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-wedding-on-dark/5"
   animate={{ rotate: -360 }}
   transition={{ duration: 72, repeat: Infinity, ease: "linear" }}
   >
-  <div className="absolute top-4 left-1/2 w-3 h-3 -translate-x-1/2 bg-amber-200/80 rounded-full blur-[1px] shadow-[0_0_20px_rgba(251,191,36,0.55)]" />
+  <div className="absolute top-4 left-1/2 w-3 h-3 -translate-x-1/2 bg-wedding-accent/80 rounded-full blur-[1px] shadow-[0_0_20px_rgba(251,191,36,0.55)]" />
   </motion.div>
 
   <motion.div
-  className="absolute left-[72%] top-[62%] w-[280px] h-[280px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-white/5"
+  className="absolute left-[72%] top-[62%] w-[280px] h-[280px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-wedding-on-dark/5"
   animate={{ rotate: 360 }}
   transition={{ duration: 54, repeat: Infinity, ease: "linear" }}
   >
-  <div className="absolute bottom-6 left-10 w-2 h-2 rounded-full bg-cyan-200/80 shadow-[0_0_18px_rgba(34,211,238,0.55)]" />
+  <div className="absolute bottom-6 left-10 w-2 h-2 rounded-full bg-wedding-accent-2-light/80 shadow-[0_0_18px_rgba(34,211,238,0.55)]" />
   </motion.div>
 
-  <div className="absolute -bottom-56 left-1/4 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-  <div className="absolute -top-56 left-3/4 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-amber-500/10 blur-3xl" />
+  <div className="absolute -bottom-56 left-1/4 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-wedding-accent-2/10 blur-3xl" />
+  <div className="absolute -top-56 left-3/4 w-[620px] h-[620px] -translate-x-1/2 rounded-full bg-wedding-accent/10 blur-3xl" />
 
   <motion.div
   className="absolute -top-12 left-[-30%] w-[55%] h-[2px] bg-linear-to-r from-transparent via-white/70 to-transparent opacity-0"
@@ -1035,18 +1035,18 @@ function JupiterFooter({ hosts }: { hosts: Host[] }) {
   </div>
 
   <div className="relative px-6 py-14">
-  <div className="max-w-3xl mx-auto text-center text-white">
+  <div className="max-w-3xl mx-auto text-center text-wedding-on-dark">
   <JupiterReveal direction="up" width="100%" delay={0.25} className="flex justify-center">
-  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-white/80 backdrop-blur-md relative overflow-hidden">
-  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent animate-[gradient_4s_linear_infinite]" />
-  <span className="relative w-2 h-2 rounded-full bg-amber-200 animate-pulse shadow-[0_0_10px_#fbbf24]" />
+  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-wedding-on-dark/5 border border-wedding-on-dark/10 text-xs font-mono text-wedding-on-dark/80 backdrop-blur-md relative overflow-hidden">
+  <div className="absolute inset-0 bg-linear-to-r from-transparent via-wedding-accent-2/20 to-transparent animate-[gradient_4s_linear_infinite]" />
+  <span className="relative w-2 h-2 rounded-full bg-wedding-accent animate-pulse shadow-[0_0_10px_var(--invitation-accent)]" />
   <span className="relative">{names}</span>
   </div>
   </JupiterReveal>
 
   <JupiterReveal direction="up" width="100%" delay={0.75}>
-  <h3 className={`${jupiterScript.className} mt-7 text-5xl leading-none text-white`}>Terima kasih</h3>
-  <p className="mt-4 text-sm text-white/70">Sampai jumpa di hari bahagia kami.</p>
+  <h3 className={`${jupiterScript.className} mt-7 text-5xl leading-none text-wedding-on-dark`}>Terima kasih</h3>
+  <p className="mt-4 text-sm text-wedding-on-dark/70">Sampai jumpa di hari bahagia kami.</p>
   </JupiterReveal>
 
   <JupiterReveal direction="up" width="100%" delay={1.05}>

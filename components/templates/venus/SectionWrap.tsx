@@ -20,17 +20,17 @@ export function SectionWrap({
 
   return (
     <section id={id} className="relative scroll-mt-24 py-14 px-6">
-      {maskBackground ? <div className="absolute inset-0 bg-[#F8F4EC]" /> : null}
+      {maskBackground ? <div className="absolute inset-0 bg-wedding-bg" /> : null}
       <div className="max-w-5xl mx-auto">
         <VenusReveal direction="up" width="100%">
           <div className="text-center mb-10">
             <h3
-              className={`${venusScript.className} text-5xl leading-none ${isOverPhoto ? "text-white drop-shadow-[0_14px_40px_rgba(0,0,0,0.75)]" : "text-[#2B2424]"}`}
+              className={`${venusScript.className} text-5xl leading-none ${isOverPhoto ? "text-white drop-shadow-[0_14px_40px_rgba(0,0,0,0.75)]" : "text-wedding-text"}`}
             >
               {title}
             </h3>
             <div
-              className={`mt-5 mx-auto h-px w-24 ${isOverPhoto ? "bg-white/35" : "bg-black/15"}`}
+              className={`mt-5 mx-auto h-px w-24 ${isOverPhoto ? "bg-white/35" : "bg-wedding-text/15"}`}
             />
           </div>
         </VenusReveal>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   EventDetail,
   Host,
@@ -858,53 +858,6 @@ function SectionCard({
   );
 }
 
-function StringListEditor({
-  label,
-  items,
-  onChange,
-}: {
-  label: string;
-  items: string[];
-  onChange: (items: string[]) => void;
-}) {
-  return (
-    <div className="grid gap-2">
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-white/70">{label}</div>
-        <button
-          type="button"
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60"
-          onClick={() => onChange([...(items ?? []), ""])}
-        >
-          Add
-        </button>
-      </div>
-      <div className="grid gap-2">
-        {(items ?? []).map((item, idx) => (
-          <div key={idx} className="flex gap-2">
-            <input
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
-              value={item}
-              onChange={(e) => {
-                const next = [...items];
-                next[idx] = e.target.value;
-                onChange(next);
-              }}
-            />
-            <button
-              type="button"
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60"
-              onClick={() => onChange(items.filter((_, i) => i !== idx))}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export function RegisterInvitationForm({
   initialConfig,
   templateOptions,
@@ -927,13 +880,18 @@ export function RegisterInvitationForm({
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
-    id: "",
+    id: initialConfig.id ?? "",
     imagekitFolderKey:
       initialConfig.imagekitFolderKey
       ?? deriveImagekitFolderKey(initialPurpose, initialConfig.hosts ?? [], 0),
     templateId: templateId,
     theme: initialTheme
-      ? { mainColor: initialTheme.mainColor, accentColor: initialTheme.accentColor }
+      ? {
+          mainColor: initialTheme.mainColor,
+          accentColor: initialTheme.accentColor,
+          accent2Color: initialTheme.accent2Color,
+          darkColor: initialTheme.darkColor,
+        }
       : initialConfig.theme,
     purpose: initialPurpose,
     sections: {
@@ -993,7 +951,12 @@ export function RegisterInvitationForm({
       ...prev,
       templateId: nextTemplateId,
       theme: nextTheme
-        ? { mainColor: nextTheme.mainColor, accentColor: nextTheme.accentColor }
+        ? {
+            mainColor: nextTheme.mainColor,
+            accentColor: nextTheme.accentColor,
+            accent2Color: nextTheme.accent2Color,
+            darkColor: nextTheme.darkColor,
+          }
         : prev.theme,
     }));
   };
@@ -1007,6 +970,8 @@ export function RegisterInvitationForm({
       theme: {
         mainColor: nextTheme.mainColor,
         accentColor: nextTheme.accentColor,
+        accent2Color: nextTheme.accent2Color,
+        darkColor: nextTheme.darkColor,
       },
     }));
   };
@@ -1074,7 +1039,7 @@ export function RegisterInvitationForm({
   const [themeDragging, setThemeDragging] = useState(false);
   const [themeDisplayedIndex, setThemeDisplayedIndex] = useState(1);
 
-  const getDisplayedIndexFromScroller = (el: HTMLDivElement): number => {
+  const getDisplayedIndexFromScroller = useCallback((el: HTMLDivElement): number => {
     const children = Array.from(el.children) as HTMLElement[];
     if (!children.length) return 1;
 
@@ -1093,19 +1058,19 @@ export function RegisterInvitationForm({
     }
 
     return bestIdx + 1;
-  };
+  }, []);
 
-  const updateTemplateDisplayedIndex = () => {
+  const updateTemplateDisplayedIndex = useCallback(() => {
     const el = templateScrollerRef.current;
     if (!el) return;
     setTemplateDisplayedIndex(getDisplayedIndexFromScroller(el));
-  };
+  }, [getDisplayedIndexFromScroller]);
 
-  const updateThemeDisplayedIndex = () => {
+  const updateThemeDisplayedIndex = useCallback(() => {
     const el = themeScrollerRef.current;
     if (!el) return;
     setThemeDisplayedIndex(getDisplayedIndexFromScroller(el));
-  };
+  }, [getDisplayedIndexFromScroller]);
 
   const handleTemplateScrollerScroll = () => {
     if (templateCounterRafRef.current != null) return;
@@ -1131,7 +1096,7 @@ export function RegisterInvitationForm({
         templateCounterRafRef.current = null;
       }
     };
-  }, [templateCards.length]);
+  }, [templateCards.length, updateTemplateDisplayedIndex]);
 
   useDeferredEffect(() => {
     setThemeDisplayedIndex(1);
@@ -1190,7 +1155,7 @@ export function RegisterInvitationForm({
     }
   };
 
-  const handleThemeScrollerPointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleThemeScrollerPointerEnd = () => {
     const el = themeScrollerRef.current;
     const drag = themeDragRef.current;
     if (!el || !drag.active) return;
@@ -1240,7 +1205,7 @@ export function RegisterInvitationForm({
     }
   };
 
-  const handleTemplateScrollerPointerEnd = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleTemplateScrollerPointerEnd = () => {
     const el = templateScrollerRef.current;
     const drag = templateDragRef.current;
     if (!el || !drag.active) return;

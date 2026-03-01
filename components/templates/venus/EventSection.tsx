@@ -66,21 +66,21 @@ function EventCard({
 
   return (
     <VenusReveal direction="up" width="100%" delay={revealDelay}>
-      <div className="rounded-3xl border border-black/10 bg-white/60 backdrop-blur p-6">
+      <div className="rounded-3xl border border-wedding-text/10 bg-wedding-bg/60 backdrop-blur p-6">
         <div className="text-center">
-          <h4 className={`${venusScript.className} text-4xl leading-none text-[#2B2424]`}>
+          <h4 className={`${venusScript.className} text-4xl leading-none text-wedding-text`}>
             {title}
           </h4>
 
           {!isLinkOnly ? (
-            <div className="mt-5 space-y-2 text-sm text-[#3A2F2F]">
+            <div className="mt-5 space-y-2 text-sm text-wedding-text">
               {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
               {date ? (
-                <p className="text-[#6B5B5B]">{formatInvitationTime(date)}</p>
+                <p className="text-wedding-text-light">{formatInvitationTime(date)}</p>
               ) : null}
               {venue ? <p className="font-body">{venue}</p> : null}
               {address ? (
-                <p className="text-[#6B5B5B] whitespace-pre-line">{address}</p>
+                <p className="text-wedding-text-light whitespace-pre-line">{address}</p>
               ) : null}
             </div>
           ) : null}
@@ -90,9 +90,9 @@ function EventCard({
               href={mapUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-6 inline-flex items-center justify-center w-full rounded-full px-5 py-3 border border-black/10 bg-white/60 hover:bg-white transition"
+              className="mt-6 inline-flex items-center justify-center w-full rounded-full px-5 py-3 border border-wedding-text/10 bg-wedding-bg/60 hover:bg-wedding-bg transition"
             >
-              <span className="text-xs uppercase tracking-[0.25em] font-body text-[#2B2424]">
+              <span className="text-xs uppercase tracking-[0.25em] font-body text-wedding-text">
                 {title.toLowerCase().includes("live") ||
                 title.toLowerCase().includes("stream")
                   ? "Open Link"

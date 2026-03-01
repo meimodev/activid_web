@@ -5,7 +5,6 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useScrollProgress } from '@/hooks';
 import { EASING, DURATION } from '@/lib/animation-config';
 import { trackNavigation } from '@/lib/analytics';
 
@@ -55,7 +54,6 @@ export default function Navigation({
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(!hideUntilScroll);
   const { scrollY } = useScroll();
-  const scrollProgress = useScrollProgress();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (hideUntilScroll) {

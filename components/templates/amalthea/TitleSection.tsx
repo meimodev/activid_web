@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { OverlayReveal } from "./graphics";
-import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
+import { useOverlayAssets } from "./graphics/overlays";
 import type { TitleSectionProps } from "./InfoSections.types";
 import { getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
 
@@ -18,6 +18,7 @@ export function TitleSection({
   showCountdown = true,
   purpose,
 }: TitleSectionProps) {
+  const overlayAssets = useOverlayAssets();
   const [timeLeft, setTimeLeft] = useState(() => getCountdownParts(countdownTarget));
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export function TitleSection({
   }, [countdownTarget, hosts, purpose]);
 
   return (
-    <section className="relative h-screen overflow-hidden bg-[#F6FBFF]">
+    <section className="relative h-screen overflow-hidden bg-wedding-bg">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         {slideshowPhotos.length ? (
           <BackgroundSlideshow
@@ -75,7 +76,7 @@ export function TitleSection({
             className="absolute inset-0 overflow-hidden pointer-events-none"
           />
         ) : null}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-wedding-dark/30" />
       </div>
 
       <div className="relative z-10 h-full w-full overflow-hidden">
@@ -87,9 +88,9 @@ export function TitleSection({
             width="100%"
           >
             <div
-              className="relative w-full px-4 pt-12 pb-12 text-center bg-center bg-no-repeat bg-linear-to-t from-[#F6FBFF] to-transparent"
+              className="relative w-full px-4 pt-12 pb-12 text-center bg-center bg-no-repeat bg-linear-to-t from-wedding-bg to-transparent"
               style={{
-                backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.bottomTitleGraphic})`,
+                backgroundImage: `url(${overlayAssets.bottomTitleGraphic})`,
               }}
             >
               <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -97,28 +98,28 @@ export function TitleSection({
                   delay={0.06}
                   className="absolute -left-34 scale-x-[-1] bottom-8 h-[220px] w-[220px] bg-contain bg-no-repeat"
                   style={{
-                    backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.leafSide})`,
+                    backgroundImage: `url(${overlayAssets.leafSide})`,
                   }}
                 />
                 <OverlayReveal
                   delay={0.12}
                   className="absolute -right-34 -bottom-6 h-[220px] w-[220px] bg-contain bg-no-repeat"
                   style={{
-                    backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.leafSide})`,
+                    backgroundImage: `url(${overlayAssets.leafSide})`,
                   }}
                 />
                 <OverlayReveal
                   delay={0.18}
                   className="absolute -left-36 scale-x-[-1] bottom-12 h-[220px] w-[220px] bg-contain bg-no-repeat z-10"
                   style={{
-                    backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.leafSide2})`,
+                    backgroundImage: `url(${overlayAssets.leafSide2})`,
                   }}
                 />
                 <OverlayReveal
                   delay={0.24}
                   className="absolute -right-30 -bottom-18 h-[220px] w-[220px] bg-contain bg-no-repeat z-10"
                   style={{
-                    backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.leafSide2})`,
+                    backgroundImage: `url(${overlayAssets.leafSide2})`,
                   }}
                 />
               </div>
@@ -142,7 +143,7 @@ export function TitleSection({
                         delay: 0.5 + idx * 0.08,
                         ease: "easeOut",
                       }}
-                      className="bg-[#38BDF8] h-20 w-24 text-center text-white rounded-[24px] flex items-center justify-center shadow-[0_14px_30px_rgba(56,189,248,0.25)]"
+                      className="bg-[var(--invitation-accent-2)] h-20 w-24 text-center text-[var(--invitation-on-accent-2)] rounded-[24px] flex items-center justify-center shadow-[0_14px_30px_color-mix(in_srgb,var(--invitation-accent-2)_25%,transparent)]"
                     >
                       <motion.div
                         animate={{ scale: [0.96, 1.04, 0.96] }}
@@ -165,13 +166,13 @@ export function TitleSection({
                 </div>
               ) : null}
 
-              <p className="font-poppins text-[16px] tracking-[0.22em] uppercase text-[#0284C7] mt-10">
+              <p className="font-poppins text-[16px] tracking-[0.22em] uppercase text-wedding-accent-2 mt-10">
                 {displayHeading}
               </p>
-              <p className="mt-4 font-poppins-bold text-[36px] leading-none text-[#0B1B2A] ">
+              <p className="mt-4 font-poppins-bold text-[36px] leading-none text-wedding-dark ">
                 {hosts[0]?.firstName ?? ""} {hosts[1]?.firstName ? "&" : ""} {hosts[1]?.firstName ?? ""}
               </p>
-              <p className="mt-4 font-poppins text-[14px] tracking-[0.24em] uppercase text-[#0B1B2A]/70 ">
+              <p className="mt-4 font-poppins text-[14px] tracking-[0.24em] uppercase text-wedding-dark/70 ">
                 {date}
               </p>
               <motion.a
@@ -180,7 +181,7 @@ export function TitleSection({
                 rel="noreferrer"
                 animate={{ scale: [1, 1.02, 1], opacity: [0.92, 1, 0.92] }}
                 transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-                className="mt-7 inline-flex items-center justify-center rounded-full bg-[#0B1B2A]/72 px-8 py-3 font-poppins-bold text-[12px] uppercase tracking-[0.28em] text-white shadow-[0_14px_30px_rgba(11,27,42,0.22)] transition hover:bg-[#0B1B2A]/80"
+                className="mt-7 inline-flex items-center justify-center rounded-full bg-wedding-dark/72 px-8 py-3 font-poppins-bold text-[12px] uppercase tracking-[0.28em] text-wedding-on-dark shadow-[0_14px_30px_color-mix(in_srgb,var(--invitation-dark)_22%,transparent)] transition hover:bg-wedding-dark/80"
               >
                 {purpose === "birthday" ? "Save The Day" : "Save The Date"}
               </motion.a>

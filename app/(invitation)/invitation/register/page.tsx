@@ -1,4 +1,4 @@
-import { INVITATION_DEFAULTS } from "@/data/invitations";
+import { INVITATION_PURPOSE_SEEDS } from "@/data/invitations";
 import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
 import {
   getInvitationRegisterSessionCookieName,
@@ -9,11 +9,10 @@ import { RegisterInvitationForm } from "./RegisterInvitationForm";
 import { registerInvitation, verifyInvitationRegisterPassword } from "./actions";
 
 export default async function InvitationRegisterPage() {
-  const baseConfig =
-    INVITATION_DEFAULTS["christian-regina"] ?? INVITATION_DEFAULTS["ricci-andrini"];
+  const baseConfig = INVITATION_PURPOSE_SEEDS.marriage;
 
   if (!baseConfig) {
-    throw new Error("Missing base invitation config in INVITATION_DEFAULTS.");
+    throw new Error("Missing base invitation config in INVITATION_PURPOSE_SEEDS.");
   }
 
   const templateOptions = INVITATION_TEMPLATE_LISTINGS.map((t) => ({

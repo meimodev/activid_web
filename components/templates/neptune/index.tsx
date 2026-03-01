@@ -422,7 +422,6 @@ export function Neptune({ config }: NeptuneProps) {
   <CoverOverlay
   hosts={hosts}
   targetDate={config.weddingDate.countdownTarget}
-  subtitle={config.sections.hero.subtitle}
   coverImage={config.sections.hero.coverImage}
   guestName={guestName}
   isOpening={coverClosing}
@@ -435,7 +434,6 @@ export function Neptune({ config }: NeptuneProps) {
   <div className="relative z-10">
   <TitleCountdownSection
   id="home"
-  coverImage={config.sections.hero.coverImage}
   backgroundPhotos={derivedPhotos}
   date={config.weddingDate.display}
   coupleLabel={coupleTitle}
@@ -453,17 +451,6 @@ export function Neptune({ config }: NeptuneProps) {
   <CoupleProfileSection
   hosts={hosts}
   inviteLine={inviteLine}
-  nextSectionId={
-  config.sections.event.enabled
-  ? "event"
-  : config.sections.story.enabled
-  ? "story"
-  : config.sections.gallery.enabled
-  ? "gallery"
-  : config.sections.gift.enabled
-  ? "gift"
-  : "wishes"
-  }
   />
   ) : null}
 
@@ -549,14 +536,14 @@ export function Neptune({ config }: NeptuneProps) {
   <button
   type="button"
   onClick={togglePlay}
-  className="group pointer-events-auto flex items-center gap-2.5 rounded-full border border-white/15 bg-[#0B1028]/75 text-white shadow-lg shadow-black/35 backdrop-blur px-3 py-2 transition hover:bg-[#0B1028]/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
+  className="group pointer-events-auto flex items-center gap-2.5 rounded-full border border-wedding-on-dark/15 bg-wedding-dark/75 text-wedding-on-dark shadow-lg shadow-black/35 backdrop-blur px-3 py-2 transition hover:bg-wedding-dark/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wedding-accent-2/60"
   aria-label={`${isPlaying ? "Pause" : "Play"} music: ${musicTitle}`}
   >
   <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 transition group-hover:bg-white/15">
   {isPlaying ? <IconPause /> : <IconPlay />}
   {isPlaying ? (
   <motion.span
-  className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-300"
+  className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-wedding-accent-2"
   animate={{
   opacity: [0.4, 1, 0.4],
   scale: [0.9, 1.15, 0.9],
@@ -578,7 +565,7 @@ export function Neptune({ config }: NeptuneProps) {
   animate={{ opacity: 1, x: 0 }}
   exit={{ opacity: 0, x: -8 }}
   transition={{ duration: 0.35, ease: "easeOut" }}
-  className="max-w-[52vw] text-[12.5px] leading-tight text-white/90 truncate"
+  className="max-w-[52vw] text-[12.5px] leading-tight text-wedding-on-dark/90 truncate"
   title={musicTitle}
   >
   {musicTitle}
@@ -598,7 +585,6 @@ export function Neptune({ config }: NeptuneProps) {
 function CoverOverlay({
  hosts,
  targetDate,
- subtitle,
  coverImage,
  guestName,
  isOpening,
@@ -606,7 +592,6 @@ function CoverOverlay({
 }: {
  hosts: Host[];
  targetDate: string;
- subtitle: string;
  coverImage: string;
  guestName: string;
  isOpening: boolean;
@@ -707,12 +692,12 @@ function CoverOverlay({
  };
 
  return (
-  <div className="relative h-screen w-full overflow-hidden bg-[#4E5C6C] text-[#2E343A]">
+  <div className="relative h-screen w-full overflow-hidden bg-wedding-bg-alt text-wedding-text">
   <motion.div
   className="absolute inset-0"
   style={{
   backgroundImage:
-  "linear-gradient(120deg, #8FA2BA, #5B6A7C, #3E4A58, #6D7C8F)",
+  "linear-gradient(120deg, var(--invitation-accent-2-light), var(--invitation-accent-2), var(--invitation-dark), var(--invitation-accent-2-light))",
   backgroundSize: "320% 320%",
   }}
   animate={{ backgroundPosition: ["0% 45%", "100% 55%", "0% 45%"] }}
@@ -734,7 +719,7 @@ function CoverOverlay({
   repeatDelay: 2.4,
   }}
   />
-  <div className="absolute inset-0 bg-linear-to-b from-[#59677A]/55 via-[#4E5C6C]/60 to-[#3E4A58]/78" />
+  <div className="absolute inset-0 bg-linear-to-b from-wedding-accent-2/20 via-wedding-dark/50 to-wedding-dark/70" />
 
   <div className="relative z-10 h-full px-5 flex items-center justify-center">
   <motion.div
@@ -743,8 +728,8 @@ function CoverOverlay({
   animate={isOpening ? "open" : "show"}
   className="w-full max-w-[420px]"
   >
-  <div className="relative overflow-visible rounded-[44px] border border-white/35 bg-[#E7E4DC] shadow-[0_40px_90px_rgba(0,0,0,0.50)] p-[6px]">
-  <div className="rounded-[38px] overflow-hidden border border-black/15 bg-[#E7E4DC]">
+  <div className="relative overflow-visible rounded-[44px] border border-wedding-on-dark/35 bg-wedding-bg shadow-[0_40px_90px_rgba(0,0,0,0.50)] p-[6px]">
+  <div className="rounded-[38px] overflow-hidden border border-wedding-text/15 bg-wedding-bg">
   <motion.div variants={imageVariants} className="px-4 pt-4">
   <div className="relative w-full aspect-[4/3] rounded-t-[999px] rounded-b-none border border-black/15 bg-black">
   <div className="absolute inset-[7px] rounded-t-[999px] rounded-b-none overflow-hidden border border-white/35">
@@ -781,7 +766,7 @@ function CoverOverlay({
   <div className=" pt-14 pb-9 text-center">
   <motion.h1
   variants={itemVariants}
-  className={`${neptuneScript.className} mt-4 text-4xl leading-none text-[#546058]`}
+  className={`${neptuneScript.className} mt-4 text-4xl leading-none text-wedding-accent`}
   >
   <SplitText
   text={`${primary?.firstName ?? ""}${secondary?.firstName ? ` & ${secondary.firstName}` : ""}`}
@@ -793,21 +778,21 @@ function CoverOverlay({
 
   <motion.p
   variants={itemVariants}
-  className="mt-6 text-sm tracking-[0.35em] uppercase text-[#4A5257]"
+  className="mt-6 text-sm tracking-[0.35em] uppercase text-wedding-text-light"
   >
   {heroDate}
   </motion.p>
 
   <motion.p
   variants={itemVariants}
-  className="mt-12 text-sm leading-relaxed text-[#4A5257]"
+  className="mt-12 text-sm leading-relaxed text-wedding-text-light"
   >
   Kepada Yth. Bapak/Ibu/Saudara/i
   <br />
   </motion.p>
   <motion.p
   variants={itemVariants}
-  className="mt-2 text-3xl leading-none tracking-wide text-[#2E343A] font-body"
+  className="mt-2 text-3xl leading-none tracking-wide text-wedding-text font-body"
   >
   {guestName}
   </motion.p>
@@ -835,7 +820,7 @@ function CoverOverlay({
   ease: "easeInOut",
   }
   }
-  className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-lg bg-[#5E6A78] text-white px-6 py-3 shadow-md transition hover:bg-[#556170] disabled:pointer-events-none"
+  className="relative overflow-hidden inline-flex items-center justify-center gap-2 rounded-lg bg-wedding-accent text-wedding-on-accent px-6 py-3 shadow-md transition hover:bg-wedding-accent/90 disabled:pointer-events-none"
   >
   <motion.span
   aria-hidden="true"
@@ -889,14 +874,12 @@ function CoverOverlay({
 
 function TitleCountdownSection({
  id,
- coverImage,
  backgroundPhotos,
  date,
  coupleLabel,
  targetDate,
 }: {
  id: NavSectionId;
- coverImage: string;
  backgroundPhotos?: string[];
  date: string;
  coupleLabel: string;
@@ -926,7 +909,7 @@ function TitleCountdownSection({
  return (
   <section
   id={id}
-  className="relative isolate scroll-mt-24 min-h-screen overflow-hidden text-[#2E343A]"
+  className="relative isolate scroll-mt-24 min-h-screen overflow-hidden text-wedding-text"
   >
   <div className="absolute inset-0 z-0">
   <div className="absolute inset-0 overflow-hidden">
@@ -963,7 +946,7 @@ function TitleCountdownSection({
   </AnimatePresence>
   </div>
 
-  <div className="absolute inset-x-0 bottom-0 h-[72%] bg-linear-to-t from-[#F3F1EC] via-[#F3F1EC]/82 to-transparent" />
+  <div className="absolute inset-x-0 bottom-0 h-[72%] bg-linear-to-t from-wedding-bg via-wedding-bg/82 to-transparent" />
   {/* <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[radial-gradient(ellipse_at_50%_100%,rgba(0,0,0,0.08),transparent_68%)]" /> */}
   </div>
 
@@ -1020,19 +1003,19 @@ function TitleCountdownSection({
   </div>
 
   <p
-  className={`${neptuneSerif.className} relative z-10 text-sm tracking-[0.28em] uppercase text-[#667078]`}
+  className={`${neptuneSerif.className} relative z-10 text-sm tracking-[0.28em] uppercase text-wedding-text-light`}
   >
   The Wedding Of
   </p>
   <h2
-  className={`${neptuneSerif.className} relative z-10 mt-4 text-5xl leading-none text-[#586057]`}
+  className={`${neptuneSerif.className} relative z-10 mt-4 text-5xl leading-none text-wedding-text`}
   >
   <SplitText text={coupleLabel} splitBy="word" staggerDelay={0.09} />
   </h2>
-  <p className="relative z-10 mt-4 text-lg tracking-wide text-[#5C666F] font-body">
+  <p className="relative z-10 mt-4 text-lg tracking-wide text-wedding-text-light font-body">
   {date}
   </p>
-  <p className="relative z-10 mt-10 text-xs tracking-[0.45em] uppercase text-[#7A838B] font-body">
+  <p className="relative z-10 mt-10 text-xs tracking-[0.45em] uppercase text-wedding-text-light font-body">
   SAVE THE DATE
   </p>
   <div className="relative z-10 mt-6">
@@ -1056,7 +1039,7 @@ function GallerySectionClassic({
  return (
   <section
   id={id}
-  className="relative scroll-mt-24 overflow-hidden bg-[#F3F1EC] text-[#2E343A] px-6 py-16"
+  className="relative scroll-mt-24 overflow-hidden bg-wedding-bg text-wedding-text px-6 py-16"
   >
   <div className="absolute inset-0 pointer-events-none">
   {/* <FloralCorner className="left-0 bottom-0 w-56 opacity-30" flipX /> */}
@@ -1068,7 +1051,7 @@ function GallerySectionClassic({
   <div className="p-10">
   <NeptuneStagger baseDelay={0.1}>
   <h3
-  className={`${neptuneSerif.className} text-4xl text-[#6B7480] text-center`}
+  className={`${neptuneSerif.className} text-4xl text-wedding-text-light text-center`}
   >
   <SplitText text={heading} splitBy="word" staggerDelay={0.09} />
   </h3>
@@ -1098,7 +1081,7 @@ function QuoteSection({
  const quoteAuthor = trimmedAuthor || inlineCitation;
 
  return (
-  <section className="relative overflow-hidden bg-[#5F737B] text-white px-6 py-4">
+  <section className="relative overflow-hidden bg-wedding-dark text-wedding-on-dark px-6 py-4">
   <div className="relative z-10 py-10 flex items-center justify-center">
   <NeptuneStagger
   className="max-w-3xl text-center"
@@ -1155,18 +1138,18 @@ function CountdownRow({ targetDate }: { targetDate: string }) {
   staggerStep={0.26}
   >
   {cells.map((c) => (
-  <div key={c.label}>
-  <div className="rounded-2xl border border-white/20 bg-[#5E727B] px-2 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.12)]">
-  <div
-  className={`${neptuneSerif.className} text-3xl leading-none text-white`}
-  >
-  {c.value}
-  </div>
-  <div className="mt-2 text-[12px] leading-none text-white/85 font-body">
-  {c.label}
-  </div>
-  </div>
-  </div>
+   <div key={c.label}>
+   <div className="rounded-2xl border border-wedding-on-dark/20 bg-wedding-on-dark/10 px-2 py-3 shadow-[0_10px_35px_rgba(0,0,0,0.12)]">
+    <div
+   className={`${neptuneSerif.className} text-3xl leading-none text-wedding-on-dark`}
+    >
+    {c.value}
+    </div>
+   <div className="mt-2 text-[12px] leading-none text-wedding-on-dark/85 font-body">
+    {c.label}
+    </div>
+   </div>
+   </div>
   ))}
   </NeptuneStagger>
  );
@@ -1175,20 +1158,12 @@ function CountdownRow({ targetDate }: { targetDate: string }) {
 function CoupleProfileSection({
  hosts,
  inviteLine,
- nextSectionId,
 }: {
  hosts: Host[];
  inviteLine: string;
- nextSectionId: NavSectionId;
 }) {
  const primary = hosts[0];
  const secondary = hosts[1];
-
- const scrollToId = (id: string) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
- };
 
  return (
   <section id="couple" className="relative scroll-mt-24">
@@ -1202,7 +1177,6 @@ function CoupleProfileSection({
   photo={primary?.photo ?? ""}
   isBride={false}
   showAnd={false}
-  onNext={() => (secondary ? scrollToId("hosts-2") : scrollToId(nextSectionId))}
   />
   {secondary ? (
   <CoupleProfileCard
@@ -1215,7 +1189,6 @@ function CoupleProfileSection({
   photo={secondary.photo}
   isBride={true}
   showAnd
-  onNext={() => scrollToId(nextSectionId)}
   />
   ) : null}
   </section>
@@ -1232,7 +1205,6 @@ function CoupleProfileCard({
  photo,
  isBride,
  showAnd,
- onNext,
 }: {
  id: string;
  intro: string | null;
@@ -1243,26 +1215,25 @@ function CoupleProfileCard({
  photo: string;
  isBride: boolean;
  showAnd: boolean;
- onNext: () => void;
 }) {
  return (
   <section
   id={id}
-  className="relative min-h-screen overflow-hidden bg-[#F3F1EC] text-[#2E343A] px-6 pt-16"
+  className="relative min-h-screen overflow-hidden bg-wedding-bg text-wedding-text px-6 pt-16"
   >
   <NeptuneStagger
   className="relative z-10 max-w-md mx-auto text-center"
   baseDelay={0.12}
   >
   {showAnd ? (
-  <div className="flex items-center justify-center gap-4 text-xs tracking-[0.35em] uppercase text-[#6B747C]">
-  <div className="h-px w-16 bg-[#9AA3AB]" />
+  <div className="flex items-center justify-center gap-4 text-xs tracking-[0.35em] uppercase text-wedding-text-light">
+  <div className="h-px w-16 bg-wedding-text/20" />
   <span
   className={`${neptuneSerif.className} text-sm tracking-[0.32em]`}
   >
   AND
   </span>
-  <div className="h-px w-16 bg-[#9AA3AB]" />
+  <div className="h-px w-16 bg-wedding-text/20" />
   </div>
   ) : null}
 
@@ -1280,7 +1251,7 @@ function CoupleProfileCard({
   </div>
   ) : null}
   {intro ? (
-  <p className="mt-6 text-lg leading-relaxed text-[#6A737B]">{intro}</p>
+  <p className="mt-6 text-lg leading-relaxed text-wedding-text-light">{intro}</p>
   ) : null}
 
   <div className={intro ? "mt-10" : "mt-14"}>
@@ -1292,7 +1263,7 @@ function CoupleProfileCard({
   </div>
 
   <p
-  className={`${neptuneScript.className} mt-10 text-5xl leading-none text-[#8D8A7E]`}
+  className={`${neptuneScript.className} mt-10 text-5xl leading-none text-wedding-accent-light`}
   >
   <SplitText
   text={nameScript}
@@ -1301,14 +1272,14 @@ function CoupleProfileCard({
   />
   </p>
   <p
-  className={`${neptuneSerif.className} mt-5 text-4xl leading-none text-[#586057]`}
+  className={`${neptuneSerif.className} mt-5 text-4xl leading-none text-wedding-text`}
   >
   {nameFull}
   </p>
-  <p className="mt-6 text-xl font-bold text-[#5B646D] font-body">
+  <p className="mt-6 text-xl font-bold text-wedding-text font-body">
   {city}
   </p>
-  <p className="mt-4 text-lg leading-relaxed text-[#6B747C]">{parents}</p>
+  <p className="mt-4 text-lg leading-relaxed text-wedding-text-light">{parents}</p>
 
   <div className="pt-10 -mx-6 pointer-events-none">
   <NeptuneOverlayFloat
@@ -1369,8 +1340,8 @@ function ArchedPortrait({
   ) : null}
   </div>
 
-  <div className="relative z-10 rounded-t-[999px] rounded-b-none border border-[#8496AC] bg-[#F6F4EF] p-[7px] shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-  <div className="relative aspect-[4/4.3] rounded-t-[999px] rounded-b-none overflow-hidden border border-[#8496AC] bg-white">
+  <div className="relative z-10 rounded-t-[999px] rounded-b-none border border-wedding-text/25 bg-wedding-bg p-[7px] shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
+  <div className="relative aspect-[4/4.3] rounded-t-[999px] rounded-b-none overflow-hidden border border-wedding-text/25 bg-wedding-bg">
   <Image
   src={photo}
   alt={alt}
@@ -1409,9 +1380,9 @@ function WeddingEventSection({
  return (
   <section
   id={id}
-  className="relative scroll-mt-24 overflow-hidden bg-[#4E5C6C] text-white px-6 pt-18 pb-20"
+  className="relative scroll-mt-24 overflow-hidden bg-wedding-dark text-wedding-on-dark px-6 pt-18 pb-20"
   >
-  <div className="absolute inset-0 bg-linear-to-b from-[#59677A] via-[#4E5C6C] to-[#3E4A58]" />
+  <div className="absolute inset-0 bg-linear-to-b from-wedding-accent-2/20 via-wedding-dark to-wedding-dark" />
   <div className="absolute inset-0 pointer-events-none">
   <NeptuneReveal
   direction="up"
@@ -1456,12 +1427,12 @@ function WeddingEventSection({
   <div className="flex items-start gap-4">
   <div className="leading-none">
   <div
-  className={`${neptuneSerif.className} text-6xl text-white/95`}
+  className={`${neptuneSerif.className} text-6xl text-wedding-on-dark/95`}
   >
   <SplitText text={topWord} splitBy="word" staggerDelay={0.1} />
   </div>
   <div
-  className={`${neptuneScript.className} mt-2 text-5xl text-white/90`}
+  className={`${neptuneScript.className} mt-2 text-5xl text-wedding-on-dark/90`}
   >
   <SplitText
   text={scriptWord}
@@ -1470,7 +1441,7 @@ function WeddingEventSection({
   />
   </div>
   </div>
-  <div className="mt-6 h-px flex-1 bg-white/55" />
+  <div className="mt-6 h-px flex-1 bg-wedding-on-dark/55" />
   </div>
   </NeptuneReveal>
 
@@ -1513,11 +1484,11 @@ function EventCardClassic({
  const isLinkOnly = Boolean(mapUrl) && !address && !venue;
 
  return (
-  <div className="relative rounded-[28px] bg-white text-[#2E343A] shadow-[0_26px_70px_rgba(0,0,0,0.35)]">
+  <div className="relative rounded-[28px] bg-wedding-bg text-wedding-text shadow-[0_26px_70px_rgba(0,0,0,0.35)]">
   <div className="absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_25%_20%,rgba(0,0,0,0.06),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(0,0,0,0.05),transparent_55%)] opacity-50" />
-  <div className="relative rounded-[28px] border border-black/10 px-8 py-12">
+  <div className="relative rounded-[28px] border border-wedding-text/10 px-8 py-12">
   <h4
-  className={`${neptuneSerif.className} text-6xl leading-none text-[#6B756B] text-center`}
+  className={`${neptuneSerif.className} text-6xl leading-none text-wedding-accent text-center`}
   >
   <SplitText text={title} splitBy="word" staggerDelay={0.1} />
   </h4>
@@ -1528,12 +1499,12 @@ function EventCardClassic({
   {!isLinkOnly ? (
   <div className="mt-7 text-center">
   {date ? (
-  <p className="text-md leading-none tracking-[0.14em] uppercase text-[#3A3F45] font-body">
+  <p className="text-md leading-none tracking-[0.14em] uppercase text-wedding-text font-body">
   {formatInvitationDateLong(date)}
   </p>
   ) : null}
 
-  <div className="mt-7 flex items-center justify-center gap-3 text-[#6B747C]">
+  <div className="mt-7 flex items-center justify-center gap-3 text-wedding-text-light">
   {date ? (
   <>
   <IconClock />
@@ -1545,12 +1516,12 @@ function EventCardClassic({
   </div>
 
   {venue ? (
-  <p className="mt-6 text-md font-semibold text-[#5A6168] font-body">
+  <p className="mt-6 text-md font-semibold text-wedding-text font-body">
   {venue}
   </p>
   ) : null}
   {address ? (
-  <p className="mt-2 text-xl leading-tight text-[#5A6168] font-body whitespace-pre-line">
+  <p className="mt-2 text-xl leading-tight text-wedding-text font-body whitespace-pre-line">
   {address}
   </p>
   ) : null}
@@ -1563,7 +1534,7 @@ function EventCardClassic({
   href={mapUrl}
   target="_blank"
   rel="noreferrer"
-  className="inline-flex items-center justify-center gap-2 rounded-none border border-black/30 bg-transparent px-10 py-4 text-[#4B545C] hover:bg-black/5 transition"
+  className="inline-flex items-center justify-center gap-2 rounded-none border border-wedding-text/30 bg-transparent px-10 py-4 text-wedding-text hover:bg-wedding-text/5 transition"
   >
   <IconPin />
   <span className="text-md font-semibold font-body">
@@ -1596,7 +1567,7 @@ function StorySectionClassic({
  return (
   <section
   id={id}
-  className="relative scroll-mt-24 overflow-hidden bg-[#F3F1EC] text-[#2E343A] px-6 py-16"
+  className="relative scroll-mt-24 overflow-hidden bg-wedding-bg text-wedding-text px-6 py-16"
   >
   <div className="absolute inset-0 pointer-events-none"></div>
 
@@ -1624,7 +1595,7 @@ function StorySectionClassic({
 
   <NeptuneReveal direction="up" width="100%" delay={0.15}>
   <p
-  className={`${neptuneSerif.className} pt-20 text-4xl text-[#667078]`}
+  className={`${neptuneSerif.className} pt-20 text-4xl text-wedding-text-light`}
   >
   <SplitText
   text={coupleLabel}
@@ -1635,7 +1606,7 @@ function StorySectionClassic({
   </NeptuneReveal>
   <NeptuneReveal direction="up" width="100%" delay={0.35}>
   <p
-  className={`${neptuneScript.className} pt-2 text-5xl text-[#5E6A78]`}
+  className={`${neptuneScript.className} pt-2 text-5xl text-wedding-accent`}
   >
   <SplitText
   text={heading}
@@ -1647,7 +1618,7 @@ function StorySectionClassic({
 
   <NeptuneReveal direction="up" width="100%" delay={0.55}>
   <div className="mt-8">
-  <div className="relative rounded-t-[999px] border border-[#6E7B6E] bg-[#F6F4EF] p-[7px] shadow-[0_14px_40px_rgba(0,0,0,0.12)]">
+  <div className="relative rounded-t-[999px] border border-wedding-text/25 bg-wedding-bg p-[7px] shadow-[0_14px_40px_rgba(0,0,0,0.12)]">
   <NeptuneOverlayFloat
   src={NEPTUNE_OVERLAY_ASSETS.flowerDouble}
   alt=""
@@ -1660,7 +1631,7 @@ function StorySectionClassic({
   loading="lazy"
   draggable={false}
   />
-  <div className="relative aspect-[4/5] rounded-t-[999px] overflow-hidden border border-[#6E7B6E] bg-white">
+  <div className="relative aspect-[4/5] rounded-t-[999px] overflow-hidden border border-wedding-text/25 bg-wedding-bg">
   <Image
   src={photo}
   alt="Story"
@@ -1683,15 +1654,15 @@ function StorySectionClassic({
   delay={0.75 + idx * 0.22}
   >
   <div className="text-center">
-  <p className="text-xs tracking-[0.28em] uppercase text-[#6B747C] font-body">
+  <p className="text-xs tracking-[0.28em] uppercase text-wedding-text-light font-body">
   {formatInvitationMonthYear(s.date)}
   </p>
-  <p className="mt-5 text-[15px] leading-relaxed text-[#6B747C] whitespace-pre-line">
+  <p className="mt-5 text-[15px] leading-relaxed text-wedding-text-light whitespace-pre-line">
   {s.description}
   </p>
   {idx < stories.length - 1 ? (
   <div className="mt-10 flex justify-center">
-  <div className="h-10 w-px bg-black/20" />
+  <div className="h-10 w-px bg-wedding-text/20" />
   </div>
   ) : null}
   </div>
@@ -1719,14 +1690,14 @@ export function WishesSectionClassic({
  return (
   <section
   id={id}
-  className="relative scroll-mt-24 overflow-hidden bg-[#F3F1EC] text-[#2E343A] px-6 py-16"
+  className="relative scroll-mt-24 overflow-hidden bg-wedding-bg text-wedding-text px-6 py-16"
   >
   <div className="absolute inset-0 pointer-events-none"></div>
 
   <div className="relative z-10 max-w-md mx-auto">
   <NeptuneStagger baseDelay={0.1}>
   <h3
-  className={`${neptuneSerif.className} text-4xl text-[#6B7480] text-center`}
+  className={`${neptuneSerif.className} text-4xl text-wedding-text-light text-center`}
   >
   <SplitText text={heading} splitBy="word" staggerDelay={0.09} />
   </h3>
@@ -1749,16 +1720,16 @@ export function GiftSectionClassic({
  return (
   <section
   id={id}
-  className="relative scroll-mt-24 overflow-hidden bg-[#4E5C6C] text-white px-6 py-16"
+  className="relative scroll-mt-24 overflow-hidden bg-wedding-dark text-wedding-on-dark px-6 py-16"
   >
-  <div className="absolute inset-0 bg-linear-to-b from-[#59677A] via-[#4E5C6C] to-[#3E4A58]" />
+  <div className="absolute inset-0 bg-linear-to-b from-wedding-accent-2/20 via-wedding-dark to-wedding-dark" />
 
   <div className="relative z-10 max-w-xl mx-auto">
-  <div className="rounded-[34px] border border-white/10 bg-[#0B1028]/75 backdrop-blur shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+  <div className="rounded-[34px] border border-wedding-on-dark/10 bg-wedding-dark/75 backdrop-blur shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
   <div className="p-10">
   <NeptuneStagger baseDelay={0.1}>
   <h3
-  className={`${neptuneSerif.className} text-4xl text-center bg-linear-to-r from-cyan-200 via-indigo-200 to-emerald-200 bg-clip-text text-transparent`}
+  className={`${neptuneSerif.className} text-4xl text-center bg-linear-to-r from-wedding-accent-2-light via-wedding-accent-light to-wedding-accent-2 bg-clip-text text-transparent`}
   >
   <SplitText text={heading} splitBy="word" staggerDelay={0.09} />
   </h3>
@@ -1889,7 +1860,7 @@ function GalleryGrid({
   <div
   className={
   isClassic
-  ? "absolute -top-12 left-0 right-0 flex items-center justify-between gap-3 text-[#2E343A]/80"
+  ? "absolute -top-12 left-0 right-0 flex items-center justify-between gap-3 text-wedding-text/80"
   : "absolute -top-12 left-0 right-0 flex items-center justify-between gap-3 text-white/85"
   }
   >
@@ -1900,7 +1871,7 @@ function GalleryGrid({
   rel="noreferrer"
   className={
   isClassic
-  ? "text-xs tracking-[0.25em] uppercase font-body hover:text-[#2E343A]"
+  ? "text-xs tracking-[0.25em] uppercase font-body hover:text-wedding-text"
   : "text-xs tracking-[0.25em] uppercase font-body hover:text-white"
   }
   >
@@ -1914,7 +1885,7 @@ function GalleryGrid({
   onClick={() => setSelectedIndex(null)}
   className={
   isClassic
-  ? "text-xs tracking-[0.25em] uppercase font-body hover:text-[#2E343A]"
+  ? "text-xs tracking-[0.25em] uppercase font-body hover:text-wedding-text"
   : "text-xs tracking-[0.25em] uppercase font-body hover:text-white"
   }
   >
@@ -1929,7 +1900,7 @@ function GalleryGrid({
   onClick={() => paginate(-1)}
   className={
   isClassic
-  ? "absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 h-12 w-12 rounded-full bg-white/85 hover:bg-white border border-black/10 backdrop-blur flex items-center justify-center text-[#2E343A]"
+  ? "absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 h-12 w-12 rounded-full bg-wedding-bg/85 hover:bg-wedding-bg border border-wedding-text/10 backdrop-blur flex items-center justify-center text-wedding-text"
   : "absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 h-12 w-12 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur flex items-center justify-center text-white"
   }
   aria-label="Previous image"
@@ -1941,7 +1912,7 @@ function GalleryGrid({
   onClick={() => paginate(1)}
   className={
   isClassic
-  ? "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 h-12 w-12 rounded-full bg-white/85 hover:bg-white border border-black/10 backdrop-blur flex items-center justify-center text-[#2E343A]"
+  ? "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 h-12 w-12 rounded-full bg-wedding-bg/85 hover:bg-wedding-bg border border-wedding-text/10 backdrop-blur flex items-center justify-center text-wedding-text"
   : "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 h-12 w-12 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur flex items-center justify-center text-white"
   }
   aria-label="Next image"
@@ -2051,8 +2022,8 @@ export function GiftBlock({
   <p
   className={
   isClassic
-  ? "text-sm text-cyan-100/70 text-center whitespace-pre-line"
-  : "text-sm text-cyan-100/70 text-center whitespace-pre-line"
+  ? "text-sm text-wedding-on-dark/70 text-center whitespace-pre-line"
+  : "text-sm text-wedding-on-dark/70 text-center whitespace-pre-line"
   }
   >
   {description}
@@ -2064,7 +2035,7 @@ export function GiftBlock({
   <button
   type="button"
   onClick={() => setIsGiftDialogOpen(true)}
-  className="w-full inline-flex items-center justify-center rounded-full px-6 py-3 border border-white/15 bg-linear-to-r from-cyan-400/20 via-indigo-400/20 to-emerald-400/20 text-white hover:bg-white/10 transition"
+  className="w-full inline-flex items-center justify-center rounded-full px-6 py-3 border border-wedding-on-dark/15 bg-linear-to-r from-wedding-accent-2/20 via-wedding-accent/20 to-wedding-accent-2-light/20 text-wedding-on-dark hover:bg-wedding-on-dark/10 transition"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">
   Kirim Hadiah
@@ -2093,7 +2064,7 @@ export function GiftBlock({
   >
   <div className="flex items-start justify-between gap-4">
   <div className="min-w-0">
-  <p className="text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body">
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body">
   {b.bankName}
   </p>
   <p className="mt-3 text-sm font-body text-white/90 truncate">
@@ -2168,19 +2139,19 @@ export function GiftBlock({
   exit={{ opacity: 0, y: 18, scale: 0.98 }}
   transition={{ duration: 0.22, ease: "easeOut" }}
   onClick={(e) => e.stopPropagation()}
-  className="w-full max-w-lg rounded-3xl border border-black/10 bg-[#F8F4EC] p-7 shadow-2xl"
+  className="w-full max-w-lg rounded-3xl border border-wedding-text/10 bg-wedding-bg p-7 shadow-2xl"
   >
-  <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-body">
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-text-light font-body">
   Info
   </p>
   <h4
-  className={`mt-3 ${neptuneScript.className} text-4xl leading-none text-[#2B2424]`}
+  className={`mt-3 ${neptuneScript.className} text-4xl leading-none text-wedding-text`}
   >
   Exclusive Discount
   </h4>
-  <p className="mt-4 text-sm text-[#3A2F2F]">
+  <p className="mt-4 text-sm text-wedding-text">
   Anda akan mendapatkan exclusive discount hingga{" "}
-  <span className="font-body text-[#2B2424]">25%</span>{" "}
+  <span className="font-body text-wedding-text">25%</span>{" "}
   untuk pemesanan hadiah dari link ini. &quot;Chat
   WhatsApp&quot; untuk informasi lebih lanjut.
   </p>
@@ -2189,7 +2160,7 @@ export function GiftBlock({
   <button
   type="button"
   onClick={() => setIsGiftDialogOpen(false)}
-  className="rounded-full px-6 py-3 border border-black/10 bg-white/70 hover:bg-white transition"
+  className="rounded-full px-6 py-3 border border-wedding-text/10 bg-wedding-bg/70 hover:bg-wedding-bg transition"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">
   Tutup
@@ -2200,7 +2171,7 @@ export function GiftBlock({
   href={waUrl}
   target="_blank"
   rel="noreferrer"
-  className="rounded-full px-6 py-3 bg-[#2B2424] text-white hover:bg-black transition text-center"
+  className="rounded-full px-6 py-3 bg-wedding-accent text-wedding-on-accent hover:bg-wedding-accent/90 transition text-center"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">
   Chat WhatsApp
@@ -2218,7 +2189,7 @@ export function GiftBlock({
  );
 }
 
-function RsvpFirestore({
+export function RsvpFirestore({
  invitationId,
  inviteeName,
  rsvpDeadline,
@@ -2284,24 +2255,24 @@ function RsvpFirestore({
 
  return (
   <div className="space-y-6">
-  <div className="rounded-3xl border border-white/12 bg-white/8 backdrop-blur p-7">
+  <div className="rounded-3xl border border-wedding-on-dark/12 bg-wedding-dark/8 backdrop-blur p-7">
   {submitted ? (
   <div className="text-center">
-  <p className="text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body">
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body">
   {inviteeName ?? "Tamu"}
   </p>
-  <p className="mt-4 text-sm text-white/90">
+  <p className="mt-4 text-sm text-wedding-on-dark/90">
   {status === "already_submitted"
   ? alreadySubmittedMessage || "Konfirmasi anda sudah kami terima"
   : successMessage || "Terima kasih atas konfirmasi anda"}
   </p>
-  <p className="mt-4 text-xs uppercase tracking-[0.25em] font-body text-cyan-100/70">
+  <p className="mt-4 text-xs uppercase tracking-[0.25em] font-body text-wedding-on-dark/70">
   {seeYouMessage || "Sampai jumpa di acara kami"}
   </p>
   </div>
   ) : (
   <div>
-  <p className="text-center text-sm text-cyan-100/70 whitespace-pre-line">
+  <p className="text-center text-sm text-wedding-on-dark/70 whitespace-pre-line">
   {inviteeName
   ? description ||
   `Silakan konfirmasi kehadiran sebelum ${rsvpDeadline}`
@@ -2309,23 +2280,23 @@ function RsvpFirestore({
   </p>
 
   <form onSubmit={submit} className="mt-6 space-y-4">
-  <div className="rounded-2xl border border-white/12 bg-white/6 px-4 py-3">
-  <p className="text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body">
+  <div className="rounded-2xl border border-wedding-on-dark/12 bg-wedding-dark/6 px-4 py-3">
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body">
   Nama
   </p>
-  <p className="mt-2 text-sm font-body text-white/90">
+  <p className="mt-2 text-sm font-body text-wedding-on-dark/90">
   {inviteeName ?? "Tamu"}
   </p>
   </div>
 
   <div>
-  <label className="block text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body mb-2">
+  <label className="block text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body mb-2">
   Jumlah Tamu
   </label>
   <select
   value={guests}
   onChange={(e) => setGuests(e.target.value)}
-  className="w-full rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-white/15"
+  className="w-full rounded-2xl border border-wedding-on-dark/12 bg-wedding-dark/6 px-4 py-3 text-sm text-wedding-on-dark outline-none focus:ring-2 focus:ring-wedding-on-dark/15"
   disabled={status === "submitting" || !inviteeName}
   >
   <option value="1">1</option>
@@ -2342,7 +2313,7 @@ function RsvpFirestore({
   <button
   type="submit"
   disabled={status === "submitting" || !inviteeName}
-  className="w-full rounded-full px-6 py-3 bg-white text-[#020615] hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+  className="w-full rounded-full px-6 py-3 bg-wedding-accent text-wedding-on-accent hover:bg-wedding-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">
   {status === "submitting" ? "Mengirim..." : "Konfirmasi"}
@@ -2661,8 +2632,8 @@ export function WishesFirestore({
   <div
   className={
   isClassic
-  ? "relative overflow-hidden rounded-3xl border border-white/15 bg-[#475465] shadow-[0_18px_50px_rgba(0,0,0,0.18)] p-7"
-  : "rounded-3xl border border-white/12 bg-white/8 backdrop-blur p-7"
+  ? "relative overflow-hidden rounded-3xl border border-wedding-on-dark/15 bg-wedding-dark/70 shadow-[0_18px_50px_rgba(0,0,0,0.18)] p-7"
+  : "rounded-3xl border border-wedding-on-dark/12 bg-wedding-dark/8 backdrop-blur p-7"
   }
   >
   {isClassic ? (
@@ -2687,8 +2658,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "text-sm text-white/80"
-  : "text-sm text-cyan-100/70"
+  ? "text-sm text-wedding-on-dark/80"
+  : "text-sm text-wedding-on-dark/70"
   }
   >
   {showAttendance
@@ -2701,8 +2672,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "text-xs tracking-[0.35em] uppercase text-white/70 font-body"
-  : "text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body"
+  ? "text-xs tracking-[0.35em] uppercase text-wedding-on-dark/70 font-body"
+  : "text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body"
   }
   >
   {effectiveInviteeName}
@@ -2711,8 +2682,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "mt-3 text-xs uppercase tracking-[0.25em] font-body text-white/90"
-  : "mt-3 text-xs uppercase tracking-[0.25em] font-body text-white"
+  ? "mt-3 text-xs uppercase tracking-[0.25em] font-body text-wedding-on-dark/90"
+  : "mt-3 text-xs uppercase tracking-[0.25em] font-body text-wedding-on-dark"
   }
   >
   {existingWish.attendance === "hadir"
@@ -2723,8 +2694,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "mt-4 text-sm text-white/90"
-  : "mt-4 text-sm text-white/90"
+  ? "mt-4 text-sm text-wedding-on-dark/90"
+  : "mt-4 text-sm text-wedding-on-dark/90"
   }
   >
   {thankYouMessage}
@@ -2733,8 +2704,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "mt-4 text-sm text-white/85 whitespace-pre-line"
-  : "mt-4 text-sm text-white/80 whitespace-pre-line"
+  ? "mt-4 text-sm text-wedding-on-dark/85 whitespace-pre-line"
+  : "mt-4 text-sm text-wedding-on-dark/80 whitespace-pre-line"
   }
   >
   {existingWish.message}
@@ -2747,8 +2718,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "text-xs tracking-[0.35em] uppercase text-white/70 font-body"
-  : "text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body"
+  ? "text-xs tracking-[0.35em] uppercase text-wedding-on-dark/70 font-body"
+  : "text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body"
   }
   >
   Dari
@@ -2756,8 +2727,8 @@ export function WishesFirestore({
   <p
   className={
   isClassic
-  ? "mt-2 text-sm font-body text-white/90"
-  : "mt-2 text-sm font-body text-white/90"
+  ? "mt-2 text-sm font-body text-wedding-on-dark/90"
+  : "mt-2 text-sm font-body text-wedding-on-dark/90"
   }
   >
   {effectiveInviteeName}
@@ -2769,14 +2740,14 @@ export function WishesFirestore({
   <button
   type="button"
   onClick={() => setAttendance("hadir")}
-  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-white text-[#475465] border-white" : "bg-white/10 text-white border-white/15 hover:bg-white/15"}`}
+  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-wedding-accent text-wedding-on-accent border-wedding-accent" : "bg-wedding-on-dark/10 text-wedding-on-dark border-wedding-on-dark/15 hover:bg-wedding-on-dark/15"}`}
   >
   Hadir
   </button>
   <button
   type="button"
   onClick={() => setAttendance("tidak")}
-  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-white text-[#475465] border-white" : "bg-white/10 text-white border-white/15 hover:bg-white/15"}`}
+  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-wedding-accent text-wedding-on-accent border-wedding-accent" : "bg-wedding-on-dark/10 text-wedding-on-dark border-wedding-on-dark/15 hover:bg-wedding-on-dark/15"}`}
   >
   Tidak
   </button>
@@ -2789,8 +2760,8 @@ export function WishesFirestore({
   placeholder={placeholder || "Tuliskan pesanmu"}
   className={
   isClassic
-  ? "w-full min-h-28 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-white/20 text-white placeholder:text-white/45"
-  : "w-full min-h-28 rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-white/15 text-white placeholder:text-white/40"
+  ? "w-full min-h-28 rounded-2xl border border-wedding-on-dark/15 bg-wedding-dark/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-wedding-on-dark/20 text-wedding-on-dark placeholder:text-wedding-on-dark/45"
+  : "w-full min-h-28 rounded-2xl border border-wedding-on-dark/12 bg-wedding-dark/6 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-wedding-on-dark/15 text-wedding-on-dark placeholder:text-wedding-on-dark/40"
   }
   disabled={isSubmitting}
   />
@@ -2809,8 +2780,8 @@ export function WishesFirestore({
   disabled={isSubmitting || !message.trim()}
   className={
   isClassic
-  ? "rounded-full px-6 py-3 bg-white text-[#475465] hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-  : "rounded-full px-6 py-3 bg-white text-[#020615] hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+  ? "rounded-full px-6 py-3 bg-white text-wedding-on-dark hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+  : "rounded-full px-6 py-3 bg-wedding-accent text-wedding-on-accent hover:bg-wedding-accent/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
   }
   >
   <span className="text-xs uppercase tracking-[0.25em] font-body">
@@ -2826,7 +2797,7 @@ export function WishesFirestore({
   <div
   className={
   isClassic
-  ? "rounded-3xl border border-black/10 bg-white/70 shadow-[0_18px_50px_rgba(0,0,0,0.10)]"
+  ? "rounded-3xl border border-wedding-text/10 bg-wedding-dark/70 shadow-[0_18px_50px_rgba(0,0,0,0.10)]"
   : "space-y-3"
   }
   >
@@ -2835,14 +2806,14 @@ export function WishesFirestore({
   className={
   isClassic
   ? "px-6 py-7 text-center"
-  : "rounded-3xl border border-white/12 bg-white/6 backdrop-blur p-7 text-center"
+  : "rounded-3xl border border-wedding-on-dark/12 bg-wedding-dark/6 backdrop-blur p-7 text-center"
   }
   >
   <p
   className={
   isClassic
-  ? "text-sm text-[#6B747C]"
-  : "text-sm text-cyan-100/70"
+  ? "text-sm text-wedding-text-light"
+  : "text-sm text-wedding-on-dark/70"
   }
   >
   Belum ada ucapan. Jadilah yang pertama.
@@ -2860,21 +2831,21 @@ export function WishesFirestore({
   viewport={{ once: true, amount: 0.2 }}
   custom={idx}
   layout
-  className="relative rounded-[24px] bg-white text-[#2E343A] shadow-[0_18px_50px_rgba(0,0,0,0.12)]"
+  className="relative rounded-[24px] bg-white text-wedding-text shadow-[0_18px_50px_rgba(0,0,0,0.12)]"
   >
   <div className="absolute inset-0 rounded-[24px] bg-[radial-gradient(circle_at_25%_20%,rgba(0,0,0,0.06),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(0,0,0,0.05),transparent_55%)] opacity-50" />
-  <div className="relative rounded-[24px] border border-black/10 p-6">
+  <div className="relative rounded-[24px] border border-wedding-text/10 p-6">
   <div className="flex items-start justify-between gap-4">
   <div>
-  <p className="text-sm font-semibold text-[#3A3F45]">
+  <p className="text-sm font-semibold text-wedding-text">
   {w.name}
   </p>
-  <p className="mt-2 text-xs text-[#6B747C]">
+  <p className="mt-2 text-xs text-wedding-text-light">
   {w.createdAt ? formatRelativeToNow(w.createdAt) || "Baru saja" : "Baru saja"}
   </p>
   </div>
   </div>
-  <p className="mt-3 text-sm text-[#5A6168] whitespace-pre-line">
+  <p className="mt-3 text-sm text-wedding-text whitespace-pre-line">
   {w.message}
   </p>
   </div>
@@ -2895,29 +2866,29 @@ export function WishesFirestore({
   viewport={{ once: true, amount: 0.2 }}
   custom={idx}
   layout
-  className="rounded-3xl border border-white/12 bg-white/6 backdrop-blur p-7"
+  className="rounded-3xl border border-wedding-on-dark/12 bg-wedding-dark/6 backdrop-blur p-7"
   >
   <div className="flex items-start justify-between gap-4">
   <div>
-  <p className="text-xs tracking-[0.35em] uppercase text-cyan-100/60 font-body">
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body">
   {w.name}
   </p>
   <div className="mt-2 flex items-center gap-2">
   {w.attendance ? (
   <span
-  className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.25em] font-body border ${w.attendance === "tidak" ? "bg-white/10 text-white border-white/15" : "bg-white text-[#020615] border-white"}`}
+  className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.25em] font-body border ${w.attendance === "tidak" ? "bg-wedding-on-dark/10 text-wedding-on-dark border-wedding-on-dark/15" : "bg-wedding-accent text-wedding-on-accent border-wedding-accent"}`}
   >
   {w.attendance === "tidak" ? "Tidak" : "Hadir"}
   </span>
   ) : null}
-  <span className="text-[10px] text-cyan-100/50 uppercase tracking-[0.25em] font-body">
+  <span className="text-[10px] text-wedding-on-dark/50 uppercase tracking-[0.25em] font-body">
   {w.createdAt ? formatRelativeToNow(w.createdAt) || "Baru saja" : "Baru saja"}
   </span>
   </div>
   </div>
   </div>
 
-  <p className="mt-4 text-sm text-white/85 whitespace-pre-line">
+  <p className="mt-4 text-sm text-wedding-on-dark/85 whitespace-pre-line">
   {w.message}
   </p>
   </motion.div>
@@ -2964,7 +2935,7 @@ function ThankYouSection({
  return (
   <section
   id="thankyou"
-  className="relative overflow-hidden bg-[#F3F1EC] text-[#536675]"
+  className="relative overflow-hidden bg-wedding-dark text-wedding-on-dark"
   >
   <div className="relative h-[56vh] min-h-[360px] max-h-[560px] overflow-hidden">
   <AnimatePresence initial={false}>
@@ -2999,8 +2970,8 @@ function ThankYouSection({
   ) : null}
   </AnimatePresence>
   <div className="absolute inset-0 bg-white/18" />
-  <div className="absolute inset-0 bg-linear-to-b from-white/5 via-white/28 to-[#F3F1EC]/85" />
-  <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-[#F3F1EC] to-transparent" />
+  <div className="absolute inset-0 bg-linear-to-b from-white/5 via-white/28 to-wedding-dark/85" />
+  <div className="absolute inset-x-0 bottom-0 h-44 bg-linear-to-t from-wedding-dark to-transparent" />
   </div>
 
   <div className="relative -mt-24 px-6 pb-16 ">
@@ -3009,17 +2980,17 @@ function ThankYouSection({
   baseDelay={0.08}
   staggerStep={0.22}
   >
-  <p className="mx-auto max-w-2xl text-md leading-tight text-[#536675] ">
+  <p className="mx-auto max-w-2xl text-md leading-tight text-wedding-on-dark ">
   Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila
   Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Atas
   perhatian dan doa yang diberikan, kami ucapkan terima kasih.
   </p>
 
-  <p className={`${neptuneScript.className} pt-10 text-xl text-[#5E7382]`}>
+  <p className={`${neptuneScript.className} pt-10 text-xl text-wedding-on-dark/70`}>
   The Wedding of
   </p>
 
-  <h3 className={`${neptuneSerif.className} pt-2 text-4xl text-[#516675]`}>
+  <h3 className={`${neptuneSerif.className} pt-2 text-4xl text-wedding-on-dark`}>
   {names}
   </h3>
   </NeptuneStagger>
@@ -3045,8 +3016,8 @@ function FooterMark({ hosts }: { hosts: Host[] }) {
  }, []);
 
  return (
-  <footer className="relative mt-8 overflow-hidden bg-[#0b0c1a] border-t border-white/5">
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.10),transparent)]" />
+  <footer className="relative mt-8 overflow-hidden bg-wedding-dark border-t border-wedding-on-dark/5">
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,color-mix(in_srgb,var(--invitation-accent-2)_10%,transparent),transparent)]" />
   <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/25 to-black/80" />
   <div className="absolute inset-0 opacity-25 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.28)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
 
@@ -3059,7 +3030,7 @@ function FooterMark({ hosts }: { hosts: Host[] }) {
   {stars.map((s, idx) => (
   <motion.span
   key={idx}
-  className="absolute rounded-full bg-white"
+  className="absolute rounded-full bg-wedding-on-dark"
   style={{
   left: `${s.x}%`,
   top: `${s.y}%`,
@@ -3082,19 +3053,19 @@ function FooterMark({ hosts }: { hosts: Host[] }) {
   </motion.div>
 
   <motion.div
-  className="absolute left-[22%] top-[50%] w-[360px] h-[360px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-white/5"
+  className="absolute left-[22%] top-[50%] w-[360px] h-[360px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-wedding-on-dark/5"
   animate={{ rotate: -360 }}
   transition={{ duration: 68, repeat: Infinity, ease: "linear" }}
   >
-  <div className="absolute top-2 right-12 w-2.5 h-2.5 rounded-full bg-cyan-200/70 shadow-[0_0_18px_rgba(34,211,238,0.55)]" />
+  <div className="absolute top-2 right-12 w-2.5 h-2.5 rounded-full bg-wedding-accent-2-light/70 shadow-[0_0_18px_rgba(34,211,238,0.55)]" />
   </motion.div>
 
   <motion.div
-  className="absolute left-[78%] top-[38%] w-[420px] h-[420px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-white/5"
+  className="absolute left-[78%] top-[38%] w-[420px] h-[420px] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-wedding-on-dark/5"
   animate={{ rotate: 360 }}
   transition={{ duration: 74, repeat: Infinity, ease: "linear" }}
   >
-  <div className="absolute bottom-3 left-1/2 w-2 h-2 -translate-x-1/2 rounded-full bg-emerald-200/80 shadow-[0_0_18px_rgba(167,243,208,0.55)]" />
+  <div className="absolute bottom-3 left-1/2 w-2 h-2 -translate-x-1/2 rounded-full bg-wedding-accent/80 shadow-[0_0_18px_rgba(167,243,208,0.55)]" />
   </motion.div>
 
   <motion.div
@@ -3111,23 +3082,23 @@ function FooterMark({ hosts }: { hosts: Host[] }) {
   </div>
 
   <div className="relative px-6 py-12 ">
-  <div className="max-w-3xl mx-auto text-center text-white">
+  <div className="max-w-3xl mx-auto text-center text-wedding-on-dark">
   <NeptuneReveal
   direction="up"
   width="100%"
   delay={0.25}
   className="flex justify-center"
   >
-  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/30 border border-indigo-500/20 text-xs font-mono text-indigo-300 backdrop-blur-md relative overflow-hidden">
-  <div className="absolute inset-0 bg-linear-to-r from-transparent via-indigo-500/20 to-transparent animate-[gradient_4s_linear_infinite]" />
-  <span className="relative w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_#4ade80]" />
+  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-wedding-on-dark/5 border border-wedding-on-dark/10 text-xs font-mono text-wedding-on-dark/80 backdrop-blur-md relative overflow-hidden">
+  <div className="absolute inset-0 bg-linear-to-r from-transparent via-wedding-accent-2/20 to-transparent animate-[gradient_4s_linear_infinite]" />
+  <span className="relative w-2 h-2 rounded-full bg-wedding-accent-2 animate-pulse shadow-[0_0_10px_var(--invitation-accent-2)]" />
   <span className="relative">{names}</span>
   </div>
   </NeptuneReveal>
 
   <NeptuneReveal direction="up" width="100%" delay={0.75}>
   <h3
-  className={`mt-4 ${neptuneScript.className} text-2xl bg-linear-to-r from-indigo-400 via-purple-300 to-cyan-300 bg-clip-text text-transparent bg-size-[200%_auto] animate-[gradient_4s_linear_infinite]`}
+  className={`mt-4 ${neptuneScript.className} text-2xl bg-linear-to-r from-wedding-accent via-wedding-accent-2-light to-wedding-accent-2 bg-clip-text text-transparent bg-size-[200%_auto] animate-[gradient_4s_linear_infinite]`}
   style={{
   textShadow: "0 0 40px rgba(79, 70, 229, 0.4)",
   WebkitBackgroundClip: "text",
@@ -3138,7 +3109,7 @@ function FooterMark({ hosts }: { hosts: Host[] }) {
   </NeptuneReveal>
 
   <NeptuneReveal direction="up" width="100%" delay={1.25}>
-  <p className="mt-4 text-sm text-indigo-200/70 font-light leading-relaxed">
+  <p className="mt-4 text-sm text-wedding-on-dark/70 font-light leading-relaxed">
   MISI SELESAI! <br />
   Terima kasih sudah menjelajah bersama <br />
   Activid Invitation
@@ -3151,7 +3122,7 @@ function FooterMark({ hosts }: { hosts: Host[] }) {
   href="https://invitation.activid.id"
   target="_blank"
   rel="noreferrer"
-  className="inline-flex items-center justify-center rounded-full px-8 py-3 bg-indigo-950/30 border border-indigo-500/20 text-xs font-mono text-indigo-200 backdrop-blur-md transition-all hover:border-indigo-500/50 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.35)]"
+  className="inline-flex items-center justify-center rounded-full px-8 py-3 bg-wedding-on-dark/5 border border-wedding-on-dark/10 text-xs font-mono text-wedding-on-dark/80 backdrop-blur-md transition-all hover:border-wedding-accent-2/30 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.35)]"
   >
   <span className="uppercase tracking-[0.25em]">
   Kembali Pulang 🚀

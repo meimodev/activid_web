@@ -8,7 +8,7 @@ import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
 import type { CoupleSectionProps } from "./InfoSections.types";
 
 const PHOTO_VIGNETTE_CLASS =
-  "absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(235,227,209,0)_0%,rgba(235,227,209,0.5)_50%,rgba(235,227,209,1)_70%,rgba(235,227,209,1)_80%)]";
+  "absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,color-mix(in_srgb,var(--invitation-bg)_50%,transparent)_50%,var(--invitation-bg)_70%,var(--invitation-bg)_80%)]";
 
 function FramedPhoto({ src, alt }: { src: string; alt: string }) {
   return (
@@ -55,7 +55,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
   }, []);
 
   return (
-    <section className="relative bg-[#EFE7D6] py-24 text-[#2B2424]">
+    <section className="relative bg-wedding-bg py-24 text-wedding-text">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 opacity-35 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]" />
 
@@ -86,7 +86,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
         {petals.map((p, idx) => (
           <motion.span
             key={idx}
-            className="absolute top-[-12px] rotate-[18deg] rounded-full bg-white blur-[0.2px]"
+            className="absolute top-[-12px] rotate-[18deg] rounded-full bg-wedding-accent-light blur-[0.2px]"
             style={{
               left: `${p.x}%`,
               width: p.size,
@@ -136,7 +136,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
 
       <div className="relative z-10 mx-auto w-full max-w-[520px] px-4 text-center">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%">
-          <p className="font-poppins text-[14px] leading-relaxed text-[#3A2F2F]/70 ">
+          <p className="font-poppins text-[14px] leading-relaxed text-wedding-text/70 ">
             Tanpa Mengurangi rasa hormat dengan ini kami mengundang
             Bapak/Ibu/Saudara-i untuk hadir pada pernikahan kami
           </p>
@@ -159,7 +159,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
               delay={0.28}
               width="100%"
             >
-              <p className="font-stoic text-[52px] leading-none text-[#7C5A2A] ">
+              <p className="font-stoic text-[52px] leading-none text-wedding-accent ">
                 {primary?.firstName ?? ""}
               </p>
             </RevealOnScroll>
@@ -170,7 +170,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
               delay={0.34}
               width="100%"
             >
-              <p className="mt-2 font-poppins-bold text-[18px] text-[#2B2424] ">
+              <p className="mt-2 font-poppins-bold text-[18px] text-wedding-text ">
                 {primary?.fullName ?? ""}
               </p>
             </RevealOnScroll>
@@ -181,7 +181,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
               delay={0.46}
               width="100%"
             >
-              <p className="mt-4 font-poppins text-[13px] leading-relaxed text-[#3A2F2F]/70 ">
+              <p className="mt-4 font-poppins text-[13px] leading-relaxed text-wedding-text/70 ">
                 {primary?.parents ?? ""}
               </p>
             </RevealOnScroll>
@@ -193,7 +193,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
                 delay={0.52}
                 width="100%"
               >
-                <p className="mt-3 font-poppins italic text-[14px] text-[#3A2F2F]/70">
+                <p className="mt-3 font-poppins italic text-[14px] text-wedding-text/70">
                   {primary.role}
                 </p>
               </RevealOnScroll>
@@ -205,11 +205,11 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
           <>
             <RevealOnScroll direction="up" distance={18} delay={0.56} width="100%">
               <div className="mt-14 flex items-center justify-center">
-                <div className="h-px flex-1 bg-[#4F5B4B]/25" />
-                <div className="mx-5 font-poppins-bold text-xs tracking-[0.3em] text-[#4F5B4B]/70">
+                <div className="h-px flex-1 bg-wedding-dark/25" />
+                <div className="mx-5 font-poppins-bold text-xs tracking-[0.3em] text-wedding-dark/70">
                   AND
                 </div>
-                <div className="h-px flex-1 bg-[#4F5B4B]/25" />
+                <div className="h-px flex-1 bg-wedding-dark/25" />
               </div>
             </RevealOnScroll>
 
@@ -230,7 +230,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
                   delay={0.74}
                   width="100%"
                 >
-                  <p className="font-stoic text-[52px] leading-none text-[#7C5A2A] ">
+                  <p className="font-stoic text-[52px] leading-none text-wedding-accent ">
                     {secondary.firstName}
                   </p>
                 </RevealOnScroll>
@@ -241,7 +241,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
                   delay={0.8}
                   width="100%"
                 >
-                  <p className="mt-2 font-poppins-bold text-[18px] text-[#2B2424] ">
+                  <p className="mt-2 font-poppins-bold text-[18px] text-wedding-text ">
                     {secondary.fullName}
                   </p>
                 </RevealOnScroll>
@@ -253,7 +253,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
                     delay={0.86}
                     width="100%"
                   >
-                    <p className="mt-3 font-poppins italic text-[14px] text-[#3A2F2F]/70">
+                    <p className="mt-3 font-poppins italic text-[14px] text-wedding-text/70">
                       {secondary.role}
                     </p>
                   </RevealOnScroll>
@@ -265,7 +265,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
                   delay={0.92}
                   width="100%"
                 >
-                  <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-[#3A2F2F]/70 ">
+                  <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-wedding-text/70 ">
                     {secondary.parents}
                   </p>
                 </RevealOnScroll>

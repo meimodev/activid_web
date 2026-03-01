@@ -3,6 +3,8 @@ import { getInvitationTemplateThemes } from "@/data/invitation-templates";
 type InvitationThemeColors = {
   mainColor: string;
   accentColor: string;
+  accent2Color?: string;
+  darkColor?: string;
 };
 
 type DerivedInvitationTheme = InvitationThemeColors & {
@@ -10,7 +12,11 @@ type DerivedInvitationTheme = InvitationThemeColors & {
   text: string;
   textLight: string;
   accentLight: string;
+  accent2Light: string;
   dark: string;
+  onAccent: string;
+  onAccent2: string;
+  onDark: string;
 };
 
 function clamp01(value: number) {
@@ -67,6 +73,7 @@ function relativeLuminance({ r, g, b }: { r: number; g: number; b: number }): nu
 function deriveThemeColors(theme: InvitationThemeColors): DerivedInvitationTheme {
   const mainRgb = hexToRgb(theme.mainColor) ?? { r: 249, g: 247, b: 242 };
   const accentRgb = hexToRgb(theme.accentColor) ?? { r: 128, g: 0, b: 32 };
+  const accent2Rgb = hexToRgb(theme.accent2Color ?? theme.accentColor) ?? accentRgb;
 
   const lum = relativeLuminance(mainRgb);
   const isDark = lum < 0.36;
@@ -78,7 +85,21 @@ function deriveThemeColors(theme: InvitationThemeColors): DerivedInvitationTheme
   const text = isDark ? "#EAF7FF" : "#4A4A4A";
   const textLight = isDark ? "#A6C3D7" : "#8E9196";
   const accentLight = rgbToHex(mix(accentRgb, isDark ? white : mainRgb, isDark ? 0.35 : 0.45));
-  const dark = isDark ? "#020205" : "#2A1B1B";
+  const accent2Light = rgbToHex(mix(accent2Rgb, isDark ? white : mainRgb, isDark ? 0.35 : 0.45));
+  const dark = theme.darkColor
+    ? rgbToHex(hexToRgb(theme.darkColor) ?? (isDark ? { r: 2, g: 6, b: 5 } : mix(accentRgb, black, 0.55)))
+    : isDark
+      ? "#020205"
+      : rgbToHex(mix(accentRgb, black, 0.55));
+
+  const darkRgb = hexToRgb(dark) ?? { r: 2, g: 6, b: 5 };
+
+  const accentLum = relativeLuminance(accentRgb);
+  const accent2Lum = relativeLuminance(accent2Rgb);
+  const darkLum = relativeLuminance(darkRgb);
+  const onAccent = accentLum > 0.55 ? "#1F1B16" : "#FFFFFF";
+  const onAccent2 = accent2Lum > 0.55 ? "#1F1B16" : "#FFFFFF";
+  const onDark = darkLum > 0.55 ? "#1F1B16" : "#FFFFFF";
 
   return {
     ...theme,
@@ -86,19 +107,33 @@ function deriveThemeColors(theme: InvitationThemeColors): DerivedInvitationTheme
     text,
     textLight,
     accentLight,
+    accent2Light,
     dark,
+    onAccent,
+    onAccent2,
+    onDark,
   };
 }
 
 export function resolveInvitationTheme(templateId: string, theme?: InvitationThemeColors): DerivedInvitationTheme {
+  const fallback = getInvitationTemplateThemes(templateId)[0];
+
   if (theme?.mainColor && theme?.accentColor) {
-    return deriveThemeColors(theme);
+    return deriveThemeColors({
+      ...theme,
+      accent2Color: theme.accent2Color ?? fallback?.accent2Color,
+      darkColor: theme.darkColor ?? fallback?.darkColor,
+    });
   }
 
-  const fallback = getInvitationTemplateThemes(templateId)[0];
   return deriveThemeColors(
     fallback
-      ? { mainColor: fallback.mainColor, accentColor: fallback.accentColor }
+      ? {
+          mainColor: fallback.mainColor,
+          accentColor: fallback.accentColor,
+          accent2Color: fallback.accent2Color,
+          darkColor: fallback.darkColor,
+        }
       : { mainColor: "#F9F7F2", accentColor: "#800020" },
   );
 }
@@ -113,6 +148,11 @@ export function getInvitationThemeStyle(templateId: string, theme?: InvitationTh
     "--invitation-text-light": resolved.textLight,
     "--invitation-accent": resolved.accentColor,
     "--invitation-accent-light": resolved.accentLight,
+    "--invitation-accent-2": resolved.accent2Color ?? resolved.accentColor,
+    "--invitation-accent-2-light": resolved.accent2Light,
     "--invitation-dark": resolved.dark,
+    "--invitation-on-accent": resolved.onAccent,
+    "--invitation-on-accent-2": resolved.onAccent2,
+    "--invitation-on-dark": resolved.onDark,
   } as Record<string, string>;
 }

@@ -23,11 +23,11 @@ export function StorySection({
   const heroImageUrl = stories?.[0]?.imageUrl || fallbackImageUrl;
 
   return (
-    <section className="relative overflow-hidden bg-[#EFE7D6] py-12 text-[#2B2424] ">
+    <section className="relative overflow-hidden bg-wedding-bg py-12 text-wedding-text ">
       <OverlayReveal
         delay={0.06}
         idle="none"
-        className="pointer-events-none absolute inset-x-0 top-38 h-[100px] w-full bg-cover bg-bottom bg-no-repeat z-0"
+        className="pointer-events-none absolute inset-x-0 top-58 h-[100px] w-full bg-cover bg-bottom bg-no-repeat z-20"
       >
         <motion.div
           className="h-full w-full bg-cover bg-bottom bg-no-repeat"
@@ -72,11 +72,14 @@ export function StorySection({
             width="100%"
           >
             <div className="flex items-center justify-end pb-12">
-              <div className="h-px flex-1 bg-[#4F5B4B]" />
-              <div className="h-2 w-2 rounded-full bg-[#4F5B4B]" />
-              <h2 className="font-brittany-signature text-[62px] leading-none text-[#4F5B4B] px-6  ">
-                Our Story
+              <div className="h-px flex-1 bg-wedding-dark" />
+              <div className="h-2 w-2 rounded-full bg-wedding-dark" />
+              <h2 className="font-brittany-signature text-center text-[62px] leading-none text-wedding-dark px-6  ">
+                {heading}
               </h2>
+               <div className="h-px flex-1 bg-wedding-dark" />
+              <div className="h-2 w-2 rounded-full bg-wedding-dark" />
+              
             </div>
           </RevealOnScroll>
 
@@ -89,13 +92,13 @@ export function StorySection({
             <div className="relative mt-16 p-4">
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-[24px] border-2 border-[#2d3418]/75 bg-[#EDE4D6]"
+                className="pointer-events-none absolute inset-0 rounded-[24px] border-2 border-wedding-dark/75 bg-wedding-bg-alt"
               />
 
-              <div className="relative z-10 overflow-hidden rounded-[24px] border-2 border-[#2d3418]/75 bg-white/75">
+              <div className="relative z-10 overflow-hidden rounded-[24px] border-2 border-wedding-dark/75 bg-wedding-bg/75">
                 {heroImageUrl ? (
                   <div className="p-5">
-                    <div className="relative overflow-hidden rounded-t-[20px] rounded-tl-[300px] rounded-b-[18px] border-2 border-[#2d3418] bg-[#EFE7D6]">
+                    <div className="relative overflow-hidden rounded-t-[20px] rounded-tl-[300px] rounded-b-[18px] border-2 border-wedding-dark bg-wedding-bg">
                       <div className="relative aspect-[4/5]">
                         <div className="absolute inset-0">
                           <img
@@ -103,7 +106,7 @@ export function StorySection({
                             alt=""
                             className="h-full w-full object-cover"
                           />
-                          <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/0 to-black/10" />
+                          <div className="absolute inset-0 bg-linear-to-b from-wedding-dark/0 via-wedding-dark/0 to-wedding-dark/10" />
                         </div>
 
                         
@@ -123,12 +126,12 @@ export function StorySection({
                         width="100%"
                       >
                         <div className="text-center">
-                          <div className="mx-auto h-6 w-[2px] bg-[#4F5B4B] mb-2" />
+                          <div className="mx-auto h-6 w-[2px] bg-wedding-dark mb-2" />
 
-                          <p className="font-poppins-bold italic text-[14px] text-[#4F5B4B]">
+                          <p className="font-poppins-bold italic text-[14px] text-wedding-dark">
                             {formatInvitationMonthYear(story.date)}
                           </p>
-                          <p className="mt-3 font-poppins text-[13px] leading-relaxed text-[#3A2F2F]/80">
+                          <p className="mt-3 font-poppins text-[13px] leading-relaxed text-wedding-text/80">
                             {story.description}
                           </p>
                         </div>

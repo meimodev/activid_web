@@ -39,7 +39,7 @@ export function GiftSection({
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#4F5B4B] py-24 text-white ">
+    <section className="relative overflow-hidden bg-wedding-dark py-24 text-wedding-on-dark ">
       
 
       <div className="container mx-auto px-4 relative z-10">
@@ -51,7 +51,7 @@ export function GiftSection({
             width="100%"
           >
             <div className="flex items-center justify-center">
-              <h2 className="font-brittany-signature text-[62px] leading-none text-white ">
+              <h2 className="font-brittany-signature text-[62px] leading-none text-wedding-on-dark ">
                 {heading}
               </h2>
             </div>
@@ -64,8 +64,8 @@ export function GiftSection({
               delay={0.18}
               width="100%"
             >
-              <div className="mt-10 rounded-3xl border border-white/20 bg-white/10 backdrop-blur p-7 shadow-[0_18px_50px_rgba(0,0,0,0.20)]">
-                <p className="text-center text-sm text-white/80 whitespace-pre-line font-poppins">
+              <div className="mt-10 rounded-3xl border border-wedding-on-dark/20 bg-wedding-on-dark/10 backdrop-blur p-7 shadow-[0_18px_50px_rgba(0,0,0,0.20)]">
+                <p className="text-center text-sm text-wedding-on-dark/80 whitespace-pre-line font-poppins">
                   {description}
                 </p>
               </div>
@@ -81,7 +81,7 @@ export function GiftSection({
             <button
               type="button"
               onClick={() => setIsGiftDialogOpen(true)}
-              className="mt-8 w-full inline-flex items-center justify-center rounded-full px-6 py-3 border border-white/25 bg-white/10 text-white hover:bg-white/15 transition"
+              className="mt-8 w-full inline-flex items-center justify-center rounded-full px-6 py-3 border border-wedding-on-dark/25 bg-wedding-on-dark/10 text-wedding-on-dark hover:bg-wedding-on-dark/15 transition"
             >
               <span className="text-xs uppercase tracking-[0.25em] font-poppins">
                 KIRIM HADIAH
@@ -89,23 +89,21 @@ export function GiftSection({
             </button>
           </RevealOnScroll>
 
-          <div className="relative mt-4">
-            <OverlayReveal
-              delay={0.12}
-              idle="none"
-              className="pointer-events-none translate-y-1 h-[65px] z-10"
-            >
-              <motion.div
-                className="pointer-events-none translate-y-1 h-[65px] z-10 h-full w-full bg-cover bg-no-repeat"
-                style={{
-                  backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.bottomFloral})`,
-                }}
-                animate={{ scale: [1, 1.02, 1], opacity: [0.92, 1, 0.92] }}
-                transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </OverlayReveal>
+          <div className="relative mt-4 isolate">
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -translate-y-14 h-[65px] z-0">
+              <OverlayReveal delay={0.12} idle="none" className="h-full w-full">
+                <motion.div
+                  className="pointer-events-none h-full w-full bg-cover bg-center bg-no-repeat"
+                  style={{
+                    backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.bottomFloral})`,
+                  }}
+                  animate={{ scale: [1, 1.03, 1],  }}
+                  transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </OverlayReveal>
+            </div>
 
-            <div className="relative z-20 grid grid-cols-1 gap-4 ">
+            <div className="relative z-10 grid grid-cols-1 gap-4 mt-20">
               {bankAccounts.map((account, index) => {
                 const k = `${account.bankName}-${index}`;
                 const isExpanded = !!expandedKeys[k];
@@ -118,19 +116,19 @@ export function GiftSection({
                     delay={0.24 + index * 0.08}
                     width="100%"
                   >
-                    <div className="relative overflow-hidden rounded-3xl border border-[#2d3418]/20 shadow-[0_18px_50px_rgba(0,0,0,0.20)] bg-[#2d3418]">
+                    <div className="relative z-10 overflow-hidden rounded-3xl border border-wedding-on-dark/10 shadow-[0_18px_50px_rgba(0,0,0,0.20)] bg-wedding-dark/90">
                       <div
                         aria-hidden
-                        className="absolute inset-0 bg-white/6 backdrop-blur"
+                        className="absolute inset-0 bg-wedding-dark/15 backdrop-blur"
                       />
 
                       <div className="relative p-7">
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
-                            <p className="text-xs tracking-[0.35em] uppercase text-white/75 font-poppins">
+                            <p className="text-xs tracking-[0.35em] uppercase text-wedding-on-dark/75 font-poppins">
                               {account.bankName}
                             </p>
-                            <p className="mt-3 text-sm text-white/90 font-poppins truncate">
+                            <p className="mt-3 text-sm text-wedding-on-dark/90 font-poppins truncate">
                               {account.accountHolder}
                             </p>
                           </div>
@@ -143,14 +141,14 @@ export function GiftSection({
                                 [k]: !prev[k],
                               }))
                             }
-                            className="shrink-0 inline-flex items-center justify-center rounded-full h-9 w-9 border border-white/20 bg-white/8 hover:bg-white/12 transition"
+                            className="shrink-0 inline-flex items-center justify-center rounded-full h-9 w-9 border border-wedding-on-dark/20 bg-wedding-on-dark/8 hover:bg-wedding-on-dark/12 transition"
                             aria-expanded={isExpanded}
                             aria-label={isExpanded ? "Collapse" : "Expand"}
                           >
                             <svg
                               viewBox="0 0 24 24"
                               fill="none"
-                              className={`h-4 w-4 text-white transition-transform duration-200 ${isExpanded ? "-rotate-90" : "rotate-90"}`}
+                              className={`h-4 w-4 text-wedding-on-dark transition-transform duration-200 ${isExpanded ? "-rotate-90" : "rotate-90"}`}
                             >
                               <path
                                 d="M8 5l8 7-8 7"
@@ -173,16 +171,16 @@ export function GiftSection({
                               transition={{ duration: 0.28, ease: "easeOut" }}
                               className="mt-5 overflow-hidden"
                             >
-                              <p className="font-mono text-2xl tracking-wide text-white">
+                              <p className="font-mono text-2xl tracking-wide text-wedding-on-dark">
                                 {account.accountNumber}
                               </p>
 
                               <button
                                 type="button"
                                 onClick={() => copy(account.accountNumber, k)}
-                                className="mt-5 inline-flex w-full items-center justify-center rounded-full px-6 py-3 border border-white/20 bg-white/10 hover:bg-white/15 transition"
+                                className="mt-5 inline-flex w-full items-center justify-center rounded-full px-6 py-3 border border-wedding-on-dark/20 bg-wedding-on-dark/10 hover:bg-wedding-on-dark/15 transition"
                               >
-                                <span className="text-xs uppercase tracking-[0.25em] font-poppins text-white">
+                                <span className="text-xs uppercase tracking-[0.25em] font-poppins text-wedding-on-dark">
                                   {copiedKey === k ? "Copied" : "Copy"}
                                 </span>
                               </button>
@@ -206,7 +204,7 @@ export function GiftSection({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setIsGiftDialogOpen(false)}
-                      className="fixed inset-0 z-[130] bg-black/70 backdrop-blur-md flex items-center justify-center p-6"
+                      className="fixed inset-0 z-[130] bg-wedding-dark/70 backdrop-blur-md flex items-center justify-center p-6"
                       role="dialog"
                       aria-modal="true"
                       aria-label="Kirim hadiah"
@@ -217,17 +215,17 @@ export function GiftSection({
                         exit={{ opacity: 0, y: 18, scale: 0.98 }}
                         transition={{ duration: 0.22, ease: "easeOut" }}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-lg rounded-3xl border border-[#8b7a57]/20 bg-[#EFE7D6] p-7 shadow-2xl"
+                        className="w-full max-w-lg rounded-3xl border border-wedding-accent/20 bg-wedding-bg p-7 shadow-2xl"
                       >
-                        <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-poppins">
+                        <p className="text-xs tracking-[0.35em] uppercase text-wedding-text-light font-poppins">
                           Info
                         </p>
-                        <h4 className="mt-3 font-brittany-signature text-5xl leading-none text-[#2B2424]">
+                        <h4 className="mt-3 font-brittany-signature text-5xl leading-none text-wedding-text">
                           Exclusive Discount
                         </h4>
-                        <p className="mt-4 text-sm text-[#3A2F2F]/80 font-poppins">
+                        <p className="mt-4 text-sm text-wedding-text/80 font-poppins">
                           Anda akan mendapatkan exclusive discount hingga{" "}
-                          <span className="font-poppins-bold text-[#2B2424]">
+                          <span className="font-poppins-bold text-wedding-text">
                             25%
                           </span>{" "}
                           untuk pemesanan hadiah dari link ini. &quot;Chat
@@ -238,7 +236,7 @@ export function GiftSection({
                           <button
                             type="button"
                             onClick={() => setIsGiftDialogOpen(false)}
-                            className="rounded-full px-6 py-3 border border-[#8b7a57]/25 bg-white/70 hover:bg-white transition"
+                            className="rounded-full px-6 py-3 border border-wedding-accent/25 bg-wedding-bg/70 hover:bg-wedding-bg transition"
                           >
                             <span className="text-xs uppercase tracking-[0.25em] font-poppins">
                               Tutup
@@ -249,7 +247,7 @@ export function GiftSection({
                             href={waUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded-full px-6 py-3 bg-[#4F5B4B] text-white hover:bg-[#445142] transition text-center"
+                            className="rounded-full px-6 py-3 bg-wedding-dark text-wedding-on-dark hover:bg-wedding-dark/90 transition text-center"
                           >
                             <span className="text-xs uppercase tracking-[0.25em] font-poppins">
                               Chat WhatsApp

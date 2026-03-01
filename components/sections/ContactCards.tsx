@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { siteContent } from '@/lib/site-content';
 
 /**
@@ -22,7 +23,6 @@ export default function ContactCards() {
     <div className="container mx-auto max-w-7xl mt-16">
       <div className="flex gap-4 h-[500px]">
         {offices.map((office, index) => {
-          const cardIndex = index + 1; // 1-based index for logic if needed, but 0-based is fine
           const isExpanded = expandedCard === index;
           const addressLines = Array.isArray(office.address) ? office.address : [office.address];
 
@@ -41,15 +41,12 @@ export default function ContactCards() {
                 }
               }}
             >
-              {/* Using img tag to avoid next/image complexity with external URLs if domain not configured, 
-                  but siteContent URLs are unsplash so it should be fine. 
-                  Keeping img for simplicity as in original code or could upgrade to Next Image if domains allowed.
-                  Original used img.
-              */}
-              <img
+              <Image
                 src={office.image}
                 alt={`${office.city} ${office.type} workspace`}
-                className={`w-full h-full object-cover transition-transform duration-700 ease-out ${isExpanded ? 'scale-105' : 'group-hover:scale-105'
+                fill
+                sizes="(max-width: 1024px) 100vw, 1200px"
+                className={`object-cover transition-transform duration-700 ease-out ${isExpanded ? 'scale-105' : 'group-hover:scale-105'
                   }`}
               />
               <div

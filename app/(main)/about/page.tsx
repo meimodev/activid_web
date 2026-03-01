@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { AboutUs } from '@/components/sections/AboutUs';
-import { siteContent } from '@/lib/site-content';
 
 export const metadata: Metadata = {
     title: 'About Us | ACTIVID',

@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { OverlayReveal } from "./graphics";
-import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
+import { useOverlayAssets } from "./graphics/overlays";
 import type { HostSectionProps } from "./InfoSections.types";
 
 const PHOTO_VIGNETTE_CLASS =
-  "absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(246,251,255,0)_0%,rgba(246,251,255,0.42)_52%,rgba(246,251,255,0.95)_72%,rgba(246,251,255,1)_100%)]";
+  "absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,color-mix(in_srgb,var(--invitation-bg)_0%,transparent)_0%,color-mix(in_srgb,var(--invitation-bg)_42%,transparent)_52%,color-mix(in_srgb,var(--invitation-bg)_95%,transparent)_72%,var(--invitation-bg)_100%)]";
 
-function FramedPhoto({ src, alt }: { src: string; alt: string }) {
+function FramedPhoto({ src, alt, frameUrl }: { src: string; alt: string; frameUrl: string }) {
   return (
     <div className="relative mx-auto h-[320px] w-[320px]">
       <div
@@ -26,7 +26,7 @@ function FramedPhoto({ src, alt }: { src: string; alt: string }) {
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -inset-0 bg-contain bg-center bg-no-repeat "
-        style={{ backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.frameFlower})` }}
+        style={{ backgroundImage: `url(${frameUrl})` }}
         animate={{
           x: [0, 2, -1, 0],
           y: [0, -2, 1, 0],
@@ -40,6 +40,7 @@ function FramedPhoto({ src, alt }: { src: string; alt: string }) {
 }
 
 export function HostSection({ hosts, purpose }: HostSectionProps) {
+  const overlayAssets = useOverlayAssets();
   const petals = useMemo(() => {
     const count = 14;
     return Array.from({ length: count }, (_, i) => {
@@ -63,7 +64,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
   );
 
   return (
-    <section className="relative bg-[#F6FBFF] py-24 text-[#0B1B2A]">
+    <section className="relative bg-wedding-bg py-24 text-wedding-text">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 opacity-35 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]" />
 
@@ -73,7 +74,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
         >
           <motion.div
             className="h-full w-full bg-contain bg-no-repeat"
-            style={{ backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.sprinkle})` }}
+            style={{ backgroundImage: `url(${overlayAssets.sprinkle})` }}
             animate={{ x: [0, 14, 0], y: [0, -8, 0], rotate: [8, 10, 8] }}
             transition={{ duration: 12.5, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -85,7 +86,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
         >
           <motion.div
             className="h-full w-full bg-contain bg-no-repeat"
-            style={{ backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.sprinkle})` }}
+            style={{ backgroundImage: `url(${overlayAssets.sprinkle})` }}
             animate={{ x: [0, -12, 0], y: [0, 10, 0], rotate: [-10, -8, -10] }}
             transition={{ duration: 14.5, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -94,7 +95,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
         {petals.map((p, idx) => (
           <motion.span
             key={idx}
-            className="absolute top-[-12px] rotate-[18deg] rounded-full bg-white blur-[0.2px]"
+            className="absolute top-[-12px] rotate-[18deg] rounded-full bg-wedding-accent-2-light blur-[0.2px]"
             style={{
               left: `${p.x}%`,
               width: p.size,
@@ -123,7 +124,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
           <motion.div
             className="h-full w-full bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.dividerFlower})`,
+              backgroundImage: `url(${overlayAssets.dividerFlower})`,
             }}
             animate={{ scale: [1, 1.02, 1], opacity: [0.92, 1, 0.92] }}
             transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
@@ -138,7 +139,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
           <motion.div
             className="h-full w-full bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.bottomFloral})`,
+              backgroundImage: `url(${overlayAssets.bottomFloral})`,
             }}
             animate={{ scale: [1, 1.02, 1], opacity: [0.92, 1, 0.92] }}
             transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
@@ -148,7 +149,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
 
       <div className="relative z-10 mx-auto w-full max-w-[520px] px-4 text-center">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%">
-          <p className="font-poppins text-[14px] leading-relaxed text-[#0B1B2A]/70 ">
+          <p className="font-poppins text-[14px] leading-relaxed text-wedding-text/70 ">
             {isBirthday
               ? `Tanpa Mengurangi rasa hormat dengan ini kami mengundang Bapak/Ibu/Saudara-i untuk hadir pada acara ulang tahun ${celebrantName || "kami"}`
               : "Tanpa Mengurangi rasa hormat dengan ini kami mengundang Bapak/Ibu/Saudara-i untuk hadir pada pernikahan kami"}
@@ -162,7 +163,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
             delay={0.18}
             width="100%"
           >
-            <FramedPhoto src={primary?.photo ?? ""} alt={isBirthday ? "Host" : "Host"} />
+            <FramedPhoto src={primary?.photo ?? ""} alt={isBirthday ? "Host" : "Host"} frameUrl={overlayAssets.frameFlower} />
           </RevealOnScroll>
 
           <div className="mt-10">
@@ -172,7 +173,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
               delay={0.28}
               width="100%"
             >
-              <p className="font-poppins-bold text-[44px] leading-none text-[#0B1B2A] ">
+              <p className="font-poppins-bold text-[44px] leading-none text-wedding-dark ">
                 {primary?.firstName ?? ""}
               </p>
             </RevealOnScroll>
@@ -183,7 +184,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
               delay={0.34}
               width="100%"
             >
-              <p className="mt-3 font-poppins-bold text-[18px] text-[#0B1B2A] ">
+              <p className="mt-3 font-poppins-bold text-[18px] text-wedding-dark ">
                 {primary?.fullName ?? ""}
               </p>
             </RevealOnScroll>
@@ -194,7 +195,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
               delay={0.46}
               width="100%"
             >
-              <p className="mt-4 font-poppins text-[13px] leading-relaxed text-[#0B1B2A]/70 ">
+              <p className="mt-4 font-poppins text-[13px] leading-relaxed text-wedding-text/70 ">
                 {primary?.parents ?? ""}
               </p>
             </RevealOnScroll>
@@ -210,11 +211,11 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
               width="100%"
             >
               <div className="mt-14 flex items-center justify-center">
-                <div className="h-px flex-1 bg-[#38BDF8]/35" />
-                <div className="mx-5 font-poppins-bold text-xs tracking-[0.3em] text-[#0284C7]">
+                <div className="h-px flex-1 bg-wedding-accent-2/35" />
+                <div className="mx-5 font-poppins-bold text-xs tracking-[0.3em] text-wedding-accent-2">
                   AND
                 </div>
-                <div className="h-px flex-1 bg-[#38BDF8]/35" />
+                <div className="h-px flex-1 bg-wedding-accent-2/35" />
               </div>
             </RevealOnScroll>
 
@@ -225,7 +226,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
                 delay={0.64}
                 width="100%"
               >
-                <FramedPhoto src={secondary?.photo ?? ""} alt={isBirthday ? "Host" : "Host"} />
+                <FramedPhoto src={secondary?.photo ?? ""} alt={isBirthday ? "Host" : "Host"} frameUrl={overlayAssets.frameFlower} />
               </RevealOnScroll>
 
               <div className="mt-10">
@@ -235,7 +236,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
                   delay={0.74}
                   width="100%"
                 >
-                  <p className="font-poppins-bold text-[44px] leading-none text-[#0B1B2A] ">
+                  <p className="font-poppins-bold text-[44px] leading-none text-wedding-dark ">
                     {secondary?.firstName ?? ""}
                   </p>
                 </RevealOnScroll>
@@ -246,7 +247,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
                   delay={0.8}
                   width="100%"
                 >
-                  <p className="mt-3 font-poppins-bold text-[18px] text-[#0B1B2A] ">
+                  <p className="mt-3 font-poppins-bold text-[18px] text-wedding-dark ">
                     {secondary?.fullName ?? ""}
                   </p>
                 </RevealOnScroll>
@@ -258,7 +259,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
                     delay={0.86}
                     width="100%"
                   >
-                    <p className="mt-3 font-poppins italic text-[14px] text-[#0B1B2A]/65">
+                    <p className="mt-3 font-poppins italic text-[14px] text-wedding-text/65">
                       {secondary.role}
                     </p>
                   </RevealOnScroll>
@@ -270,7 +271,7 @@ export function HostSection({ hosts, purpose }: HostSectionProps) {
                   delay={0.92}
                   width="100%"
                 >
-                  <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-[#0B1B2A]/70 ">
+                  <p className="mt-5 pb-10 font-poppins text-[13px] leading-relaxed text-wedding-text/70 ">
                     {secondary?.parents ?? ""}
                   </p>
                 </RevealOnScroll>

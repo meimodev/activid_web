@@ -28,7 +28,7 @@ export function RevealOnScroll({
     duration = 1.0, // Increased default duration for elegance
     direction = "up",
     className = "",
-    once = true,
+    once = false,
     scale = 0.95, // Default subtle scale up
     fullHeight = false,
     distance = 40, // Default subtle move

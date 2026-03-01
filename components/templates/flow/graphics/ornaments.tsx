@@ -4,17 +4,17 @@ import { motion } from "framer-motion";
 
 export function SectionDivider() {
     return (
-        <div className="w-full flex justify-center py-8 opacity-80">
+        <div className="w-full flex justify-center py-8 opacity-80 text-wedding-accent-light">
             <svg width="280" height="30" viewBox="0 0 280 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M140 25C165 25 180 15 200 15C220 15 240 20 260 20C270 20 275 10 280 5" stroke="#C5A059" strokeWidth="1.5" />
-                <path d="M140 25C115 25 100 15 80 15C60 15 40 20 20 20C10 20 5 10 0 5" stroke="#C5A059" strokeWidth="1.5" />
-                <circle cx="140" cy="22" r="4" fill="#C5A059" />
-                <circle cx="140" cy="22" r="2" fill="#F9F7F2" />
+                <path d="M140 25C165 25 180 15 200 15C220 15 240 20 260 20C270 20 275 10 280 5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M140 25C115 25 100 15 80 15C60 15 40 20 20 20C10 20 5 10 0 5" stroke="currentColor" strokeWidth="1.5" />
+                <circle cx="140" cy="22" r="4" fill="currentColor" />
+                <circle cx="140" cy="22" r="2" fill="var(--invitation-bg)" />
                 {/* Extra decorative dots */}
-                <circle cx="100" cy="18" r="1.5" fill="#C5A059" opacity="0.6" />
-                <circle cx="180" cy="18" r="1.5" fill="#C5A059" opacity="0.6" />
-                <circle cx="60" cy="15" r="1" fill="#C5A059" opacity="0.4" />
-                <circle cx="220" cy="15" r="1" fill="#C5A059" opacity="0.4" />
+                <circle cx="100" cy="18" r="1.5" fill="currentColor" opacity="0.6" />
+                <circle cx="180" cy="18" r="1.5" fill="currentColor" opacity="0.6" />
+                <circle cx="60" cy="15" r="1" fill="currentColor" opacity="0.4" />
+                <circle cx="220" cy="15" r="1" fill="currentColor" opacity="0.4" />
             </svg>
         </div>
     );
@@ -95,16 +95,16 @@ export function DiamondAccent() {
 export function GoldLeafBorder({ position }: { position: "top" | "bottom" }) {
     return (
         <div className={`absolute left-0 right-0 ${position === "top" ? "top-0" : "bottom-0"} h-8 overflow-hidden pointer-events-none`}>
-            <svg className="w-full h-full" viewBox="0 0 1200 32" preserveAspectRatio="none">
+            <svg className="w-full h-full text-wedding-accent-light" viewBox="0 0 1200 32" preserveAspectRatio="none">
                 {position === "top" ? (
                     <>
-                        <path d="M0 32 Q300 0 600 16 T1200 32" stroke="#C5A059" strokeWidth="1" fill="none" opacity="0.4" />
-                        <path d="M0 32 Q300 8 600 20 T1200 32" stroke="#C5A059" strokeWidth="0.5" fill="none" opacity="0.2" />
+                        <path d="M0 32 Q300 0 600 16 T1200 32" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.4" />
+                        <path d="M0 32 Q300 8 600 20 T1200 32" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2" />
                     </>
                 ) : (
                     <>
-                        <path d="M0 0 Q300 32 600 16 T1200 0" stroke="#C5A059" strokeWidth="1" fill="none" opacity="0.4" />
-                        <path d="M0 0 Q300 24 600 12 T1200 0" stroke="#C5A059" strokeWidth="0.5" fill="none" opacity="0.2" />
+                        <path d="M0 0 Q300 32 600 16 T1200 0" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.4" />
+                        <path d="M0 0 Q300 24 600 12 T1200 0" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.2" />
                     </>
                 )}
             </svg>

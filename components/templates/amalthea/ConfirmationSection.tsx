@@ -65,30 +65,30 @@ export function ConfirmationSection({
   } catch (err) {
   console.error(err);
   setStatus("error");
-  }
+ }
  };
 
  return (
-  <section className="py-24 relative text-center bg-[#F6FBFF] text-[#0B1B2A]">
+  <section className="py-24 relative text-center bg-wedding-bg text-wedding-text">
   <div className="max-w-2xl mx-auto px-4 relative z-10">
   <RevealOnScroll direction="up" width="100%">
-  <h2 className="font-poppins-bold text-3xl text-[#0B1B2A] tracking-tight">
+  <h2 className="font-poppins-bold text-3xl text-wedding-dark tracking-tight">
   R.S.V.P
   </h2>
   <FloralDivider />
   </RevealOnScroll>
 
-  <div className="bg-white/80 p-10 rounded-3xl shadow-[0_18px_55px_rgba(0,0,0,0.10)] border border-[#38BDF8]/25 mt-8">
+  <div className="bg-wedding-bg/80 p-10 rounded-3xl shadow-[0_18px_55px_rgba(0,0,0,0.10)] border border-wedding-accent-2/25 mt-8">
   {status === "success" || status === "already_submitted" ? (
   <motion.div
   initial={{ opacity: 0, scale: 0.95 }}
   animate={{ opacity: 1, scale: 1 }}
   className="py-10"
   >
-  <h3 className="font-poppins-bold text-3xl mb-4 text-[#0B1B2A]">
+  <h3 className="font-poppins-bold text-3xl mb-4 text-wedding-dark">
   {status === "already_submitted" ? "Welcome Back" : "Thank You"}
   </h3>
-  <p className="font-poppins text-[#0B1B2A]/70 mb-8">
+  <p className="font-poppins text-wedding-text/70 mb-8">
   {status === "already_submitted"
   ? "We have already received your confirmation."
   : "We look forward to celebrating with you."}
@@ -97,7 +97,7 @@ export function ConfirmationSection({
   ) : (
   <RevealOnScroll direction="up" delay={0.2} width="100%">
   <div>
-  <p className="font-poppins mb-8 text-[#0B1B2A]/70 italic leading-relaxed">
+  <p className="font-poppins mb-8 text-wedding-text/70 italic leading-relaxed">
   {!inviteeName ? (
   "Please access the invitation via your unique link."
   ) : (
@@ -107,15 +107,15 @@ export function ConfirmationSection({
 
   <form onSubmit={handleSubmit} className="space-y-6 text-left">
   <div>
-  <label className="block text-xs uppercase tracking-[0.2em] mb-2 font-poppins text-[#0284C7]">
+  <label className="block text-xs uppercase tracking-[0.2em] mb-2 font-poppins text-wedding-accent-2">
   Name
   </label>
-  <div className="w-full bg-white/70 border border-[#38BDF8]/25 rounded-2xl p-4 font-poppins text-[#0B1B2A]">
+  <div className="w-full bg-wedding-bg/70 border border-wedding-accent-2/25 rounded-2xl p-4 font-poppins text-wedding-text">
   {inviteeName || "Guest"}
   </div>
   </div>
   <div>
-  <label className="block text-xs uppercase tracking-[0.2em] mb-2 font-poppins text-[#0284C7]">
+  <label className="block text-xs uppercase tracking-[0.2em] mb-2 font-poppins text-wedding-accent-2">
   Guests
   </label>
   <select
@@ -123,7 +123,7 @@ export function ConfirmationSection({
   onChange={(e) =>
   setFormData({ ...formData, guests: e.target.value })
   }
-  className="w-full bg-white border border-[#38BDF8]/25 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-[#38BDF8]/25 font-poppins text-[#0B1B2A]"
+  className="w-full bg-wedding-bg border border-wedding-accent-2/25 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-wedding-accent-2/25 font-poppins text-wedding-text"
   disabled={status === "submitting" || !inviteeName}
   >
   <option value="1">1 Person</option>
@@ -134,12 +134,12 @@ export function ConfirmationSection({
   <button
   type="submit"
   disabled={status === "submitting" || !inviteeName}
-  className="w-full rounded-full bg-[#38BDF8] text-white py-4 text-xs font-poppins uppercase tracking-[0.3em] hover:bg-[#0EA5E9] transition-all duration-300 disabled:opacity-50 mt-4 shadow-[0_14px_35px_rgba(56,189,248,0.22)]"
+  className="w-full rounded-full bg-wedding-accent-2 text-wedding-on-accent-2 py-4 text-xs font-poppins uppercase tracking-[0.3em] hover:bg-wedding-accent-2/85 transition-all duration-300 disabled:opacity-50 mt-4 shadow-[0_14px_35px_color-mix(in_srgb,var(--invitation-accent-2)_22%,transparent)]"
   >
   {status === "submitting" ? "Sending..." : "Confirm"}
   </button>
   {status === "error" ? (
-  <p className="text-red-700/80 text-xs text-center mt-4 font-poppins">
+  <p className="text-wedding-accent/80 text-xs text-center mt-4 font-poppins">
   Something went wrong. Please try again.
   </p>
   ) : null}

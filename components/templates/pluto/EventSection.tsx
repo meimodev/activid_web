@@ -21,7 +21,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
       ].filter(Boolean);
 
   return (
-    <section className="relative overflow-hidden bg-[#4F5B4B] py-24 text-white ">
+    <section className="relative overflow-hidden bg-wedding-dark py-24 text-wedding-on-dark ">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/green-dust-and-scratches.png')]" />
         <OverlayReveal
@@ -74,17 +74,17 @@ export function EventSection({ events, heading }: EventSectionProps) {
           >
             <div className="flex items-start gap-6 ">
               <div className="shrink-0">
-                <p className="font-brittany-signature text-[56px] leading-none text-white ">
+                <p className="font-brittany-signature text-[56px] leading-none text-wedding-on-dark ">
                   Wedding
                 </p>
-                <p className="mt-2 font-stoic text-[56px] leading-none text-white ">
+                <p className="mt-2 font-stoic text-[56px] leading-none text-wedding-on-dark ">
                   Event
                 </p>
               </div>
 
               <div className="mt-10 flex w-full items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-white" />
-                <div className="h-px flex-1 bg-white" />
+                <div className="h-2 w-2 rounded-full bg-wedding-on-dark" />
+                <div className="h-px flex-1 bg-wedding-on-dark" />
               </div>
             </div>
           </RevealOnScroll>
@@ -98,12 +98,12 @@ export function EventSection({ events, heading }: EventSectionProps) {
                 delay={0.16 + idx * 0.12}
                 width="100%"
               >
-                <div className="relative rounded-[34px] bg-[#EFE7D6] px-8 py-12 text-center text-[#2B2424] shadow-[0_18px_55px_rgba(0,0,0,0.22)] ring-1 ring-white/15 ">
+                <div className="relative rounded-[34px] bg-wedding-bg px-8 py-12 text-center text-wedding-text shadow-[0_18px_55px_rgba(0,0,0,0.22)] ring-1 ring-wedding-on-dark/15 ">
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-0 opacity-25 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]" />
                   </div>
 
-                  <p className="relative font-poppins-bold text-[20px] tracking-[0.22em] uppercase text-[#7C5A2A] ">
+                  <p className="relative font-poppins-bold text-[20px] tracking-[0.22em] uppercase text-wedding-accent ">
                     {data.title}
                   </p>
 
@@ -117,13 +117,13 @@ export function EventSection({ events, heading }: EventSectionProps) {
                       transition={{ duration: 5.8, repeat: Infinity, ease: "easeInOut" }}
                     />
 
-                  <p className="relative mt-6 font-poppins-bold text-[18px] text-[#2B2424] ">
+                  <p className="relative mt-6 font-poppins-bold text-[18px] text-wedding-text ">
                     {formatInvitationDateLong(data.date)}
                   </p>
-                  <p className="relative mt-2 font-poppins text-[18px] text-[#7C5A2A]">
+                  <p className="relative mt-2 font-poppins text-[18px] text-wedding-accent">
                     {formatInvitationTime(data.date)}
                   </p>
-                  <p className="relative font-poppins text-[18px] text-[#7C5A2A]">
+                  <p className="relative font-poppins text-[18px] text-wedding-accent">
                     {data.venue}
                   </p>
 
@@ -131,7 +131,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
                     href={data.mapUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="relative mt-4 uppercase inline-flex min-w-[210px] items-center justify-center rounded-full bg-[#7A5A2A] px-10 py-3 font-poppins-bold text-[12px] tracking-[0.22em] text-white shadow-[0_14px_35px_rgba(0,0,0,0.18)] transition-colors hover:bg-[#6B4F25]"
+                    className="relative mt-4 uppercase inline-flex min-w-[210px] items-center justify-center rounded-full bg-wedding-accent px-10 py-3 font-poppins-bold text-[12px] tracking-[0.22em] text-wedding-on-accent shadow-[0_14px_35px_rgba(0,0,0,0.18)] transition-colors hover:bg-wedding-accent/90"
                   >
                     Link Map
                   </a>

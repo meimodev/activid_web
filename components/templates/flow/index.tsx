@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Hero } from "./Hero";
 import { Countdown } from "./Countdown";
@@ -13,18 +14,15 @@ import {
   FloatingFlowers,
   FloatingSparkles,
   FloatingHearts,
-  GoldenRings
+  GoldenRings,
 } from "./graphics";
 import { StorySection } from "./StorySection";
-import {
-  TitleSection,
-  CoupleSection,
-  EventSection,
-  GiftSection,
-  ConfirmationSection
-} from "./InfoSections";
+import { TitleSection } from "./TitleSection";
+import { CoupleSection } from "./CoupleSection";
+import { EventSection } from "./EventSection";
+import { GiftSection } from "./GiftSection";
+import { GratitudeSection } from "./GratitudeSection";
 import Link from "next/link";
-import { FloatingParallax } from "@/components/invitation/ParallaxText";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { Host, InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
@@ -35,14 +33,14 @@ interface FlowProps {
 
 export function Flow({ config }: FlowProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const guestName = searchParams.get("to");
 
-  const {
-  music,
-  weddingDate,
-  sections
-  } = config;
+  const { music, weddingDate, sections } = config;
 
-  const hosts = config.hosts;
+  const hosts = (Array.isArray(config.hosts) ? config.hosts : []).filter(
+    (host): host is Host => Boolean(host),
+  );
   const hostsSection = sections.hosts;
 
   const derivedPhotos = useMemo(
@@ -51,94 +49,137 @@ export function Flow({ config }: FlowProps) {
   );
 
   return (
-  <main className="relative min-h-screen overflow-x-hidden">
-  <BackgroundSlideshow
-    photos={derivedPhotos}
-    className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
-  />
-  <GoldenRings />
-  <FloatingFlowers />
-  <FloatingSparkles />
-  <FloatingHearts />
-  <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
+    <main className="relative min-h-screen overflow-x-hidden">
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="sticky top-0 w-full h-[100dvh] overflow-hidden">
+          <BackgroundSlideshow
+            photos={derivedPhotos}
+            className="absolute inset-0 w-full h-full"
+          />
+        </div>
+      </div>
 
-  {/* Hero / Cover Section - Fixed Overlay until opened */}
-  {sections.hero.enabled && (
-  <motion.div
-  className="absolute inset-0 z-50"
-  initial={false}
-  animate={{
-  y: isOpen ? "-100%" : "0%",
-  transitionEnd: {
-  display: isOpen ? "none" : "block"
-  }
-  }}
-  transition={{ duration: 1.5, ease: [0.19, 1, 0.22, 1] }}
-  >
-  <Hero
-  onOpen={() => setIsOpen(true)}
-  hosts={hosts}
-  date={weddingDate.displayShort}
-  subtitle={sections.hero.subtitle}
-  coverImage={sections.hero.coverImage}
-  />
-  </motion.div>
-  )}
+      <GoldenRings />
+      <FloatingFlowers />
+      <FloatingSparkles />
+      <FloatingHearts />
+      <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 
-  {/* Main Content - Visible underneath or revealed */}
-  <div className={`relative z-10 transition-opacity duration-1000 ${isOpen ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}>
-  {/* Only allow scrolling when open */}
-  <div className={isOpen ? "" : "h-screen overflow-hidden"}>
-  {sections.title.enabled && (
-  <TitleSection hosts={hosts} date={weddingDate.display} heading={sections.title.heading} />
-  )}
+      {/* Hero / Cover Section - Fixed Overlay until opened */}
+      {sections.hero.enabled && (
+        <motion.div
+          className="absolute inset-0 z-50 pointer-events-none"
+          initial={false}
+          animate={{
+            y: isOpen ? "-100%" : "0%",
+            opacity: isOpen ? 0 : 1,
+          }}
+          transition={{ duration: 1.5, ease: [0.19, 1, 0.22, 1], opacity: { duration: 1, delay: 0.2 } }}
+        >
+          <div className="pointer-events-auto h-full">
+            <Hero
+              onOpen={() => setIsOpen(true)}
+              hosts={hosts}
+              date={weddingDate.displayShort}
+              subtitle={sections.hero.subtitle}
+              coverImage={sections.hero.coverImage}
+              guestName={guestName}
+              isOpen={isOpen}
+            />
+          </div>
+        </motion.div>
+      )}
 
-  {sections.countdown.enabled && (
-  <Countdown targetDate={weddingDate.countdownTarget} photos={derivedPhotos} heading={sections.countdown.heading} />
-  )}
+      {/* Main Content - Visible underneath or revealed */}
+      <div
+        className={`relative z-10 transition-opacity duration-1000 delay-500 ${isOpen ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}
+      >
+        {/* Only allow scrolling when open */}
+        <div className={isOpen ? "" : "h-screen overflow-hidden"}>
+          {sections.title.enabled && (
+            <TitleSection
+              hosts={hosts}
+              date={weddingDate.display}
+              heading={sections.title.heading}
+              isOpen={isOpen}
+            />
+          )}
 
-  {sections.quote.enabled && (
-  <QuoteSection quote={sections.quote} />
-  )}
+          {sections.countdown.enabled && (
+            <Countdown
+              targetDate={weddingDate.countdownTarget}
+              photos={derivedPhotos}
+              heading={sections.countdown.heading}
+            />
+          )}
 
-  {hostsSection.enabled && (
-  <CoupleSection hosts={hosts} disableGrayscale={hostsSection.disableGrayscale} />
-  )}
+          {sections.quote.enabled && <QuoteSection quote={sections.quote} />}
 
-  {sections.story.enabled && (
-  <StorySection stories={sections.story.stories} heading={sections.story.heading} />
-  )}
+          {hostsSection.enabled && (
+            <CoupleSection
+              hosts={hosts}
+              disableGrayscale={hostsSection.disableGrayscale}
+            />
+          )}
 
-  {sections.event.enabled && (
-  <EventSection events={sections.event.events} heading={sections.event.heading} />
-  )}
+          {sections.story.enabled && (
+            <StorySection
+              stories={sections.story.stories}
+              heading={sections.story.heading}
+            />
+          )}
 
-  {sections.gallery.enabled && (
-  <Gallery photos={sections.gallery.photos} heading={sections.gallery.heading} />
-  )}
+          {sections.event.enabled && (
+            <EventSection
+              events={sections.event.events}
+              heading={sections.event.heading}
+            />
+          )}
 
-  {sections.rsvp.enabled && (
-  <Suspense fallback={<div className="py-24 text-center text-wedding-text-light font-body italic">Loading RSVP...</div>}>
-  <ConfirmationSection invitationId={config.id} rsvpDeadline={weddingDate.rsvpDeadline} />
-  </Suspense>
-  )}
+          {sections.gallery.enabled && (
+            <Gallery
+              photos={sections.gallery.photos}
+              heading={sections.gallery.heading}
+            />
+          )}
 
-  {sections.gift.enabled && (
-  <GiftSection bankAccounts={sections.gift.bankAccounts} heading={sections.gift.heading} description={sections.gift.description} />
-  )}
+          {sections.gift.enabled && (
+            <GiftSection
+              bankAccounts={sections.gift.bankAccounts}
+              heading={sections.gift.heading}
+              description={sections.gift.description}
+            />
+          )}
 
-  {sections.wishes.enabled && (
-  <Suspense fallback={<div className="py-24 text-center text-wedding-text-light font-body italic">Loading Wishes...</div>}>
-  <Wishes invitationId={config.id} heading={sections.wishes.heading} placeholder={sections.wishes.placeholder} thankYouMessage={sections.wishes.thankYouMessage} />
-  </Suspense>
-  )}
+          {sections.wishes.enabled && (
+            <Suspense
+              fallback={
+                <div className="py-24 text-center text-wedding-text-light font-body italic">
+                  Loading Wishes...
+                </div>
+              }
+            >
+              <Wishes
+                invitationId={config.id}
+                heading={sections.wishes.heading}
+                placeholder={sections.wishes.placeholder}
+                thankYouMessage={sections.wishes.thankYouMessage}
+              />
+            </Suspense>
+          )}
 
-  {sections.footer.enabled && (
-  <SpaceFooter hosts={hosts} message={sections.footer.message} seedKey={config.id} />
-  )}
-  </div>
-  </div>
-  </main>
+          <GratitudeSection hosts={hosts} />
+
+          {sections.footer.enabled && (
+            <SpaceFooter
+              hosts={hosts}
+              message={sections.footer.message}
+              seedKey={config.id}
+            />
+          )}
+        </div>
+      </div>
+    </main>
   );
 }
 
@@ -171,6 +212,10 @@ function SpaceFooter({
   message: string;
   seedKey: string;
 }) {
+  const primaryName = hosts[0]?.firstName ?? "";
+  const secondaryName = hosts[1]?.firstName ?? "";
+  const displayNames = secondaryName ? `${primaryName} & ${secondaryName}` : primaryName;
+
   const stars = useMemo(() => {
     const rand = mulberry32(fnv1a32(seedKey || "0"));
     return Array.from({ length: 50 }).map((_, i) => ({
@@ -184,67 +229,62 @@ function SpaceFooter({
   }, [seedKey]);
 
   return (
-  <footer className="relative py-24 bg-[#0B0D17] text-center text-white overflow-hidden">
-  {/* Space Background & Stars */}
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-  {stars.map((star) => (
-  <motion.div
-  key={star.id}
-  className="absolute rounded-full bg-white opacity-80"
-  style={{
-  top: star.top,
-  left: star.left,
-  width: star.size,
-  height: star.size,
-  }}
-  animate={{
-  opacity: [0.2, 1, 0.2],
-  scale: [0.8, 1.2, 0.8],
-  }}
-  transition={{
-  duration: star.duration,
-  repeat: Infinity,
-  delay: star.delay,
-  ease: "easeInOut",
-  }}
-  />
-  ))}
-  </div>
+    <footer className="relative py-24 bg-wedding-dark text-center text-wedding-on-dark overflow-hidden">
+      {/* Space Background & Stars */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {stars.map((star) => (
+          <motion.div
+            key={star.id}
+            className="absolute rounded-full bg-wedding-on-dark opacity-80"
+            style={{
+              top: star.top,
+              left: star.left,
+              width: star.size,
+              height: star.size,
+            }}
+            animate={{
+              opacity: [0.2, 1, 0.2],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: star.duration,
+              repeat: Infinity,
+              delay: star.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
 
-  {/* Content */}
-  <div className="relative z-10 px-4">
-  <RevealOnScroll direction="up" delay={0.1} width="100%">
-  <FloatingParallax speed={0.2}>
-  {/* Couple Names */}
-  <h2 className="font-script text-5xl text-transparent bg-clip-text bg-linear-to-r from-purple-200 via-white to-blue-200 mb-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-  {hosts[0]?.firstName ?? ""} {hosts[1]?.firstName ? "&" : ""} {hosts[1]?.firstName ?? ""}
-  </h2>
+      {/* Content */}
+      <div className="relative z-10 px-4">
+        <RevealOnScroll direction="up" delay={0.1} width="100%">
+          <div>
+            <h2 className="font-brittany-signature text-5xl text-transparent bg-clip-text bg-linear-to-r from-wedding-accent-2-light via-wedding-on-dark to-wedding-accent-light mb-8 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_55%,transparent)] leading-[1.08] py-1">
+              {displayNames}
+            </h2>
 
-  {/* Message */}
-  <p className="font-heading text-xs uppercase tracking-[0.4em] text-blue-100/60 mb-12 max-w-lg mx-auto leading-loose whitespace-pre-line">
-  {message}
-  </p>
-  </FloatingParallax>
-  </RevealOnScroll>
+            <p className="font-garet-book text-xs uppercase tracking-[0.4em] text-wedding-on-dark/60 mb-12 max-w-lg mx-auto leading-loose whitespace-pre-line">
+              {message}
+            </p>
+          </div>
+        </RevealOnScroll>
 
-  {/* CTA Button */}
-  <RevealOnScroll direction="up" delay={0.3} width="100%">
-  <Link
-  href="/"
-  className="group relative inline-flex items-center gap-3 px-8 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-full overflow-hidden hover:bg-white/10 transition-all duration-500 hover:border-white/40 hover:scale-105 hover:shadow-[0_0_20px_rgba(100,200,255,0.3)]"
-  >
-  <span className="relative z-10 font-heading text-xs uppercase tracking-[0.2em] text-white group-hover:text-blue-100 transition-colors">
-  🚀 Kembali Pulang ✨
-  </span>
-  <motion.div
-  className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"
-  />
-  </Link>
-  </RevealOnScroll>
+        {/* CTA Button */}
+        <RevealOnScroll direction="up" delay={0.3} width="100%">
+          <Link
+            href="/"
+            className="group relative inline-flex items-center gap-3 px-8 py-2 bg-wedding-on-dark/5 backdrop-blur-sm border border-wedding-on-dark/20 rounded-full overflow-hidden hover:bg-wedding-on-dark/10 transition-all duration-500 hover:border-wedding-on-dark/40 hover:scale-105 hover:shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-accent-2-light)_35%,transparent)]"
+          >
+            <span className="relative z-10 font-garet-book text-xs uppercase tracking-[0.2em] text-wedding-on-dark group-hover:text-wedding-accent-2-light transition-colors">
+              🚀 Kembali Pulang ✨
+            </span>
+            <motion.div className="absolute inset-0 bg-linear-to-r from-transparent via-wedding-on-dark/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+          </Link>
+        </RevealOnScroll>
 
-  {/* Activid Branding */}
-
-  </div>
-  </footer>
+        {/* Activid Branding */}
+      </div>
+    </footer>
   );
 }

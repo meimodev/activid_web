@@ -65,7 +65,7 @@ function PersonCard({
 }) {
   return (
     <VenusReveal direction="up" width="100%" delay={revealDelay}>
-      <div className="rounded-3xl overflow-hidden border border-black/10 bg-white/60 backdrop-blur">
+      <div className="rounded-3xl overflow-hidden border border-wedding-text/10 bg-wedding-bg/60 backdrop-blur">
         <div className="aspect-[4/3] w-full overflow-hidden bg-black/5 relative">
           <Image
             src={photo}
@@ -78,16 +78,16 @@ function PersonCard({
           />
         </div>
         <div className="p-6 text-center">
-          <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-body">
+          <p className="text-xs tracking-[0.35em] uppercase text-wedding-text-light font-body">
             {variant === "groom" ? "Mempelai Pria" : "Mempelai Wanita"}
           </p>
-          <h4 className={`mt-3 ${venusScript.className} text-4xl text-[#2B2424]`}>
+          <h4 className={`mt-3 ${venusScript.className} text-4xl text-wedding-text`}>
             {name}
           </h4>
-          <p className="mt-2 font-body text-sm text-[#2B2424]">{fullName}</p>
-          <p className="mt-3 text-xs text-[#6B5B5B]">{parents}</p>
+          <p className="mt-2 font-body text-sm text-wedding-text">{fullName}</p>
+          <p className="mt-3 text-xs text-wedding-text-light">{parents}</p>
           {meta ? (
-            <p className="mt-4 text-xs tracking-[0.25em] uppercase text-[#6B5B5B]">
+            <p className="mt-4 text-xs tracking-[0.25em] uppercase text-wedding-text-light">
               {meta}
             </p>
           ) : null}

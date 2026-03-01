@@ -37,7 +37,7 @@ function StarLayer({ stars, y }: { stars: Star[]; y: MotionValue<number> }) {
             {stars.map((star) => (
                 <motion.div
                     key={star.id}
-                    className="absolute rounded-full bg-white shadow-[0_0_2px_#fff]"
+                    className="absolute rounded-full bg-wedding-on-dark shadow-[0_0_2px_color-mix(in_srgb,var(--invitation-on-dark)_90%,transparent)]"
                     style={{
                         left: `${star.left}%`,
                         top: `${star.top}%`,
@@ -75,9 +75,9 @@ export function StarField() {
     const stars3 = useMemo(() => generateStars(20, 2.5, 4.0, 47), []);  // Close/Bright stars
 
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden bg-[#0B0D17]">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden bg-wedding-dark">
             {/* Base gradient background */}
-            <div className="absolute inset-0 bg-gradient-radial from-[#1e1b4b] via-[#0B0D17] to-black opacity-60" />
+            <div className="absolute inset-0 bg-gradient-radial from-wedding-accent-2/18 via-wedding-dark to-wedding-dark opacity-60" />
 
             <StarLayer stars={stars1} y={y1} />
             <StarLayer stars={stars2} y={y2} />
@@ -95,16 +95,16 @@ export function Nebula() {
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden mix-blend-screen">
             <motion.div
                 style={{ rotate, scale }}
-                className="absolute -top-[20%] -left-[10%] w-[320px] h-[320px] bg-purple-900/10 rounded-full blur-[100px] opacity-40"
+                className="absolute -top-[20%] -left-[10%] w-[320px] h-[320px] bg-wedding-accent/10 rounded-full blur-[100px] opacity-40"
             />
             <motion.div
                 style={{ rotate: useTransform(scrollY, [0, 5000], [0, -90]), scale }}
-                className="absolute top-[40%] -right-[10%] w-[280px] h-[280px] bg-blue-900/10 rounded-full blur-[120px] opacity-30"
+                className="absolute top-[40%] -right-[10%] w-[280px] h-[280px] bg-wedding-accent-2/10 rounded-full blur-[120px] opacity-30"
             />
             <motion.div
                 animate={{ opacity: [0.2, 0.4, 0.2] }}
                 transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[420px] bg-gradient-to-t from-purple-900/10 to-transparent blur-3xl"
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[420px] bg-gradient-to-t from-wedding-accent/10 to-transparent blur-3xl"
             />
         </div>
     );
@@ -121,25 +121,25 @@ export function SaturnRings() {
             <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/5 rounded-full"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-wedding-on-dark/5 rounded-full"
             >
-                <div className="absolute top-0 left-1/2 w-4 h-4 bg-white/40 rounded-full blur-[2px] shadow-[0_0_10px_white]" />
+                <div className="absolute top-0 left-1/2 w-4 h-4 bg-wedding-on-dark/40 rounded-full blur-[2px] shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_60%,transparent)]" />
             </motion.div>
 
             {/* Inner Gold Orbit */}
             <motion.div
                 animate={{ rotate: -360 }}
                 transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[430px] h-[430px] border border-[#D4AF37]/10 rounded-full"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[430px] h-[430px] border border-wedding-accent/10 rounded-full"
             >
-                <div className="absolute bottom-0 left-1/2 w-3 h-3 bg-[#D4AF37]/40 rounded-full blur-[1px] shadow-[0_0_8px_#D4AF37]" />
+                <div className="absolute bottom-0 left-1/2 w-3 h-3 bg-wedding-accent/40 rounded-full blur-[1px] shadow-[0_0_8px_color-mix(in_srgb,var(--invitation-accent)_70%,transparent)]" />
             </motion.div>
 
             {/* Dashed faint orbit */}
             <motion.div
                 animate={{ rotate: 90 }}
                 transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[780px] h-[780px] border border-dashed border-white/5 rounded-full"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[780px] h-[780px] border border-dashed border-wedding-on-dark/5 rounded-full"
             />
         </motion.div>
     );
@@ -159,7 +159,7 @@ export function ShootingStars() {
                         repeatDelay: 5 + i * 8,
                         ease: "easeIn"
                     }}
-                    className="absolute top-0 right-0 w-[400px] h-px bg-gradient-to-l from-transparent via-white to-transparent rotate-45 blur-[0.5px]"
+                    className="absolute top-0 right-0 w-[400px] h-px bg-gradient-to-l from-transparent via-wedding-on-dark to-transparent rotate-45 blur-[0.5px]"
                 />
             ))}
         </div>

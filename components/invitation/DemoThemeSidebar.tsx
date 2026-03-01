@@ -23,10 +23,15 @@ export function DemoThemeSidebar({ templateId, themes, initialTheme }: DemoTheme
     if (initialTheme?.mainColor && initialTheme.accentColor) {
       const main = normalizeHex(initialTheme.mainColor);
       const accent = normalizeHex(initialTheme.accentColor);
+      const accent2 = initialTheme.accent2Color ? normalizeHex(initialTheme.accent2Color) : null;
 
       const match = themes.find(
-        (theme) =>
-          normalizeHex(theme.mainColor) === main && normalizeHex(theme.accentColor) === accent,
+        (theme) => {
+          if (normalizeHex(theme.mainColor) !== main) return false;
+          if (normalizeHex(theme.accentColor) !== accent) return false;
+          if (!accent2) return true;
+          return !!theme.accent2Color && normalizeHex(theme.accent2Color) === accent2;
+        },
       );
 
       if (match) return match;
@@ -71,6 +76,8 @@ export function DemoThemeSidebar({ templateId, themes, initialTheme }: DemoTheme
     const styleMap = getInvitationThemeStyle(templateId, {
       mainColor: activeTheme.mainColor,
       accentColor: activeTheme.accentColor,
+      accent2Color: activeTheme.accent2Color,
+      darkColor: activeTheme.darkColor,
     });
 
     Object.entries(styleMap).forEach(([key, value]) => {
@@ -117,7 +124,7 @@ export function DemoThemeSidebar({ templateId, themes, initialTheme }: DemoTheme
             </button>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-1">
+          <div className="mt-3 grid grid-cols-1 gap-2">
             {themes.map((theme) => {
               const isActive =
                 !!activeTheme &&
@@ -157,7 +164,7 @@ export function DemoThemeSidebar({ templateId, themes, initialTheme }: DemoTheme
                           </span>
                         </>
                       ) : null}
-                      <div className="flex items-center overflow-hidden rounded-full border border-wedding-accent/15">
+                      <div className="flex flex-col overflow-hidden rounded-lg border border-wedding-accent/15">
                         <span
                           aria-hidden
                           className="h-6 w-6"

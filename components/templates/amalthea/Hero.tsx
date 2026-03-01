@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { PLUTO_OVERLAY_ASSETS } from "./graphics/overlays";
+import { useOverlayAssets } from "./graphics/overlays";
 import type { Host } from "@/types/invitation";
 
 interface HeroProps {
@@ -26,6 +26,7 @@ export function Hero({
   guestName,
   purpose,
 }: HeroProps) {
+  const overlayAssets = useOverlayAssets();
   const [isOpening, setIsOpening] = useState(false);
   const openTimeoutRef = useRef<number | null>(null);
 
@@ -91,7 +92,7 @@ export function Hero({
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-[#F6FBFF] max-w-[610px]">
+    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg max-w-[610px]">
       <div className="relative z-10 mx-auto flex h-full w-full items-center justify-center px-4">
         <motion.div
           variants={containerVariants}
@@ -115,7 +116,7 @@ export function Hero({
                 className="absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(circle at 50% 45%, rgba(246,251,255,0) 0%, rgba(246,251,255,0.42) 52%, rgba(246,251,255,0.95) 72%, rgba(246,251,255,1) 100%)",
+                    "radial-gradient(circle at 50% 45%, color-mix(in_srgb,var(--invitation-bg)_0%,transparent) 0%, color-mix(in_srgb,var(--invitation-bg)_42%,transparent) 52%, color-mix(in_srgb,var(--invitation-bg)_95%,transparent) 72%, var(--invitation-bg) 100%)",
                 }}
               />
             </div>
@@ -124,7 +125,7 @@ export function Hero({
               aria-hidden
               className="h-full w-full bg-contain bg-center bg-no-repeat"
               style={{
-                backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.heroFrame})`,
+                backgroundImage: `url(${overlayAssets.heroFrame})`,
               }}
               animate={
                 isOpening
@@ -147,24 +148,24 @@ export function Hero({
           </motion.div>
 
           <motion.div variants={itemVariants}>
-            <p className="font-poppins text-[14px] tracking-[0.22em] uppercase text-[#0284C7] pt-7">
+            <p className="font-poppins text-[14px] tracking-[0.22em] uppercase text-wedding-accent-2 pt-7">
               {heading}
             </p>
-            <p className="mt-3 font-poppins-bold text-[36px] leading-none text-[#0B1B2A]">
+            <p className="mt-3 font-poppins-bold text-[36px] leading-none text-wedding-dark">
               {nameLine}
             </p>
-            <p className="mt-2 font-poppins text-[13px] tracking-[0.24em] uppercase text-[#0B1B2A]/70">
+            <p className="mt-2 font-poppins text-[13px] tracking-[0.24em] uppercase text-wedding-dark/70">
               {date}
             </p>
           </motion.div>
 
           <motion.div
-            className="mt-8 space-y-2 text-[#0B1B2A]/75"
+            className="mt-8 space-y-2 text-wedding-dark/75"
             variants={itemVariants}
           >
             <p className="font-poppins text-sm">Kepada Yth.</p>
             <p className="font-poppins text-sm">Bapak/Ibu/Saudara-i</p>
-            <p className="pt-1 font-poppins-bold text-xl tracking-wide text-[#0B1B2A]">
+            <p className="pt-1 font-poppins-bold text-xl tracking-wide text-wedding-dark">
               {displayGuest}
             </p>
           </motion.div>
@@ -173,7 +174,7 @@ export function Hero({
             <motion.button
               onClick={handleOpen}
               disabled={isOpening}
-              className="mt-5 inline-flex items-center justify-center gap-3 rounded-full bg-[#38BDF8] px-9 py-3 font-poppins-bold text-sm tracking-[0.18em] uppercase text-white shadow-[0_12px_30px_rgba(56,189,248,0.35)] transition-colors hover:bg-[#0EA5E9] disabled:opacity-70"
+              className="mt-5 inline-flex items-center justify-center gap-3 rounded-full bg-wedding-accent-2 px-9 py-3 font-poppins-bold text-sm tracking-[0.18em] uppercase text-wedding-on-accent-2 shadow-[0_12px_30px_color-mix(in_srgb,var(--invitation-accent-2)_35%,transparent)] transition-colors hover:bg-wedding-accent-2/85 disabled:opacity-70"
               animate={
                 isOpening
                   ? undefined
@@ -193,7 +194,7 @@ export function Hero({
         </motion.div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 z-20 shadow-[inset_0_0_120px_rgba(0,0,0,0.14)]" />
+      <div className="pointer-events-none absolute inset-0 z-20 shadow-[inset_0_0_120px_color-mix(in_srgb,var(--invitation-dark)_14%,transparent)]" />
     </div>
   );
 }

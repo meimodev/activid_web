@@ -87,7 +87,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
     Math.abs(offset) * velocity;
 
   return (
-    <section className="relative overflow-hidden bg-[#EFE7D6] py-24 text-[#2B2424] ">
+    <section className="relative overflow-hidden bg-wedding-bg py-24 text-wedding-text ">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 opacity-25 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]" />
         <OverlayReveal
@@ -124,18 +124,18 @@ export function Gallery({ photos, heading }: GalleryProps) {
             width="100%"
           >
             <div className="flex items-center justify-end ">
-              <div className="h-px flex-1 bg-[#4F5B4B]" />
-              <div className="h-2 w-2 rounded-full bg-[#4F5B4B]" />
-              <h2 className="font-brittany-signature text-[62px] leading-none text-[#4F5B4B] px-6 ">
+              <div className="h-px flex-1 bg-wedding-dark" />
+              <div className="h-2 w-2 rounded-full bg-wedding-dark" />
+              <h2 className="font-brittany-signature text-center text-[62px] leading-none text-wedding-dark px-6 ">
                 {heading}
               </h2>
                 
-              <div className="h-2 w-2 rounded-full bg-[#4F5B4B]" />
-              <div className="h-px flex-1 bg-[#4F5B4B]" />
+              <div className="h-2 w-2 rounded-full bg-wedding-dark" />
+              <div className="h-px flex-1 bg-wedding-dark" />
             </div>
           </RevealOnScroll>
 
-          <div className="mt-12 overflow-hidden rounded-[28px] bg-white/70 ring-1 ring-[#8b7a57]/35 shadow-[0_18px_55px_rgba(0,0,0,0.10)]">
+          <div className="mt-12 overflow-hidden rounded-[28px] bg-wedding-bg/70 ring-1 ring-wedding-accent/35 shadow-[0_18px_55px_rgba(0,0,0,0.10)]">
             <div className="grid grid-cols-2 gap-0 ">
               {displayPhotos.map((p, idx) => (
                 <RevealOnScroll
@@ -151,14 +151,14 @@ export function Gallery({ photos, heading }: GalleryProps) {
                       setDirection(1);
                       setSelectedIndex(idx);
                     }}
-                    className="group relative w-full aspect-square overflow-hidden bg-[#EFE7D6]"
+                    className="group relative w-full aspect-square overflow-hidden bg-wedding-bg"
                   >
                     <img
                       src={p}
                       alt={`Gallery photo ${idx + 1}`}
                       className="block h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-black/15 opacity-0 transition-opacity group-hover:opacity-100" />
+                    <div className="absolute inset-0 bg-wedding-dark/15 opacity-0 transition-opacity group-hover:opacity-100" />
                   </button>
                 </RevealOnScroll>
               ))}
@@ -176,17 +176,17 @@ export function Gallery({ photos, heading }: GalleryProps) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setSelectedIndex(null)}
-                  className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-3 backdrop-blur-md "
+                  className="fixed inset-0 z-[120] flex items-center justify-center bg-wedding-dark/80 p-3 backdrop-blur-md "
                 >
                   <div className="relative h-[86vh] w-full max-w-5xl pointer-events-none">
                     <div
-                      className="relative h-full w-full overflow-hidden rounded-2xl bg-white p-2 pointer-events-auto shadow-2xl "
+                      className="relative h-full w-full overflow-hidden rounded-2xl bg-wedding-bg p-2 pointer-events-auto shadow-2xl "
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 bg-white/85 px-4 py-3 text-xs tracking-widest uppercase backdrop-blur">
+                      <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between gap-4 bg-wedding-bg/85 px-4 py-3 text-xs tracking-widest uppercase backdrop-blur">
                         <button
                           onClick={handleDownload}
-                          className="text-stone-800 hover:text-stone-500 transition-colors flex items-center gap-2 group"
+                          className="text-wedding-text hover:text-wedding-text-light transition-colors flex items-center gap-2 group"
                         >
                           <span className="text-lg group-hover:animate-bounce">
                             ↓
@@ -194,19 +194,19 @@ export function Gallery({ photos, heading }: GalleryProps) {
                           Download
                         </button>
 
-                        <div className="font-poppins text-[10px] text-stone-600">
+                        <div className="font-poppins text-[10px] text-wedding-text/70">
                           {selectedIndex + 1} / {total}
                         </div>
 
                         <button
                           onClick={() => setSelectedIndex(null)}
-                          className="text-stone-800 hover:text-stone-500 transition-colors"
+                          className="text-wedding-text hover:text-wedding-text-light transition-colors"
                         >
                           Close
                         </button>
                       </div>
 
-                      <div className="relative h-full w-full overflow-hidden bg-stone-100 pt-12 ">
+                      <div className="relative h-full w-full overflow-hidden bg-wedding-bg pt-12 ">
                         <AnimatePresence
                           initial={false}
                           custom={direction}
@@ -254,7 +254,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
                             e.stopPropagation();
                             paginate(-1);
                           }}
-                          className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/85 p-3 text-stone-700 shadow-lg backdrop-blur transition-colors hover:bg-white pointer-events-auto "
+                          className="absolute left-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-wedding-bg/85 p-3 text-wedding-text shadow-lg backdrop-blur transition-colors hover:bg-wedding-bg pointer-events-auto "
                           aria-label="Previous image"
                         >
                           <span className="text-3xl font-light ">&lt;</span>
@@ -265,7 +265,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
                             e.stopPropagation();
                             paginate(1);
                           }}
-                          className="absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-white/85 p-3 text-stone-700 shadow-lg backdrop-blur transition-colors hover:bg-white pointer-events-auto "
+                          className="absolute right-2 top-1/2 z-50 -translate-y-1/2 rounded-full bg-wedding-bg/85 p-3 text-wedding-text shadow-lg backdrop-blur transition-colors hover:bg-wedding-bg pointer-events-auto "
                           aria-label="Next image"
                         >
                           <span className="text-3xl font-light ">&gt;</span>

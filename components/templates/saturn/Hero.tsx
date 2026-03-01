@@ -57,7 +57,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
 
   {/* Names - Massive & Glowing */}
   <div className="relative py-4">
-  <h1 className="font-heading text-5xl  text-white leading-tight filter drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]">
+  <h1 className="font-heading text-5xl  text-wedding-on-dark leading-tight filter drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-accent-2)_30%,transparent)]">
   <span className="block">{primary?.firstName ?? ""}</span>
   {secondary ? (
   <>
@@ -89,7 +89,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   <div className="absolute inset-0 bg-wedding-accent/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
   <div className="relative z-10 flex items-center gap-3">
   <span className="w-1.5 h-1.5 rounded-full bg-wedding-accent animate-pulse" />
-  <span className="font-heading text-xs uppercase tracking-[0.3em] text-wedding-accent-light group-hover:text-white transition-colors">
+  <span className="font-heading text-xs uppercase tracking-[0.3em] text-wedding-accent-light group-hover:text-wedding-on-dark transition-colors">
   Initialize Sequence
   </span>
   </div>
@@ -104,20 +104,20 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
   {/* HUD Elements - Corners */}
   <div className="absolute top-8 left-8 hidden ">
   <div className="flex flex-col gap-1">
-  <span className="text-[10px] items-center text-cyan-500/40 font-mono tracking-widest">SYS.READY</span>
-  <div className="w-24 h-[1px] bg-cyan-500/20" />
+  <span className="text-[10px] items-center text-wedding-accent-2/40 font-mono tracking-widest">SYS.READY</span>
+  <div className="w-24 h-[1px] bg-wedding-accent-2/20" />
   </div>
   </div>
   <div className="absolute bottom-8 right-8 hidden ">
   <div className="flex flex-col items-end gap-1">
-  <span className="text-[10px] items-center text-cyan-500/40 font-mono tracking-widest">V.1.0.4</span>
-  <div className="w-24 h-[1px] bg-cyan-500/20" />
+  <span className="text-[10px] items-center text-wedding-accent-2/40 font-mono tracking-widest">V.1.0.4</span>
+  <div className="w-24 h-[1px] bg-wedding-accent-2/20" />
   </div>
   </div>
 
   {/* Vertical Data Lines */}
-  <div className="absolute top-1/2 left-6 -translate-y-1/2 w-[1px] h-32 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent hidden " />
-  <div className="absolute top-1/2 right-6 -translate-y-1/2 w-[1px] h-32 bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent hidden " />
+  <div className="absolute top-1/2 left-6 -translate-y-1/2 w-[1px] h-32 bg-gradient-to-b from-transparent via-wedding-accent-2/20 to-transparent hidden " />
+  <div className="absolute top-1/2 right-6 -translate-y-1/2 w-[1px] h-32 bg-gradient-to-b from-transparent via-wedding-accent-2/20 to-transparent hidden " />
   </div>
   );
 }

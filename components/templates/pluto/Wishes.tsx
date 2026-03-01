@@ -316,7 +316,7 @@ export function Wishes({
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#EFE7D6] py-24 text-[#2B2424]">
+    <section className="relative overflow-hidden bg-wedding-bg py-24 text-wedding-text">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <OverlayReveal
           delay={0.08}
@@ -343,33 +343,33 @@ export function Wishes({
       <div className="container mx-auto px-4 max-w-4xl relative z-10 w-full">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%">
           <div className="flex items-center justify-center gap-4 w-full ">
-            <div className="h-2 w-2 rounded-full bg-[#4F5B4B]/0" />
-            <h2 className="font-brittany-signature text-[62px] leading-none text-[#4F5B4B] text-center">
+            <div className="h-2 w-2 rounded-full bg-wedding-dark/0" />
+            <h2 className="font-brittany-signature text-[62px] leading-none text-wedding-dark text-center">
               {heading}
             </h2>
           </div>
         </RevealOnScroll>
 
         <RevealOnScroll delay={0.18} width="100%">
-          <div className="mt-12 rounded-3xl border border-[#8b7a57]/30 bg-white backdrop-blur p-7 shadow-[0_18px_50px_rgba(0,0,0,0.10)] relative overflow-hidden">
+          <div className="mt-12 rounded-3xl border border-wedding-accent/30 bg-wedding-bg backdrop-blur p-7 shadow-[0_18px_50px_rgba(0,0,0,0.10)] relative overflow-hidden">
             {!effectiveInviteeName ? (
-              <div className="text-center font-poppins text-[#3A2F2F]/75">
+              <div className="text-center font-poppins text-wedding-text/75">
                 Untuk memberikan ucapan, silahkan akses undangan ini melalui
                 link yang disediakan.
               </div>
             ) : hasPosted && !isDemo ? (
               <div className="text-center py-6">
-                <p className="text-xs tracking-[0.35em] uppercase text-[#4F5B4B]/75 font-poppins">
+                <p className="text-xs tracking-[0.35em] uppercase text-wedding-dark/75 font-poppins">
                   {effectiveInviteeName}
                 </p>
-                <h3 className="mt-4 font-brittany-signature text-[56px] leading-none text-[#4F5B4B]">
+                <h3 className="mt-4 font-brittany-signature text-[56px] leading-none text-wedding-dark">
                   Terimakasih
                 </h3>
-                <p className="mt-4 font-poppins text-sm text-[#3A2F2F]/80">
+                <p className="mt-4 font-poppins text-sm text-wedding-text/80">
                   {thankYouMessage}
                 </p>
                 {existingWish?.message ? (
-                  <p className="mt-4 text-sm text-[#3A2F2F]/75 whitespace-pre-line font-poppins">
+                  <p className="mt-4 text-sm text-wedding-text/75 whitespace-pre-line font-poppins">
                     {existingWish.message}
                   </p>
                 ) : null}
@@ -377,10 +377,10 @@ export function Wishes({
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="text-center">
-                  <p className="text-xs tracking-[0.35em] uppercase text-[#4F5B4B]/70 font-poppins">
+                  <p className="text-xs tracking-[0.35em] uppercase text-wedding-dark/70 font-poppins">
                     Dari
                   </p>
-                  <p className="mt-2 text-sm font-poppins text-[#2B2424]">
+                  <p className="mt-2 text-sm font-poppins text-wedding-text">
                     {effectiveInviteeName}
                   </p>
                 </div>
@@ -388,13 +388,13 @@ export function Wishes({
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full min-h-[128px] rounded-2xl border border-[#8b7a57]/25 bg-white/60 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#4F5B4B]/20 text-[#2B2424] placeholder:text-[#3A2F2F]/40 font-poppins"
+                  className="w-full min-h-[128px] rounded-2xl border border-wedding-accent/25 bg-wedding-bg/60 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-wedding-dark/20 text-wedding-text placeholder:text-wedding-text/40 font-poppins"
                   placeholder={placeholder}
                   disabled={isSubmitting}
                 />
 
                 {error ? (
-                  <p className="text-red-700/80 text-xs text-center font-poppins">
+                  <p className="text-wedding-accent/80 text-xs text-center font-poppins">
                     {error}
                   </p>
                 ) : null}
@@ -402,7 +402,7 @@ export function Wishes({
                 <button
                   type="submit"
                   disabled={isSubmitting || !message.trim()}
-                  className="w-full rounded-full px-6 py-3 bg-[#4F5B4B] text-white hover:bg-[#445142] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-full px-6 py-3 bg-wedding-dark text-wedding-on-dark hover:bg-wedding-dark/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="text-xs uppercase tracking-[0.25em] font-poppins">
                     {isSubmitting ? "Mengirim ..." : "Kirim"}
@@ -427,9 +427,9 @@ export function Wishes({
                 ease: [0.19, 1, 0.22, 1],
                 delay: 0.12,
               }}
-              className="rounded-3xl border border-[#8b7a57] bg-white/60 backdrop-blur p-7 text-center"
+              className="rounded-3xl border border-wedding-accent bg-wedding-bg/60 backdrop-blur p-7 text-center"
             >
-              <p className="text-sm text-[#3A2F2F]/75 font-poppins">
+              <p className="text-sm text-wedding-text/75 font-poppins">
                 Be the first to wish them well.
               </p>
             </motion.div>
@@ -452,21 +452,21 @@ export function Wishes({
                       ease: [0.19, 1, 0.22, 1],
                     }}
                     layout
-                    className="rounded-3xl border border-[#2d3418] bg-white/60 backdrop-blur p-7"
+                    className="rounded-3xl border border-wedding-dark bg-wedding-bg/60 backdrop-blur p-7"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-xs tracking-[0.35em] uppercase text-[#4F5B4B]/80 font-poppins">
+                        <p className="text-xs tracking-[0.35em] uppercase text-wedding-dark/80 font-poppins">
                           {wish.name}
                         </p>
-                        <p className="mt-2 text-[10px] uppercase tracking-[0.25em] font-poppins text-[#3A2F2F]/55">
+                        <p className="mt-2 text-[10px] uppercase tracking-[0.25em] font-poppins text-wedding-text/55">
                           {wish.createdAt
                             ? formatRelativeToNow(wish.createdAt) || "Just now"
                             : "Just now"}
                         </p>
                       </div>
                     </div>
-                    <p className="mt-4 text-sm text-[#3A2F2F]/80 whitespace-pre-line font-poppins">
+                    <p className="mt-4 text-sm text-wedding-text/80 whitespace-pre-line font-poppins">
                       {wish.message}
                     </p>
                   </motion.div>

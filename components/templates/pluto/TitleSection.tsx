@@ -59,7 +59,7 @@ export function TitleSection({
   }, [countdownTarget, hosts]);
 
   return (
-    <section className="relative h-screen overflow-hidden bg-[#EFE7D6]">
+    <section className="relative h-screen overflow-hidden bg-wedding-bg">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         {heroPhoto ? (
           <div
@@ -67,7 +67,7 @@ export function TitleSection({
             style={{ backgroundImage: `url(${heroPhoto})` }}
           />
         ) : null}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-wedding-dark/30" />
       </div>
 
       <div className="relative z-10 h-full w-full overflow-hidden">
@@ -79,7 +79,7 @@ export function TitleSection({
             width="100%"
           >
             <div
-              className="relative w-full px-4 pt-12 pb-12 text-center bg-center bg-no-repeat bg-linear-to-t from-[#EFE7D6] to-transparent"
+              className="relative w-full px-4 pt-12 pb-12 text-center bg-center bg-no-repeat bg-linear-to-t from-wedding-bg to-transparent"
               style={{
                 backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.bottomTitleGraphic})`,
               }}
@@ -134,7 +134,7 @@ export function TitleSection({
                         delay: 0.5 + idx * 0.08,
                         ease: "easeOut",
                       }}
-                      className="bg-[#7A5A2A] h-20 w-24 text-center text-white rounded-full flex items-center justify-center"
+                      className="bg-wedding-accent h-20 w-24 text-center text-wedding-on-accent rounded-full flex items-center justify-center"
                     >
                       <div>
                         <div className="text-[28px] font-semibold leading-none">
@@ -149,13 +149,13 @@ export function TitleSection({
                 </div>
               ) : null}
 
-              <p className="font-stoic text-[40px] leading-none text-[#8A6A2E] mt-10">
+              <p className="font-stoic text-[40px] leading-none text-wedding-accent mt-10">
                 {displayHeading}
               </p>
-              <p className="mt-2 font-tan-mon-cheri text-[30px] font-bold leading-none text-[#7C5A2A] ">
+              <p className="mt-2 font-tan-mon-cheri text-[30px] font-bold leading-none text-wedding-accent ">
                 {hosts[0]?.firstName ?? ""}{hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}
               </p>
-              <p className="mt-4 font-garet-book text-[16px] tracking-[0.12em] text-[#7C5A2A] ">
+              <p className="mt-4 font-garet-book text-[16px] tracking-[0.12em] text-wedding-accent ">
                 {date}
               </p>
               <motion.a
@@ -164,7 +164,7 @@ export function TitleSection({
                 rel="noreferrer"
                 animate={{ scale: [1, 1.02, 1], opacity: [0.92, 1, 0.92] }}
                 transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
-                className="mt-7 inline-flex items-center justify-center rounded-full bg-[#4E5A4A]/70 px-8 py-3 font-garet-book font-bold text-[12px] uppercase tracking-[0.28em] text-white shadow-[0_14px_30px_rgba(0,0,0,0.18)] transition hover:bg-[#6f5126]"
+                className="mt-7 inline-flex items-center justify-center rounded-full bg-wedding-dark/70 px-8 py-3 font-garet-book font-bold text-[12px] uppercase tracking-[0.28em] text-wedding-on-dark shadow-[0_14px_30px_rgba(0,0,0,0.18)] transition hover:bg-wedding-accent hover:text-wedding-on-accent"
               >
                 Save The Date
               </motion.a>

@@ -120,7 +120,7 @@ export function Saturn({ config }: SaturnProps) {
                     )}
 
                     {sections.rsvp.enabled && (
-                        <Suspense fallback={<div className="py-24 text-center text-white/50 font-body italic">Loading RSVP...</div>}>
+                        <Suspense fallback={<div className="py-24 text-center text-wedding-on-dark/50 font-body italic">Loading RSVP...</div>}>
                             <ConfirmationSection invitationId={config.id} rsvpDeadline={weddingDate.rsvpDeadline} />
                         </Suspense>
                     )}
@@ -130,7 +130,7 @@ export function Saturn({ config }: SaturnProps) {
                     )}
 
                     {sections.wishes.enabled && (
-                        <Suspense fallback={<div className="py-24 text-center text-white/50 font-body italic">Loading Wishes...</div>}>
+                        <Suspense fallback={<div className="py-24 text-center text-wedding-on-dark/50 font-body italic">Loading Wishes...</div>}>
                             <Wishes invitationId={config.id} heading={sections.wishes.heading} placeholder={sections.wishes.placeholder} thankYouMessage={sections.wishes.thankYouMessage} />
                         </Suspense>
                     )}

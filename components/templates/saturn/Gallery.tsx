@@ -74,14 +74,14 @@ export function Gallery({ photos, heading }: GalleryProps) {
   };
 
   return (
-  <section className="py-32 relative text-white bg-[#0B0D17]">
+  <section className="py-32 relative text-wedding-on-dark bg-wedding-dark">
 
   <div className="container mx-auto px-4 relative z-10">
   <RevealOnScroll direction="down" width="100%">
   <div className="flex flex-col items-center mb-20 text-center">
   <SatrunIcon />
   <h2 className="font-heading text-3xl uppercase tracking-[0.2em]">{heading}</h2>
-  <p className="mt-4 font-mono text-cyan-400/60 text-xs tracking-widest">ARCHIVED MEMORIES // STARDATE 2026</p>
+  <p className="mt-4 font-mono text-wedding-accent-2/60 text-xs tracking-widest">ARCHIVED MEMORIES // STARDATE 2026</p>
   </div>
   </RevealOnScroll>
 
@@ -89,11 +89,11 @@ export function Gallery({ photos, heading }: GalleryProps) {
   {/* Constellation Lines SVG Layer */}
   <div className="absolute inset-0 z-0 pointer-events-none opacity-20 hidden ">
   <svg width="100%" height="100%">
-  <line x1="16%" y1="16%" x2="50%" y2="50%" stroke="cyan" strokeWidth="1" />
-  <line x1="84%" y1="16%" x2="50%" y2="50%" stroke="cyan" strokeWidth="1" />
-  <line x1="16%" y1="84%" x2="50%" y2="50%" stroke="cyan" strokeWidth="1" />
-  <line x1="84%" y1="84%" x2="50%" y2="50%" stroke="cyan" strokeWidth="1" />
-  <line x1="50%" y1="16%" x2="50%" y2="84%" stroke="purple" strokeWidth="1" strokeDasharray="5,5" />
+  <line x1="16%" y1="16%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+  <line x1="84%" y1="16%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+  <line x1="16%" y1="84%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+  <line x1="84%" y1="84%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+  <line x1="50%" y1="16%" x2="50%" y2="84%" stroke="var(--invitation-accent)" strokeWidth="1" strokeDasharray="5,5" />
   </svg>
   </div>
 
@@ -109,24 +109,24 @@ export function Gallery({ photos, heading }: GalleryProps) {
   }}
   >
   {/* Connection Node */}
-  <div className="absolute -top-2 -left-2 w-4 h-4 bg-[#0B0D17] border border-cyan-500 rounded-full z-20 group-hover:bg-cyan-400 transition-colors duration-300" />
+  <div className="absolute -top-2 -left-2 w-4 h-4 bg-wedding-dark border border-wedding-accent-2 rounded-full z-20 group-hover:bg-wedding-accent-2 transition-colors duration-300" />
 
   <div
-  className="absolute inset-0 p-1 bg-gradient-to-br from-cyan-500/20 to-purple-500/20"
+  className="absolute inset-0 p-1 bg-gradient-to-br from-wedding-accent-2/20 to-wedding-accent/20"
   style={{ clipPath: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)" }}
   >
-  <div className="w-full h-full relative overflow-hidden bg-black/50">
+  <div className="w-full h-full relative overflow-hidden bg-wedding-dark/50">
   <img
   src={photo}
   alt={`Memory ${index + 1}`}
   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100"
   />
   {/* Overlay Scanline */}
-  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent h-[200%] w-full animate-scan pointer-events-none" />
+  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-wedding-accent-2/10 to-transparent h-[200%] w-full animate-scan pointer-events-none" />
   </div>
   </div>
 
-  <div className="absolute -bottom-4 -right-4 font-mono text-[10px] text-cyan-500/50 opacity-0 group-hover:opacity-100 transition-opacity">
+  <div className="absolute -bottom-4 -right-4 font-mono text-[10px] text-wedding-accent-2/50 opacity-0 group-hover:opacity-100 transition-opacity">
   IMG_SEQ_{index + 10}
   </div>
   </motion.div>
@@ -144,14 +144,14 @@ export function Gallery({ photos, heading }: GalleryProps) {
   animate={{ opacity: 1 }}
   exit={{ opacity: 0 }}
   onClick={() => setSelectedIndex(null)}
-  className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
+  className="fixed inset-0 z-[100] bg-wedding-dark/95 backdrop-blur-xl flex items-center justify-center p-4"
   >
   <div
   className="relative max-w-6xl w-full h-full max-h-[90vh] flex items-center justify-center pointer-events-none"
   >
   {/* Image Container */}
   <div
-  className="relative max-w-4xl w-full aspect-video border border-white/10 p-2 bg-white/5 pointer-events-auto"
+  className="relative max-w-4xl w-full aspect-video border border-wedding-on-dark/10 p-2 bg-wedding-on-dark/5 pointer-events-auto"
   onClick={(e) => e.stopPropagation()}
   >
   {/* Image Viewport - Overflow hidden for slide animation */}
@@ -179,21 +179,21 @@ export function Gallery({ photos, heading }: GalleryProps) {
   <div className="absolute -top-12 left-0 right-0 flex justify-between items-center text-xs tracking-widest uppercase">
   <button
   onClick={handleDownload}
-  className="text-white hover:text-cyan-400 transition-colors flex items-center gap-2 group"
+  className="text-wedding-on-dark hover:text-wedding-accent-2-light transition-colors flex items-center gap-2 group"
   >
   <span className="text-lg group-hover:animate-bounce">↓</span> [ Download ]
   </button>
 
   <button
   onClick={() => setSelectedIndex(null)}
-  className="text-white hover:text-cyan-400 transition-colors"
+  className="text-wedding-on-dark hover:text-wedding-accent-2-light transition-colors"
   >
   [ Close Transmission ]
   </button>
   </div>
 
   {/* Counter */}
-  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-cyan-400/80 font-mono text-sm tracking-widest">
+  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-wedding-accent-2/80 font-mono text-sm tracking-widest">
   [{selectedIndex + 1} / {displayPhotos.length}]
   </div>
   </div>
@@ -201,7 +201,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
   {/* Navigation Buttons */}
   <button
   onClick={handlePrev}
-  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-cyan-400 transition-colors pointer-events-auto z-50 group"
+  className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent-2-light transition-colors pointer-events-auto z-50 group"
   aria-label="Previous image"
   >
   <span className="text-4xl group-hover:-translate-x-1 transition-transform inline-block">&lt;</span>
@@ -209,7 +209,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
 
   <button
   onClick={handleNext}
-  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-white/50 hover:text-cyan-400 transition-colors pointer-events-auto z-50 group"
+  className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent-2-light transition-colors pointer-events-auto z-50 group"
   aria-label="Next image"
   >
   <span className="text-4xl group-hover:translate-x-1 transition-transform inline-block">&gt;</span>

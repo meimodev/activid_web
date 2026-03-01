@@ -40,11 +40,11 @@ function StoryItem({
 }) {
   return (
     <VenusReveal direction="up" width="100%" delay={revealDelay}>
-      <div className="rounded-3xl border border-black/10 bg-white/60 backdrop-blur p-7">
-        <p className="text-xs tracking-[0.35em] uppercase text-[#6B5B5B] font-body">
+      <div className="rounded-3xl border border-wedding-text/10 bg-wedding-bg/60 backdrop-blur p-7">
+        <p className="text-xs tracking-[0.35em] uppercase text-wedding-text-light font-body">
           {formatInvitationMonthYear(date)}
         </p>
-        <p className="mt-4 text-sm leading-relaxed text-[#3A2F2F] whitespace-pre-line">
+        <p className="mt-4 text-sm leading-relaxed text-wedding-text whitespace-pre-line">
           {description}
         </p>
       </div>

@@ -13,6 +13,8 @@ export type InvitationTemplateTheme = {
   title: string;
   mainColor: string;
   accentColor: string;
+  accent2Color?: string;
+  darkColor?: string;
 };
 
 export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[]> = {
@@ -22,12 +24,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Classic",
       mainColor: "#F9F7F2",
       accentColor: "#800020",
+      accent2Color: "#C5A059",
+      darkColor: "#2A1B1B",
     },
     {
       id: "emerald",
       title: "Emerald",
       mainColor: "#F9F7F2",
       accentColor: "#1F7A5C",
+      accent2Color: "#C5A059",
+      darkColor: "#0F2A22",
     },
   ],
   saturn: [
@@ -36,12 +42,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Night Gold",
       mainColor: "#0B0D17",
       accentColor: "#D4AF37",
+      accent2Color: "#22D3EE",
+      darkColor: "#0B0D17",
     },
     {
       id: "deep-space-cyan",
       title: "Deep Space",
       mainColor: "#020615",
       accentColor: "#7DD3FC",
+      accent2Color: "#D4AF37",
+      darkColor: "#020615",
     },
   ],
   venus: [
@@ -50,12 +60,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Cream Gold",
       mainColor: "#F8F4EC",
       accentColor: "#C5A059",
+      accent2Color: "#800020",
+      darkColor: "#2B2424",
     },
     {
       id: "cream-maroon",
       title: "Cream Maroon",
       mainColor: "#F8F4EC",
       accentColor: "#800020",
+      accent2Color: "#C5A059",
+      darkColor: "#2B2424",
     },
   ],
   neptune: [
@@ -64,12 +78,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Midnight Cyan",
       mainColor: "#020615",
       accentColor: "#7DD3FC",
+      accent2Color: "#C5A059",
+      darkColor: "#020615",
     },
     {
       id: "midnight-gold",
       title: "Midnight Gold",
       mainColor: "#020615",
       accentColor: "#C5A059",
+      accent2Color: "#7DD3FC",
+      darkColor: "#020615",
     },
   ],
   mercury: [
@@ -78,12 +96,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Ivory Maroon",
       mainColor: "#F7F3EA",
       accentColor: "#612A35",
+      accent2Color: "#C5A059",
+      darkColor: "#12060A",
     },
     {
       id: "blush-maroon",
       title: "Blush Maroon",
       mainColor: "#FFF4F6",
       accentColor: "#612A35",
+      accent2Color: "#C5A059",
+      darkColor: "#12060A",
     },
   ],
   pluto: [
@@ -92,12 +114,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Sand Bronze",
       mainColor: "#EFE7D6",
       accentColor: "#7A5A2A",
+      accent2Color: "#1F4D3A",
+      darkColor: "#2A1B1B",
     },
     {
       id: "pearl-forest",
       title: "Pearl Forest",
       mainColor: "#F3EFE7",
       accentColor: "#1F4D3A",
+      accent2Color: "#7A5A2A",
+      darkColor: "#101915",
     },
   ],
   amalthea: [
@@ -106,12 +132,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Sky Navy",
       mainColor: "#F6FBFF",
       accentColor: "#0B1B2A",
+      accent2Color: "#38BDF8",
+      darkColor: "#0B1B2A",
     },
     {
       id: "mist-blue",
       title: "Mist Blue",
       mainColor: "#F6FBFF",
       accentColor: "#2B6CB0",
+      accent2Color: "#38BDF8",
+      darkColor: "#0B1B2A",
     },
   ],
   jupiter: [
@@ -120,12 +150,16 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       title: "Ivory Gold",
       mainColor: "#F7F3EA",
       accentColor: "#C5A059",
+      accent2Color: "#38BDF8",
+      darkColor: "#0D0D1F",
     },
     {
       id: "night-gold",
       title: "Night Gold",
       mainColor: "#0B0D17",
       accentColor: "#C5A059",
+      accent2Color: "#38BDF8",
+      darkColor: "#0B0D17",
     },
   ],
 };
