@@ -106,7 +106,7 @@ export function Amalthea({ config }: AmaltheaProps) {
         .set({ second: 0, millisecond: 0 })
         .toISO({ includeOffset: true, suppressMilliseconds: true }) ?? null
     );
-  }, [sections.event?.events]);
+  }, [sections.event.events]);
 
   const effectiveCountdownTarget =
     firstEventCountdownTarget ?? (isDemo ? demoCountdownTarget : (dateInfo?.countdownTarget ?? ""));

@@ -40,7 +40,7 @@ export function TitleSection({ hosts, date, heading, isReady = true }: TitleSect
 
           {hosts.length <= 2 ? (
             <>
-              <h2 className="font-heading text-5xl md:text-6xl lg:text-7xl  tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)] mb-6">
+              <h2 className="font-heading text-5xl tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)] mb-6">
                 {primaryName}
               </h2>
 
@@ -49,7 +49,7 @@ export function TitleSection({ hosts, date, heading, isReady = true }: TitleSect
                   <div className="font-heading text-xl text-wedding-accent/80 italic mb-6" aria-hidden="true">
                     &amp;
                   </div>
-                  <h2 className="font-heading text-5xl md:text-6xl lg:text-7xl  tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)] mb-16">
+                  <h2 className="font-heading text-5xl tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)] mb-16">
                     {secondaryName}
                   </h2>
                 </>
@@ -59,18 +59,18 @@ export function TitleSection({ hosts, date, heading, isReady = true }: TitleSect
             </>
           ) : (
             <div className="mb-16 flex flex-col items-center gap-4">
-              <h2 className="font-heading text-5xl md:text-6xl lg:text-7xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]">
+              <h2 className="font-heading text-5xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]">
                 {primaryName}
               </h2>
               {secondaryName ? (
-                <h2 className="font-heading text-5xl md:text-6xl lg:text-7xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]">
+                <h2 className="font-heading text-5xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]">
                   {secondaryName}
                 </h2>
               ) : null}
               {extraNames.map((name, idx) => (
                 <h2
                   key={`${name}-${idx}`}
-                  className="font-heading text-5xl md:text-6xl lg:text-7xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]"
+                  className="font-heading text-5xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]"
                 >
                   {name}
                 </h2>

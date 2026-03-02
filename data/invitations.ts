@@ -5,8 +5,6 @@ const dt = (year: number, month: number, day: number, hour = 0, minute = 0) =>
   toInvitationIso({ year, month, day, hour, minute }) ??
   `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00+07:00`;
 
-const cd = (year: number, month: number, day: number) => dt(year, month, day, 0, 0);
-
 type Purpose = "marriage" | "birthday" | "event";
 
 type InvitationConfigOverrides = Omit<Partial<InvitationConfig>, "metadata" | "music" | "sections"> & {
@@ -172,10 +170,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     music: {
       title: "Theme",
       url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
-      autoPlay: true,
-      loop: true,
     },
-    backgroundPhotos: [],
     sections: {
       hero: {
         enabled: true,
@@ -321,10 +316,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     music: {
       title: "Theme",
       url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
-      autoPlay: true,
-      loop: true,
     },
-    backgroundPhotos: [],
     sections: {
       hero: {
         enabled: true,
@@ -444,10 +436,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     music: {
       title: "Theme",
       url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
-      autoPlay: true,
-      loop: true,
     },
-    backgroundPhotos: [],
     sections: {
       hero: {
         enabled: true,

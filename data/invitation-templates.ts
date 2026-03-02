@@ -177,7 +177,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Maroon"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "saturn-demo",
@@ -187,7 +187,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Saturn"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "venus-demo",
@@ -197,7 +197,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Haruki"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "neptune-demo",
@@ -207,7 +207,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Neptune"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "mercury-demo",
@@ -217,7 +217,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Floral"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "pluto-demo",
@@ -227,7 +227,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Pluto"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "amalthea-demo",
@@ -237,7 +237,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Sky Blue"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
   {
     id: "jupiter-demo",
@@ -247,6 +247,6 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
       "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
     tags: ["Wedding", "Jupiter"],
     priceOriginal: "450.000",
-    priceDiscount: "159.000",
+    priceDiscount: "120.000",
   },
 ];

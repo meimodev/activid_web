@@ -219,7 +219,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
       <motion.div 
         animate={{ opacity: isExiting ? 0 : 1 }}
         transition={{ duration: 0.4 }}
-        className="absolute top-8 left-8 hidden md:flex"
+        className="absolute top-8 left-8 hidden"
       >
         <div className="flex flex-col gap-1">
           <span className="text-[10px] items-center text-wedding-accent-2/40 font-mono tracking-widest">
@@ -235,7 +235,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
       <motion.div 
         animate={{ opacity: isExiting ? 0 : 1 }}
         transition={{ duration: 0.4 }}
-        className="absolute bottom-8 right-8 hidden md:flex"
+        className="absolute bottom-8 right-8 hidden"
       >
         <div className="flex flex-col items-end gap-1">
           <span className="text-[10px] items-center text-wedding-accent-2/40 font-mono tracking-widest">
@@ -253,7 +253,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
       <motion.div 
         animate={{ opacity: isExiting ? 0 : 1 }}
         transition={{ duration: 0.4 }}
-        className="absolute top-1/2 left-6 -translate-y-1/2 w-[1px] h-48 bg-gradient-to-b from-transparent via-wedding-accent-2/20 to-transparent hidden md:block overflow-hidden" 
+        className="absolute top-1/2 left-6 -translate-y-1/2 w-[1px] h-48 bg-gradient-to-b from-transparent via-wedding-accent-2/20 to-transparent hidden overflow-hidden" 
       >
         <motion.div 
           animate={{ y: ["-100%", "200%"] }}
@@ -264,7 +264,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage }: HeroProps) {
       <motion.div 
         animate={{ opacity: isExiting ? 0 : 1 }}
         transition={{ duration: 0.4 }}
-        className="absolute top-1/2 right-6 -translate-y-1/2 w-[1px] h-48 bg-gradient-to-b from-transparent via-wedding-accent-2/20 to-transparent hidden md:block overflow-hidden" 
+        className="absolute top-1/2 right-6 -translate-y-1/2 w-[1px] h-48 bg-gradient-to-b from-transparent via-wedding-accent-2/20 to-transparent hidden overflow-hidden" 
       >
         <motion.div 
           animate={{ y: ["200%", "-100%"] }}

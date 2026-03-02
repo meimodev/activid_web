@@ -91,6 +91,7 @@ function deriveImagekitFolderKey(
 }
 
 const MAX_IMAGE_SIZE_BYTES = 25 * 1024 * 1024;
+const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -106,6 +107,58 @@ function validateImageFile(file: File): string | null {
     return "Image must be smaller than 25MB.";
   }
   return null;
+}
+
+function validateAudioFile(file: File): string | null {
+  if (!file.type || !file.type.startsWith("audio/")) {
+    return "Only audio files are allowed.";
+  }
+  if (file.size >= MAX_AUDIO_SIZE_BYTES) {
+    return "Audio must be smaller than 10MB.";
+  }
+  return null;
+}
+
+async function uploadToDropboxAudio({
+  file,
+  folderKey,
+}: {
+  file: File;
+  folderKey: string;
+}): Promise<{ url: string; dropboxPath: string }> {
+  if (!folderKey) {
+    throw new Error("Upload folder is required before uploading audio.");
+  }
+
+  const form = new FormData();
+  form.set("file", file);
+  form.set("folderKey", folderKey);
+
+  const res = await fetch("/api/dropbox/audio", { method: "POST", body: form });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Upload failed.");
+  }
+
+  const data = (await res.json()) as { url?: string; dropboxPath?: string };
+  if (!data.url || !data.dropboxPath) {
+    throw new Error("Upload failed: missing URL.");
+  }
+
+  return { url: data.url, dropboxPath: data.dropboxPath };
+}
+
+async function deleteDropboxAudio(dropboxPath: string): Promise<void> {
+  const res = await fetch("/api/dropbox/audio", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dropboxPath }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Delete failed.");
+  }
 }
 
 async function uploadToImageKit({
@@ -733,47 +786,6 @@ function TextArea({
   );
 }
 
-function Checkbox({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-}) {
-  return (
-    <label className="group inline-flex items-center gap-2.5 text-sm text-white/80 select-none cursor-pointer">
-      <span className="relative grid h-5 w-5 place-items-center">
-        <input
-          type="checkbox"
-          className="peer sr-only"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-        />
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-md border border-white/20 bg-white/5 shadow-[0_1px_0_rgba(255,255,255,0.06)] transition-colors peer-checked:border-indigo-400/60 peer-checked:bg-indigo-500/20 group-hover:border-white/30 peer-focus-visible:ring-2 peer-focus-visible:ring-indigo-500/60"
-        />
-        <svg
-          viewBox="0 0 20 20"
-          fill="none"
-          className="relative z-10 h-3.5 w-3.5 text-indigo-100 opacity-0 scale-90 transition-all peer-checked:opacity-100 peer-checked:scale-100"
-        >
-          <path
-            d="M16.667 5.833 8.333 14.167 4.167 10"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <span className="leading-none">{label}</span>
-    </label>
-  );
-}
-
 function SectionCard({
   title,
   enabled,
@@ -858,6 +870,9 @@ export function RegisterInvitationForm({
   const initialTheme = useMemo(() => getInvitationTemplateThemes(templateId)[0], [templateId]);
   const [themeId, setThemeId] = useState(() => initialTheme?.id ?? "");
   const [password, setPassword] = useState("");
+  const [musicUploading, setMusicUploading] = useState(false);
+  const [musicDeleting, setMusicDeleting] = useState(false);
+  const [musicError, setMusicError] = useState<string | null>(null);
   const initialPurpose = initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
@@ -1641,7 +1656,7 @@ export function RegisterInvitationForm({
 
         <div className="grid gap-4 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner relative z-10">
           <div className="text-sm font-black text-indigo-100 uppercase tracking-wide">
-            Audio Transmission (Music)
+            Music
           </div>
           <div className="grid gap-4">
             <TextInput
@@ -1652,27 +1667,96 @@ export function RegisterInvitationForm({
             <TextInput
               label="Audio URL"
               value={config.music.url}
+              readOnly={Boolean(config.music.dropboxPath)}
               onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "url"], v))}
             />
-            <div className="flex gap-6">
-              <Checkbox
-                label="Auto Play"
-                checked={asBoolean(config.music.autoPlay)}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "autoPlay"], v))}
-              />
-              <Checkbox
-                label="Loop"
-                checked={asBoolean(config.music.loop)}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "loop"], v))}
-              />
+
+            <div className="flex items-center justify-between gap-3">
+              {!config.music.dropboxPath ? (
+                <label className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-indigo-500/60">
+                  {musicUploading ? "Uploading..." : "Choose Audio"}
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    disabled={musicUploading || musicDeleting}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file) return;
+
+                      const validationError = validateAudioFile(file);
+                      if (validationError) {
+                        setMusicError(validationError);
+                        return;
+                      }
+
+                      setMusicError(null);
+                      setMusicUploading(true);
+
+                      try {
+                        const uploaded = await uploadToDropboxAudio({
+                          file,
+                          folderKey: config.imagekitFolderKey ?? "",
+                        });
+
+                        setConfig((prev) => {
+                          let next = updateAtPath(prev, ["music", "url"], uploaded.url);
+                          next = updateAtPath(next, ["music", "dropboxPath"], uploaded.dropboxPath);
+                          return next;
+                        });
+                      } catch (err) {
+                        setMusicError(getErrorMessage(err));
+                      } finally {
+                        setMusicUploading(false);
+                      }
+                    }}
+                  />
+                </label>
+              ) : (
+                <div className="text-xs text-white/60">Audio URL is locked (Dropbox-managed).</div>
+              )}
+
+              {config.music.dropboxPath ? (
+                <button
+                  type="button"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60 disabled:opacity-60"
+                  disabled={musicUploading || musicDeleting}
+                  onClick={async () => {
+                    const path = config.music.dropboxPath;
+                    if (!path) return;
+                    setMusicError(null);
+                    setMusicDeleting(true);
+                    try {
+                      await deleteDropboxAudio(path);
+                      setConfig((prev) => {
+                        let next = updateAtPath(prev, ["music", "dropboxPath"], undefined);
+                        next = updateAtPath(next, ["music", "url"], "");
+                        return next;
+                      });
+                    } catch (err) {
+                      setMusicError(getErrorMessage(err));
+                    } finally {
+                      setMusicDeleting(false);
+                    }
+                  }}
+                >
+                  {musicDeleting ? "Deleting..." : "Delete"}
+                </button>
+              ) : null}
             </div>
+
+            {musicError ? (
+              <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
+                {musicError}
+              </div>
+            ) : null}
           </div>
         </div>
-      </div>
 
-      <div className="grid gap-5 relative z-10">
+        <div className="grid gap-5 relative z-10">
           <SectionCard
-            title="👋 Greeting / Quote (Hero)"
+            title="👋 Hero"
             enabled={asBoolean(config.sections.hero.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1861,7 +1945,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="📖 Journey (Story)"
+            title="📖 Story"
             enabled={asBoolean(config.sections.story.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -1971,7 +2055,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="📅 Event Schedule (Event Section)"
+            title="📅 Event Section"
             enabled={asBoolean(config.sections.event.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2144,7 +2228,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="RSVP (Confirmation)"
+            title="Confirmation"
             enabled={asBoolean(config.sections.rsvp.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2345,6 +2429,8 @@ export function RegisterInvitationForm({
               />
             </div>
           </SectionCard>
+      </div>
+
       </div>
 
       <button

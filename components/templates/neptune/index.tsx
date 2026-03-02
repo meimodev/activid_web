@@ -341,7 +341,6 @@ export function Neptune({ config }: NeptuneProps) {
 
  useEffect(() => {
   if (!isOpen || !contentReady) return;
-  if (!config.music.autoPlay) return;
 
   if (audioRef.current) {
   const playPromise = audioRef.current.play();
@@ -351,7 +350,7 @@ export function Neptune({ config }: NeptuneProps) {
   .catch(() => setIsPlaying(false));
   }
   }
- }, [config.music.autoPlay, contentReady, isOpen]);
+ }, [contentReady, isOpen]);
 
  const togglePlay = () => {
   if (!audioRef.current) return;
@@ -394,7 +393,7 @@ export function Neptune({ config }: NeptuneProps) {
   <audio
   ref={audioRef}
   src={audioStreamUrl}
-  loop={config.music.loop}
+  loop
   preload="auto"
   />
 

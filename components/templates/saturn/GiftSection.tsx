@@ -23,7 +23,7 @@ export function GiftSection({ bankAccounts, heading, description }: GiftSectionP
             <div className="w-16 h-16 mb-6 rounded-full border border-wedding-accent/30 flex items-center justify-center">
               <span className="text-2xl">🎁</span>
             </div>
-            <h2 className="font-heading text-3xl md:text-4xl capitalize tracking-[0.2em] text-wedding-accent mb-6">{heading}</h2>
+            <h2 className="font-heading text-3xl capitalize tracking-[0.2em] text-wedding-accent mb-6">{heading}</h2>
             <StarDivider />
           </div>
 

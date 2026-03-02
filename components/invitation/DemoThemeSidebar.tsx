@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { InvitationConfig } from "@/types/invitation";
 import type { InvitationTemplateTheme } from "@/data/invitation-templates";
@@ -32,6 +32,7 @@ export function DemoThemeSidebar({
   onPurposeChange,
 }: DemoThemeSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const [internalThemeId, setInternalThemeId] = useState<string>(() => {
     if (!themes.length) return "";
 
@@ -78,18 +79,7 @@ export function DemoThemeSidebar({
   }, []);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
-    const apply = () => {
-      setIsOpen(mediaQuery.matches);
-    };
-
-    const timer = window.setTimeout(apply, 0);
-    mediaQuery.addEventListener("change", apply);
-
-    return () => {
-      window.clearTimeout(timer);
-      mediaQuery.removeEventListener("change", apply);
-    };
+    return;
   }, []);
 
   useEffect(() => {
@@ -110,7 +100,26 @@ export function DemoThemeSidebar({
     });
   }, [activeTheme, templateId]);
 
-  const title = "Color Combinations";
+  const title = "Theme selector";
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (panelRef.current?.contains(target)) return;
+      setIsOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
+  }, [isOpen]);
 
   if (!portalRoot) return null;
 
@@ -130,11 +139,13 @@ export function DemoThemeSidebar({
             className="h-3 w-3 rounded-full"
             style={{ backgroundColor: activeTheme?.accentColor ?? "var(--invitation-accent)" }}
           />
-          <span className="sm:hidden">Colors</span>
-          <span className="hidden sm:inline">{title}</span>
+          <span>Theme</span>
         </button>
       ) : (
-        <div className="max-h-[calc(100vh-140px)] overflow-auto rounded-2xl border border-wedding-accent/30 bg-wedding-bg/88 p-3 text-wedding-text shadow-[0_18px_60px_rgba(0,0,0,0.22)] backdrop-blur">
+        <div
+          ref={panelRef}
+          className="max-h-[calc(100vh-140px)] overflow-auto rounded-2xl border border-wedding-accent/30 bg-wedding-bg/88 p-3 text-wedding-text shadow-[0_18px_60px_rgba(0,0,0,0.22)] backdrop-blur"
+        >
           <div className="flex items-center justify-between gap-3">
             <div className="text-xs font-semibold tracking-[0.14em] uppercase text-wedding-text-light">
               {title}
@@ -211,7 +222,7 @@ export function DemoThemeSidebar({
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold">{theme.title}</div>
-                      <div className="mt-1 hidden sm:flex items-center gap-2 text-[11px] text-wedding-text-light">
+                      <div className="mt-1 flex items-center gap-2 text-[11px] text-wedding-text-light">
                         <span className="truncate">{theme.mainColor}</span>
                         <span className="opacity-60">/</span>
                         <span className="truncate">{theme.accentColor}</span>
@@ -220,14 +231,9 @@ export function DemoThemeSidebar({
 
                     <div className="flex items-center gap-2">
                       {isActive ? (
-                        <>
-                          <span className="hidden sm:inline rounded-full bg-wedding-accent/15 px-2 py-1 text-[10px] font-semibold text-wedding-accent">
-                            Active
-                          </span>
-                          <span className="sm:hidden flex h-7 w-7 items-center justify-center rounded-full bg-wedding-accent/15 text-[13px] font-semibold text-wedding-accent">
-                            ✓
-                          </span>
-                        </>
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-wedding-accent/15 text-[13px] font-semibold text-wedding-accent">
+                          ✓
+                        </span>
                       ) : null}
                       <div className="flex flex-col overflow-hidden rounded-lg border border-wedding-accent/15">
                         <span
@@ -249,7 +255,7 @@ export function DemoThemeSidebar({
           </div>
 
           <div className="mt-3 text-[11px] leading-relaxed text-wedding-text-light">
-            Demo only: click a combination to preview.
+            Demo only: click a theme to preview.
           </div>
         </div>
       )}

@@ -127,7 +127,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
               direction="up"
               width="100%"
               staggerDelay={0.12}
-              className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 relative z-10"
+              className="grid grid-cols-2 gap-4 relative z-10"
             >
               {displayPhotos.map((photo, index) => (
                 <button
@@ -172,7 +172,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
               animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
               exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
               onClick={() => setSelectedIndex(null)}
-              className="fixed inset-0 z-[99999] bg-wedding-dark/90 flex flex-col items-center justify-center p-4 md:p-12 cursor-pointer"
+              className="fixed inset-0 z-[99999] bg-wedding-dark/90 flex flex-col items-center justify-center p-4 cursor-pointer"
             >
               {/* Top Bar Controls */}
               <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-50 pointer-events-none">
@@ -233,7 +233,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); showPrev(e); }}
-                    className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent transition-colors z-50 group bg-wedding-dark/30 hover:bg-wedding-dark/80 rounded-full backdrop-blur-md border border-transparent hover:border-wedding-accent/30 pointer-events-auto"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent transition-colors z-50 group bg-wedding-dark/30 hover:bg-wedding-dark/80 rounded-full backdrop-blur-md border border-transparent hover:border-wedding-accent/30 pointer-events-auto"
                     aria-label="Previous image"
                   >
                     <span className="text-2xl group-hover:-translate-x-1 transition-transform inline-block">←</span>
@@ -241,7 +241,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
 
                   <button
                     onClick={(e) => { e.stopPropagation(); showNext(e); }}
-                    className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent transition-colors z-50 group bg-wedding-dark/30 hover:bg-wedding-dark/80 rounded-full backdrop-blur-md border border-transparent hover:border-wedding-accent/30 pointer-events-auto"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent transition-colors z-50 group bg-wedding-dark/30 hover:bg-wedding-dark/80 rounded-full backdrop-blur-md border border-transparent hover:border-wedding-accent/30 pointer-events-auto"
                     aria-label="Next image"
                   >
                     <span className="text-2xl group-hover:translate-x-1 transition-transform inline-block">→</span>

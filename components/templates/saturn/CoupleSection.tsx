@@ -35,16 +35,16 @@ export function HostsSection({ hosts }: HostsSectionProps) {
                     direction={isEven ? "right" : "left"}
                     width="100%"
                     staggerDelay={0.16}
-                    className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12 md:gap-20 w-full`}
+                    className="flex flex-col items-center gap-12 w-full"
                   >
                     {/* Photo Side */}
-                    <div className="w-full md:w-1/2 flex justify-center">
+                    <div className="w-full flex justify-center">
                       <div className="relative group">
                         {/* Decorative orbits */}
                         <div className="absolute -inset-8 border border-wedding-on-dark/10 rounded-full animate-[spin_60s_linear_infinite]" />
                         <div className="absolute -inset-12 border border-wedding-accent/20 rounded-full animate-[spin_40s_linear_infinite_reverse] border-dashed" />
 
-                        <div className="w-64 h-64 md:w-80 md:h-80 rounded-full p-2 bg-linear-to-tr from-wedding-accent via-wedding-on-dark/20 to-wedding-accent-2 relative z-10 overflow-hidden group-hover:scale-105 transition-transform duration-700">
+                        <div className="w-64 h-64 rounded-full p-2 bg-linear-to-tr from-wedding-accent via-wedding-on-dark/20 to-wedding-accent-2 relative z-10 overflow-hidden group-hover:scale-105 transition-transform duration-700">
                           {host.photo ? (
                             <img
                               src={host.photo}
@@ -63,12 +63,12 @@ export function HostsSection({ hosts }: HostsSectionProps) {
                     </div>
 
                     {/* Info Side */}
-                    <div className={`w-full md:w-1/2 text-center ${isEven ? 'md:text-left' : 'md:text-right'}`}>
-                      <h3 className="font-heading text-3xl md:text-4xl capitalize tracking-[0.2em] text-wedding-on-dark mb-4 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_20%,transparent)]">
+                    <div className="w-full text-center">
+                      <h3 className="font-heading text-3xl capitalize tracking-[0.2em] text-wedding-on-dark mb-4 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_20%,transparent)]">
                         {host.fullName}
                       </h3>
 
-                      <div className={`flex items-center gap-4 mb-6 justify-center ${isEven ? 'md:justify-start' : 'md:justify-end'}`}>
+                      <div className="flex items-center gap-4 mb-6 justify-center">
                         <div className="h-px w-12 bg-wedding-accent/50" />
                         <span className="font-heading text-xs uppercase tracking-[0.3em] text-wedding-accent">
                           {host.role}

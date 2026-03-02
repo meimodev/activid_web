@@ -39,7 +39,7 @@ export function EventSection({ events, heading }: EventSectionProps) {
 
           <div className="relative">
             {/* Vertical connecting line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-wedding-accent/20 hidden md:block" />
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-wedding-accent/20 hidden" />
 
             <StaggerRevealOnScroll
               direction="up"
@@ -48,13 +48,12 @@ export function EventSection({ events, heading }: EventSectionProps) {
               className="grid gap-12"
             >
               {cards.map((event, index) => {
-                const isEven = index % 2 === 0;
                 const time = formatInvitationTime(event.date);
 
                 return (
                   <div
                     key={`${event.title}-${index}`}
-                    className={`flex flex-col md:flex-row items-center gap-8 ${isEven ? "" : "md:flex-row-reverse"}`}
+                    className="flex flex-col items-center gap-8"
                   >
                     {/* Content */}
                     <div
@@ -114,11 +113,11 @@ export function EventSection({ events, heading }: EventSectionProps) {
                     </div>
 
                     {/* Center Node */}
-                    <div className="hidden md:flex relative z-10 w-12 h-12 rounded-full bg-wedding-dark border border-wedding-accent/30 items-center justify-center -mx-6">
+                    <div className="hidden relative z-10 w-12 h-12 rounded-full bg-wedding-dark border border-wedding-accent/30 items-center justify-center -mx-6">
                       <div className="w-4 h-4 bg-wedding-accent rounded-full animate-pulse shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-accent)_50%,transparent)]" />
                     </div>
 
-                    <div className="hidden md:block w-1/2" />
+                    <div className="hidden w-1/2" />
                   </div>
                 );
               })}

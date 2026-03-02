@@ -51,8 +51,7 @@ export interface BankAccount {
 export interface MusicConfig {
     title?: string;
     url: string;
-    autoPlay: boolean;
-    loop: boolean;
+    dropboxPath?: string;
 }
 
 export interface MetadataConfig {
@@ -105,9 +104,7 @@ export interface QuoteSection extends SectionBase {
     author: string;
 }
 
-export interface CoupleSection extends SectionBase {
-   // Couple data is shared, this section config might just be for the UI component
-}
+export type CoupleSection = SectionBase;
 
 export interface HostsSection extends SectionBase {
    hosts: Host[];
@@ -166,7 +163,6 @@ export interface InvitationConfig {
     purpose: "marriage" | "birthday" | "event";
     metadata: MetadataConfig;
     music: MusicConfig;
-    backgroundPhotos: string[];
 
     sections: {
         hero: HeroSection;

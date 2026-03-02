@@ -2,9 +2,6 @@
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
-  INVITATION_LOCALE,
-  INVITATION_ZONE,
-  parseInvitationDateTime,
   toInvitationIso,
 } from "@/lib/date-time";
 import {
@@ -339,17 +336,21 @@ export async function registerInvitation(
     if (candidateSlug.endsWith("-demo")) continue;
 
     const toSave: InvitationConfig = {
-      ...config,
       id: candidateSlug,
       imagekitFolderKey,
       templateId,
       purpose,
+      theme: config.theme,
       metadata: generateMetadata({
         slug: candidateSlug,
         purpose,
         config,
       }),
-      backgroundPhotos: derivedPhotos,
+      music: {
+        title: config.music.title,
+        url: config.music.url,
+        dropboxPath: config.music.dropboxPath,
+      },
       sections: {
         ...config.sections,
         countdown: {

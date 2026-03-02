@@ -40,7 +40,7 @@ export function GratitudeSection({ hosts, purpose }: { hosts: Host[]; purpose: "
           </p>
 
           {names.length <= 2 ? (
-            <h2 className="font-heading text-3xl md:text-4xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_15px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]">
+            <h2 className="font-heading text-3xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_15px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]">
               {names[0] ?? ""}{names[1] ? ` & ${names[1]}` : ""}
             </h2>
           ) : (
@@ -48,7 +48,7 @@ export function GratitudeSection({ hosts, purpose }: { hosts: Host[]; purpose: "
               {names.map((name, idx) => (
                 <h2
                   key={`${name}-${idx}`}
-                  className="font-heading text-3xl md:text-4xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_15px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]"
+                  className="font-heading text-3xl capitalize tracking-[0.2em] text-wedding-on-dark drop-shadow-[0_0_15px_color-mix(in_srgb,var(--invitation-on-dark)_30%,transparent)]"
                 >
                   {name}
                 </h2>
