@@ -48,7 +48,12 @@ import {
  where,
 } from "firebase/firestore";
 import { DateTime } from "luxon";
-import { formatRelativeToNow, getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
+import {
+ deriveInvitationPrimaryDateInfo,
+ formatRelativeToNow,
+ getCountdownParts,
+ parseInvitationDateTime,
+} from "@/lib/date-time";
 import {
  formatInvitationDateLong,
  formatInvitationMonthYear,
@@ -252,8 +257,9 @@ export function Neptune({ config }: NeptuneProps) {
 
  const storyPhoto = useMemo(() => derivedPhotos[0] ?? "", [derivedPhotos]);
 
- const hosts = config.hosts;
+ const hosts = config.sections.hosts.hosts;
  const hostsSection = config.sections.hosts;
+ const dateInfo = deriveInvitationPrimaryDateInfo(config.sections.event.events[0]?.date);
 
  const coupleTitle = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
@@ -368,19 +374,9 @@ export function Neptune({ config }: NeptuneProps) {
   setOpenRequested(true);
  };
 
- const events = (Array.isArray(config.sections.event.events)
-  ? config.sections.event.events.map((e, idx) => ({ key: String(idx), ...e }))
-  : Object.entries(config.sections.event.events).map(([key, e]) => ({ key, ...e }))
- )
-  .filter((e) => Boolean(e?.title))
-  .map((e) => ({
-  key: e.key,
-  title: e.title,
-  date: e.date,
-  venue: e.venue,
-  address: e.address,
-  mapUrl: e.mapUrl,
-  }));
+ const events = config.sections.event.events
+  .map((e, idx) => ({ key: String(idx), ...e }))
+  .filter((e) => Boolean(e?.title));
 
  return (
   <main
@@ -421,7 +417,7 @@ export function Neptune({ config }: NeptuneProps) {
   >
   <CoverOverlay
   hosts={hosts}
-  targetDate={config.weddingDate.countdownTarget}
+  targetDate={dateInfo?.countdownTarget ?? ""}
   coverImage={config.sections.hero.coverImage}
   guestName={guestName}
   isOpening={coverClosing}
@@ -435,9 +431,9 @@ export function Neptune({ config }: NeptuneProps) {
   <TitleCountdownSection
   id="home"
   backgroundPhotos={derivedPhotos}
-  date={config.weddingDate.display}
+  date={dateInfo?.display ?? ""}
   coupleLabel={coupleTitle}
-  targetDate={config.weddingDate.countdownTarget}
+  targetDate={dateInfo?.countdownTarget ?? ""}
   />
 
   {config.sections.quote.enabled ? (
@@ -492,8 +488,8 @@ export function Neptune({ config }: NeptuneProps) {
   <GiftBlock
   bankAccounts={config.sections.gift.bankAccounts}
   description={config.sections.gift.description}
-  templateName={config.templateId ?? "neptune"}
-  eventDate={config.weddingDate.display}
+  templateName={config.templateId}
+  eventDate={dateInfo?.display ?? ""}
   uiVariant="classic"
   />
   </GiftSectionClassic>

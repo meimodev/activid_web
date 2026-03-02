@@ -12,11 +12,18 @@ import { DateTime } from "luxon";
 export default function LandingPage() {
   // Demo Data as requested
   const templates = INVITATION_TEMPLATE_LISTINGS;
+  type TemplateListing = (typeof templates)[number];
 
   const [viewedTemplates, setViewedTemplates] = React.useState<string[]>([]);
   const [selectedThemeByTemplateId, setSelectedThemeByTemplateId] = React.useState<
     Record<string, string>
   >({});
+
+  const [previewTemplate, setPreviewTemplate] = React.useState<TemplateListing | null>(null);
+  const [previewPurpose, setPreviewPurpose] = React.useState<"marriage" | "birthday" | "event">(
+    "marriage",
+  );
+  const [previewThemeId, setPreviewThemeId] = React.useState<string>("");
 
   React.useEffect(() => {
     const stored = localStorage.getItem("activid_viewed_templates");
@@ -25,12 +32,38 @@ export default function LandingPage() {
     }
   }, []);
 
+  React.useEffect(() => {
+    if (!previewTemplate) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setPreviewTemplate(null);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [previewTemplate]);
+
   const handleView = (id: string) => {
     if (!viewedTemplates.includes(id)) {
       const updated = [...viewedTemplates, id];
       setViewedTemplates(updated);
       localStorage.setItem("activid_viewed_templates", JSON.stringify(updated));
     }
+  };
+
+  const openPreviewDialog = (template: TemplateListing) => {
+    const themes = getInvitationTemplateThemes(template.templateId);
+    const nextThemeId = selectedThemeByTemplateId[template.templateId] ?? themes[0]?.id ?? "";
+    setPreviewThemeId(nextThemeId);
+    setPreviewTemplate(template);
   };
 
   const WHATSAPP_NUMBER = "62881080088816";
@@ -173,13 +206,6 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {templates.map((template, index) => {
               const isViewed = viewedTemplates.includes(template.id);
-              const themes = getInvitationTemplateThemes(template.templateId);
-              const activeThemeId =
-                selectedThemeByTemplateId[template.templateId] ?? themes[0]?.id;
-
-              const previewUrl = activeThemeId
-                ? `/invitation/${template.id}?theme=${encodeURIComponent(activeThemeId)}`
-                : `/invitation/${template.id}`;
 
               return (
                 <motion.div
@@ -200,12 +226,7 @@ export default function LandingPage() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        handleView(template.id);
-                        window.open(
-                          previewUrl,
-                          "_blank",
-                          "noopener,noreferrer",
-                        );
+                        openPreviewDialog(template);
                       }}
                       className="aspect-4/5 overflow-hidden relative text-left"
                       aria-label={`Lihat template ${template.title}`}
@@ -257,72 +278,13 @@ export default function LandingPage() {
                         </div>
                       </div>
 
-                      <div className="grid gap-2">
-                        <div className="text-[9px] sm:text-[10px] font-mono text-white/40 uppercase tracking-wider">
-                          Colors
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2">
-                          {themes.map((theme) => {
-                            const isActive = activeThemeId === theme.id;
-
-                            return (
-                              <button
-                                key={theme.id}
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setSelectedThemeByTemplateId((prev) => ({
-                                    ...prev,
-                                    [template.templateId]: theme.id,
-                                  }));
-                                }}
-                                aria-label={`Pilih warna ${theme.title}`}
-                                className={
-                                  "flex items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors " +
-                                  (isActive
-                                    ? "border-indigo-300/70 bg-white/5 ring-4 ring-indigo-600/30"
-                                    : "border-white/10 bg-white/0 hover:bg-white/5 hover:border-white/25")
-                                }
-                              >
-                                <span className="flex min-w-0 items-center gap-2">
-                                  <span className="flex shrink-0 items-center overflow-hidden rounded-full border border-white/10">
-                                    <span
-                                      aria-hidden
-                                      className="h-4 w-4"
-                                      style={{ backgroundColor: theme.mainColor }}
-                                    />
-                                    <span
-                                      aria-hidden
-                                      className="h-4 w-4"
-                                      style={{ backgroundColor: theme.accentColor }}
-                                    />
-                                  </span>
-                                  <span className="hidden sm:inline min-w-0 truncate text-[10px] font-bold text-white/80">
-                                    {theme.title}
-                                  </span>
-                                </span>
-
-                                
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleView(template.id);
-                            window.open(
-                              previewUrl,
-                              "_blank",
-                              "noopener,noreferrer",
-                            );
+                            openPreviewDialog(template);
                           }}
                           aria-label="Lihat"
                           className="inline-flex items-center justify-center gap-0.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl bg-linear-to-r from-indigo-500/15 via-purple-500/10 to-cyan-500/10 border border-indigo-400/40 text-indigo-100 text-xs font-black uppercase tracking-wider hover:bg-indigo-500/20 hover:border-indigo-300/70 transition-colors"
@@ -608,6 +570,162 @@ export default function LandingPage() {
           </div>
         </footer>
       </div>
+
+      {previewTemplate ? (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Preview invitation demo"
+          onClick={() => setPreviewTemplate(null)}
+        >
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-[720px] rounded-3xl border border-white/10 bg-[#05050d]/95 p-5 sm:p-6 shadow-[0_35px_120px_-30px_rgba(0,0,0,0.75)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-indigo-200/60">
+                  Demo preview
+                </div>
+                <div className="mt-2 truncate text-lg font-black tracking-tight text-white">
+                  {previewTemplate.title}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPreviewTemplate(null)}
+                className="h-10 w-10 shrink-0 rounded-full border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-6">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                  Purpose
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {(
+                    [
+                      { key: "marriage", label: "Pernikahan" },
+                      { key: "birthday", label: "Ulang Tahun" },
+                      { key: "event", label: "Acara" },
+                    ] as const
+                  ).map((opt) => {
+                    const isActive = previewPurpose === opt.key;
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => setPreviewPurpose(opt.key)}
+                        className={
+                          "rounded-2xl border px-3 py-2 text-xs font-black uppercase tracking-wider transition-colors " +
+                          (isActive
+                            ? "border-indigo-300/70 bg-white/5 text-white ring-4 ring-indigo-600/30"
+                            : "border-white/10 bg-white/0 text-white/80 hover:bg-white/5 hover:border-white/25")
+                        }
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                  Color combinations
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2">
+                  {getInvitationTemplateThemes(previewTemplate.templateId).map((theme) => {
+                    const isActive = previewThemeId === theme.id;
+                    return (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() => {
+                          setPreviewThemeId(theme.id);
+                          setSelectedThemeByTemplateId((prev) => ({
+                            ...prev,
+                            [previewTemplate.templateId]: theme.id,
+                          }));
+                        }}
+                        className={
+                          "flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-colors " +
+                          (isActive
+                            ? "border-indigo-300/70 bg-white/5 ring-4 ring-indigo-600/30"
+                            : "border-white/10 bg-white/0 hover:bg-white/5 hover:border-white/25")
+                        }
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-black text-white">
+                            {theme.title}
+                          </span>
+                          <span className="mt-1 block truncate text-[11px] font-mono text-white/45">
+                            {theme.mainColor} / {theme.accentColor}
+                          </span>
+                        </span>
+
+                        <span className="flex shrink-0 items-center gap-2">
+                          <span className="flex items-center overflow-hidden rounded-full border border-white/10">
+                            <span
+                              aria-hidden
+                              className="h-5 w-5"
+                              style={{ backgroundColor: theme.mainColor }}
+                            />
+                            <span
+                              aria-hidden
+                              className="h-5 w-5"
+                              style={{ backgroundColor: theme.accentColor }}
+                            />
+                          </span>
+                          {isActive ? (
+                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/15 text-xs font-black text-indigo-200">
+                              ✓
+                            </span>
+                          ) : null}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPreviewTemplate(null)}
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/0 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/80 hover:bg-white/5 hover:border-white/25 transition-colors"
+              >
+                Close
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!previewThemeId) return;
+                  handleView(previewTemplate.id);
+                  const url = `/invitation/${previewTemplate.id}?theme=${encodeURIComponent(
+                    previewThemeId,
+                  )}&purpose=${encodeURIComponent(previewPurpose)}`;
+                  window.open(url, "_blank", "noopener,noreferrer");
+                  setPreviewTemplate(null);
+                }}
+                disabled={!previewThemeId}
+                className="inline-flex items-center justify-center rounded-2xl border border-indigo-400/50 bg-linear-to-r from-indigo-500/15 via-purple-500/10 to-cyan-500/10 px-4 py-3 text-xs font-black uppercase tracking-wider text-indigo-100 hover:bg-indigo-500/20 hover:border-indigo-300/70 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Preview demo
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-150 contrast-200 mix-blend-overlay pointer-events-none z-50" />
 

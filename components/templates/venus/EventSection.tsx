@@ -14,19 +14,9 @@ export function EventSection({
   events: InvitationConfig["sections"]["event"]["events"];
   heading: string;
 }) {
-  const list = (Array.isArray(events)
-    ? events.map((e, idx) => ({ key: String(idx), ...e }))
-    : Object.entries(events).map(([key, e]) => ({ key, ...e }))
-  )
-    .filter((e) => Boolean(e?.title))
-    .map((e) => ({
-      key: e.key,
-      title: e.title,
-      date: e.date,
-      venue: e.venue,
-      address: e.address,
-      mapUrl: e.mapUrl,
-    }));
+  const list = events
+    .map((e, idx) => ({ key: String(idx), ...e }))
+    .filter((e) => Boolean(e?.title));
 
   return (
     <SectionWrap id="event" title={heading || "Event"}>

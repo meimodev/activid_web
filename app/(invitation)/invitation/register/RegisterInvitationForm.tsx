@@ -616,7 +616,7 @@ function withTimeFromInput(value: InvitationDateTime, input: string): Invitation
   return { ...value, time: { hour, minute } };
 }
 
-function normalizeEventList(raw: InvitationConfig["sections"]["event"]["events"]): EventDetail[] {
+function ensureEventList(raw: InvitationConfig["sections"]["event"]["events"]): [EventDetail, ...EventDetail[]] {
   const emptyEvent: EventDetail = {
     title: "",
     date: createTodayDateTime(),
@@ -625,30 +625,13 @@ function normalizeEventList(raw: InvitationConfig["sections"]["event"]["events"]
     mapUrl: "",
   };
 
-  if (Array.isArray(raw)) {
-    const list = raw.length ? raw : [emptyEvent];
-    return list.map((e) => ({
-      ...emptyEvent,
-      ...(e as unknown as Partial<EventDetail>),
-      date: coerceInvitationDateTime((e as { date?: unknown })?.date),
-    })) as EventDetail[];
-  }
-  if (!raw || typeof raw !== "object") return [emptyEvent];
-
-  const orderedKeys = ["holyMatrimony", "reception"];
-  const record = raw as Record<string, EventDetail>;
-  const prioritized = orderedKeys.map((key) => record[key]).filter(Boolean);
-  const rest = Object.entries(record)
-    .filter(([key]) => !orderedKeys.includes(key))
-    .map(([, value]) => value)
-    .filter(Boolean);
-  const list = [...prioritized, ...rest];
-  const ensured = list.length ? list : [emptyEvent];
-  return ensured.map((e) => ({
+  const list = (raw.length ? raw : [emptyEvent]).map((e) => ({
     ...emptyEvent,
     ...(e as unknown as Partial<EventDetail>),
     date: coerceInvitationDateTime((e as { date?: unknown })?.date),
-  })) as EventDetail[];
+  }));
+
+  return list as [EventDetail, ...EventDetail[]];
 }
 
 function TextInput({
@@ -875,15 +858,15 @@ export function RegisterInvitationForm({
   const initialTheme = useMemo(() => getInvitationTemplateThemes(templateId)[0], [templateId]);
   const [themeId, setThemeId] = useState(() => initialTheme?.id ?? "");
   const [password, setPassword] = useState("");
-  const initialPurpose = initialConfig.purpose ?? "marriage";
+  const initialPurpose = initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
-    id: initialConfig.id ?? "",
+    id: initialConfig.id,
     imagekitFolderKey:
       initialConfig.imagekitFolderKey
-      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.hosts ?? [], 0),
+      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.sections.hosts.hosts, 0),
     templateId: templateId,
     theme: initialTheme
       ? {
@@ -905,25 +888,24 @@ export function RegisterInvitationForm({
       },
       event: {
         ...initialConfig.sections.event,
-        events: normalizeEventList(initialConfig.sections.event.events),
+        events: ensureEventList(initialConfig.sections.event.events),
       },
     },
   }));
 
   function setHosts(nextHosts: Host[]) {
-    setConfig((prev) => ({
-      ...prev,
-      hosts: nextHosts,
-    }));
+    setConfig((prev) =>
+      updateAtPath(prev, ["sections", "hosts", "hosts"], nextHosts),
+    );
   }
 
   useDeferredEffect(() => {
-    const nextSlug = deriveBaseSlug(purpose, config.hosts ?? []);
+    const nextSlug = deriveBaseSlug(purpose, config.sections.hosts.hosts);
     setSlug((prev) => (prev === nextSlug ? prev : nextSlug));
     setConfig((prev) => (prev.id === nextSlug ? prev : { ...prev, id: nextSlug }));
-  }, [config.hosts, purpose]);
+  }, [config.sections.hosts.hosts, purpose]);
   const hasImageUploads = Boolean(config.sections?.hero?.coverImage)
-    || Boolean((config.hosts ?? []).some((h) => Boolean(h.photo)))
+    || Boolean(config.sections.hosts.hosts.some((h) => Boolean(h.photo)))
     || Boolean((config.sections?.gallery?.photos ?? []).length);
 
   useDeferredEffect(() => {
@@ -934,14 +916,14 @@ export function RegisterInvitationForm({
 
     const nextFolderKey = deriveImagekitFolderKey(
       purpose,
-      config.hosts ?? [],
+      config.sections.hosts.hosts,
       imagekitEpochSecondsRef.current,
     );
 
     setConfig((prev) =>
       prev.imagekitFolderKey === nextFolderKey ? prev : { ...prev, imagekitFolderKey: nextFolderKey },
     );
-  }, [config.hosts, hasImageUploads, purpose]);
+  }, [config.sections.hosts.hosts, hasImageUploads, purpose]);
 
   const handleTemplateChange = (nextTemplateId: string) => {
     const nextTheme = getInvitationTemplateThemes(nextTemplateId)[0];
@@ -1251,17 +1233,17 @@ export function RegisterInvitationForm({
   }, [templateThemes, themeId]);
 
   const hostLabel = useMemo(() => {
-    const hosts = config.hosts ?? [];
+    const hosts = config.sections.hosts.hosts;
     const primary = hosts[0]?.firstName || hosts[0]?.fullName || "";
     const secondary = hosts[1]?.firstName || hosts[1]?.fullName || "";
     if (primary && secondary) return `${primary} & ${secondary}`;
     return primary || secondary || "";
-  }, [config.hosts]);
+  }, [config.sections.hosts.hosts]);
+
+  const firstEvent = config.sections.event.events[0];
 
   const firstEventSummary = useMemo(() => {
-    const eventsRaw = config.sections?.event?.events as unknown;
-    const list = normalizeEventList(eventsRaw as InvitationConfig["sections"]["event"]["events"]);
-    const first = list[0];
+    const first = firstEvent;
     if (!first) return null;
 
     const dt = coerceInvitationDateTime((first as { date?: unknown }).date);
@@ -1278,22 +1260,18 @@ export function RegisterInvitationForm({
       dateText,
       timeText,
     };
-  }, [config.sections?.event?.events]);
+  }, [firstEvent]);
 
   const validateBeforeReview = (): string | null => {
     if (!templateId) return "Ship Template is required.";
-    const hosts = config.hosts ?? [];
+    const hosts = config.sections.hosts.hosts;
     const hasHostName = Boolean(
       (hosts[0]?.firstName || hosts[0]?.fullName || "").trim()
         || (hosts[1]?.firstName || hosts[1]?.fullName || "").trim(),
     );
     if (!hosts.length || !hasHostName) return "At least 1 host name is required.";
 
-    const eventsRaw = config.sections?.event?.events as unknown;
-    const list = normalizeEventList(eventsRaw as InvitationConfig["sections"]["event"]["events"]);
-    if (!list.length) return "At least 1 event is required.";
-
-    const first = list[0] as { date?: unknown };
+    const first = config.sections.event.events[0] as { date?: unknown };
     const dt = coerceInvitationDateTime(first?.date);
     if (!dt?.date?.year) return "First event date is required.";
 
@@ -1807,21 +1785,7 @@ export function RegisterInvitationForm({
               setConfig((prev) => updateAtPath(prev, ["sections", "hosts", "enabled"], v))
             }
           >
-            <Checkbox
-              label="Disable Grayscale Effect"
-              checked={asBoolean(config.sections.hosts.disableGrayscale)}
-              onChange={(v) =>
-                setConfig((prev) =>
-                  updateAtPath(
-                    prev,
-                    ["sections", "hosts", "disableGrayscale"],
-                    v,
-                  ),
-                )
-              }
-            />
-
-            {(config.hosts ?? []).map((host, idx) => (
+            {config.sections.hosts.hosts.map((host, idx) => (
               <div
                 key={idx}
                 className="grid gap-5 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner relative"
@@ -1834,9 +1798,9 @@ export function RegisterInvitationForm({
                   <button
                     type="button"
                     className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors disabled:opacity-50"
-                    disabled={(config.hosts?.length ?? 0) <= 1}
+                    disabled={config.sections.hosts.hosts.length <= 1}
                     onClick={() => {
-                      const next = (config.hosts ?? []).filter((_, i) => i !== idx);
+                      const next = config.sections.hosts.hosts.filter((_, i) => i !== idx);
                       setHosts(next.length ? next : [host]);
                     }}
                   >
@@ -1854,7 +1818,7 @@ export function RegisterInvitationForm({
                           folderKey={config.imagekitFolderKey ?? ""}
                           fieldKey={`host-${idx}-photo`}
                           onChange={(v) => {
-                            const next = [...(config.hosts ?? [])];
+                            const next = [...config.sections.hosts.hosts];
                             next[idx] = { ...next[idx]!, photo: v };
                             setHosts(next);
                           }}
@@ -1866,7 +1830,7 @@ export function RegisterInvitationForm({
                         label={label}
                         value={host[key]}
                         onChange={(v) => {
-                          const next = [...(config.hosts ?? [])];
+                          const next = [...config.sections.hosts.hosts];
                           next[idx] = { ...next[idx]!, [key]: v };
                           setHosts(next);
                         }}
@@ -1889,7 +1853,7 @@ export function RegisterInvitationForm({
                   parents: "",
                   photo: "",
                 };
-                setHosts([...(config.hosts ?? []), emptyHost]);
+                setHosts([...config.sections.hosts.hosts, emptyHost]);
               }}
             >
               + Add Host
@@ -2014,7 +1978,11 @@ export function RegisterInvitationForm({
                 let next = updateAtPath(prev, ["sections", "event", "enabled"], v);
                 if (!v) {
                   next = updateAtPath(next, ["sections", "event", "heading"], "");
-                  next = updateAtPath(next, ["sections", "event", "events"], []);
+                  next = updateAtPath(
+                    next,
+                    ["sections", "event", "events"],
+                    ensureEventList(prev.sections.event.events),
+                  );
                 }
                 return next;
               })
@@ -2035,7 +2003,7 @@ export function RegisterInvitationForm({
                     className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
                     onClick={() => {
                       const nextEvents = [
-                        ...(config.sections.event.events as EventDetail[]),
+                        ...config.sections.event.events,
                         {
                           title: "",
                           date: createTodayDateTime(),
@@ -2043,7 +2011,7 @@ export function RegisterInvitationForm({
                           address: "",
                           mapUrl: "",
                         },
-                      ];
+                      ] as [EventDetail, ...EventDetail[]];
                       setConfig((prev) =>
                         updateAtPath(prev, ["sections", "event", "events"], nextEvents),
                       );
@@ -2054,7 +2022,7 @@ export function RegisterInvitationForm({
                 </div>
 
                 <div className="grid gap-4">
-                  {(config.sections.event.events as EventDetail[]).map((event, idx) => (
+                  {config.sections.event.events.map((event, idx) => (
                     <div
                       key={idx}
                       className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
@@ -2063,14 +2031,18 @@ export function RegisterInvitationForm({
                         <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Event {idx + 1}</div>
                         <button
                           type="button"
-                          disabled={(config.sections.event.events as EventDetail[]).length <= 1}
+                          disabled={config.sections.event.events.length <= 1}
                           className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                           onClick={() => {
-                            const nextEvents = (config.sections.event.events as EventDetail[]).filter(
+                            const nextEvents = config.sections.event.events.filter(
                               (_, i) => i !== idx,
                             );
                             setConfig((prev) =>
-                              updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                              updateAtPath(
+                                prev,
+                                ["sections", "event", "events"],
+                                nextEvents as [EventDetail, ...EventDetail[]],
+                              ),
                             );
                           }}
                         >
@@ -2085,10 +2057,14 @@ export function RegisterInvitationForm({
                               label={fieldLabel}
                               value={event[field]}
                               onChange={(v) => {
-                                const nextEvents = [...(config.sections.event.events as EventDetail[])];
+                                const nextEvents = [...config.sections.event.events];
                                 nextEvents[idx] = { ...nextEvents[idx]!, [field]: v };
                                 setConfig((prev) =>
-                                  updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                                  updateAtPath(
+                                    prev,
+                                    ["sections", "event", "events"],
+                                    nextEvents as [EventDetail, ...EventDetail[]],
+                                  ),
                                 );
                               }}
                             />
@@ -2099,22 +2075,29 @@ export function RegisterInvitationForm({
                           label="Date"
                           value={event.date}
                           onChange={(v) => {
-                            const nextEvents = [...(config.sections.event.events as EventDetail[])];
+                            const nextEvents = [...config.sections.event.events];
                             nextEvents[idx] = { ...nextEvents[idx]!, date: v };
                             setConfig((prev) =>
-                              updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                              updateAtPath(
+                                prev,
+                                ["sections", "event", "events"],
+                                nextEvents as [EventDetail, ...EventDetail[]],
+                              ),
                             );
                           }}
                         />
-
                         <TimeInput
                           label="Time"
                           value={event.date}
                           onChange={(v) => {
-                            const nextEvents = [...(config.sections.event.events as EventDetail[])];
+                            const nextEvents = [...config.sections.event.events];
                             nextEvents[idx] = { ...nextEvents[idx]!, date: v };
                             setConfig((prev) =>
-                              updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                              updateAtPath(
+                                prev,
+                                ["sections", "event", "events"],
+                                nextEvents as [EventDetail, ...EventDetail[]],
+                              ),
                             );
                           }}
                         />

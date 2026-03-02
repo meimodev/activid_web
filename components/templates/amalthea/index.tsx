@@ -17,9 +17,14 @@ import {
   GiftSection,
   FooterSection,
 } from "./InfoSections";
-import { InvitationConfig } from "@/types/invitation";
+import { Host, InvitationConfig } from "@/types/invitation";
 import { DateTime } from "luxon";
-import { INVITATION_LOCALE, INVITATION_ZONE, parseInvitationDateTime } from "@/lib/date-time";
+import {
+  deriveInvitationPrimaryDateInfo,
+  INVITATION_LOCALE,
+  INVITATION_ZONE,
+  parseInvitationDateTime,
+} from "@/lib/date-time";
 
 const AMALTHEA_DEMO_ASSETS = {
   groomPhoto:
@@ -52,22 +57,22 @@ export function Amalthea({ config }: AmaltheaProps) {
 
   const isDemo = config.id.endsWith("-demo");
 
-  const { music, weddingDate, sections, purpose } = config;
+  const { music, sections, purpose } = config;
 
   const hostsSection = sections.hosts;
+  const hosts = hostsSection.hosts;
+  const dateInfo = deriveInvitationPrimaryDateInfo(sections.event.events[0]?.date);
 
-  const effectiveHosts = useMemo(() => {
-    if (!isDemo) return config.hosts;
+  const effectiveHosts = useMemo<[Host, ...Host[]]>(() => {
+    if (!isDemo) return hosts as [Host, ...Host[]];
 
-    const next = [...config.hosts];
-    if (next[0]) {
-      next[0] = { ...next[0], photo: AMALTHEA_DEMO_ASSETS.groomPhoto };
-    }
+    const next = [...hosts] as [Host, ...Host[]];
+    next[0] = { ...next[0], photo: AMALTHEA_DEMO_ASSETS.groomPhoto };
     if (next[1]) {
       next[1] = { ...next[1], photo: AMALTHEA_DEMO_ASSETS.bridePhoto };
     }
     return next;
-  }, [config.hosts, isDemo]);
+  }, [hosts, isDemo]);
 
   const effectiveGalleryPhotos = isDemo
     ? Array.from(AMALTHEA_DEMO_ASSETS.galleryPhotos)
@@ -89,10 +94,7 @@ export function Amalthea({ config }: AmaltheaProps) {
     const raw = sections.event?.events;
     if (!raw) return null;
 
-    const list = Array.isArray(raw)
-      ? raw
-      : [raw.holyMatrimony, raw.reception, ...Object.values(raw)].filter(Boolean);
-    const first = list[0];
+    const first = raw[0];
     if (!first) return null;
 
     const dateValue = (first as { date?: unknown } | null)?.date;
@@ -107,14 +109,20 @@ export function Amalthea({ config }: AmaltheaProps) {
   }, [sections.event?.events]);
 
   const effectiveCountdownTarget =
-    firstEventCountdownTarget ?? (isDemo ? demoCountdownTarget : weddingDate.countdownTarget);
+    firstEventCountdownTarget ?? (isDemo ? demoCountdownTarget : (dateInfo?.countdownTarget ?? ""));
 
   const effectiveWeddingDateDisplay = useMemo(() => {
-    if (!isDemo) return weddingDate.display;
+    if (!isDemo) return dateInfo?.display ?? "";
 
     const dt = DateTime.now().setZone(INVITATION_ZONE).plus({ days: 3 }).startOf("day");
     return dt.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
-  }, [isDemo, weddingDate.display]);
+  }, [dateInfo?.display, isDemo]);
+
+  const effectiveWeddingDateDisplayShort = useMemo(() => {
+    if (!isDemo) return dateInfo?.displayShort ?? "";
+    const dt = DateTime.now().setZone(INVITATION_ZONE).plus({ days: 3 }).startOf("day");
+    return dt.setLocale(INVITATION_LOCALE).toFormat("dd . MM . yyyy");
+  }, [dateInfo?.displayShort, isDemo]);
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text ">
@@ -145,7 +153,7 @@ export function Amalthea({ config }: AmaltheaProps) {
               setIsOpen(true);
             }}
             hosts={effectiveHosts}
-            date={weddingDate.displayShort}
+            date={effectiveWeddingDateDisplayShort}
             subtitle={sections.hero.subtitle}
             coverImage={effectiveCoverImage}
             guestName={guestName || undefined}
@@ -209,8 +217,8 @@ export function Amalthea({ config }: AmaltheaProps) {
                   bankAccounts={sections.gift.bankAccounts}
                   heading={sections.gift.heading}
                   description={sections.gift.description}
-                  templateName={config.templateId || "amalthea"}
-                  eventDate={weddingDate.display}
+                  templateName={config.templateId}
+                  eventDate={effectiveWeddingDateDisplay}
                 />
               ) : null}
 

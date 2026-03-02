@@ -619,15 +619,7 @@ interface EventSectionProps {
 export function EventSection({ events, heading }: EventSectionProps) {
  const titleRight = heading?.trim().split(/\s+/).slice(-1)[0] || "Event";
 
- const cards = Array.isArray(events)
-  ? events
-  : [
-    events.holyMatrimony,
-    events.reception,
-    ...Object.entries(events)
-     .filter(([key]) => key !== "holyMatrimony" && key !== "reception")
-     .map(([, v]) => v),
-   ].filter(Boolean);
+ const cards = events;
 
  return (
   <section className="relative overflow-hidden bg-[#F8F4EC] py-24 text-[#612A35] ">

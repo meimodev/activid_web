@@ -1,6 +1,6 @@
 import type { InvitationConfig } from "@/types/invitation";
 
-export type Hosts = InvitationConfig["hosts"];
+export type Hosts = InvitationConfig["sections"]["hosts"]["hosts"];
 
 export type EventsConfig = InvitationConfig["sections"]["event"]["events"];
 

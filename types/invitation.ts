@@ -27,13 +27,6 @@ export type InvitationDateTimeIso = string;
 
 export type InvitationDateTimeValue = InvitationDateTimeIso | InvitationDateTime;
 
-export interface WeddingDate {
-    display: string;
-    displayShort: string;
-    countdownTarget: string; // ISO format (canonical: include offset)
-    rsvpDeadline: string;
-}
-
 export interface EventDetail {
     title: string;
     date: InvitationDateTimeValue;
@@ -114,11 +107,10 @@ export interface QuoteSection extends SectionBase {
 
 export interface CoupleSection extends SectionBase {
    // Couple data is shared, this section config might just be for the UI component
-   disableGrayscale?: boolean;
 }
 
 export interface HostsSection extends SectionBase {
-   disableGrayscale?: boolean;
+   hosts: Host[];
 }
 
 export interface StorySection extends SectionBase {
@@ -128,13 +120,7 @@ export interface StorySection extends SectionBase {
 
 export interface EventSection extends SectionBase {
     heading: string;
-    events:
-        | {
-              holyMatrimony: EventDetail;
-              reception: EventDetail;
-              [key: string]: EventDetail;
-          }
-        | EventDetail[];
+    events: [EventDetail, ...EventDetail[]];
 }
 
 export interface GallerySection extends SectionBase {
@@ -170,20 +156,17 @@ export interface FooterSection extends SectionBase {
 export interface InvitationConfig {
     id: string; // matches document ID in firebase
     imagekitFolderKey?: string;
-    templateId?: string; // e.g. "flow"
-    theme?: {
+    templateId: string; // e.g. "flow"
+    theme: {
         mainColor: string;
         accentColor: string;
         accent2Color?: string;
         darkColor?: string;
     };
-    purpose?: "marriage" | "birthday" | "event";
+    purpose: "marriage" | "birthday" | "event";
     metadata: MetadataConfig;
     music: MusicConfig;
     backgroundPhotos: string[];
-    weddingDate: WeddingDate;
-
-    hosts: Host[];
 
     sections: {
         hero: HeroSection;

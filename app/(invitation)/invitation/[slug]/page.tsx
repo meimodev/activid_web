@@ -7,13 +7,13 @@ import { Amalthea } from "@/components/templates/amalthea";
 import { Venus } from "@/components/templates/venus";
 import { Jupiter } from "@/components/templates/jupiter";
 import { Neptune } from "@/components/templates/neptune";
-import { DemoThemeSidebar } from "@/components/invitation/DemoThemeSidebar";
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import type { InvitationConfig } from "@/types/invitation";
 import { notFound } from "next/navigation";
 import { getInvitationThemeStyle } from "@/lib/invitation-theme";
 import { getInvitationTemplateThemes } from "@/data/invitation-templates";
+import { InvitationDemoPlayground } from "@/components/invitation/InvitationDemoPlayground";
 import {
     getInvitationConfig,
     InvitationConfigQuotaExceededError,
@@ -31,6 +31,59 @@ const RESERVED_TEMPLATE_SLUGS = new Set([
     "jupiter",
     "neptune",
 ]);
+
+type DemoPurpose = "marriage" | "birthday" | "event";
+
+function getSingleSearchParam(
+    searchParams: { [key: string]: string | string[] | undefined },
+    key: string,
+): string | undefined {
+    const value = searchParams[key];
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) return value[0];
+    return undefined;
+}
+
+function requireDemoPurpose(raw: string | undefined): DemoPurpose {
+    if (raw === "birthday" || raw === "event" || raw === "marriage") return raw;
+    notFound();
+}
+
+function requireDemoTheme(templateId: string, raw: string | undefined) {
+    if (!raw) notFound();
+    const themes = getInvitationTemplateThemes(templateId);
+    const selected = themes.find((theme) => theme.id === raw);
+    if (!selected) notFound();
+    return selected;
+}
+
+function requireInvitationConfig(config: InvitationConfig): InvitationConfig {
+    const cfg = config as unknown as {
+        templateId?: unknown;
+        purpose?: unknown;
+        theme?: unknown;
+        sections?: unknown;
+    };
+
+    if (typeof cfg.templateId !== "string" || !cfg.templateId.trim()) notFound();
+    if (cfg.purpose !== "birthday" && cfg.purpose !== "event" && cfg.purpose !== "marriage") notFound();
+
+    const theme = cfg.theme as Record<string, unknown> | null;
+    if (!theme || typeof theme !== "object") notFound();
+    if (typeof theme.mainColor !== "string" || !theme.mainColor.trim()) notFound();
+    if (typeof theme.accentColor !== "string" || !theme.accentColor.trim()) notFound();
+
+    const sections = cfg.sections as Record<string, unknown> | null;
+    const hostsSection = sections?.hosts as Record<string, unknown> | null;
+    const hosts = hostsSection?.hosts as unknown;
+    if (!Array.isArray(hosts) || hosts.length < 1) notFound();
+
+    const eventSection = sections?.event as Record<string, unknown> | null;
+    const events = eventSection?.events as unknown;
+    if (!Array.isArray(events) || events.length < 1) notFound();
+
+    return config;
+}
 
 function getTemplateLabel(templateId: string) {
     switch (templateId) {
@@ -112,19 +165,9 @@ export async function generateMetadata(
     const canonicalUrl = `${SITE_ORIGIN}/invitation/${slug}`;
 
     if (slug.endsWith("-demo")) {
-        const purposeValue = (() => {
-            const value = resolvedSearchParams.purpose;
-            if (typeof value === "string") return value;
-            if (Array.isArray(value)) return value[0];
-            return undefined;
-        })();
-
-        const purpose =
-            purposeValue === "birthday" || purposeValue === "event" || purposeValue === "marriage"
-                ? purposeValue
-                : "marriage";
-
         const templateId = slug.replace(/-demo$/, "");
+        const purpose = requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
+        requireDemoTheme(templateId, getSingleSearchParam(resolvedSearchParams, "theme"));
         const config = buildInvitationDemoConfig({ slug, templateId, purpose });
         const templateLabel = getTemplateLabel(templateId);
         const coverImage = config.sections?.hero?.coverImage ?? getDemoCoverImage(templateId);
@@ -199,26 +242,6 @@ export async function generateMetadata(
 export default async function InvitationPage({ params, searchParams }: PageProps) {
     const { slug } = await params;
     const resolvedSearchParams = await searchParams;
-    const selectedThemeId = (() => {
-        const value = resolvedSearchParams.theme;
-
-        if (typeof value === "string") return value;
-        if (Array.isArray(value)) return value[0];
-        return undefined;
-    })();
-
-    const selectedPurpose = (() => {
-        const value = resolvedSearchParams.purpose;
-
-        if (typeof value === "string") return value;
-        if (Array.isArray(value)) return value[0];
-        return undefined;
-    })();
-
-    const demoPurpose: "marriage" | "birthday" | "event" =
-        selectedPurpose === "birthday" || selectedPurpose === "event" || selectedPurpose === "marriage"
-            ? selectedPurpose
-            : "marriage";
 
     const renderTemplate = (templateId: string, config: InvitationConfig) => {
         if (templateId === "flow") return <Flow config={config} />;
@@ -233,41 +256,27 @@ export default async function InvitationPage({ params, searchParams }: PageProps
     };
 
     if (slug.endsWith("-demo")) {
-        const demoTemplateId = slug.replace("-demo", "");
-        let config = buildInvitationDemoConfig({
-            slug,
-            templateId: demoTemplateId,
-            purpose: demoPurpose,
-        });
-
-        const demoThemes = getInvitationTemplateThemes(demoTemplateId);
-        const selectedTheme = selectedThemeId
-            ? demoThemes.find((theme) => theme.id === selectedThemeId)
-            : undefined;
-
-        if (selectedTheme) {
-            config = {
-                ...config,
-                theme: {
-                    mainColor: selectedTheme.mainColor,
-                    accentColor: selectedTheme.accentColor,
-                    accent2Color: selectedTheme.accent2Color,
-                    darkColor: selectedTheme.darkColor,
-                },
-            };
-        }
+        const demoTemplateId = slug.replace(/-demo$/, "");
+        const demoPurpose = requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
+        const selectedTheme = requireDemoTheme(
+            demoTemplateId,
+            getSingleSearchParam(resolvedSearchParams, "theme"),
+        );
 
         return withInvitationChrome(
             demoTemplateId,
-            config.theme,
-            <>
-                <DemoThemeSidebar
-                    templateId={demoTemplateId}
-                    themes={demoThemes}
-                    initialTheme={config.theme}
-                />
-                {renderTemplate(demoTemplateId, config)}
-            </>,
+            {
+                mainColor: selectedTheme.mainColor,
+                accentColor: selectedTheme.accentColor,
+                accent2Color: selectedTheme.accent2Color,
+                darkColor: selectedTheme.darkColor,
+            },
+            <InvitationDemoPlayground
+                slug={slug}
+                templateId={demoTemplateId}
+                initialPurpose={demoPurpose}
+                initialThemeId={selectedTheme.id}
+            />,
         );
     }
 
@@ -301,7 +310,12 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         notFound();
     }
 
-    const templateId = config.templateId ?? "flow";
+    const validated = requireInvitationConfig(config);
+    const templateId = validated.templateId;
 
-    return withInvitationChrome(templateId, config.theme, renderTemplate(templateId, config));
+    return withInvitationChrome(
+        templateId,
+        validated.theme,
+        renderTemplate(templateId, validated),
+    );
 }

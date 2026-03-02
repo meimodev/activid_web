@@ -19,7 +19,11 @@ import {
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
 import { DateTime } from "luxon";
-import { INVITATION_LOCALE, INVITATION_ZONE } from "@/lib/date-time";
+import {
+  deriveInvitationPrimaryDateInfo,
+  INVITATION_LOCALE,
+  INVITATION_ZONE,
+} from "@/lib/date-time";
 
 const PLUTO_DEMO_ASSETS = {
   groomPhoto:
@@ -52,10 +56,11 @@ export function Pluto({ config }: PlutoProps) {
 
   const isDemo = config.id.endsWith("-demo");
 
-  const { music, weddingDate, sections } = config;
+  const { music, sections } = config;
 
-  const hosts = config.hosts;
   const hostsSection = sections.hosts;
+  const hosts = hostsSection.hosts;
+  const dateInfo = deriveInvitationPrimaryDateInfo(sections.event.events[0]?.date);
 
   const effectiveHosts = useMemo(() => {
     if (!isDemo) return hosts;
@@ -81,16 +86,24 @@ export function Pluto({ config }: PlutoProps) {
     return dt.toISO({ includeOffset: true, suppressMilliseconds: true }) ?? "";
   }, []);
 
-  const effectiveCountdownTarget = isDemo
-    ? demoCountdownTarget
-    : weddingDate.countdownTarget;
-
-  const effectiveWeddingDateDisplay = useMemo(() => {
-    if (!isDemo) return weddingDate.display;
-
+  const demoDisplay = useMemo(() => {
     const dt = DateTime.now().setZone(INVITATION_ZONE).plus({ days: 3 }).startOf("day");
     return dt.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
-  }, [isDemo, weddingDate.display]);
+  }, []);
+
+  const demoDisplayShort = useMemo(() => {
+    const dt = DateTime.now().setZone(INVITATION_ZONE).plus({ days: 3 }).startOf("day");
+    return dt.setLocale(INVITATION_LOCALE).toFormat("dd . MM . yyyy");
+  }, []);
+
+  const effectiveCountdownTarget = isDemo
+    ? demoCountdownTarget
+    : (dateInfo?.countdownTarget ?? "");
+
+  const effectiveWeddingDateDisplay = isDemo ? demoDisplay : (dateInfo?.display ?? "");
+  const effectiveWeddingDateDisplayShort = isDemo
+    ? demoDisplayShort
+    : (dateInfo?.displayShort ?? "");
 
   return (
     <main className="relative min-h-[100dvh] overflow-x-hidden bg-wedding-bg text-wedding-text">
@@ -118,7 +131,7 @@ export function Pluto({ config }: PlutoProps) {
               setIsOpen(true);
             }}
             hosts={effectiveHosts}
-            date={weddingDate.displayShort}
+            date={effectiveWeddingDateDisplayShort}
             subtitle={sections.hero.subtitle}
             coverImage={effectiveCoverImage}
             guestName={guestName || undefined}
@@ -180,7 +193,7 @@ export function Pluto({ config }: PlutoProps) {
                   heading={sections.gift.heading}
                   description={sections.gift.description}
                   templateName={config.templateId || "pluto"}
-                  eventDate={weddingDate.display}
+                  eventDate={effectiveWeddingDateDisplay}
                 />
               ) : null}
 

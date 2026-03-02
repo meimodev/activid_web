@@ -28,6 +28,7 @@ import { WishesSection } from "./WishesSection";
 import { FooterSection } from "./FooterSection";
 import { FloatingNav } from "./FloatingNav";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 
 interface VenusProps {
   config: InvitationConfig;
@@ -83,8 +84,9 @@ export function Venus({ config }: VenusProps) {
 
   const guestName = inviteeName || searchParams.get("guest") || "Tamu";
 
-  const hosts = config.hosts;
+  const hosts = config.sections.hosts.hosts;
   const hostsSection = config.sections.hosts;
+  const dateInfo = deriveInvitationPrimaryDateInfo(config.sections.event.events[0]?.date);
 
   const navItems = useMemo(
   () =>
@@ -201,7 +203,7 @@ export function Venus({ config }: VenusProps) {
       <Hero
       onOpen={openInvitation}
       hosts={hosts}
-      date={config.weddingDate.displayShort}
+      date={dateInfo?.displayShort ?? ""}
       subtitle={config.sections.hero.subtitle}
       coverImage={config.sections.hero.coverImage}
       guestName={guestName}
@@ -220,7 +222,7 @@ export function Venus({ config }: VenusProps) {
   {config.sections.quote.enabled ? (
   <QuoteSection
   text={config.sections.quote.text}
-  targetDate={config.weddingDate.countdownTarget}
+  targetDate={dateInfo?.countdownTarget ?? ""}
   backgroundImage={quoteBackgroundImage}
   />
   ) : null}
@@ -255,8 +257,8 @@ export function Venus({ config }: VenusProps) {
   heading={config.sections.gift.heading || "Wedding Gift"}
   bankAccounts={config.sections.gift.bankAccounts}
   description={config.sections.gift.description}
-  templateName={config.templateId ?? "venus"}
-  eventDate={config.weddingDate.display}
+  templateName={config.templateId}
+  eventDate={dateInfo?.display ?? ""}
   />
   ) : null}
 

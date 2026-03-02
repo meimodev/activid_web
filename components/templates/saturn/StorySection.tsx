@@ -1,8 +1,7 @@
 "use client";
 
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { FloatingParallax } from "@/components/invitation/ParallaxText";
-import { CosmicDivider, StarDivider, SatrunIcon } from "./graphics";
+import { StaggerRevealOnScroll } from "@/components/invitation/StaggerRevealOnScroll";
+import { StarDivider, OrbitDivider, SatrunIcon } from "./graphics";
 import { formatInvitationMonthYear } from "@/lib/date-utils";
 import type { StoryItem } from "@/types/invitation";
 
@@ -19,15 +18,11 @@ export function StorySection({ stories, heading }: StorySectionProps) {
             <div className="absolute inset-0 bg-wedding-dark/60 backdrop-blur-md z-0" />
 
             <div className="container mx-auto px-4 max-w-3xl">
-                <RevealOnScroll direction="down" width="100%">
-                    <div className="flex flex-col items-center mb-12">
-                        <SatrunIcon />
-                        <FloatingParallax speed={-0.2}>
-                            <h2 className="font-heading text-3xl uppercase tracking-[0.2em] text-wedding-accent mb-4 mt-4 text-glow">{heading}</h2>
-                        </FloatingParallax>
-                        <StarDivider />
-                    </div>
-                </RevealOnScroll>
+                <StaggerRevealOnScroll direction="up" width="100%" staggerDelay={0.16} className="flex flex-col items-center mb-12">
+                    <SatrunIcon />
+                    <h2 className="font-heading text-3xl capitalize tracking-[0.2em] text-wedding-accent mb-4 mt-4 text-glow">{heading}</h2>
+                    <StarDivider />
+                </StaggerRevealOnScroll>
 
                 <div className="relative">
                     {/* Vertical Line */}
@@ -36,34 +31,32 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                     <div className="space-y-16">
                         {stories.map((story, index) => (
                             <div key={index} className="relative z-10">
-                                <RevealOnScroll
+                                <StaggerRevealOnScroll
                                     direction="up"
-                                    delay={index * 0.15}
+                                    delay={index * 0.12}
+                                    staggerDelay={0.14}
                                     width="100%"
+                                    className="flex flex-col items-center gap-6"
                                 >
-                                    <FloatingParallax speed={0.1}>
-                                        <div className="flex flex-col items-center gap-6">
-                                            {/* Date Badge */}
-                                            <div className="relative">
-                                                <div className="absolute inset-0 bg-wedding-accent blur-md rounded-full opacity-30" />
-                                                <span className="relative z-10 inline-block py-2 px-8 border border-wedding-accent/40 rounded-full font-heading text-sm tracking-[0.15em] bg-wedding-dark/80 backdrop-blur-sm shadow-sm text-wedding-accent font-bold uppercase">
-                                                    {formatInvitationMonthYear(story.date)}
-                                                </span>
-                                            </div>
+                                    {/* Date Badge */}
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-wedding-accent blur-md rounded-full opacity-30" />
+                                        <span className="relative z-10 inline-block py-2 px-8 border border-wedding-accent/40 rounded-full font-heading text-sm tracking-[0.15em] bg-wedding-dark/80 backdrop-blur-sm shadow-sm text-wedding-accent font-bold uppercase">
+                                            {formatInvitationMonthYear(story.date)}
+                                        </span>
+                                    </div>
 
-                                            {/* Center Point */}
-                                            <div className="w-3 h-3 bg-wedding-accent rotate-45 ring-4 ring-wedding-dark" />
+                                    {/* Center Point */}
+                                    <div className="w-3 h-3 bg-wedding-accent rotate-45 ring-4 ring-wedding-dark" />
 
-                                            {/* Content */}
-                                            <div className="max-w-md mx-auto relative px-4 py-2">
-                                                <div className="absolute inset-0 bg-wedding-on-dark/5 blur-xl rounded-full -z-10" />
-                                                <p className="font-body text-wedding-on-dark/90 text-lg leading-relaxed italic">
-                                                    &ldquo;{story.description}&rdquo;
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </FloatingParallax>
-                                </RevealOnScroll>
+                                    {/* Content */}
+                                    <div className="max-w-md mx-auto relative px-4 py-2">
+                                        <div className="absolute inset-0 bg-wedding-on-dark/5 blur-xl rounded-full -z-10" />
+                                        <p className="font-body text-wedding-on-dark/90 text-lg leading-relaxed italic">
+                                            &ldquo;{story.description}&rdquo;
+                                        </p>
+                                    </div>
+                                </StaggerRevealOnScroll>
                             </div>
                         ))}
                     </div>
@@ -74,7 +67,7 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                     </div>
                 </div>
             </div>
-            <CosmicDivider />
+            <OrbitDivider />
         </section >
     );
 }

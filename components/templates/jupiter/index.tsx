@@ -12,7 +12,12 @@ import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, onSnapshot, query, runTransaction, Timestamp, where } from "firebase/firestore";
 import { DateTime } from "luxon";
-import { formatRelativeToNow, getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
+import {
+  deriveInvitationPrimaryDateInfo,
+  formatRelativeToNow,
+  getCountdownParts,
+  parseInvitationDateTime,
+} from "@/lib/date-time";
 import {
   formatInvitationDateLong,
   formatInvitationMonthYear,
@@ -120,8 +125,9 @@ export function Jupiter({ config }: JupiterProps) {
     [config.id, config.sections.gallery.photos],
   );
 
-  const hosts = config.hosts;
+  const hosts = config.sections.hosts.hosts;
   const hostsSection = config.sections.hosts;
+  const dateInfo = deriveInvitationPrimaryDateInfo(config.sections.event.events[0]?.date);
 
   useEffect(() => {
   if (!isOpen || !contentReady) return;
@@ -193,7 +199,7 @@ export function Jupiter({ config }: JupiterProps) {
   >
   <JupiterCoverOverlay
   hosts={hosts}
-  date={config.weddingDate.display}
+  date={dateInfo?.display ?? ""}
   subtitle={config.sections.hero.subtitle}
   coverImage={config.sections.hero.coverImage}
   guestName={guestName}
@@ -207,7 +213,7 @@ export function Jupiter({ config }: JupiterProps) {
   <div className="relative">
   <JupiterTitleCountdown
   hosts={hosts}
-  targetDate={config.weddingDate.countdownTarget}
+  targetDate={dateInfo?.countdownTarget ?? ""}
   heading={config.sections.title.heading}
   coverImage={config.sections.hero.coverImage}
   photos={derivedPhotos}
@@ -336,10 +342,14 @@ function JupiterCoverOverlay({
   <h1 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-wedding-accent-light`}>
   {primary?.firstName ?? ""}
   </h1>
+  {secondary ? (
+  <>
   <div className="mt-2 mb-2 text-3xl opacity-90">&</div>
   <h1 className={`${jupiterScript.className} text-6xl leading-none text-wedding-accent-light`}>
-  {secondary?.firstName ?? ""}
+  {secondary.firstName}
   </h1>
+  </>
+  ) : null}
 
   <div className="mt-8 w-full max-w-sm border border-white/25 bg-white/10 backdrop-blur-md rounded-2xl p-5">
   <p className="text-xs opacity-80">Kepada Yth. Bapak/Ibu/Saudara/i</p>
@@ -404,10 +414,14 @@ function JupiterTitleCountdown({
   <h2 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-wedding-text`}>
   {primary?.firstName ?? ""}
   </h2>
+  {secondary ? (
+  <>
   <div className="mt-2 mb-2 text-3xl opacity-80 text-wedding-text">&</div>
   <h2 className={`${jupiterScript.className} text-6xl leading-none text-wedding-text`}>
-  {secondary?.firstName ?? ""}
+  {secondary.firstName}
   </h2>
+  </>
+  ) : null}
 
   <div className="mt-10 grid grid-cols-1 gap-6 items-center">
   <div className="rounded-3xl border border-wedding-text/10 bg-wedding-bg p-7">
@@ -560,15 +574,7 @@ function JupiterEvent({
   heading: string;
   events: InvitationConfig["sections"]["event"]["events"];
 }) {
-  const cards = Array.isArray(events)
-    ? events
-    : [
-        events.holyMatrimony,
-        events.reception,
-        ...Object.entries(events)
-          .filter(([key]) => key !== "holyMatrimony" && key !== "reception")
-          .map(([, v]) => v),
-      ].filter(Boolean);
+  const cards = events;
 
   return (
   <section className="relative px-6 py-20">

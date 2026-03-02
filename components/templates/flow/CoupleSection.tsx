@@ -6,10 +6,9 @@ import type { Host } from "@/types/invitation";
 
 interface CoupleSectionProps {
   hosts: Host[];
-  disableGrayscale?: boolean;
 }
 
-export function CoupleSection({ hosts, disableGrayscale = false }: CoupleSectionProps) {
+export function CoupleSection({ hosts }: CoupleSectionProps) {
   const primary = hosts[0];
   const secondary = hosts[1];
 
@@ -26,7 +25,7 @@ export function CoupleSection({ hosts, disableGrayscale = false }: CoupleSection
                 <img
                   src={primary?.photo ?? ""}
                   alt="Groom"
-                  className={`w-full h-full object-cover rounded-full transition-all duration-700 ${disableGrayscale ? "" : "grayscale group-hover:grayscale-0"}`}
+                  className="w-full h-full object-cover rounded-full transition-all duration-700"
                 />
               </div>
             </RevealOnScroll>
@@ -57,7 +56,7 @@ export function CoupleSection({ hosts, disableGrayscale = false }: CoupleSection
                   <img
                     src={secondary.photo}
                     alt="Bride"
-                    className={`w-full h-full object-cover rounded-full transition-all duration-700 ${disableGrayscale ? "" : "grayscale group-hover:grayscale-0"}`}
+                    className="w-full h-full object-cover rounded-full transition-all duration-700"
                   />
                 </div>
               </RevealOnScroll>

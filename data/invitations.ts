@@ -176,32 +176,6 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       loop: true,
     },
     backgroundPhotos: [],
-    weddingDate: {
-      display: "01 Januari 2026",
-      displayShort: "01 . 01 . 2026",
-      countdownTarget: cd(2026, 1, 1),
-      rsvpDeadline: "31 Desember 2025",
-    },
-    hosts: [
-      {
-        firstName: "Alex",
-        fullName: "Alexandra Pratama",
-        shortName: "Alex",
-        role: "The Groom",
-        parents: "Putra dari Bapak Hendra & Ibu Rina",
-        photo:
-          "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
-      },
-      {
-        firstName: "Maya",
-        fullName: "Maya Aurelia",
-        shortName: "Maya",
-        role: "The Bride",
-        parents: "Putri dari Bapak Samuel & Ibu Maria",
-        photo:
-          "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
-      },
-    ],
     sections: {
       hero: {
         enabled: true,
@@ -229,7 +203,26 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       },
       hosts: {
         enabled: true,
-        disableGrayscale: false,
+        hosts: [
+          {
+            firstName: "Alex",
+            fullName: "Alexandra Pratama",
+            shortName: "Alex",
+            role: "The Groom",
+            parents: "Putra dari Bapak Hendra & Ibu Rina",
+            photo:
+              "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+          },
+          {
+            firstName: "Maya",
+            fullName: "Maya Aurelia",
+            shortName: "Maya",
+            role: "The Bride",
+            parents: "Putri dari Bapak Samuel & Ibu Maria",
+            photo:
+              "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+          },
+        ],
       },
       story: {
         enabled: true,
@@ -332,23 +325,6 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       loop: true,
     },
     backgroundPhotos: [],
-    weddingDate: {
-      display: "Sabtu, 12 April 2026",
-      displayShort: "12 Apr 2026",
-      countdownTarget: cd(2026, 4, 12),
-      rsvpDeadline: "10 April 2026",
-    },
-    hosts: [
-      {
-        firstName: "Raka",
-        fullName: "Raka Mahendra",
-        shortName: "Raka",
-        role: "Birthday Star",
-        parents: "Putra dari Bapak Mahendra & Ibu Kristina",
-        photo:
-          "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
-      },
-    ],
     sections: {
       hero: {
         enabled: true,
@@ -375,7 +351,17 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       },
       hosts: {
         enabled: true,
-        disableGrayscale: true,
+        hosts: [
+          {
+            firstName: "Raka",
+            fullName: "Raka Mahendra",
+            shortName: "Raka",
+            role: "Birthday Star",
+            parents: "Putra dari Bapak Mahendra & Ibu Kristina",
+            photo:
+              "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
+          },
+        ],
       },
       story: {
         enabled: true,
@@ -462,23 +448,6 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       loop: true,
     },
     backgroundPhotos: [],
-    weddingDate: {
-      display: "Minggu, 02 Agustus 2026",
-      displayShort: "02 Aug 2026",
-      countdownTarget: cd(2026, 8, 2),
-      rsvpDeadline: "01 Agustus 2026",
-    },
-    hosts: [
-      {
-        firstName: "Activid",
-        fullName: "Activid Team",
-        shortName: "Activid",
-        role: "Organizer",
-        parents: "",
-        photo:
-          "https://images.pexels.com/photos/3184307/pexels-photo-3184307.jpeg?auto=compress&cs=tinysrgb&w=800",
-      },
-    ],
     sections: {
       hero: {
         enabled: true,
@@ -504,7 +473,17 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       },
       hosts: {
         enabled: true,
-        disableGrayscale: false,
+        hosts: [
+          {
+            firstName: "Activid",
+            fullName: "Activid Team",
+            shortName: "Activid",
+            role: "Organizer",
+            parents: "",
+            photo:
+              "https://images.pexels.com/photos/3184307/pexels-photo-3184307.jpeg?auto=compress&cs=tinysrgb&w=800",
+          },
+        ],
       },
       story: {
         enabled: true,

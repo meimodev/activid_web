@@ -3,6 +3,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
+const EASE_OUT: [number, number, number, number] = [0.2, 0.65, 0.3, 0.9];
+
 type UseInViewOptions = NonNullable<Parameters<typeof useInView>[1]>;
 type InViewMargin = UseInViewOptions extends { margin?: infer M } ? M : never;
 
@@ -19,6 +21,7 @@ interface RevealOnScrollProps {
     distance?: number;
     margin?: InViewMargin;
     threshold?: number;
+    isReady?: boolean;
 }
 
 export function RevealOnScroll({
@@ -34,6 +37,7 @@ export function RevealOnScroll({
     distance = 40, // Default subtle move
     margin = "-10%",
     threshold = 0.12,
+    isReady = true,
 }: RevealOnScrollProps) {
     const ref = useRef(null);
     const isInView = useInView(ref, { once, margin, amount: threshold });
@@ -57,11 +61,11 @@ export function RevealOnScroll({
             <motion.div
                 variants={getVariants()}
                 initial="hidden"
-                animate={isInView ? "visible" : "hidden"}
+                animate={isInView && isReady ? "visible" : "hidden"}
                 transition={{
                     duration,
                     delay,
-                    ease: [0.2, 0.65, 0.3, 0.9] // Custom "Ease Out Quart/Quint" blend for soft landing
+                    ease: EASE_OUT // Custom "Ease Out Quart/Quint" blend for soft landing
                 }}
                 className={fullHeight ? 'h-full' : ''}
                 style={{ willChange: "opacity, transform" }}

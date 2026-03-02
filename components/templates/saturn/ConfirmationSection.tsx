@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { StaggerRevealOnScroll } from "@/components/invitation/StaggerRevealOnScroll";
 import { CheckIcon } from "./graphics/icons";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
@@ -67,35 +67,33 @@ export function ConfirmationSection({ invitationId, rsvpDeadline }: Confirmation
       <div className="absolute inset-0 bg-wedding-dark/50 backdrop-blur-sm z-0" />
 
       <div className="max-w-2xl mx-auto px-4 relative z-10">
-        <RevealOnScroll direction="down" width="100%">
-          <h2 className="font-heading text-3xl uppercase tracking-[0.3em] text-wedding-accent mb-12 drop-shadow-md">RSVP</h2>
-        </RevealOnScroll>
+        <StaggerRevealOnScroll direction="up" width="100%" staggerDelay={0.18} className="w-full">
+          <h2 className="font-heading text-3xl capitalize tracking-[0.6em] text-wedding-accent mb-12 drop-shadow-md">RSVP</h2>
 
-        <div className="bg-wedding-on-dark/5 backdrop-blur-xl border border-wedding-on-dark/10 p-10 rounded-2xl shadow-2xl relative overflow-hidden">
-          {/* Decorative glow */}
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-wedding-accent/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-wedding-accent-2/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="bg-wedding-on-dark/5 backdrop-blur-xl border border-wedding-on-dark/10 p-10 rounded-2xl shadow-2xl relative overflow-hidden">
+            {/* Decorative glow */}
+            <div className="absolute -top-10 -left-10 w-40 h-40 bg-wedding-accent/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-wedding-accent-2/20 rounded-full blur-3xl pointer-events-none" />
 
-          {status === "success" || status === "already_submitted" ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="py-10"
-            >
-              <div className="w-20 h-20 bg-wedding-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckIcon />
-              </div>
-              <h3 className="font-script text-5xl text-wedding-on-dark mb-4">
-                {status === "already_submitted" ? "Welcome Back" : "Thank You"}
-              </h3>
-              <p className="font-body text-wedding-on-dark/70 mb-8 max-w-md mx-auto">
-                {status === "already_submitted"
-                  ? "We have already received your signal. Your presence is confirmed."
-                  : "Transmission received. Your seat among the stars is reserved."}
-              </p>
-            </motion.div>
-          ) : (
-            <RevealOnScroll direction="up" delay={0.2} width="100%">
+            {status === "success" || status === "already_submitted" ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-10"
+              >
+                <div className="w-20 h-20 bg-wedding-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckIcon />
+                </div>
+                <h3 className="font-heading text-3xl capitalize tracking-[0.2em] text-wedding-on-dark mb-6">
+                  {status === "already_submitted" ? "Welcome Back" : "Thank You"}
+                </h3>
+                <p className="font-body text-wedding-on-dark/70 mb-8 max-w-md mx-auto">
+                  {status === "already_submitted"
+                    ? "We have already received your signal. Your presence is confirmed."
+                    : "Transmission received. Your seat among the stars is reserved."}
+                </p>
+              </motion.div>
+            ) : (
               <div>
                 <p className="font-body mb-8 text-wedding-on-dark/70 italic leading-relaxed">
                   {!inviteeName ? (
@@ -135,9 +133,9 @@ export function ConfirmationSection({ invitationId, rsvpDeadline }: Confirmation
                   {status === "error" && <p className="text-wedding-accent/80 text-xs text-center mt-4">Signal lost. Please retry transmission.</p>}
                 </form>
               </div>
-            </RevealOnScroll>
-          )}
-        </div>
+            )}
+          </div>
+        </StaggerRevealOnScroll>
       </div>
     </section>
   );

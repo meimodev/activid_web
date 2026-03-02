@@ -26,6 +26,7 @@ import Link from "next/link";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { Host, InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 
 interface FlowProps {
   config: InvitationConfig;
@@ -36,12 +37,13 @@ export function Flow({ config }: FlowProps) {
   const searchParams = useSearchParams();
   const guestName = searchParams.get("to");
 
-  const { music, weddingDate, sections } = config;
+  const { music, sections } = config;
 
-  const hosts = (Array.isArray(config.hosts) ? config.hosts : []).filter(
+  const hostsSection = sections.hosts;
+  const hosts = (Array.isArray(hostsSection.hosts) ? hostsSection.hosts : []).filter(
     (host): host is Host => Boolean(host),
   );
-  const hostsSection = sections.hosts;
+  const dateInfo = deriveInvitationPrimaryDateInfo(sections.event.events[0]?.date);
 
   const derivedPhotos = useMemo(
     () => pickDeterministicRandomSubset(sections.gallery.photos, config.id, 5),
@@ -80,7 +82,7 @@ export function Flow({ config }: FlowProps) {
             <Hero
               onOpen={() => setIsOpen(true)}
               hosts={hosts}
-              date={weddingDate.displayShort}
+              date={dateInfo?.displayShort ?? ""}
               subtitle={sections.hero.subtitle}
               coverImage={sections.hero.coverImage}
               guestName={guestName}
@@ -99,7 +101,7 @@ export function Flow({ config }: FlowProps) {
           {sections.title.enabled && (
             <TitleSection
               hosts={hosts}
-              date={weddingDate.display}
+              date={dateInfo?.display ?? ""}
               heading={sections.title.heading}
               isOpen={isOpen}
             />
@@ -107,7 +109,7 @@ export function Flow({ config }: FlowProps) {
 
           {sections.countdown.enabled && (
             <Countdown
-              targetDate={weddingDate.countdownTarget}
+              targetDate={dateInfo?.countdownTarget ?? ""}
               photos={derivedPhotos}
               heading={sections.countdown.heading}
             />
@@ -116,10 +118,7 @@ export function Flow({ config }: FlowProps) {
           {sections.quote.enabled && <QuoteSection quote={sections.quote} />}
 
           {hostsSection.enabled && (
-            <CoupleSection
-              hosts={hosts}
-              disableGrayscale={hostsSection.disableGrayscale}
-            />
+            <CoupleSection hosts={hosts} />
           )}
 
           {sections.story.enabled && (

@@ -64,7 +64,7 @@ function generateMetadata({
   purpose: "marriage" | "birthday" | "event";
   config: InvitationConfig;
 }): MetadataConfig {
-  const hosts = config.hosts;
+  const hosts = config.sections.hosts.hosts;
 
   const primaryName =
     hosts[0]?.firstName || hosts[0]?.fullName || slug;
@@ -192,42 +192,8 @@ function isAlreadyExistsError(err: unknown): boolean {
   return code === 6 || code === "already-exists";
 }
 
-function normalizeEventList(
-  raw: InvitationConfig["sections"]["event"]["events"],
-): EventDetail[] {
-  if (Array.isArray(raw)) {
-    return raw.filter((e) => Boolean(e));
-  }
-
-  if (!raw || typeof raw !== "object") return [];
-
-  const orderedKeys = ["holyMatrimony", "reception"];
-  const entries = Object.entries(raw as Record<string, EventDetail>);
-
-  const prioritized = orderedKeys
-    .map((key) => [key, (raw as Record<string, EventDetail>)[key]] as const)
-    .filter(([, value]) => Boolean(value));
-
-  const rest = entries.filter(([key]) => !orderedKeys.includes(key));
-  return [...prioritized, ...rest].map(([, value]) => value).filter(Boolean);
-}
-
-function deriveWeddingDateFromFirstEvent(firstEvent: EventDetail) {
-  const dt = parseInvitationDateTime(firstEvent.date);
-  if (!dt) return null;
-
-  const day = dt.setZone(INVITATION_ZONE).startOf("day");
-  const display = day.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
-  const displayShort = day.setLocale(INVITATION_LOCALE).toFormat("dd LLL yyyy");
-  const countdownTarget = day.toISO({ includeOffset: true, suppressMilliseconds: true });
-  if (!countdownTarget) return null;
-
-  return {
-    display,
-    displayShort,
-    countdownTarget,
-    rsvpDeadline: display,
-  };
+function normalizeEventList(raw: InvitationConfig["sections"]["event"]["events"]): EventDetail[] {
+  return raw.filter((e) => Boolean(e));
 }
 
 function normalizePhotoList(raw: unknown): string[] {
@@ -319,12 +285,12 @@ export async function registerInvitation(
     return { error: "Config payload is missing required fields." };
   }
 
-  if (!Array.isArray(config.hosts) || config.hosts.length < 1) {
-    return { error: "At least 1 host is required." };
-  }
-
   if (!config.sections.hosts) {
     return { error: "Hosts section config is required." };
+  }
+
+  if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
+    return { error: "At least 1 host is required." };
   }
 
   if (!config.sections.event || !config.sections.event.events) {
@@ -346,13 +312,6 @@ export async function registerInvitation(
     return { error: "All event dates are required." };
   }
 
-  const derivedWeddingDate = deriveWeddingDateFromFirstEvent(
-    normalizedEvents[0] as EventDetail,
-  );
-  if (!derivedWeddingDate) {
-    return { error: "First event date is required." };
-  }
-
   const normalizedStories = (config.sections?.story?.stories ?? []).map((story) => {
     const iso = toInvitationIso(story?.date);
     return { ...story, date: iso ?? story?.date };
@@ -360,12 +319,12 @@ export async function registerInvitation(
 
   const purpose = readPurpose(formData);
 
-  const baseSlug = deriveBaseSlug(purpose, config.hosts);
+  const baseSlug = deriveBaseSlug(purpose, config.sections.hosts.hosts);
   if (!baseSlug) {
     return { error: "Failed to derive slug." };
   }
 
-  const imagekitFolderKey = config.imagekitFolderKey || deriveImagekitFolderKey(purpose, config.hosts);
+  const imagekitFolderKey = config.imagekitFolderKey || deriveImagekitFolderKey(purpose, config.sections.hosts.hosts);
 
   const derivedPhotos = normalizePhotoList(config.sections?.gallery?.photos);
 
@@ -390,7 +349,6 @@ export async function registerInvitation(
         purpose,
         config,
       }),
-      weddingDate: derivedWeddingDate,
       backgroundPhotos: derivedPhotos,
       sections: {
         ...config.sections,
@@ -398,9 +356,13 @@ export async function registerInvitation(
           ...config.sections.countdown,
           photos: derivedPhotos,
         },
+        hosts: {
+          ...config.sections.hosts,
+          hosts: config.sections.hosts.hosts,
+        },
         event: {
           ...config.sections.event,
-          events: normalizedEvents as EventDetail[],
+          events: normalizedEvents as [EventDetail, ...EventDetail[]],
         },
         story: {
           ...config.sections.story,

@@ -10,15 +10,7 @@ import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils
 export function EventSection({ events, heading }: EventSectionProps) {
   void heading;
 
-  const cards = Array.isArray(events)
-    ? events
-    : [
-        events.holyMatrimony,
-        events.reception,
-        ...Object.entries(events)
-          .filter(([key]) => key !== "holyMatrimony" && key !== "reception")
-          .map(([, v]) => v),
-      ].filter(Boolean);
+  const cards = events;
 
   return (
     <section className="relative overflow-hidden bg-wedding-dark py-24 text-wedding-on-dark ">

@@ -1,51 +1,76 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { InvitationConfig } from "@/types/invitation";
 import type { InvitationTemplateTheme } from "@/data/invitation-templates";
 import { getInvitationThemeStyle } from "@/lib/invitation-theme";
 
+type DemoPurpose = InvitationConfig["purpose"];
+
 type DemoThemeSidebarProps = {
   templateId: string;
   themes: InvitationTemplateTheme[];
   initialTheme?: InvitationConfig["theme"];
+  activeThemeId?: string;
+  onThemeIdChange?: (themeId: string) => void;
+  activePurpose?: DemoPurpose;
+  onPurposeChange?: (purpose: DemoPurpose) => void;
 };
 
 function normalizeHex(value: string) {
   return value.trim().toLowerCase();
 }
 
-export function DemoThemeSidebar({ templateId, themes, initialTheme }: DemoThemeSidebarProps) {
-  const initialActive = (() => {
-    if (!themes.length) return null;
+export function DemoThemeSidebar({
+  templateId,
+  themes,
+  initialTheme,
+  activeThemeId,
+  onThemeIdChange,
+  activePurpose,
+  onPurposeChange,
+}: DemoThemeSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [internalThemeId, setInternalThemeId] = useState<string>(() => {
+    if (!themes.length) return "";
+
+    if (activeThemeId) {
+      const match = themes.find((theme) => theme.id === activeThemeId);
+      if (match) return match.id;
+    }
 
     if (initialTheme?.mainColor && initialTheme.accentColor) {
       const main = normalizeHex(initialTheme.mainColor);
       const accent = normalizeHex(initialTheme.accentColor);
       const accent2 = initialTheme.accent2Color ? normalizeHex(initialTheme.accent2Color) : null;
 
-      const match = themes.find(
-        (theme) => {
-          if (normalizeHex(theme.mainColor) !== main) return false;
-          if (normalizeHex(theme.accentColor) !== accent) return false;
-          if (!accent2) return true;
-          return !!theme.accent2Color && normalizeHex(theme.accent2Color) === accent2;
-        },
-      );
+      const match = themes.find((theme) => {
+        if (normalizeHex(theme.mainColor) !== main) return false;
+        if (normalizeHex(theme.accentColor) !== accent) return false;
+        if (!accent2) return true;
+        return !!theme.accent2Color && normalizeHex(theme.accent2Color) === accent2;
+      });
 
-      if (match) return match;
+      if (match) return match.id;
     }
 
-    return themes[0];
-  })();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTheme, setActiveTheme] = useState<InvitationTemplateTheme | null>(initialActive);
+    return themes[0].id;
+  });
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
+  const effectiveThemeId = activeThemeId ?? internalThemeId;
+
+  const activeTheme = useMemo(() => {
+    if (!themes.length) return null;
+    return themes.find((theme) => theme.id === effectiveThemeId) ?? themes[0] ?? null;
+  }, [effectiveThemeId, themes]);
+
   useEffect(() => {
-    const timer = window.setTimeout(() => setPortalRoot(document.body), 0);
+    const timer = window.setTimeout(() => {
+      const shell = document.querySelector<HTMLElement>(".invitation-mobile-shell");
+      setPortalRoot(shell ?? document.body);
+    }, 0);
 
     return () => {
       window.clearTimeout(timer);
@@ -124,18 +149,58 @@ export function DemoThemeSidebar({ templateId, themes, initialTheme }: DemoTheme
             </button>
           </div>
 
+          {onPurposeChange && activePurpose ? (
+            <div className="mt-3">
+              <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-wedding-text-light">
+                Purpose
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {(
+                  [
+                    { key: "marriage", label: "Wedding" },
+                    { key: "birthday", label: "Birthday" },
+                    { key: "event", label: "Event" },
+                  ] as const
+                ).map((opt) => {
+                  const isActive = activePurpose === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => onPurposeChange(opt.key)}
+                      className={
+                        "rounded-xl border px-3 py-2 text-[11px] font-semibold uppercase tracking-wide transition " +
+                        (isActive
+                          ? "border-wedding-accent bg-wedding-accent/10 text-wedding-accent"
+                          : "border-wedding-accent/20 hover:border-wedding-accent/50")
+                      }
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
           <div className="mt-3 grid grid-cols-1 gap-2">
             {themes.map((theme) => {
-              const isActive =
-                !!activeTheme &&
-                normalizeHex(activeTheme.mainColor) === normalizeHex(theme.mainColor) &&
-                normalizeHex(activeTheme.accentColor) === normalizeHex(theme.accentColor);
+              const isActive = activeThemeId
+                ? theme.id === activeThemeId
+                : !!activeTheme &&
+                  normalizeHex(activeTheme.mainColor) === normalizeHex(theme.mainColor) &&
+                  normalizeHex(activeTheme.accentColor) === normalizeHex(theme.accentColor);
 
               return (
                 <button
                   key={theme.id}
                   type="button"
-                  onClick={() => setActiveTheme(theme)}
+                  onClick={() => {
+                    if (!activeThemeId) {
+                      setInternalThemeId(theme.id);
+                    }
+                    onThemeIdChange?.(theme.id);
+                  }}
                   className={
                     "w-full rounded-xl border p-3 text-left transition " +
                     (isActive

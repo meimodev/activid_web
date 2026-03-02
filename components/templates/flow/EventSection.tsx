@@ -13,15 +13,7 @@ interface EventSectionProps {
 }
 
 export function EventSection({ events, heading }: EventSectionProps) {
-  const cards = Array.isArray(events)
-    ? events
-    : [
-        events.holyMatrimony,
-        events.reception,
-        ...Object.entries(events)
-          .filter(([key]) => key !== "holyMatrimony" && key !== "reception")
-          .map(([, v]) => v),
-      ].filter(Boolean);
+  const cards = events;
 
   return (
     <section className="section-curved py-24 bg-wedding-bg/90 backdrop-blur-md text-center relative border-b border-wedding-accent/30">

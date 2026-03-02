@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { motion, type MotionValue, useMotionValue } from "framer-motion";
 import { useMemo } from "react";
 
 type Star = {
@@ -11,6 +11,19 @@ type Star = {
     opacity: number;
     duration: number;
     delay: number;
+};
+
+type Orb = {
+    id: number;
+    left: number;
+    top: number;
+    size: number;
+    driftX: number;
+    driftY: number;
+    opacity: number;
+    duration: number;
+    delay: number;
+    tint: "accent" | "accent2";
 };
 
 function hash01(i: number, salt: number) {
@@ -28,6 +41,33 @@ function generateStars(count: number, minSize: number, maxSize: number, salt: nu
         const delay = hash01(i + 6, salt + 6) * 5;
 
         return { id: i, left, top, size, opacity, duration, delay };
+    });
+}
+
+function generateOrbs(count: number, salt: number): Orb[] {
+    return Array.from({ length: count }, (_, i) => {
+        const left = hash01(i + 11, salt + 1) * 100;
+        const top = hash01(i + 12, salt + 2) * 100;
+        const size = hash01(i + 13, salt + 3) * 220 + 160;
+        const driftX = (hash01(i + 14, salt + 4) * 2 - 1) * 120;
+        const driftY = (hash01(i + 15, salt + 5) * 2 - 1) * 140;
+        const opacity = hash01(i + 16, salt + 6) * 0.22 + 0.12;
+        const duration = hash01(i + 17, salt + 7) * 12 + 14;
+        const delay = hash01(i + 18, salt + 8) * 10;
+        const tint: Orb["tint"] = hash01(i + 19, salt + 9) > 0.5 ? "accent" : "accent2";
+
+        return {
+            id: i,
+            left,
+            top,
+            size,
+            driftX,
+            driftY,
+            opacity,
+            duration,
+            delay,
+            tint,
+        };
     });
 }
 
@@ -63,12 +103,9 @@ function StarLayer({ stars, y }: { stars: Star[]; y: MotionValue<number> }) {
 
 export function StarField() {
     // Three layers of stars for parallax depth
-    const { scrollY } = useScroll();
-
-    // Parallax movement
-    const y1 = useTransform(scrollY, [0, 2000], [0, 300]);
-    const y2 = useTransform(scrollY, [0, 2000], [0, 150]);
-    const y3 = useTransform(scrollY, [0, 2000], [0, 50]);
+    const y1 = useMotionValue(0);
+    const y2 = useMotionValue(0);
+    const y3 = useMotionValue(0);
 
     const stars1 = useMemo(() => generateStars(100, 0.5, 1.5, 11), []); // Distant stars
     const stars2 = useMemo(() => generateStars(50, 1.5, 2.5, 29), []);  // Mid-distance stars
@@ -86,19 +123,90 @@ export function StarField() {
     );
 }
 
-export function Nebula() {
-    const { scrollY } = useScroll();
-    const rotate = useTransform(scrollY, [0, 5000], [0, 180]);
-    const scale = useTransform(scrollY, [0, 5000], [1, 1.5]);
+export function HoloGrid() {
+    return (
+        <div className="absolute inset-0 pointer-events-none z-[1] overflow-hidden mix-blend-screen opacity-35">
+            <motion.div
+                className="absolute inset-0"
+                style={{
+                    backgroundImage: [
+                        `linear-gradient(to right, color-mix(in srgb, var(--invitation-accent-2) 18%, transparent) 1px, transparent 1px)`,
+                        `linear-gradient(to bottom, color-mix(in srgb, var(--invitation-accent-2) 18%, transparent) 1px, transparent 1px)`,
+                    ].join(","),
+                    backgroundSize: "46px 46px",
+                    backgroundPosition: "0px 0px",
+                    transform: "skewY(-12deg)",
+                }}
+                animate={{ backgroundPosition: ["0px 0px", "46px 92px"] }}
+                transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+                className="absolute inset-0"
+                style={{
+                    backgroundImage: [
+                        `linear-gradient(to right, color-mix(in srgb, var(--invitation-accent) 14%, transparent) 1px, transparent 1px)`,
+                        `linear-gradient(to bottom, color-mix(in srgb, var(--invitation-accent) 14%, transparent) 1px, transparent 1px)`,
+                    ].join(","),
+                    backgroundSize: "120px 120px",
+                    backgroundPosition: "0px 0px",
+                    transform: "skewY(-12deg)",
+                    opacity: 0.55,
+                }}
+                animate={{ backgroundPosition: ["0px 0px", "-120px 180px"] }}
+                transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
+            />
+        </div>
+    );
+}
 
+export function AuroraOrbs() {
+    const orbs = useMemo(() => generateOrbs(6, 71), []);
+
+    return (
+        <div className="absolute inset-0 pointer-events-none z-[1] overflow-hidden mix-blend-screen">
+            {orbs.map((orb) => {
+                const colorVar = orb.tint === "accent" ? "--invitation-accent" : "--invitation-accent-2";
+                return (
+                    <motion.div
+                        key={orb.id}
+                        className="absolute rounded-full blur-[70px]"
+                        style={{
+                            left: `${orb.left}%`,
+                            top: `${orb.top}%`,
+                            width: orb.size,
+                            height: orb.size,
+                            opacity: orb.opacity,
+                            background:
+                                `radial-gradient(circle at 30% 30%, ` +
+                                `color-mix(in srgb, var(${colorVar}) 72%, transparent), ` +
+                                `transparent 62%)`,
+                        }}
+                        animate={{
+                            x: [0, orb.driftX, 0],
+                            y: [0, orb.driftY, 0],
+                            scale: [1, 1.12, 1],
+                            opacity: [orb.opacity * 0.85, orb.opacity, orb.opacity * 0.85],
+                        }}
+                        transition={{
+                            duration: orb.duration,
+                            delay: orb.delay,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                        }}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+export function Nebula() {
     return (
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden mix-blend-screen">
             <motion.div
-                style={{ rotate, scale }}
                 className="absolute -top-[20%] -left-[10%] w-[320px] h-[320px] bg-wedding-accent/10 rounded-full blur-[100px] opacity-40"
             />
             <motion.div
-                style={{ rotate: useTransform(scrollY, [0, 5000], [0, -90]), scale }}
                 className="absolute top-[40%] -right-[10%] w-[280px] h-[280px] bg-wedding-accent-2/10 rounded-full blur-[120px] opacity-30"
             />
             <motion.div
@@ -111,12 +219,8 @@ export function Nebula() {
 }
 
 export function SaturnRings() {
-    const { scrollY } = useScroll();
-    const y = useTransform(scrollY, [0, 5000], [0, 200]);
-    const rotate = useTransform(scrollY, [0, 5000], [0, 45]);
-
     return (
-        <motion.div style={{ y, rotate }} className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
+        <motion.div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-20">
             {/* Primary Orbit */}
             <motion.div
                 animate={{ rotate: 360 }}

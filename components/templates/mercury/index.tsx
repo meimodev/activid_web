@@ -19,6 +19,7 @@ import {
 } from "./InfoSections";
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 
 const MERCURY_DEMO_ASSETS = {
     host1Photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -48,12 +49,12 @@ export function Mercury({ config }: MercuryProps) {
 
     const {
         music,
-        weddingDate,
         sections
     } = config;
 
-    const hosts = config.hosts;
     const hostsSection = sections.hosts;
+    const hosts = hostsSection.hosts;
+    const dateInfo = deriveInvitationPrimaryDateInfo(sections.event.events[0]?.date);
 
     const effectiveHosts = isDemo
         ? hosts.map((h, idx) => {
@@ -105,7 +106,7 @@ export function Mercury({ config }: MercuryProps) {
                             setIsOpen(true);
                         }}
                         hosts={effectiveHosts}
-                        date={weddingDate.displayShort}
+                        date={dateInfo?.displayShort ?? ""}
                         subtitle={sections.hero.subtitle}
                         coverImage={effectiveCoverImage}
                         guestName={guestName || undefined}
@@ -122,9 +123,9 @@ export function Mercury({ config }: MercuryProps) {
                             {sections.title.enabled && (
                                 <TitleSection
                                     hosts={effectiveHosts}
-                                    date={weddingDate.display}
+                                    date={dateInfo?.display ?? ""}
                                     heading={sections.title.heading}
-                                    countdownTarget={weddingDate.countdownTarget}
+                                    countdownTarget={dateInfo?.countdownTarget ?? ""}
                                     galleryPhotos={effectiveGalleryPhotos}
                                     showCountdown={sections.countdown.enabled}
                                 />
@@ -160,7 +161,7 @@ export function Mercury({ config }: MercuryProps) {
                                     heading={sections.gift.heading}
                                     description={sections.gift.description}
                                     templateName={config.templateId || "mercury"}
-                                    eventDate={weddingDate.display}
+                                    eventDate={dateInfo?.display ?? ""}
                                 />
                             )}
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { StaggerRevealOnScroll } from "@/components/invitation/StaggerRevealOnScroll";
 import { SatrunIcon } from "./graphics";
 
 interface GalleryProps {
@@ -41,11 +41,11 @@ export function Gallery({ photos, heading }: GalleryProps) {
   // Limit to 9 photos for the grid
   const displayPhotos = photos.slice(0, 9);
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const paginate = useCallback((newDirection: number) => {
     setDirection(newDirection);
@@ -105,64 +105,62 @@ export function Gallery({ photos, heading }: GalleryProps) {
     <section className="py-32 relative text-wedding-on-dark bg-wedding-dark pointer-events-auto">
 
       <div className="container mx-auto px-4 relative z-10">
-        <RevealOnScroll direction="down" width="100%">
+        <StaggerRevealOnScroll direction="up" width="100%" staggerDelay={0.18} className="w-full">
           <div className="flex flex-col items-center mb-20 text-center">
             <SatrunIcon />
-            <h2 className="font-heading text-3xl uppercase tracking-[0.2em]">{heading}</h2>
-            <p className="mt-4 font-mono text-wedding-accent-2/60 text-xs tracking-widest">ARCHIVED MEMORIES // STARDATE 2026</p>
-          </div>
-        </RevealOnScroll>
-
-        <div className="relative max-w-5xl mx-auto">
-          {/* Constellation Lines SVG Layer */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-20 hidden ">
-            <svg width="100%" height="100%">
-              <line x1="16%" y1="16%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
-              <line x1="84%" y1="16%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
-              <line x1="16%" y1="84%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
-              <line x1="84%" y1="84%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
-              <line x1="50%" y1="16%" x2="50%" y2="84%" stroke="var(--invitation-accent)" strokeWidth="1" strokeDasharray="5,5" />
-            </svg>
+            <h2 className="font-heading text-3xl tracking-[0.2em]">{heading}</h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 relative z-10">
-            {displayPhotos.map((photo, index) => (
-              <RevealOnScroll key={index} delay={index * 0.1} width="100%">
+          <div className="relative max-w-5xl mx-auto">
+            {/* Constellation Lines SVG Layer */}
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-20 hidden ">
+              <svg width="100%" height="100%">
+                <line x1="16%" y1="16%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+                <line x1="84%" y1="16%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+                <line x1="16%" y1="84%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+                <line x1="84%" y1="84%" x2="50%" y2="50%" stroke="var(--invitation-accent-2)" strokeWidth="1" />
+                <line x1="50%" y1="16%" x2="50%" y2="84%" stroke="var(--invitation-accent)" strokeWidth="1" strokeDasharray="5,5" />
+              </svg>
+            </div>
+
+            <StaggerRevealOnScroll
+              direction="up"
+              width="100%"
+              staggerDelay={0.12}
+              className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 relative z-10"
+            >
+              {displayPhotos.map((photo, index) => (
                 <button
+                  key={index}
                   type="button"
-                  className="block w-full relative aspect-square cursor-pointer group pointer-events-auto transition-transform duration-300 hover:scale-[1.02]"
+                  className="block w-full relative aspect-[4/5] cursor-pointer group pointer-events-auto rounded-xl overflow-hidden border border-wedding-on-dark/10 hover:border-wedding-accent/50 transition-all duration-700 hover:shadow-[0_0_30px_color-mix(in_srgb,var(--invitation-accent)_30%,transparent)] bg-wedding-dark/50"
                   onClick={(e) => {
                     e.stopPropagation();
                     setDirection(0);
                     setSelectedIndex(index);
                   }}
                 >
-                  {/* Connection Node */}
-                  <div className="absolute -top-2 -left-2 w-4 h-4 bg-wedding-dark border border-wedding-accent-2 rounded-full z-20 group-hover:bg-wedding-accent-2 transition-colors duration-300" />
-
-                  <div
-                    className="absolute inset-0 p-1 bg-gradient-to-br from-wedding-accent-2/20 to-wedding-accent/20"
-                    style={{ clipPath: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)" }}
-                  >
-                    <div className="w-full h-full relative overflow-hidden bg-wedding-dark/50">
-                      <img
-                        src={photo}
-                        alt={`Memory ${index + 1}`}
-                        className="block w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100 pointer-events-none"
-                      />
-                      {/* Overlay Scanline */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-wedding-accent-2/10 to-transparent h-[200%] w-full animate-scan pointer-events-none" />
-                    </div>
+                  <img
+                    src={photo}
+                    alt={`Memory ${index + 1}`}
+                    className="block w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100 pointer-events-none"
+                  />
+                  {/* Elegant Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-wedding-dark/90 via-wedding-dark/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                  
+                  {/* Subtle Scanline */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-wedding-accent/10 to-transparent h-[200%] w-full animate-scan pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  
+                  {/* Memory Label */}
+                  <div className="absolute bottom-4 left-4 font-mono text-[10px] text-wedding-accent/80 tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
+                    MEM_SEQ_{index + 1}
                   </div>
-
-                  <div className="absolute -bottom-4 -right-4 font-mono text-[10px] text-wedding-accent-2/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                    IMG_SEQ_{index + 10}
-                  </div>
+                  <div className="absolute top-4 right-4 w-2 h-2 rounded-full border border-wedding-accent opacity-0 group-hover:opacity-100 transition-all duration-500 scale-50 group-hover:scale-100" />
                 </button>
-              </RevealOnScroll>
-            ))}
+              ))}
+            </StaggerRevealOnScroll>
           </div>
-        </div>
+        </StaggerRevealOnScroll>
       </div>
 
       {/* Lightbox Modal - Portalled to body to cover full viewport */}
@@ -170,96 +168,86 @@ export function Gallery({ photos, heading }: GalleryProps) {
         <AnimatePresence>
           {selectedIndex !== null && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+              animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
+              exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
               onClick={() => setSelectedIndex(null)}
-              className="fixed inset-0 z-[99999] bg-wedding-dark/95 backdrop-blur-xl flex items-center justify-center p-4"
+              className="fixed inset-0 z-[99999] bg-wedding-dark/90 flex flex-col items-center justify-center p-4 md:p-12 cursor-pointer"
             >
-              <div
-                className="relative max-w-6xl w-full h-full max-h-[90vh] flex items-center justify-center pointer-events-none"
-              >
-                {/* Image Container */}
-                <div
-                  className="relative max-w-4xl w-full h-full md:h-auto md:aspect-video border border-wedding-on-dark/10 p-2 bg-wedding-on-dark/5 pointer-events-auto"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {/* Image Viewport - Overflow hidden for slide animation */}
-                  <div className="relative w-full h-full overflow-hidden">
-                    <AnimatePresence initial={false} custom={direction} mode="wait">
-                      <motion.img
-                        key={selectedIndex}
-                        src={displayPhotos[selectedIndex]}
-                        custom={direction}
-                        variants={slideVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                          x: { type: "spring", stiffness: 300, damping: 30 },
-                          opacity: { duration: 0.2 }
-                        }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={1}
-                        onDragEnd={(e, { offset, velocity }) => {
-                          const swipe = swipePower(offset.x, velocity.x);
-                          if (swipe < -10000) {
-                            paginate(1);
-                          } else if (swipe > 10000) {
-                            paginate(-1);
-                          }
-                        }}
-                        alt={`Memory ${selectedIndex + 1}`}
-                        className="w-full h-full object-contain absolute inset-0 cursor-grab active:cursor-grabbing"
-                      />
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Controls Header */}
-                  <div className="absolute -top-12 left-0 right-0 flex justify-between items-center text-xs tracking-widest uppercase">
-                    <button
-                      onClick={handleDownload}
-                      className="text-wedding-on-dark hover:text-wedding-accent-2-light transition-colors flex items-center gap-2 group pointer-events-auto"
-                    >
-                      <span className="text-lg group-hover:animate-bounce">↓</span> [ Download ]
-                    </button>
-
-                    <button
-                      onClick={() => setSelectedIndex(null)}
-                      className="text-wedding-on-dark hover:text-wedding-accent-2-light transition-colors pointer-events-auto"
-                    >
-                      [ Close Transmission ]
-                    </button>
-                  </div>
-
-                  {/* Counter */}
-                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-wedding-accent-2/80 font-mono text-sm tracking-widest">
-                    [{selectedIndex + 1} / {displayPhotos.length}]
-                  </div>
+              {/* Top Bar Controls */}
+              <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-50 pointer-events-none">
+                <div className="text-wedding-on-dark font-mono text-xs tracking-widest  px-4 py-2 rounded-full   backdrop-blur-md pointer-events-auto">
+                  {selectedIndex + 1} / {displayPhotos.length}
                 </div>
-
-                {/* Navigation Buttons */}
-                {displayPhotos.length > 1 && (
-                  <>
-                    <button
-                      onClick={showPrev}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent-2-light transition-colors pointer-events-auto z-50 group"
-                      aria-label="Previous image"
-                    >
-                      <span className="text-4xl group-hover:-translate-x-1 transition-transform inline-block">&lt;</span>
-                    </button>
-
-                    <button
-                      onClick={showNext}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent-2-light transition-colors pointer-events-auto z-50 group"
-                      aria-label="Next image"
-                    >
-                      <span className="text-4xl group-hover:translate-x-1 transition-transform inline-block">&gt;</span>
-                    </button>
-                  </>
-                )}
+                <div className="flex items-center gap-4 pointer-events-auto">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDownload(e); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-wedding-on-dark/5 hover:bg-wedding-accent hover:text-wedding-dark text-wedding-on-dark border border-wedding-on-dark/20 hover:border-wedding-accent rounded-full font-body text-xs tracking-widest transition-all duration-300"
+                  >
+                    <span>Download</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedIndex(null); }}
+                    className="flex items-center gap-2 px-4 py-2 bg-wedding-on-dark/5 hover:bg-wedding-accent hover:text-wedding-dark text-wedding-on-dark border border-wedding-on-dark/20 hover:border-wedding-accent rounded-full font-body text-xs tracking-widest transition-all duration-300"
+                  >
+                    <span>Close</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Main Image Viewer */}
+              <div className="relative w-full h-full flex items-center justify-center pointer-events-none max-w-6xl mx-auto">
+                <AnimatePresence initial={false} custom={direction} mode="wait">
+                  <motion.img
+                    key={selectedIndex}
+                    src={displayPhotos[selectedIndex]}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 }
+                    }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={1}
+                    onDragEnd={(e, { offset, velocity }) => {
+                      const swipe = swipePower(offset.x, velocity.x);
+                      if (swipe < -10000) {
+                        paginate(1);
+                      } else if (swipe > 10000) {
+                        paginate(-1);
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    alt={`Memory ${selectedIndex + 1}`}
+                    className="max-w-full max-h-full w-auto h-auto object-contain cursor-grab active:cursor-grabbing rounded-sm shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-wedding-on-dark/10 pointer-events-auto"
+                  />
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Buttons */}
+              {displayPhotos.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); showPrev(e); }}
+                    className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent transition-colors z-50 group bg-wedding-dark/30 hover:bg-wedding-dark/80 rounded-full backdrop-blur-md border border-transparent hover:border-wedding-accent/30 pointer-events-auto"
+                    aria-label="Previous image"
+                  >
+                    <span className="text-2xl group-hover:-translate-x-1 transition-transform inline-block">←</span>
+                  </button>
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); showNext(e); }}
+                    className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-4 text-wedding-on-dark/50 hover:text-wedding-accent transition-colors z-50 group bg-wedding-dark/30 hover:bg-wedding-dark/80 rounded-full backdrop-blur-md border border-transparent hover:border-wedding-accent/30 pointer-events-auto"
+                    aria-label="Next image"
+                  >
+                    <span className="text-2xl group-hover:translate-x-1 transition-transform inline-block">→</span>
+                  </button>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>,

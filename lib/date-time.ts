@@ -138,6 +138,32 @@ export function toInvitationIso(value: unknown): string | null {
   return normalized.toISO({ includeOffset: true, suppressMilliseconds: true });
 }
 
+export type InvitationPrimaryDateInfo = {
+  display: string;
+  displayShort: string;
+  countdownTarget: string;
+  rsvpDeadline: string;
+};
+
+export function deriveInvitationPrimaryDateInfo(value: unknown): InvitationPrimaryDateInfo | null {
+  const dt = parseInvitationDateTime(value);
+  if (!dt) return null;
+
+  const day = dt.setZone(INVITATION_ZONE).startOf("day").set({ second: 0, millisecond: 0 });
+  const countdownTarget = day.toISO({ includeOffset: true, suppressMilliseconds: true });
+  if (!countdownTarget) return null;
+
+  const display = day.setLocale(INVITATION_LOCALE).toFormat("d LLLL yyyy");
+  const displayShort = day.setLocale(INVITATION_LOCALE).toFormat("dd . MM . yyyy");
+
+  return {
+    display,
+    displayShort,
+    countdownTarget,
+    rsvpDeadline: display,
+  };
+}
+
 export function formatInvitationDateLong(value: unknown): string {
   const dt = parseInvitationDateTime(value);
   if (!dt) return typeof value === "string" ? value : "";
