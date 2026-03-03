@@ -3,9 +3,18 @@
 import { Host } from "@/types/invitation";
 import { StaggerRevealOnScroll } from "@/components/invitation/StaggerRevealOnScroll";
 
-export function GratitudeSection({ hosts, purpose }: { hosts: Host[]; purpose: "marriage" | "birthday" | "event" }) {
+export function GratitudeSection({
+  hosts,
+  purpose,
+  message,
+}: {
+  hosts: Host[];
+  purpose: "marriage" | "birthday" | "event";
+  message?: string;
+}) {
   const names = hosts.map((h) => h?.firstName).filter(Boolean);
   const isMarriage = purpose === "marriage";
+  const effectiveMessage = message?.trim();
 
   return (
     <section className="py-24 relative text-center text-wedding-on-dark overflow-hidden bg-wedding-dark">
@@ -19,20 +28,22 @@ export function GratitudeSection({ hosts, purpose }: { hosts: Host[]; purpose: "
             <div className="w-px h-24 bg-linear-to-b from-transparent via-wedding-accent/50 to-transparent mx-auto mb-12" />
           </div>
 
-          <p className="font-body text-wedding-on-dark/70 mb-12 italic leading-relaxed text-lg max-w-2xl mx-auto">
-            {isMarriage
-              ? (
-                <>
-                  &quot;Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i 
-                  berkenan hadir untuk memberikan doa restu kepada kedua mempelai.&quot;
-                </>
-              )
-              : (
-                <>
-                  &quot;Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i 
-                  berkenan hadir untuk merayakan momen spesial ini bersama kami.&quot;
-                </>
-              )}
+          <p className="font-body text-wedding-on-dark/70 mb-12 italic leading-relaxed text-lg max-w-2xl mx-auto whitespace-pre-line">
+            {effectiveMessage
+              ? effectiveMessage
+              : isMarriage
+                ? (
+                  <>
+                    &quot;Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i 
+                    berkenan hadir untuk memberikan doa restu kepada kedua mempelai.&quot;
+                  </>
+                )
+                : (
+                  <>
+                    &quot;Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i 
+                    berkenan hadir untuk merayakan momen spesial ini bersama kami.&quot;
+                  </>
+                )}
           </p>
 
           <p className="font-heading text-xs uppercase tracking-[0.4em] text-wedding-accent mb-6">

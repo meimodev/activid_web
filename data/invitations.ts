@@ -7,6 +7,16 @@ const dt = (year: number, month: number, day: number, hour = 0, minute = 0) =>
 
 type Purpose = "marriage" | "birthday" | "event";
 
+function getDefaultGratitudeMessage(purpose: Purpose): string {
+  if (purpose === "marriage") {
+    return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.";
+  }
+  if (purpose === "birthday") {
+    return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk merayakan ulang tahun ini bersama kami.";
+  }
+  return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk merayakan momen spesial ini bersama kami.";
+}
+
 type InvitationConfigOverrides = Omit<Partial<InvitationConfig>, "metadata" | "music" | "sections"> & {
   metadata?: Omit<Partial<InvitationConfig["metadata"]>, "openGraph" | "twitter"> & {
     openGraph?: Partial<InvitationConfig["metadata"]["openGraph"]>;
@@ -86,6 +96,10 @@ function mergeInvitationConfig(base: InvitationConfig, overrides: InvitationConf
         wishes: {
           ...base.sections.wishes,
           ...(overrides.sections.wishes ?? {}),
+        },
+        gratitude: {
+          ...base.sections.gratitude,
+          ...(overrides.sections.gratitude ?? {}),
         },
         footer: {
           ...base.sections.footer,
@@ -290,6 +304,10 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         placeholder: "Tuliskan pesanmu",
         thankYouMessage: "Pesanmu sudah diterima dengan baik",
       },
+      gratitude: {
+        enabled: false,
+        message: "",
+      },
       footer: {
         enabled: true,
         message: "Terima kasih telah merayakan bersama Activid",
@@ -409,6 +427,10 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         heading: "Wishes",
         placeholder: "Tuliskan pesanmu",
         thankYouMessage: "Pesanmu sudah diterima dengan baik",
+      },
+      gratitude: {
+        enabled: false,
+        message: "",
       },
       footer: {
         enabled: true,
@@ -535,6 +557,10 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         heading: "Messages",
         placeholder: "Tuliskan pesanmu",
         thankYouMessage: "Pesanmu sudah diterima dengan baik",
+      },
+      gratitude: {
+        enabled: false,
+        message: "",
       },
       footer: {
         enabled: true,
@@ -679,8 +705,19 @@ export function buildInvitationDemoConfig({
   const seed = INVITATION_PURPOSE_SEEDS[purpose] ?? INVITATION_PURPOSE_SEEDS.marriage;
   const templateOverrides = DEMO_TEMPLATE_OVERRIDES[templateId] ?? { templateId };
 
+  const gratitudeMessage = seed.sections.gratitude.message?.trim()
+    ? seed.sections.gratitude.message
+    : getDefaultGratitudeMessage(purpose);
+
   const next = mergeInvitationConfig(seed, {
     ...templateOverrides,
+    sections: {
+      ...(templateOverrides.sections ?? {}),
+      gratitude: {
+        enabled: true,
+        message: gratitudeMessage,
+      },
+    },
     id: slug,
     templateId,
     purpose,

@@ -246,11 +246,6 @@ export function Jupiter({ config }: JupiterProps) {
   />
   )}
 
-  <JupiterGratitude
-  hosts={hosts}
-  message={config.sections.footer.message}
-  />
-
   {config.sections.wishes.enabled && (
   <JupiterSectionWrap title={config.sections.wishes.heading || "Wedding Wishes"}>
   <JupiterWishesFirestore
@@ -263,6 +258,10 @@ export function Jupiter({ config }: JupiterProps) {
   />
   </JupiterSectionWrap>
   )}
+
+  {config.sections.gratitude.enabled ? (
+  <JupiterGratitude hosts={hosts} message={config.sections.gratitude.message} />
+  ) : null}
 
   <JupiterFooter hosts={hosts} />
 

@@ -10,6 +10,7 @@ import { Wishes } from "./Wishes";
 import { MusicPlayer } from "@/components/invitation/MusicPlayer";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { StorySection } from "./StorySection";
+import { GratitudeSection } from "./GratitudeSection";
 import {
     TitleSection,
     CoupleSection,
@@ -169,6 +170,10 @@ export function Mercury({ config }: MercuryProps) {
                                 <Suspense fallback={<div className="py-24 text-center text-stone-400 font-serif italic">Loading Wishes...</div>}>
                                     <Wishes invitationId={config.id} heading={sections.wishes.heading} placeholder={sections.wishes.placeholder} thankYouMessage={sections.wishes.thankYouMessage} />
                                 </Suspense>
+                            )}
+
+                            {sections.gratitude.enabled && (
+                                <GratitudeSection hosts={effectiveHosts} message={sections.gratitude.message} />
                             )}
 
                             {sections.footer.enabled && (

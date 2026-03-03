@@ -15,6 +15,7 @@ import {
   INVITATION_TEMPLATE_LISTINGS,
   type InvitationTemplateTheme,
 } from "@/data/invitation-templates";
+import { INVITATION_PURPOSE_SEEDS } from "@/data/invitations";
 import { RegisterInvitationState, VerifyRegisterPasswordState } from "./actions";
 import { useDeferredEffect } from "@/hooks/useDeferredEffect";
 
@@ -25,6 +26,8 @@ type TemplateOption = {
 
 type RegisterInvitationFormProps = {
   initialConfig: InvitationConfig;
+  mode?: "create" | "edit";
+  existingSlug?: string;
   templateOptions: TemplateOption[];
   action: (
     prevState: RegisterInvitationState,
@@ -90,8 +93,23 @@ function deriveImagekitFolderKey(
   return `${purpose}-${hostSegment}-${unixEpochSeconds}`;
 }
 
+function getDefaultGratitudeMessage(purpose: "marriage" | "birthday" | "event"): string {
+  if (purpose === "marriage") {
+    return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.";
+  }
+  if (purpose === "birthday") {
+    return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk merayakan ulang tahun ini bersama kami.";
+  }
+  return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk merayakan momen spesial ini bersama kami.";
+}
+
 const MAX_IMAGE_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/avif", "image/webp", "image/jpeg", "image/png"]);
+const ALLOWED_IMAGE_EXTENSIONS = new Set(["avif", "webp", "jpg", "jpeg", "png", "apng"]);
+const IMAGE_INPUT_ACCEPT = "image/avif,image/webp,image/jpeg,image/png,.apng";
+const TINYPNG_OPTIMIZABLE_MIME_TYPES = new Set(["image/webp", "image/jpeg", "image/png"]);
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -99,14 +117,65 @@ function getErrorMessage(err: unknown): string {
   return "Upload failed.";
 }
 
+function getFileExtension(name: string): string {
+  const idx = (name ?? "").lastIndexOf(".");
+  if (idx < 0) return "";
+  return (name.slice(idx + 1) ?? "").trim().toLowerCase();
+}
+
 function validateImageFile(file: File): string | null {
-  if (!file.type || !file.type.startsWith("image/")) {
-    return "Only image files are allowed.";
+  const type = (file.type ?? "").toLowerCase();
+  const ext = getFileExtension(file.name);
+
+  if (type) {
+    if (!type.startsWith("image/")) {
+      return "Only AVIF, WebP, JPG, PNG, or APNG images are allowed.";
+    }
+    if (!ALLOWED_IMAGE_MIME_TYPES.has(type)) {
+      return "Only AVIF, WebP, JPG, PNG, or APNG images are allowed.";
+    }
+  } else {
+    if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
+      return "Only AVIF, WebP, JPG, PNG, or APNG images are allowed.";
+    }
   }
+
   if (file.size >= MAX_IMAGE_SIZE_BYTES) {
     return "Image must be smaller than 25MB.";
   }
   return null;
+}
+
+async function tryOptimizeWithTinyPng(file: File): Promise<File> {
+  const type = (file.type ?? "").toLowerCase();
+  const ext = getFileExtension(file.name);
+  if (!type || !TINYPNG_OPTIMIZABLE_MIME_TYPES.has(type)) {
+    return file;
+  }
+  if (ext === "apng") {
+    return file;
+  }
+
+  try {
+    const form = new FormData();
+    form.set("file", file);
+    const res = await fetch("/api/tinypng/optimize", { method: "POST", body: form });
+    if (!res.ok) {
+      return file;
+    }
+    const blob = await res.blob();
+    if (!blob || blob.size === 0) {
+      return file;
+    }
+    const nextType = blob.type || file.type || "application/octet-stream";
+    try {
+      return new File([blob], file.name, { type: nextType, lastModified: file.lastModified });
+    } catch {
+      return file;
+    }
+  } catch {
+    return file;
+  }
 }
 
 function validateAudioFile(file: File): string | null {
@@ -119,12 +188,126 @@ function validateAudioFile(file: File): string | null {
   return null;
 }
 
+function sanitizeUploadFilename(value: string): string {
+  return (value ?? "")
+    .trim()
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+/, "")
+    .slice(0, 120);
+}
+
+type UploadDraftV1 = {
+  imagekitFolderKey?: string;
+  music?: { url: string; dropboxPath: string };
+  imagesByFieldKey?: Record<string, { url: string; fileId?: string }>;
+  imageListsByFieldKey?: Record<string, Array<{ url: string; fileId?: string }>>;
+  urlToFileId?: Record<string, string>;
+};
+
+function readUploadDraft(key: string): UploadDraftV1 | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed as UploadDraftV1;
+  } catch {
+    return null;
+  }
+}
+
+function writeUploadDraft(key: string, draft: UploadDraftV1) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(draft));
+  } catch {
+    return;
+  }
+}
+
+function updateUploadDraft(key: string, updater: (prev: UploadDraftV1) => UploadDraftV1) {
+  const prev = readUploadDraft(key) ?? {};
+  writeUploadDraft(key, updater(prev));
+}
+
+function clearUploadDraft(key: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    return;
+  }
+}
+
+function xhrPostFormData<T>(
+  url: string,
+  form: FormData,
+  options?: { onProgress?: (percent: number) => void },
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.responseType = "text";
+
+    if (options?.onProgress) {
+      let lastPercent = 0;
+      xhr.upload.onloadstart = () => {
+        options.onProgress?.(0);
+      };
+      xhr.upload.onprogress = (e) => {
+        if (!e.lengthComputable || !e.total) return;
+        const raw = Math.floor((e.loaded / e.total) * 100);
+        const percent = Math.max(0, Math.min(99, raw));
+        lastPercent = Math.max(lastPercent, percent);
+        options.onProgress?.(percent);
+      };
+
+      // Some environments/files produce sparse or non-computable progress events.
+      // When the request body has fully sent, we move to 99% ("finalizing") until the server responds.
+      xhr.upload.onload = () => {
+        if (lastPercent < 99) {
+          lastPercent = 99;
+          options.onProgress?.(99);
+        }
+      };
+      xhr.upload.onloadend = () => {
+        if (lastPercent < 99) {
+          lastPercent = 99;
+          options.onProgress?.(99);
+        }
+      };
+    }
+
+    xhr.onerror = () => reject(new Error("Upload failed."));
+    xhr.onload = () => {
+      const text = xhr.responseText;
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(new Error(text || "Upload failed."));
+        return;
+      }
+
+      try {
+        options?.onProgress?.(100);
+        resolve(JSON.parse(text) as T);
+      } catch {
+        reject(new Error(text || "Upload failed."));
+      }
+    };
+
+    xhr.send(form);
+  });
+}
+
 async function uploadToDropboxAudio({
   file,
   folderKey,
+  onProgress,
 }: {
   file: File;
   folderKey: string;
+  onProgress?: (percent: number) => void;
 }): Promise<{ url: string; dropboxPath: string }> {
   if (!folderKey) {
     throw new Error("Upload folder is required before uploading audio.");
@@ -134,13 +317,9 @@ async function uploadToDropboxAudio({
   form.set("file", file);
   form.set("folderKey", folderKey);
 
-  const res = await fetch("/api/dropbox/audio", { method: "POST", body: form });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Upload failed.");
-  }
-
-  const data = (await res.json()) as { url?: string; dropboxPath?: string };
+  const data = await xhrPostFormData<{ url?: string; dropboxPath?: string }>("/api/dropbox/audio", form, {
+    onProgress,
+  });
   if (!data.url || !data.dropboxPath) {
     throw new Error("Upload failed: missing URL.");
   }
@@ -165,20 +344,32 @@ async function uploadToImageKit({
   file,
   folderKey,
   fieldKey,
+  onProgress,
+  onPhase,
 }: {
   file: File;
   folderKey: string;
   fieldKey: string;
-}): Promise<string> {
+  onProgress?: (percent: number) => void;
+  onPhase?: (phase: "optimizing" | "uploading") => void;
+}): Promise<{ url: string; fileId?: string }> {
   if (!folderKey) {
     throw new Error("Upload folder is required before uploading images.");
   }
+
+  let uploadFile = file;
+  const type = (file.type ?? "").toLowerCase();
+  const ext = getFileExtension(file.name);
+  if (type && TINYPNG_OPTIMIZABLE_MIME_TYPES.has(type) && ext !== "apng") {
+    onPhase?.("optimizing");
+    uploadFile = await tryOptimizeWithTinyPng(file);
+  }
+  onPhase?.("uploading");
 
   const authRes = await fetch("/api/imagekit/auth", { method: "GET" });
   if (!authRes.ok) {
     throw new Error("Unauthorized. Please unlock the register page again.");
   }
-
   const auth = (await authRes.json()) as {
     token: string;
     expire: number;
@@ -187,30 +378,38 @@ async function uploadToImageKit({
   };
 
   const form = new FormData();
-  form.set("file", file);
-  form.set("fileName", `${fieldKey}-${Date.now()}-${file.name}`);
+  form.set("file", uploadFile);
+  const safeName = sanitizeUploadFilename(uploadFile.name) || "image";
+  form.set("fileName", `${fieldKey}-${Date.now()}-${safeName}`);
   form.set("publicKey", auth.publicKey);
   form.set("signature", auth.signature);
   form.set("token", auth.token);
   form.set("expire", String(auth.expire));
-  form.set("folder", `activid web/invitation/${folderKey}`);
+  form.set("folder", `/activid-web/invitation/${folderKey}`);
   form.set("useUniqueFileName", "true");
 
-  const uploadRes = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-    method: "POST",
-    body: form,
-  });
-
-  if (!uploadRes.ok) {
-    const text = await uploadRes.text();
-    throw new Error(text || "Upload failed.");
-  }
-
-  const uploaded = (await uploadRes.json()) as { url?: string };
+  const uploaded = await xhrPostFormData<{ url?: string; fileId?: string }>(
+    "https://upload.imagekit.io/api/v1/files/upload",
+    form,
+    { onProgress },
+  );
   if (!uploaded.url) {
     throw new Error("Upload failed: missing URL.");
   }
-  return uploaded.url;
+  return { url: uploaded.url, fileId: uploaded.fileId };
+}
+
+async function deleteImageKitFile(fileId: string): Promise<void> {
+  const res = await fetch("/api/imagekit/delete", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileId }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Delete failed.");
+  }
 }
 
 function ImageUrlPicker({
@@ -219,17 +418,23 @@ function ImageUrlPicker({
   onChange,
   folderKey,
   fieldKey,
+  draftKey,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   folderKey: string;
   fieldKey: string;
+  draftKey: string;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [optimizing, setOptimizing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [imgError, setImgError] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setImgError(false);
@@ -243,58 +448,187 @@ function ImageUrlPicker({
 
   const previewSrc = localPreview ?? value;
 
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1200);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const url = value;
+    if (!url || deleting || uploading) {
+      onChange("");
+      return;
+    }
+
+    setError(null);
+    setDeleting(true);
+    try {
+      const draft = readUploadDraft(draftKey);
+      const fileId = draft?.urlToFileId?.[url] ?? draft?.imagesByFieldKey?.[fieldKey]?.fileId;
+      if (fileId) {
+        await deleteImageKitFile(fileId);
+      }
+
+      updateUploadDraft(draftKey, (prev) => {
+        const nextImagesByFieldKey = { ...(prev.imagesByFieldKey ?? {}) };
+        const existingUrl = nextImagesByFieldKey[fieldKey]?.url;
+        delete nextImagesByFieldKey[fieldKey];
+
+        const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
+        delete nextUrlToFileId[url];
+        if (existingUrl && existingUrl !== url) {
+          delete nextUrlToFileId[existingUrl];
+        }
+
+        return {
+          ...prev,
+          imagesByFieldKey: nextImagesByFieldKey,
+          urlToFileId: nextUrlToFileId,
+        };
+      });
+
+      onChange("");
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="grid gap-2">
       <TextInput label={label} value={value} onChange={onChange} />
-      <div className="flex items-center justify-between gap-3">
-        <label className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-indigo-500/60">
-          {uploading ? "Uploading..." : "Choose Image"}
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={uploading}
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              e.target.value = "";
-              if (!file) return;
+      <div className="text-[11px] text-white/50">Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)</div>
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="shrink-0 cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-indigo-500/60">
+              {uploading
+                ? optimizing
+                  ? "Optimizing..."
+                  : `Uploading${uploadProgress !== null ? ` ${uploadProgress}%` : "..."}`
+                : "Choose Image"}
+              <input
+                type="file"
+                accept={IMAGE_INPUT_ACCEPT}
+                className="hidden"
+                disabled={uploading || deleting}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
 
-              const validationError = validateImageFile(file);
-              if (validationError) {
-                setError(validationError);
-                return;
-              }
+                  const validationError = validateImageFile(file);
+                  if (validationError) {
+                    setError(validationError);
+                    return;
+                  }
 
-              setError(null);
-              setUploading(true);
+                  setError(null);
+                  setUploading(true);
+                  setOptimizing(true);
+                  setUploadProgress(null);
 
-              const objectUrl = URL.createObjectURL(file);
-              setLocalPreview(objectUrl);
+                  const objectUrl = URL.createObjectURL(file);
+                  setLocalPreview(objectUrl);
 
-              try {
-                const url = await uploadToImageKit({ file, folderKey, fieldKey });
-                onChange(url);
-                setLocalPreview(null);
-              } catch (err) {
-                setError(getErrorMessage(err));
-              } finally {
-                setUploading(false);
-              }
-            }}
-          />
-        </label>
+                  try {
+                    const uploaded = await uploadToImageKit({
+                      file,
+                      folderKey,
+                      fieldKey,
+                      onPhase: (phase) => {
+                        if (phase === "optimizing") {
+                          setOptimizing(true);
+                          setUploadProgress(null);
+                        } else {
+                          setOptimizing(false);
+                          setUploadProgress(0);
+                        }
+                      },
+                      onProgress: (p) => setUploadProgress(p),
+                    });
 
-        {previewSrc && !imgError ? (
-          <img
-            src={previewSrc}
-            alt=""
-            className="h-16 w-16 rounded-xl border border-white/10 bg-white/5 object-cover"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="h-16 w-16 rounded-xl border border-white/10 bg-white/5" />
-        )}
+                    updateUploadDraft(draftKey, (prev) => {
+                      const nextImagesByFieldKey = { ...(prev.imagesByFieldKey ?? {}) };
+                      const previousUrl = nextImagesByFieldKey[fieldKey]?.url;
+                      nextImagesByFieldKey[fieldKey] = { url: uploaded.url, fileId: uploaded.fileId };
+
+                      const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
+                      if (previousUrl && previousUrl !== uploaded.url) {
+                        delete nextUrlToFileId[previousUrl];
+                      }
+                      if (uploaded.fileId) {
+                        nextUrlToFileId[uploaded.url] = uploaded.fileId;
+                      }
+
+                      return {
+                        ...prev,
+                        imagesByFieldKey: nextImagesByFieldKey,
+                        urlToFileId: nextUrlToFileId,
+                      };
+                    });
+
+                    onChange(uploaded.url);
+                    setLocalPreview(null);
+                  } catch (err) {
+                    setError(getErrorMessage(err));
+                  } finally {
+                    setUploading(false);
+                    setOptimizing(false);
+                    setUploadProgress(null);
+                  }
+                }}
+              />
+            </label>
+
+            {value ? (
+              <>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-emerald-400/60 disabled:opacity-60"
+                  disabled={uploading || deleting}
+                  onClick={() => void handleCopy(value)}
+                >
+                  {copied ? "Copied" : "Copy Link"}
+                </button>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60 disabled:opacity-60"
+                  disabled={uploading || deleting}
+                  onClick={() => void handleDelete()}
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </button>
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          {previewSrc && !imgError ? (
+            <img
+              src={previewSrc}
+              alt=""
+              className="h-16 w-16 rounded-xl border border-white/10 bg-white/5 object-cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="h-16 w-16 rounded-xl border border-white/10 bg-white/5" />
+          )}
+        </div>
       </div>
+
+      {uploading && !optimizing && uploadProgress !== null ? (
+        <div className="h-1.5 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
+          <div className="h-full bg-indigo-400/70" style={{ width: `${uploadProgress}%` }} />
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
@@ -310,6 +644,8 @@ type PendingUpload = {
   previewUrl: string;
   name: string;
   status: "uploading" | "error";
+  phase?: "optimizing" | "uploading";
+  progress?: number;
   error?: string;
 };
 
@@ -319,73 +655,40 @@ function ImageUrlListPicker({
   onChange,
   folderKey,
   fieldKey,
+  draftKey,
 }: {
   label: string;
   items: string[];
   onChange: (items: string[]) => void;
   folderKey: string;
   fieldKey: string;
+  draftKey: string;
 }) {
   const [pending, setPending] = useState<PendingUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [deletingUrl, setDeletingUrl] = useState<string | null>(null);
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const pendingRef = useRef<PendingUpload[]>([]);
+  const itemsRef = useRef<string[]>(items ?? []);
+
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
+
+  useEffect(() => {
+    itemsRef.current = items ?? [];
+  }, [items]);
 
   useEffect(() => {
     return () => {
-      pending.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      pendingRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     };
-  }, [pending]);
+  }, []);
 
   return (
     <div className="grid gap-3">
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-white/70">{label}</div>
-        <label className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60">
-          Add Images
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={async (e) => {
-              const files = Array.from(e.target.files ?? []);
-              e.target.value = "";
-              if (files.length === 0) return;
-
-              setError(null);
-
-              let nextItems = [...(items ?? [])];
-
-              for (const file of files) {
-                const validationError = validateImageFile(file);
-                if (validationError) {
-                  setError(validationError);
-                  continue;
-                }
-
-                const id = globalThis.crypto?.randomUUID
-                  ? globalThis.crypto.randomUUID()
-                  : `${Date.now()}-${Math.random()}`;
-                const previewUrl = URL.createObjectURL(file);
-
-                setPending((prev) => [...prev, { id, previewUrl, name: file.name, status: "uploading" }]);
-
-                try {
-                  const url = await uploadToImageKit({ file, folderKey, fieldKey });
-                  nextItems = [...nextItems, url];
-                  onChange(nextItems);
-                  setPending((prev) => prev.filter((p) => p.id !== id));
-                } catch (err) {
-                  setPending((prev) =>
-                    prev.map((p) =>
-                      p.id === id ? { ...p, status: "error", error: getErrorMessage(err) } : p,
-                    ),
-                  );
-                }
-              }
-            }}
-          />
-        </label>
-      </div>
+      <div className="text-sm text-white/70">{label}</div>
+      <div className="text-[11px] text-white/50">Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)</div>
 
       {error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
@@ -396,7 +699,7 @@ function ImageUrlListPicker({
       <div className="grid gap-2">
         {(items ?? []).map((item, idx) => (
           <div key={`${item}-${idx}`} className="grid gap-2 rounded-2xl border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3">
               <img
                 src={item}
                 alt=""
@@ -405,22 +708,85 @@ function ImageUrlListPicker({
                   (e.currentTarget as HTMLImageElement).style.display = "none";
                 }}
               />
-              <input
-                className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500/60"
-                value={item}
-                onChange={(e) => {
-                  const next = [...items];
-                  next[idx] = e.target.value;
-                  onChange(next);
-                }}
-              />
-              <button
-                type="button"
-                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60"
-                onClick={() => onChange(items.filter((_, i) => i !== idx))}
-              >
-                Remove
-              </button>
+              <div className="min-w-0 flex-1 grid gap-2">
+                <input
+                  className="w-full min-w-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500/60"
+                  value={item}
+                  onChange={(e) => {
+                    const next = [...items];
+                    next[idx] = e.target.value;
+                    itemsRef.current = next;
+                    onChange(next);
+                  }}
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60"
+                    disabled={Boolean(deletingUrl)}
+                    onClick={() => {
+                      void (async () => {
+                        const url = item;
+                        setDeletingUrl(url);
+                        try {
+                          const draft = readUploadDraft(draftKey);
+                          const fileId = draft?.urlToFileId?.[url];
+                          if (fileId) {
+                            await deleteImageKitFile(fileId);
+                          }
+
+                          const nextItems = items.filter((_, i) => i !== idx);
+                          itemsRef.current = nextItems;
+                          onChange(nextItems);
+
+                          updateUploadDraft(draftKey, (prev) => {
+                            const nextLists = { ...(prev.imageListsByFieldKey ?? {}) };
+                            const current = nextLists[fieldKey] ?? [];
+                            nextLists[fieldKey] = current.filter((x) => x.url !== url);
+
+                            const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
+                            delete nextUrlToFileId[url];
+
+                            return {
+                              ...prev,
+                              imageListsByFieldKey: nextLists,
+                              urlToFileId: nextUrlToFileId,
+                            };
+                          });
+                        } catch (err) {
+                          setError(getErrorMessage(err));
+                        } finally {
+                          setDeletingUrl(null);
+                        }
+                      })();
+                    }}
+                  >
+                    {deletingUrl === item ? "Deleting..." : "Delete"}
+                  </button>
+                  <button
+                    type="button"
+                    className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-emerald-400/60 disabled:opacity-60"
+                    disabled={Boolean(deletingUrl)}
+                    onClick={() => {
+                      void (async () => {
+                        try {
+                          await navigator.clipboard.writeText(item);
+                          setCopiedUrl(item);
+                          window.setTimeout(
+                            () => setCopiedUrl((prev) => (prev === item ? null : prev)),
+                            1200,
+                          );
+                        } catch {
+                          setCopiedUrl(null);
+                        }
+                      })();
+                    }}
+                  >
+                    {copiedUrl === item ? "Copied" : "Copy"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -438,14 +804,113 @@ function ImageUrlListPicker({
                 alt=""
                 className="h-12 w-12 rounded-xl border border-white/10 bg-white/5 object-cover"
               />
-              <div className="flex-1 text-xs text-white/70">{p.name}</div>
+              <div className="min-w-0 flex-1 truncate text-xs text-white/70">{p.name}</div>
               <div className="text-xs text-white/70">
-                {p.status === "uploading" ? "Uploading..." : p.error ?? "Failed"}
+                {p.status === "uploading" ? (
+                  p.phase === "optimizing" ? (
+                    "Optimizing..."
+                  ) : (
+                    `Uploading${typeof p.progress === "number" ? ` ${p.progress}%` : "..."}`
+                  )
+                ) : (
+                  p.error ?? "Failed"
+                )}
               </div>
             </div>
           ))}
         </div>
       ) : null}
+
+      <div className="mt-2">
+        <label className="cursor-pointer rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2">
+          + Add Images
+          <input
+            type="file"
+            accept={IMAGE_INPUT_ACCEPT}
+            multiple
+            className="hidden"
+            onChange={async (e) => {
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = "";
+              if (files.length === 0) return;
+
+              setError(null);
+
+              for (const file of files) {
+                const validationError = validateImageFile(file);
+                if (validationError) {
+                  setError(validationError);
+                  continue;
+                }
+
+                const id = globalThis.crypto?.randomUUID
+                  ? globalThis.crypto.randomUUID()
+                  : `${Date.now()}-${Math.random()}`;
+                const previewUrl = URL.createObjectURL(file);
+
+                setPending((prev) => [
+                  ...prev,
+                  { id, previewUrl, name: file.name, status: "uploading", phase: "optimizing" },
+                ]);
+
+                try {
+                  const uploaded = await uploadToImageKit({
+                    file,
+                    folderKey,
+                    fieldKey,
+                    onPhase: (phase) => {
+                      setPending((prev) =>
+                        prev.map((x) =>
+                          x.id === id
+                            ? {
+                                ...x,
+                                phase,
+                                progress: phase === "uploading" ? 0 : undefined,
+                              }
+                            : x,
+                        ),
+                      );
+                    },
+                    onProgress: (p) =>
+                      setPending((prev) =>
+                        prev.map((x) => (x.id === id ? { ...x, progress: p } : x)),
+                      ),
+                  });
+
+                  updateUploadDraft(draftKey, (prev) => {
+                    const nextLists = { ...(prev.imageListsByFieldKey ?? {}) };
+                    const current = nextLists[fieldKey] ?? [];
+                    nextLists[fieldKey] = [...current, { url: uploaded.url, fileId: uploaded.fileId }];
+
+                    const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
+                    if (uploaded.fileId) {
+                      nextUrlToFileId[uploaded.url] = uploaded.fileId;
+                    }
+
+                    return {
+                      ...prev,
+                      imageListsByFieldKey: nextLists,
+                      urlToFileId: nextUrlToFileId,
+                    };
+                  });
+
+                  const mergedItems = [...(itemsRef.current ?? []), uploaded.url];
+                  itemsRef.current = mergedItems;
+                  onChange(mergedItems);
+                  URL.revokeObjectURL(previewUrl);
+                  setPending((prev) => prev.filter((p) => p.id !== id));
+                } catch (err) {
+                  setPending((prev) =>
+                    prev.map((p) =>
+                      p.id === id ? { ...p, status: "error", error: getErrorMessage(err) } : p,
+                    ),
+                  );
+                }
+              }
+            }}
+          />
+        </label>
+      </div>
     </div>
   );
 }
@@ -803,7 +1268,7 @@ function SectionCard({
   return (
     <details
       open={effectiveOpen}
-      className="group rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-5 shadow-[0_0_30px_-10px_rgba(34,211,238,0.05)] transition-all overflow-hidden relative"
+      className="group rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 sm:p-5 shadow-[0_0_30px_-10px_rgba(34,211,238,0.05)] transition-all overflow-hidden relative"
       onToggle={(e) => {
         if (!enabled) return;
         setOpen((e.currentTarget as HTMLDetailsElement).open);
@@ -855,6 +1320,8 @@ function SectionCard({
 
 export function RegisterInvitationForm({
   initialConfig,
+  mode = "create",
+  existingSlug,
   templateOptions,
   action,
   verifyPasswordAction,
@@ -864,33 +1331,58 @@ export function RegisterInvitationForm({
   const [verifyState, verifyAction, verifying] = useActionState(verifyPasswordAction, {});
 
   const isUnlocked = Boolean(initialUnlocked || verifyState.ok);
+  const isEditMode = mode === "edit";
+
+  const uploadDraftKey = useMemo(() => {
+    const base = "activid_invitation_register_upload_draft_v1";
+    if (!isEditMode) return base;
+    const suffix = existingSlug || initialConfig.id;
+    return suffix ? `${base}:${suffix}` : base;
+  }, [existingSlug, initialConfig.id, isEditMode]);
+
+  const initialTemplateId = initialConfig.templateId || templateOptions[0]?.id || "flow";
+  const initialTemplateThemes = getInvitationTemplateThemes(initialTemplateId);
+  const initialThemeFromTemplate = initialTemplateThemes[0];
+  const initialThemeMatch = initialConfig.theme
+    ? initialTemplateThemes.find((t) =>
+        t.mainColor === initialConfig.theme.mainColor
+        && t.accentColor === initialConfig.theme.accentColor
+        && t.accent2Color === initialConfig.theme.accent2Color
+        && t.darkColor === initialConfig.theme.darkColor,
+      )
+    : undefined;
+  const initialThemeIdValue = initialThemeMatch?.id ?? initialThemeFromTemplate?.id ?? "";
 
   const [slug, setSlug] = useState("");
-  const [templateId, setTemplateId] = useState(templateOptions[0]?.id ?? "flow");
+  const [templateId, setTemplateId] = useState(initialTemplateId);
   const initialTheme = useMemo(() => getInvitationTemplateThemes(templateId)[0], [templateId]);
-  const [themeId, setThemeId] = useState(() => initialTheme?.id ?? "");
+  const [themeId, setThemeId] = useState(() => initialThemeIdValue);
   const [password, setPassword] = useState("");
   const [musicUploading, setMusicUploading] = useState(false);
+  const [musicUploadProgress, setMusicUploadProgress] = useState<number | null>(null);
   const [musicDeleting, setMusicDeleting] = useState(false);
   const [musicError, setMusicError] = useState<string | null>(null);
+  const [musicCopied, setMusicCopied] = useState(false);
   const initialPurpose = initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
-    id: initialConfig.id,
+    id: isEditMode ? (existingSlug ?? initialConfig.id) : initialConfig.id,
     imagekitFolderKey:
       initialConfig.imagekitFolderKey
-      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.sections.hosts.hosts, 0),
-    templateId: templateId,
-    theme: initialTheme
-      ? {
-          mainColor: initialTheme.mainColor,
-          accentColor: initialTheme.accentColor,
-          accent2Color: initialTheme.accent2Color,
-          darkColor: initialTheme.darkColor,
-        }
-      : initialConfig.theme,
+      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.sections.hosts.hosts, Math.floor(Date.now() / 1000)),
+    templateId: isEditMode ? initialTemplateId : templateId,
+    theme: isEditMode
+      ? initialConfig.theme
+      : initialTheme
+        ? {
+            mainColor: initialTheme.mainColor,
+            accentColor: initialTheme.accentColor,
+            accent2Color: initialTheme.accent2Color,
+            darkColor: initialTheme.darkColor,
+          }
+        : initialConfig.theme,
     purpose: initialPurpose,
     sections: {
       ...initialConfig.sections,
@@ -905,8 +1397,92 @@ export function RegisterInvitationForm({
         ...initialConfig.sections.event,
         events: ensureEventList(initialConfig.sections.event.events),
       },
+      gratitude: {
+        ...initialConfig.sections.gratitude,
+        enabled: isEditMode ? initialConfig.sections.gratitude.enabled : true,
+        message: isEditMode
+          ? initialConfig.sections.gratitude.message
+          : (initialConfig.sections.gratitude.message?.trim()
+            ? initialConfig.sections.gratitude.message
+            : getDefaultGratitudeMessage(initialPurpose)),
+      },
     },
   }));
+
+  useDeferredEffect(() => {
+    const initialSlug = isEditMode ? (existingSlug ?? config.id) : config.id;
+    setSlug((prev) => (prev === initialSlug ? prev : initialSlug));
+    setConfig((prev) => (prev.id === initialSlug ? prev : { ...prev, id: initialSlug }));
+  }, [existingSlug, isEditMode]);
+
+  useEffect(() => {
+    if (!isUnlocked) return;
+    const draft = readUploadDraft(uploadDraftKey);
+    if (!draft) return;
+
+    setConfig((prev) => {
+      let next = prev;
+
+      if (draft.imagekitFolderKey && prev.imagekitFolderKey !== draft.imagekitFolderKey) {
+        next = { ...next, imagekitFolderKey: draft.imagekitFolderKey };
+      }
+
+      if (
+        draft.music?.url
+        && draft.music.dropboxPath
+        && !prev.music.url
+        && !prev.music.dropboxPath
+      ) {
+        next = updateAtPath(next, ["music", "url"], draft.music.url);
+        next = updateAtPath(next, ["music", "dropboxPath"], draft.music.dropboxPath);
+      }
+
+      const heroUrl = draft.imagesByFieldKey?.["hero-cover"]?.url;
+      if (heroUrl && !prev.sections.hero.coverImage) {
+        next = updateAtPath(next, ["sections", "hero", "coverImage"], heroUrl);
+      }
+
+      const nextHosts = [...(next.sections.hosts.hosts ?? [])];
+      let changedHosts = false;
+      nextHosts.forEach((host, idx) => {
+        const key = `host-${idx}-photo`;
+        const photoUrl = draft.imagesByFieldKey?.[key]?.url;
+        if (photoUrl && !host?.photo) {
+          nextHosts[idx] = { ...host, photo: photoUrl };
+          changedHosts = true;
+        }
+      });
+      if (changedHosts) {
+        next = updateAtPath(next, ["sections", "hosts", "hosts"], nextHosts);
+      }
+
+      const galleryDraft = draft.imageListsByFieldKey?.["gallery-photo"] ?? [];
+      if (galleryDraft.length && !(prev.sections.gallery.photos ?? []).length) {
+        next = updateAtPath(
+          next,
+          ["sections", "gallery", "photos"],
+          galleryDraft.map((x) => x.url),
+        );
+      }
+
+      return next;
+    });
+  }, [isUnlocked, uploadDraftKey]);
+
+  useEffect(() => {
+    if (!isUnlocked) return;
+    if (!config.imagekitFolderKey) return;
+    updateUploadDraft(uploadDraftKey, (prev) => ({
+      ...prev,
+      imagekitFolderKey: prev.imagekitFolderKey ?? config.imagekitFolderKey,
+    }));
+  }, [config.imagekitFolderKey, isUnlocked, uploadDraftKey]);
+
+  useEffect(() => {
+    if (!isUnlocked) return;
+    if (!state.ok) return;
+    clearUploadDraft(uploadDraftKey);
+  }, [isUnlocked, state.ok, uploadDraftKey]);
 
   function setHosts(nextHosts: Host[]) {
     setConfig((prev) =>
@@ -915,16 +1491,29 @@ export function RegisterInvitationForm({
   }
 
   useDeferredEffect(() => {
+    if (isEditMode) return;
     const nextSlug = deriveBaseSlug(purpose, config.sections.hosts.hosts);
     setSlug((prev) => (prev === nextSlug ? prev : nextSlug));
     setConfig((prev) => (prev.id === nextSlug ? prev : { ...prev, id: nextSlug }));
-  }, [config.sections.hosts.hosts, purpose]);
+  }, [config.sections.hosts.hosts, purpose, isEditMode]);
   const hasImageUploads = Boolean(config.sections?.hero?.coverImage)
     || Boolean(config.sections.hosts.hosts.some((h) => Boolean(h.photo)))
     || Boolean((config.sections?.gallery?.photos ?? []).length);
 
   useDeferredEffect(() => {
+    if (isEditMode) return;
     if (hasImageUploads) return;
+
+    const draft = readUploadDraft(uploadDraftKey);
+    if (draft?.imagekitFolderKey) {
+      setConfig((prev) =>
+        prev.imagekitFolderKey === draft.imagekitFolderKey
+          ? prev
+          : { ...prev, imagekitFolderKey: draft.imagekitFolderKey },
+      );
+      return;
+    }
+
     if (!imagekitEpochSecondsRef.current) {
       imagekitEpochSecondsRef.current = Math.floor(Date.now() / 1000);
     }
@@ -938,7 +1527,7 @@ export function RegisterInvitationForm({
     setConfig((prev) =>
       prev.imagekitFolderKey === nextFolderKey ? prev : { ...prev, imagekitFolderKey: nextFolderKey },
     );
-  }, [config.sections.hosts.hosts, hasImageUploads, purpose]);
+  }, [config.sections.hosts.hosts, hasImageUploads, isEditMode, purpose, uploadDraftKey]);
 
   const handleTemplateChange = (nextTemplateId: string) => {
     const nextTheme = getInvitationTemplateThemes(nextTemplateId)[0];
@@ -975,9 +1564,82 @@ export function RegisterInvitationForm({
 
   const handlePurposeChange = (nextPurpose: "marriage" | "birthday" | "event") => {
     setPurpose(nextPurpose);
+
+    if (isEditMode) {
+      setConfig((prev) => ({
+        ...prev,
+        purpose: nextPurpose,
+      }));
+      return;
+    }
+
+    const seed = INVITATION_PURPOSE_SEEDS[nextPurpose] ?? INVITATION_PURPOSE_SEEDS.marriage;
+    const seedGratitudeMessage = seed.sections.gratitude.message?.trim()
+      ? seed.sections.gratitude.message
+      : getDefaultGratitudeMessage(nextPurpose);
     setConfig((prev) => ({
       ...prev,
       purpose: nextPurpose,
+      music: prev.music,
+      sections: {
+        ...prev.sections,
+        hero: {
+          ...prev.sections.hero,
+          subtitle: seed.sections.hero.subtitle,
+        },
+        title: {
+          ...prev.sections.title,
+          heading: seed.sections.title.heading,
+        },
+        countdown: {
+          ...prev.sections.countdown,
+          heading: seed.sections.countdown.heading,
+        },
+        quote: {
+          ...prev.sections.quote,
+          text: seed.sections.quote.text,
+          author: seed.sections.quote.author,
+        },
+        story: {
+          ...prev.sections.story,
+          heading: seed.sections.story.heading,
+        },
+        event: {
+          ...prev.sections.event,
+          heading: seed.sections.event.heading,
+        },
+        gallery: {
+          ...prev.sections.gallery,
+          heading: seed.sections.gallery.heading,
+        },
+        rsvp: {
+          ...prev.sections.rsvp,
+          heading: seed.sections.rsvp.heading,
+          description: seed.sections.rsvp.description,
+          successMessage: seed.sections.rsvp.successMessage,
+          alreadySubmittedMessage: seed.sections.rsvp.alreadySubmittedMessage,
+          seeYouMessage: seed.sections.rsvp.seeYouMessage,
+        },
+        gift: {
+          ...prev.sections.gift,
+          heading: seed.sections.gift.heading,
+          description: seed.sections.gift.description,
+        },
+        wishes: {
+          ...prev.sections.wishes,
+          heading: seed.sections.wishes.heading,
+          placeholder: seed.sections.wishes.placeholder,
+          thankYouMessage: seed.sections.wishes.thankYouMessage,
+        },
+        gratitude: {
+          ...prev.sections.gratitude,
+          message: seedGratitudeMessage,
+        },
+        footer: {
+          ...prev.sections.footer,
+          message: seed.sections.footer.message,
+        },
+      },
     }));
   };
 
@@ -1133,8 +1795,7 @@ export function RegisterInvitationForm({
       startScrollLeft: el.scrollLeft,
       moved: false,
     };
-    setThemeDragging(true);
-    el.setPointerCapture(e.pointerId);
+    setThemeDragging(false);
   };
 
   const handleThemeScrollerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1145,6 +1806,8 @@ export function RegisterInvitationForm({
     const deltaX = e.clientX - drag.startClientX;
     if (!drag.moved && Math.abs(deltaX) > 4) {
       drag.moved = true;
+      setThemeDragging(true);
+      el.setPointerCapture(drag.pointerId ?? e.pointerId);
     }
     el.scrollLeft = drag.startScrollLeft - deltaX;
     if (drag.moved) {
@@ -1183,8 +1846,7 @@ export function RegisterInvitationForm({
       startScrollLeft: el.scrollLeft,
       moved: false,
     };
-    setTemplateDragging(true);
-    el.setPointerCapture(e.pointerId);
+    setTemplateDragging(false);
   };
 
   const handleTemplateScrollerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -1195,6 +1857,8 @@ export function RegisterInvitationForm({
     const deltaX = e.clientX - drag.startClientX;
     if (!drag.moved && Math.abs(deltaX) > 4) {
       drag.moved = true;
+      setTemplateDragging(true);
+      el.setPointerCapture(drag.pointerId ?? e.pointerId);
     }
     el.scrollLeft = drag.startScrollLeft - deltaX;
     if (drag.moved) {
@@ -1331,7 +1995,7 @@ export function RegisterInvitationForm({
   if (!isUnlocked) {
     return (
       <form action={verifyAction} className="grid gap-6">
-        <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-5">
+        <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 sm:p-6">
           <div className="text-xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent relative z-10">
             Command Station Access
           </div>
@@ -1362,10 +2026,10 @@ export function RegisterInvitationForm({
   if (state.ok && state.slug && invitationUrl) {
     return (
       <div className="grid gap-6">
-        <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
+        <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 sm:p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
           <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-emerald-500/10 blur-[60px] pointer-events-none" />
           <div className="text-xl font-black tracking-tight bg-linear-to-r from-emerald-200 via-white to-emerald-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
-            <span className="text-xl">✅</span> Mission Created
+            <span className="text-xl">✅</span> {isEditMode ? "Mission Updated" : "Mission Created"}
           </div>
 
           <div className="grid gap-3 relative z-10">
@@ -1398,7 +2062,7 @@ export function RegisterInvitationForm({
                   className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-indigo-400/60"
                   onClick={() => window.location.reload()}
                 >
-                  New Mission
+                  {isEditMode ? "Reload" : "New Mission"}
                 </button>
               </div>
             </div>
@@ -1407,26 +2071,28 @@ export function RegisterInvitationForm({
 
         <div className="grid gap-3">
           <div className="text-sm font-black tracking-tight text-white/90">WhatsApp Messages</div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {whatsappMessages.map((m) => {
               const waUrl = `https://wa.me/?text=${encodeURIComponent(m.text)}`;
               return (
                 <div
                   key={m.key}
-                  className="grid gap-3 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 shadow-[0_0_30px_-12px_rgba(34,211,238,0.25)]"
+                  className="flex min-w-0 flex-col gap-3 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 shadow-[0_0_30px_-12px_rgba(34,211,238,0.25)]"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-xs font-black uppercase tracking-wider text-white/80">{m.title}</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="min-w-0 flex-1 truncate text-xs font-black uppercase tracking-wider text-white/80">
+                      {m.title}
+                    </div>
                     <button
                       type="button"
-                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
+                      className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
                       onClick={() => void copyText(m.key, m.text)}
                     >
                       {copiedKey === m.key ? "Copied" : "Copy"}
                     </button>
                   </div>
 
-                  <pre className="whitespace-pre-wrap break-words rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-3 text-[12px] leading-relaxed text-white/80 font-mono">
+                  <pre className="min-w-0 flex-1 whitespace-pre-wrap break-words rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-3 text-[12px] leading-relaxed text-white/80 font-mono">
                     {m.text}
                   </pre>
 
@@ -1434,7 +2100,7 @@ export function RegisterInvitationForm({
                     href={waUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
+                    className="mt-auto inline-flex w-full items-center justify-center rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
                   >
                     Open WhatsApp
                   </a>
@@ -1460,17 +2126,18 @@ export function RegisterInvitationForm({
         if (!err) setReviewOpen(true);
       }}
     >
+      {isEditMode ? <input type="hidden" name="existingSlug" value={slug} /> : null}
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="templateId" value={templateId} />
       <input type="hidden" name="password" value={password} />
       <input type="hidden" name="configJson" value={configJson} />
 
-      <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
+      <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 sm:p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
         {/* Decorative background glow */}
         <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-indigo-500/10 blur-[60px] pointer-events-none" />
         
         <div className="text-xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
-          <span className="text-xl">🚀</span> Create New Mission
+          <span className="text-xl">🚀</span> {isEditMode ? "Edit Mission" : "Create New Mission"}
         </div>
 
         {state.error ? (
@@ -1502,7 +2169,7 @@ export function RegisterInvitationForm({
             </div>
             <div
               ref={templateScrollerRef}
-              className={`-mx-1 px-1 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              className={`-mx-4 px-4 sm:-mx-6 sm:px-6 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
                 templateDragging ? "cursor-grabbing" : "cursor-grab"
               }`}
               style={{ touchAction: "pan-y" }}
@@ -1573,7 +2240,7 @@ export function RegisterInvitationForm({
             </div>
             <div
               ref={themeScrollerRef}
-              className={`-mx-1 px-1 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              className={`-mx-4 px-4 sm:-mx-6 sm:px-6 flex gap-3 overflow-x-auto pb-2 select-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
                 themeDragging ? "cursor-grabbing" : "cursor-grab"
               }`}
               style={{ touchAction: "pan-y" }}
@@ -1654,7 +2321,7 @@ export function RegisterInvitationForm({
           </label>
         </div>
 
-        <div className="grid gap-4 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner relative z-10">
+        <div className="grid gap-4 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner relative z-10">
           <div className="text-sm font-black text-indigo-100 uppercase tracking-wide">
             Music
           </div>
@@ -1671,10 +2338,14 @@ export function RegisterInvitationForm({
               onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "url"], v))}
             />
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {!config.music.dropboxPath ? (
                 <label className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-indigo-500/60">
-                  {musicUploading ? "Uploading..." : "Choose Audio"}
+                  {musicUploading
+                    ? (musicUploadProgress !== null
+                      ? (musicUploadProgress >= 99 ? "Finalizing..." : `Uploading ${musicUploadProgress}%`)
+                      : "Uploading...")
+                    : "Choose Audio"}
                   <input
                     type="file"
                     accept="audio/*"
@@ -1693,11 +2364,13 @@ export function RegisterInvitationForm({
 
                       setMusicError(null);
                       setMusicUploading(true);
+                      setMusicUploadProgress(0);
 
                       try {
                         const uploaded = await uploadToDropboxAudio({
                           file,
                           folderKey: config.imagekitFolderKey ?? "",
+                          onProgress: (p) => setMusicUploadProgress(p),
                         });
 
                         setConfig((prev) => {
@@ -1705,10 +2378,16 @@ export function RegisterInvitationForm({
                           next = updateAtPath(next, ["music", "dropboxPath"], uploaded.dropboxPath);
                           return next;
                         });
+
+                        updateUploadDraft(uploadDraftKey, (prev) => ({
+                          ...prev,
+                          music: { url: uploaded.url, dropboxPath: uploaded.dropboxPath },
+                        }));
                       } catch (err) {
                         setMusicError(getErrorMessage(err));
                       } finally {
                         setMusicUploading(false);
+                        setMusicUploadProgress(null);
                       }
                     }}
                   />
@@ -1717,10 +2396,31 @@ export function RegisterInvitationForm({
                 <div className="text-xs text-white/60">Audio URL is locked (Dropbox-managed).</div>
               )}
 
+              {config.music.url ? (
+                <button
+                  type="button"
+                  className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-emerald-400/60 disabled:opacity-60"
+                  disabled={musicUploading || musicDeleting}
+                  onClick={() => {
+                    void (async () => {
+                      try {
+                        await navigator.clipboard.writeText(config.music.url);
+                        setMusicCopied(true);
+                        window.setTimeout(() => setMusicCopied(false), 1200);
+                      } catch {
+                        setMusicCopied(false);
+                      }
+                    })();
+                  }}
+                >
+                  {musicCopied ? "Copied" : "Copy Link"}
+                </button>
+              ) : null}
+
               {config.music.dropboxPath ? (
                 <button
                   type="button"
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60 disabled:opacity-60"
+                  className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-red-500/60 disabled:opacity-60"
                   disabled={musicUploading || musicDeleting}
                   onClick={async () => {
                     const path = config.music.dropboxPath;
@@ -1734,6 +2434,11 @@ export function RegisterInvitationForm({
                         next = updateAtPath(next, ["music", "url"], "");
                         return next;
                       });
+
+                      updateUploadDraft(uploadDraftKey, (prev) => ({
+                        ...prev,
+                        music: undefined,
+                      }));
                     } catch (err) {
                       setMusicError(getErrorMessage(err));
                     } finally {
@@ -1745,6 +2450,15 @@ export function RegisterInvitationForm({
                 </button>
               ) : null}
             </div>
+
+            {musicUploading && typeof musicUploadProgress === "number" ? (
+              <div className="h-2 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
+                <div
+                  className="h-full bg-indigo-500/60"
+                  style={{ width: `${Math.max(0, Math.min(100, musicUploadProgress))}%` }}
+                />
+              </div>
+            ) : null}
 
             {musicError ? (
               <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
@@ -1782,6 +2496,7 @@ export function RegisterInvitationForm({
                 value={config.sections.hero.coverImage}
                 folderKey={config.imagekitFolderKey ?? ""}
                 fieldKey="hero-cover"
+                draftKey={uploadDraftKey}
                 onChange={(v) =>
                   setConfig((prev) => updateAtPath(prev, ["sections", "hero", "coverImage"], v))
                 }
@@ -1872,7 +2587,7 @@ export function RegisterInvitationForm({
             {config.sections.hosts.hosts.map((host, idx) => (
               <div
                 key={idx}
-                className="grid gap-5 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner relative"
+                className="grid gap-5 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner relative"
               >
                 <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500/40 rounded-l-2xl" />
                 <div className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
@@ -1901,6 +2616,7 @@ export function RegisterInvitationForm({
                           value={host.photo}
                           folderKey={config.imagekitFolderKey ?? ""}
                           fieldKey={`host-${idx}-photo`}
+                          draftKey={uploadDraftKey}
                           onChange={(v) => {
                             const next = [...config.sections.hosts.hosts];
                             next[idx] = { ...next[idx]!, photo: v };
@@ -1969,27 +2685,13 @@ export function RegisterInvitationForm({
             <div className="grid gap-2 mt-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-bold text-indigo-100">Story List</div>
-                <button
-                  type="button"
-                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
-                  onClick={() =>
-                    setConfig((prev) =>
-                      updateAtPath(prev, ["sections", "story", "stories"], [
-                        ...prev.sections.story.stories,
-                        { date: createTodayDateTime(), description: "" },
-                      ]),
-                    )
-                  }
-                >
-                  + Add
-                </button>
               </div>
 
               <div className="grid gap-4 mt-2">
                 {config.sections.story.stories.map((story, idx) => (
                   <div
                     key={idx}
-                    className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
+                    className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-3">
                       <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Story {idx + 1}</div>
@@ -2051,11 +2753,28 @@ export function RegisterInvitationForm({
                   </div>
                 ))}
               </div>
+
+              <div className="mt-3">
+                <button
+                  type="button"
+                   className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2 w-full"
+                  onClick={() =>
+                    setConfig((prev) =>
+                      updateAtPath(prev, ["sections", "story", "stories"], [
+                        ...prev.sections.story.stories,
+                        { date: createTodayDateTime(), description: "" },
+                      ]),
+                    )
+                  }
+                >
+                  + Add Story
+                </button>
+              </div>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="📅 Event Section"
+            title="📅 Events"
             enabled={asBoolean(config.sections.event.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2082,34 +2801,13 @@ export function RegisterInvitationForm({
               <div className="grid gap-4">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-bold text-indigo-100">Event List</div>
-                  <button
-                    type="button"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
-                    onClick={() => {
-                      const nextEvents = [
-                        ...config.sections.event.events,
-                        {
-                          title: "",
-                          date: createTodayDateTime(),
-                          venue: "",
-                          address: "",
-                          mapUrl: "",
-                        },
-                      ] as [EventDetail, ...EventDetail[]];
-                      setConfig((prev) =>
-                        updateAtPath(prev, ["sections", "event", "events"], nextEvents),
-                      );
-                    }}
-                  >
-                    + Add
-                  </button>
                 </div>
 
                 <div className="grid gap-4">
                   {config.sections.event.events.map((event, idx) => (
                     <div
                       key={idx}
-                      className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
+                      className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner"
                     >
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Event {idx + 1}</div>
@@ -2189,12 +2887,36 @@ export function RegisterInvitationForm({
                     </div>
                   ))}
                 </div>
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2 w-full"
+                    onClick={() => {
+                      const nextEvents = [
+                        ...config.sections.event.events,
+                        {
+                          title: "",
+                          date: createTodayDateTime(),
+                          venue: "",
+                          address: "",
+                          mapUrl: "",
+                        },
+                      ] as [EventDetail, ...EventDetail[]];
+                      setConfig((prev) =>
+                        updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                      );
+                    }}
+                  >
+                    + Add Event
+                  </button>
+                </div>
               </div>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="🖼️ Visual Gallery"
+            title="🖼️ Gallery"
             enabled={asBoolean(config.sections.gallery.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2220,6 +2942,7 @@ export function RegisterInvitationForm({
                 items={config.sections.gallery.photos}
                 folderKey={config.imagekitFolderKey ?? ""}
                 fieldKey="gallery-photo"
+                draftKey={uploadDraftKey}
                 onChange={(items) =>
                   setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "photos"], items))
                 }
@@ -2228,7 +2951,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="Confirmation"
+            title="✅ RSVP"
             enabled={asBoolean(config.sections.rsvp.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2258,7 +2981,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="🎁 Gift / Angpao"
+            title="🎁 Gift"
             enabled={asBoolean(config.sections.gift.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2290,25 +3013,12 @@ export function RegisterInvitationForm({
               <div className="grid gap-4">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-bold text-indigo-100">Bank Accounts / E-Wallet</div>
-                  <button
-                    type="button"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white hover:border-indigo-500/60 transition-colors"
-                    onClick={() => {
-                      const nextAccounts = [
-                        ...config.sections.gift.bankAccounts,
-                        { bankName: "", accountNumber: "", accountHolder: "" },
-                      ];
-                      setConfig((prev) => updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts));
-                    }}
-                  >
-                    + Add
-                  </button>
                 </div>
                 <div className="grid gap-4">
                   {config.sections.gift.bankAccounts.map((acc, idx) => (
                     <div
                       key={idx}
-                      className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-5 shadow-inner"
+                      className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner"
                     >
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
                         <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Account {idx + 1}</div>
@@ -2366,12 +3076,30 @@ export function RegisterInvitationForm({
                     </div>
                   ))}
                 </div>
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2 w-full"
+                    onClick={() => {
+                      const nextAccounts = [
+                        ...config.sections.gift.bankAccounts,
+                        { bankName: "", accountNumber: "", accountHolder: "" },
+                      ];
+                      setConfig((prev) =>
+                        updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                      );
+                    }}
+                  >
+                    + Add Account
+                  </button>
+                </div>
               </div>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="📝 Guestbook / Wishes"
+            title="📝 Wishes"
             enabled={asBoolean(config.sections.wishes.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2401,6 +3129,31 @@ export function RegisterInvitationForm({
                 value={config.sections.wishes.thankYouMessage ?? ""}
                 onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "thankYouMessage"], v))}
                 rows={2}
+              />
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="🙏 Gratitude"
+            enabled={asBoolean(config.sections.gratitude.enabled)}
+            onEnabledChange={(v) =>
+              setConfig((prev) => {
+                let next = updateAtPath(prev, ["sections", "gratitude", "enabled"], v);
+                if (!v) {
+                  next = updateAtPath(next, ["sections", "gratitude", "message"], "");
+                }
+                return next;
+              })
+            }
+          >
+            <div className="mt-2">
+              <TextArea
+                label="Message"
+                value={config.sections.gratitude.message}
+                onChange={(v) =>
+                  setConfig((prev) => updateAtPath(prev, ["sections", "gratitude", "message"], v))
+                }
+                rows={3}
               />
             </div>
           </SectionCard>
@@ -2436,31 +3189,33 @@ export function RegisterInvitationForm({
       <button
         type="button"
         disabled={pending}
-        className="sticky bottom-6 z-50 rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-8 py-4 text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none mb-10 w-full"
+        className="mt-2 rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none w-full"
         onClick={() => {
           const err = validateBeforeReview();
           setClientError(err);
           if (!err) setReviewOpen(true);
         }}
       >
-        {pending ? "Launching Mission..." : "Launch Mission (Save)"}
+        {pending ? "Launching Mission..." : isEditMode ? "Update Mission (Save)" : "Launch Mission (Save)"}
       </button>
 
       {reviewOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 sm:items-center">
+        <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:items-center">
           <button
             type="button"
             className="absolute inset-0 bg-black/70"
             onClick={() => setReviewOpen(false)}
             aria-label="Close review"
           />
-          <div className="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6 shadow-[0_0_60px_-15px_rgba(79,70,229,0.35)] overflow-hidden">
+          <div className="relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 shadow-[0_0_60px_-15px_rgba(79,70,229,0.35)] overflow-hidden overflow-y-auto overscroll-contain">
             <div className="absolute -top-32 -right-24 w-64 h-64 rounded-full bg-indigo-500/10 blur-[70px] pointer-events-none" />
             <div className="relative z-10 grid gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-mono text-white/40 uppercase tracking-wider">Review Summary</div>
-                  <div className="mt-1 text-lg font-black tracking-tight text-white">Ready to create this mission?</div>
+                  <div className="mt-1 text-lg font-black tracking-tight text-white">
+                    {isEditMode ? "Ready to update this mission?" : "Ready to create this mission?"}
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -2538,7 +3293,7 @@ export function RegisterInvitationForm({
                     }, 0);
                   }}
                 >
-                  {pending ? "Creating..." : "Create Mission"}
+                  {pending ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update Mission" : "Create Mission"}
                 </button>
               </div>
             </div>

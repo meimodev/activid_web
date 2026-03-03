@@ -167,7 +167,9 @@ export function Flow({ config }: FlowProps) {
             </Suspense>
           )}
 
-          <GratitudeSection hosts={hosts} />
+          {sections.gratitude.enabled && (
+            <GratitudeSection hosts={hosts} message={sections.gratitude.message} />
+          )}
 
           {sections.footer.enabled && (
             <SpaceFooter

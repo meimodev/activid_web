@@ -12,6 +12,14 @@ export const runtime = "nodejs";
 const DEFAULT_ROOT = "/activid web/invitation-audio";
 const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
 
+type DropboxAccessTokenCache = {
+  token: string;
+  expiresAtMs: number;
+};
+
+let cachedDropboxToken: DropboxAccessTokenCache | null = null;
+let dropboxTokenInFlight: Promise<string> | null = null;
+
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
@@ -25,8 +33,79 @@ function requireAuthorized(request: NextRequest): NextResponse | null {
   return null;
 }
 
-function getDropboxToken(): string | null {
+function hasDropboxRefreshConfig(): boolean {
+  return Boolean(
+    process.env.DROPBOX_REFRESH_TOKEN
+    && process.env.DROPBOX_APP_KEY
+    && process.env.DROPBOX_APP_SECRET,
+  );
+}
+
+function getLegacyDropboxAccessToken(): string | null {
   return process.env.DROPBOX_ACCESS_TOKEN ?? null;
+}
+
+async function fetchDropboxAccessTokenFromRefreshToken(): Promise<DropboxAccessTokenCache> {
+  const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+  const appKey = process.env.DROPBOX_APP_KEY;
+  const appSecret = process.env.DROPBOX_APP_SECRET;
+
+  if (!refreshToken || !appKey || !appSecret) {
+    throw new Error("Server is missing DROPBOX_REFRESH_TOKEN / DROPBOX_APP_KEY / DROPBOX_APP_SECRET.");
+  }
+
+  const auth = Buffer.from(`${appKey}:${appSecret}`).toString("base64");
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  });
+
+  const res = await fetch("https://api.dropboxapi.com/oauth2/token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || "Failed to refresh Dropbox access token.");
+  }
+
+  const data = (await res.json()) as { access_token?: unknown; expires_in?: unknown };
+  const token = typeof data.access_token === "string" ? data.access_token : "";
+  const expiresInSeconds = typeof data.expires_in === "number" ? data.expires_in : 0;
+  if (!token) {
+    throw new Error("Dropbox token refresh response is missing access_token.");
+  }
+
+  const expiresAtMs = Date.now() + Math.max(0, expiresInSeconds) * 1000;
+  return { token, expiresAtMs };
+}
+
+async function getDropboxToken(): Promise<string | null> {
+  if (!hasDropboxRefreshConfig()) {
+    return getLegacyDropboxAccessToken();
+  }
+
+  const now = Date.now();
+  if (cachedDropboxToken && cachedDropboxToken.expiresAtMs - now > 60_000) {
+    return cachedDropboxToken.token;
+  }
+
+  if (!dropboxTokenInFlight) {
+    dropboxTokenInFlight = (async () => {
+      const refreshed = await fetchDropboxAccessTokenFromRefreshToken();
+      cachedDropboxToken = refreshed;
+      return refreshed.token;
+    })().finally(() => {
+      dropboxTokenInFlight = null;
+    });
+  }
+
+  return dropboxTokenInFlight;
 }
 
 function getRootPath(): string {
@@ -122,9 +201,12 @@ export async function POST(request: NextRequest) {
   const unauthorized = requireAuthorized(request);
   if (unauthorized) return unauthorized;
 
-  const token = getDropboxToken();
+  const token = await getDropboxToken();
   if (!token) {
-    return jsonError("Server is missing DROPBOX_ACCESS_TOKEN.", 500);
+    return jsonError(
+      "Server is missing Dropbox credentials. Configure DROPBOX_REFRESH_TOKEN + DROPBOX_APP_KEY + DROPBOX_APP_SECRET (recommended) or DROPBOX_ACCESS_TOKEN (legacy).",
+      500,
+    );
   }
 
   let form: FormData;
@@ -197,9 +279,12 @@ export async function DELETE(request: NextRequest) {
   const unauthorized = requireAuthorized(request);
   if (unauthorized) return unauthorized;
 
-  const token = getDropboxToken();
+  const token = await getDropboxToken();
   if (!token) {
-    return jsonError("Server is missing DROPBOX_ACCESS_TOKEN.", 500);
+    return jsonError(
+      "Server is missing Dropbox credentials. Configure DROPBOX_REFRESH_TOKEN + DROPBOX_APP_KEY + DROPBOX_APP_SECRET (recommended) or DROPBOX_ACCESS_TOKEN (legacy).",
+      500,
+    );
   }
 
   let payload: unknown;

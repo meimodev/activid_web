@@ -40,6 +40,17 @@ const SUPPORTED_TEMPLATE_IDS = new Set([
   "neptune",
 ]);
 
+const RESERVED_TEMPLATE_SLUGS = new Set([
+  "flow",
+  "saturn",
+  "mercury",
+  "pluto",
+  "amalthea",
+  "venus",
+  "jupiter",
+  "neptune",
+]);
+
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
   if (typeof value !== "string") return "";
@@ -282,6 +293,14 @@ export async function registerInvitation(
     return { error: "Config payload is missing required fields." };
   }
 
+  if (
+    !config.sections.gratitude ||
+    typeof config.sections.gratitude.enabled !== "boolean" ||
+    typeof config.sections.gratitude.message !== "string"
+  ) {
+    return { error: "Gratitude section config is required." };
+  }
+
   if (!config.sections.hosts) {
     return { error: "Hosts section config is required." };
   }
@@ -390,6 +409,182 @@ export async function registerInvitation(
   return {
     ok: true,
     slug: finalSlug,
+    invitationUrl,
+  };
+}
+
+export async function updateInvitation(
+  _prevState: RegisterInvitationState,
+  formData: FormData,
+): Promise<RegisterInvitationState> {
+  const expectedPassword = getExpectedPassword();
+  if (!expectedPassword) {
+    return { error: "Server is missing INVITATION_REGISTER_PASSWORD." };
+  }
+
+  const cookieStore = await cookies();
+  const cookieName = getInvitationRegisterSessionCookieName();
+  const sessionCookie = cookieStore.get(cookieName)?.value;
+  const hasValidSession = isInvitationRegisterSessionValid(sessionCookie);
+
+  const password = readString(formData, "password");
+  if (!hasValidSession && password !== expectedPassword) {
+    return { error: "Invalid password." };
+  }
+
+  const existingSlug = readString(formData, "existingSlug").trim() || readString(formData, "slug").trim();
+  if (!existingSlug) {
+    return { error: "Mission code is required." };
+  }
+
+  if (existingSlug.endsWith("-demo")) {
+    return { error: "Demo slugs cannot be edited." };
+  }
+
+  if (RESERVED_TEMPLATE_SLUGS.has(existingSlug)) {
+    return { error: "This mission code is reserved." };
+  }
+
+  const templateId = readString(formData, "templateId").trim();
+  if (!templateId) {
+    return { error: "Template is required." };
+  }
+
+  if (!SUPPORTED_TEMPLATE_IDS.has(templateId)) {
+    return { error: "Unsupported template." };
+  }
+
+  const configJson = readString(formData, "configJson");
+  if (!configJson) {
+    return { error: "Missing config payload." };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(configJson);
+  } catch {
+    return { error: "Config payload is not valid JSON." };
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    return { error: "Config payload must be an object." };
+  }
+
+  const config = parsed as InvitationConfig;
+
+  if (!config.music || !config.sections) {
+    return { error: "Config payload is missing required fields." };
+  }
+
+  if (
+    !config.sections.gratitude ||
+    typeof config.sections.gratitude.enabled !== "boolean" ||
+    typeof config.sections.gratitude.message !== "string"
+  ) {
+    return { error: "Gratitude section config is required." };
+  }
+
+  if (!config.sections.hosts) {
+    return { error: "Hosts section config is required." };
+  }
+
+  if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
+    return { error: "At least 1 host is required." };
+  }
+
+  if (!config.sections.event || !config.sections.event.events) {
+    return { error: "Event section is required." };
+  }
+
+  const events = normalizeEventList(config.sections.event.events);
+  if (events.length < 1) {
+    return { error: "At least 1 event is required." };
+  }
+
+  const normalizedEvents = events.map((event) => {
+    const iso = toInvitationIso(event.date);
+    if (!iso) return null;
+    return { ...event, date: iso };
+  });
+
+  if (normalizedEvents.some((e) => !e)) {
+    return { error: "All event dates are required." };
+  }
+
+  const normalizedStories = (config.sections?.story?.stories ?? []).map((story) => {
+    const iso = toInvitationIso(story?.date);
+    return { ...story, date: iso ?? story?.date };
+  });
+
+  const purpose = readPurpose(formData);
+  const derivedPhotos = normalizePhotoList(config.sections?.gallery?.photos);
+
+  const db = getAdminDb();
+  const docRef = db.collection("invitations").doc(existingSlug);
+
+  try {
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(docRef);
+      if (!snap.exists) {
+        throw new Error("Mission not found.");
+      }
+
+      const existingData = snap.data() as Partial<InvitationConfig> | undefined;
+      const existingFolderKey =
+        typeof existingData?.imagekitFolderKey === "string" && existingData.imagekitFolderKey.trim()
+          ? existingData.imagekitFolderKey
+          : "";
+
+      const imagekitFolderKey =
+        config.imagekitFolderKey || existingFolderKey || deriveImagekitFolderKey(purpose, config.sections.hosts.hosts);
+
+      const toSave: InvitationConfig = {
+        id: existingSlug,
+        imagekitFolderKey,
+        templateId,
+        purpose,
+        theme: config.theme,
+        metadata: generateMetadata({
+          slug: existingSlug,
+          purpose,
+          config,
+        }),
+        music: {
+          title: config.music.title,
+          url: config.music.url,
+          dropboxPath: config.music.dropboxPath,
+        },
+        sections: {
+          ...config.sections,
+          countdown: {
+            ...config.sections.countdown,
+            photos: derivedPhotos,
+          },
+          hosts: {
+            ...config.sections.hosts,
+            hosts: config.sections.hosts.hosts,
+          },
+          event: {
+            ...config.sections.event,
+            events: normalizedEvents as [EventDetail, ...EventDetail[]],
+          },
+          story: {
+            ...config.sections.story,
+            stories: normalizedStories,
+          },
+        },
+      };
+
+      tx.set(docRef, toSave);
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to update invitation." };
+  }
+
+  const invitationUrl = `${SITE_ORIGIN}/${existingSlug}`;
+  return {
+    ok: true,
+    slug: existingSlug,
     invitationUrl,
   };
 }

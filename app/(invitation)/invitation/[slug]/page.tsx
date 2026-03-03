@@ -82,6 +82,11 @@ function requireInvitationConfig(config: InvitationConfig): InvitationConfig {
     const events = eventSection?.events as unknown;
     if (!Array.isArray(events) || events.length < 1) notFound();
 
+    const gratitudeSection = sections?.gratitude as Record<string, unknown> | null;
+    if (!gratitudeSection || typeof gratitudeSection !== "object") notFound();
+    if (typeof gratitudeSection.enabled !== "boolean") notFound();
+    if (typeof gratitudeSection.message !== "string") notFound();
+
     return config;
 }
 

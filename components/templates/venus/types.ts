@@ -5,4 +5,5 @@ export type NavSectionId =
   | "story"
   | "gallery"
   | "gift"
-  | "wishes";
+  | "wishes"
+  | "gratitude";

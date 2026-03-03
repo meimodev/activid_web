@@ -239,7 +239,9 @@ export function Amalthea({ config }: AmaltheaProps) {
                 </Suspense>
               ) : null}
 
-              <GratitudeSection hosts={effectiveHosts} />
+              {sections.gratitude.enabled ? (
+                <GratitudeSection hosts={effectiveHosts} message={sections.gratitude.message} />
+              ) : null}
 
               {sections.footer.enabled ? (
                 <FooterSection

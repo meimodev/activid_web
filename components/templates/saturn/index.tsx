@@ -137,7 +137,9 @@ export function Saturn({ config }: SaturnProps) {
                         </Suspense>
                     )}
 
-                    <GratitudeSection hosts={hosts} purpose={purpose} />
+                    {sections.gratitude.enabled && (
+                        <GratitudeSection hosts={hosts} purpose={purpose} message={sections.gratitude.message} />
+                    )}
 
                     {sections.footer.enabled && (
                         <FooterSection hosts={hosts} message={sections.footer.message} />

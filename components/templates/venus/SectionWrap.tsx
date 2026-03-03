@@ -15,7 +15,7 @@ export function SectionWrap({
   children: ReactNode;
 }) {
   const maskBackground =
-    id === "event" || id === "gallery" || id === "gift" || id === "wishes";
+    id === "event" || id === "gallery" || id === "gift" || id === "wishes" || id === "gratitude";
   const isOverPhoto = !maskBackground;
 
   return (

@@ -25,6 +25,7 @@ import { StorySection } from "./StorySection";
 import { GallerySection } from "./GallerySection";
 import { GiftSection } from "./GiftSection";
 import { WishesSection } from "./WishesSection";
+import { GratitudeSection } from "./GratitudeSection";
 import { FooterSection } from "./FooterSection";
 import { FloatingNav } from "./FloatingNav";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
@@ -96,6 +97,7 @@ export function Venus({ config }: VenusProps) {
   { id: "event" as const, label: "Event", icon: <IconCalendar /> },
   { id: "gallery" as const, label: "Gallery", icon: <IconGallery /> },
   { id: "wishes" as const, label: "Wishes", icon: <IconChat /> },
+  { id: "gratitude" as const, label: "Gratitude", icon: <IconChat /> },
   ],
   []
   );
@@ -113,7 +115,7 @@ export function Venus({ config }: VenusProps) {
   }
   }
 
-  const ids: NavSectionId[] = ["home", "couple", "event", "gallery", "wishes"];
+  const ids: NavSectionId[] = ["home", "couple", "event", "gallery", "wishes", "gratitude"];
   const els = ids
   .map((id) => document.getElementById(id))
   .filter(Boolean) as HTMLElement[];
@@ -270,6 +272,10 @@ export function Venus({ config }: VenusProps) {
   placeholder={config.sections.wishes.placeholder}
   thankYouMessage={config.sections.wishes.thankYouMessage}
   />
+  ) : null}
+
+  {config.sections.gratitude.enabled ? (
+  <GratitudeSection hosts={hosts} message={config.sections.gratitude.message} />
   ) : null}
 
   <FooterSection hosts={hosts} />

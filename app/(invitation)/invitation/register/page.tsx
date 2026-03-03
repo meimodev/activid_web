@@ -9,7 +9,47 @@ import { RegisterInvitationForm } from "./RegisterInvitationForm";
 import { registerInvitation, verifyInvitationRegisterPassword } from "./actions";
 
 export default async function InvitationRegisterPage() {
-  const baseConfig = INVITATION_PURPOSE_SEEDS.marriage;
+  const baseSeed = INVITATION_PURPOSE_SEEDS.marriage;
+  const baseConfig = {
+    ...baseSeed,
+    music: {
+      ...baseSeed.music,
+      url: "",
+    },
+    metadata: {
+      ...baseSeed.metadata,
+      openGraph: {
+        ...baseSeed.metadata.openGraph,
+        images: [],
+      },
+      twitter: {
+        ...baseSeed.metadata.twitter,
+        images: [],
+      },
+    },
+    sections: {
+      ...baseSeed.sections,
+      hero: {
+        ...baseSeed.sections.hero,
+        coverImage: "",
+      },
+      countdown: {
+        ...baseSeed.sections.countdown,
+        photos: [],
+      },
+      hosts: {
+        ...baseSeed.sections.hosts,
+        hosts: (baseSeed.sections.hosts.hosts ?? []).map((h) => ({
+          ...h,
+          photo: "",
+        })),
+      },
+      gallery: {
+        ...baseSeed.sections.gallery,
+        photos: [],
+      },
+    },
+  };
 
   if (!baseConfig) {
     throw new Error("Missing base invitation config in INVITATION_PURPOSE_SEEDS.");
@@ -25,8 +65,8 @@ export default async function InvitationRegisterPage() {
   const initialUnlocked = isInvitationRegisterSessionValid(sessionCookie);
 
   return (
-    <div className="min-h-screen bg-[#020205] text-white">
-      <div className="mx-auto max-w-4xl px-4 py-10">
+    <div className="min-h-[100dvh] bg-[#020205] text-white">
+      <div className="mx-auto max-w-4xl px-4 py-6 sm:py-10">
         <RegisterInvitationForm
           initialConfig={baseConfig}
           templateOptions={templateOptions}

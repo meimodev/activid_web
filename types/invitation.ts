@@ -145,6 +145,10 @@ export interface WishesSection extends SectionBase {
     thankYouMessage: string;
 }
 
+export interface GratitudeSection extends SectionBase {
+    message: string;
+}
+
 export interface FooterSection extends SectionBase {
     message: string;
 }
@@ -176,6 +180,7 @@ export interface InvitationConfig {
         rsvp: RsvpSection;
         gift: GiftSection;
         wishes: WishesSection;
+        gratitude: GratitudeSection;
         footer: FooterSection;
     };
 }

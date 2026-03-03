@@ -515,10 +515,13 @@ export function Neptune({ config }: NeptuneProps) {
   </WishesSectionClassic>
   )}
 
+  {config.sections.gratitude.enabled ? (
   <ThankYouSection
   hosts={hosts}
   backgroundPhotos={derivedPhotos}
+  message={config.sections.gratitude.message}
   />
+  ) : null}
 
   <FooterMark hosts={hosts} />
   </div>
@@ -2905,9 +2908,11 @@ function nowId() {
 function ThankYouSection({
  hosts,
  backgroundPhotos,
+ message,
 }: {
  hosts: Host[];
- backgroundPhotos?: string[];
+ backgroundPhotos: string[];
+ message: string;
 }) {
  const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
  const photos = useMemo(() => {
@@ -2975,10 +2980,10 @@ function ThankYouSection({
   baseDelay={0.08}
   staggerStep={0.22}
   >
-  <p className="mx-auto max-w-2xl text-md leading-tight text-wedding-on-dark ">
-  Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila
-  Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Atas
-  perhatian dan doa yang diberikan, kami ucapkan terima kasih.
+  <p className="mx-auto max-w-2xl text-md leading-tight text-wedding-on-dark whitespace-pre-line">
+  {message?.trim()
+  ? message
+  : "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila\nBapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu. Atas\nperhatian dan doa yang diberikan, kami ucapkan terima kasih."}
   </p>
 
   <p className={`${neptuneScript.className} pt-10 text-xl text-wedding-on-dark/70`}>

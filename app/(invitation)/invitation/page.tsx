@@ -24,6 +24,7 @@ export default function LandingPage() {
     "marriage",
   );
   const [previewThemeId, setPreviewThemeId] = React.useState<string>("");
+  const [customConfirmOpen, setCustomConfirmOpen] = React.useState(false);
 
   React.useEffect(() => {
     const stored = localStorage.getItem("activid_viewed_templates");
@@ -33,15 +34,16 @@ export default function LandingPage() {
   }, []);
 
   React.useEffect(() => {
-    if (!previewTemplate) return;
+    const anyDialogOpen = Boolean(previewTemplate) || customConfirmOpen;
+    if (!anyDialogOpen) return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setPreviewTemplate(null);
-      }
+      if (e.key !== "Escape") return;
+      setPreviewTemplate(null);
+      setCustomConfirmOpen(false);
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -49,7 +51,7 @@ export default function LandingPage() {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [previewTemplate]);
+  }, [customConfirmOpen, previewTemplate]);
 
   const handleView = (id: string) => {
     if (!viewedTemplates.includes(id)) {
@@ -69,6 +71,9 @@ export default function LandingPage() {
   const WHATSAPP_NUMBER = "62881080088816";
   const createWhatsAppUrl = (message: string) =>
     `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+
+  const customWhatsappMessage =
+    "[INV] Halo activid 👋\n\nMau bikin undangan digital *custom* ✨\n\nProses custom itu lumayan detail (dan agak \"ribet\" juga 😅)\nKarena akan   mengikuti kebutuhan \ndari konsep besar sampai elemen yang kecil-kecil 🤍\n\nUntuk bisa mulai prosesnya pembuatan undangan *custom*, \nAkan dikenakan biaya buat booking slot & mulai diskusi konsep/moodboard senilai Rp. 200.000 sebagai Down Payment / Uang Muka dari Total harga undangan custom dimulai dari Rp500.000\n(tapi tergantung tingkat kompleksitasnya sesuai yang akan dibicarakan nanti).\n\nUang Muka yang sudah dibayar *TIDAK BISA DIKEMBALIKAN* 🙏🏻 apabila pelanggan membatalkan pemesanan undangan *custom* karena telah dihitung sebagai jasa konsultasi langsung ke tim developer 🙏🏻 \n\nSilahkan menunggu sebentar untuk konfirmasi lebih lanjut 😊";
 
   return (
     <div className="min-h-screen bg-[#020205] text-white selection:bg-indigo-500/30 overflow-x-hidden">
@@ -341,6 +346,63 @@ export default function LandingPage() {
                 </motion.div>
               );
             })}
+
+            <motion.button
+              type="button"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.6 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 0.99 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setCustomConfirmOpen(true);
+              }}
+              aria-label="Buat undangan custom via WhatsApp"
+              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border border-amber-300/30 bg-[#0B0B14] text-left transition-all duration-500 hover:-translate-y-1 hover:border-amber-200/60 hover:shadow-[0_0_55px_-15px_rgba(251,191,36,0.35)]"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(251,191,36,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(34,211,238,0.14),transparent_55%),linear-gradient(to_bottom,rgba(2,2,5,0.65),rgba(2,2,5,0.95))]" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.18)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
+
+              <div className="relative flex flex-col h-full">
+                <div className="aspect-4/5 p-4 sm:p-5 flex flex-col justify-between">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-300/25 text-amber-100 text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.55)]" />
+                      Custom
+                    </div>
+                    <div className="h-9 w-9 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-base">
+                      ✨
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="text-lg sm:text-2xl font-black tracking-tight text-white">
+                      Custom
+                    </div>
+                    <div className="mt-2 text-xs sm:text-sm text-amber-100/80 leading-relaxed">
+                      Undangan dibuat dari nol sesuai vibe kamu.
+                    </div>
+                    <div className="mt-4 flex items-baseline gap-2">
+                      <div className="text-base sm:text-xl font-black tracking-tight text-white">
+                        mulai 500.000
+                      </div>
+                      <div className="text-[11px] text-white/45 font-mono">via WhatsApp</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-md p-3">
+                    <div className="text-[11px] text-white/80 font-medium leading-relaxed">
+                      DP Rp200.000 untuk mulai proses & booking slot.
+                    </div>
+                    <div className="mt-2 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-amber-100/90">
+                      Chat sekarang
+                      <span className="text-white/70">→</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
 
             <motion.div
               initial={{ opacity: 0, y: 50 }}
@@ -624,7 +686,7 @@ export default function LandingPage() {
                         type="button"
                         onClick={() => setPreviewPurpose(opt.key)}
                         className={
-                          "rounded-2xl border px-3 py-2 text-xs font-black uppercase tracking-wider transition-colors " +
+                          "min-w-0 w-full rounded-2xl border px-2.5 py-2 text-xs font-black uppercase tracking-wide transition-colors whitespace-normal break-words text-center leading-tight " +
                           (isActive
                             ? "border-indigo-300/70 bg-white/5 text-white ring-4 ring-indigo-600/30"
                             : "border-white/10 bg-white/0 text-white/80 hover:bg-white/5 hover:border-white/25")
@@ -721,6 +783,78 @@ export default function LandingPage() {
                 className="inline-flex items-center justify-center rounded-2xl border border-indigo-400/50 bg-linear-to-r from-indigo-500/15 via-purple-500/10 to-cyan-500/10 px-4 py-3 text-xs font-black uppercase tracking-wider text-indigo-100 hover:bg-indigo-500/20 hover:border-indigo-300/70 transition-colors disabled:opacity-50 disabled:pointer-events-none"
               >
                 Preview demo
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {customConfirmOpen ? (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Konfirmasi biaya custom"
+          onClick={() => setCustomConfirmOpen(false)}
+        >
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-[640px] rounded-3xl border border-white/10 bg-[#05050d]/95 p-5 sm:p-6 shadow-[0_35px_120px_-30px_rgba(0,0,0,0.75)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-amber-200/60">
+                  Konfirmasi
+                </div>
+                <div className="mt-2 truncate text-lg font-black tracking-tight text-white">
+                  Sebelum lanjut ke WhatsApp
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCustomConfirmOpen(false)}
+                className="h-10 w-10 shrink-0 rounded-full border border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-4 text-sm leading-relaxed text-white/80">
+              <p className="rounded-2xl border border-amber-300/20 bg-amber-400/5 p-4">
+                Akan dikenakan biaya buat booking slot diskusi konsep senilai Rp. 200.000 yang juga akan dihitung sebagai{" "}
+                <em>Down Payment</em> atau uang muka dari total harga undangan nanti.
+              </p>
+              <p className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
+                Uang Muka yang sudah dibayar <strong>TIDAK BISA DIKEMBALIKAN</strong> 🙏🏻 apabila pelanggan membatalkan pemesanan undangan{" "}
+                <em>custom</em> karena telah dihitung sebagai jasa konsultasi langsung ke tim developer 🙏🏻
+              </p>
+            </div>
+
+            <div className="mt-7 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setCustomConfirmOpen(false)}
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/0 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/80 hover:bg-white/5 hover:border-white/25 transition-colors"
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.open(
+                    createWhatsAppUrl(customWhatsappMessage),
+                    "_blank",
+                    "noopener,noreferrer",
+                  );
+                  setCustomConfirmOpen(false);
+                }}
+                className="inline-flex items-center justify-center rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-500/15 via-amber-400/10 to-cyan-500/10 px-4 py-3 text-xs font-black uppercase tracking-wider text-amber-100 hover:bg-amber-500/20 hover:border-amber-200/70 transition-colors"
+              >
+                Lanjut ke WhatsApp
               </button>
             </div>
           </div>
