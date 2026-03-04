@@ -224,68 +224,70 @@ export function Hero({
               {secondary ? (
                 <>
                   <h1 className="relative self-center text-[60px]">&</h1>
-                  <h1 className="relative text-[86px] pt-24">{secondaryInitial}</h1>
+                  <h1 className="relative text-[86px] pt-24">
+                    {secondaryInitial}
+                  </h1>
                 </>
               ) : null}
             </motion.div>
 
-          <motion.div
-            className="relative z-10 mt-14 px-2"
-            initial={{ opacity: 0, y: 16 }}
-            animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
-            transition={
-              isOpening
-                ? { duration: 0.46, delay: 0.2, ease: revealEase }
-                : { duration: 0.82, delay: 0.84, ease: revealEase }
-            }
-          >
-            <p className="font-stoic text-[32px] leading-none text-[#6f4a53] ">
-              {heading}
-            </p>
-            <p className="mt-3 font-tan-mon-cheri text-[30px] leading-tight text-[#5f323c] ">
-              {primaryName}
-              {secondaryName ? ` & ${secondaryName}` : ""}
-            </p>
-            <p className="font-garet-book mt-4 text-[20px] tracking-[0.22em] text-[#5f323c] ">
-              {date}
-            </p>
-          </motion.div>
+            <motion.div
+              className="relative z-10 mt-14 px-2"
+              initial={{ opacity: 0, y: 16 }}
+              animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
+              transition={
+                isOpening
+                  ? { duration: 0.46, delay: 0.2, ease: revealEase }
+                  : { duration: 0.82, delay: 0.84, ease: revealEase }
+              }
+            >
+              <p className="font-stoic text-[32px] leading-none text-[#6f4a53] ">
+                {heading}
+              </p>
+              <p className="mt-3 font-tan-mon-cheri text-[30px] leading-tight text-[#5f323c] ">
+                {primaryName}
+                {secondaryName ? ` & ${secondaryName}` : ""}
+              </p>
+              <p className="font-garet-book mt-4 text-[20px] tracking-[0.22em] text-[#5f323c] ">
+                {date}
+              </p>
+            </motion.div>
 
-          <motion.div
-            className="relative font-poppins z-10 mt-10 space-y-2 text-[#62414b] "
-            initial={{ opacity: 0, y: 16 }}
-            animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
-            transition={
-              isOpening
-                ? { duration: 0.44, delay: 0.1, ease: revealEase }
-                : { duration: 0.82, delay: 0.98, ease: revealEase }
-            }
-          >
-            <p className="text-md font-medium leading-tight">Kepada Yth.</p>
-            <p className="text-md font-medium leading-tight">
-              Bapak/Ibu/Saudara-i
-            </p>
-            <p className="pt-2 text-2xl font-semibold tracking-wide text-[#4f2a31] ">
-              {displayGuest}
-            </p>
-          </motion.div>
+            <motion.div
+              className="relative font-poppins z-10 mt-10 space-y-2 text-[#62414b] "
+              initial={{ opacity: 0, y: 16 }}
+              animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
+              transition={
+                isOpening
+                  ? { duration: 0.44, delay: 0.1, ease: revealEase }
+                  : { duration: 0.82, delay: 0.98, ease: revealEase }
+              }
+            >
+              <p className="text-md font-medium leading-tight">Kepada Yth.</p>
+              <p className="text-md font-medium leading-tight">
+                Bapak/Ibu/Saudara-i
+              </p>
+              <p className="pt-2 text-2xl font-semibold tracking-wide text-[#4f2a31] ">
+                {displayGuest}
+              </p>
+            </motion.div>
 
-          <motion.button
-            whileHover={isOpening ? {} : { scale: 1.03 }}
-            whileTap={isOpening ? {} : { scale: 0.97 }}
-            initial={{ opacity: 0, y: 16 }}
-            animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
-            transition={
-              isOpening
-                ? { duration: 0.38, delay: 0, ease: revealEase }
-                : { duration: 0.82, delay: 1.12, ease: revealEase }
-            }
-            onClick={handleOpen}
-            disabled={isOpening}
-            className="relative z-10 mt-4 rounded-full bg-[#5d2e36] px-10 py-3 text-md font-poppins tracking-wide text-[#fff4f6] shadow-[0_10px_25px_rgba(68,26,35,0.35)] transition-colors hover:bg-[#4f252d]"
-          >
-            Buka Undangan
-          </motion.button>
+            <motion.button
+              whileHover={isOpening ? {} : { scale: 1.03 }}
+              whileTap={isOpening ? {} : { scale: 0.97 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={isOpening ? { opacity: 0 } : { opacity: 1, y: 0 }}
+              transition={
+                isOpening
+                  ? { duration: 0.38, delay: 0, ease: revealEase }
+                  : { duration: 0.82, delay: 1.12, ease: revealEase }
+              }
+              onClick={handleOpen}
+              disabled={isOpening}
+              className="relative z-10 mt-4 rounded-full bg-[#5d2e36] px-10 py-3 text-md font-poppins tracking-wide text-[#fff4f6] shadow-[0_10px_25px_rgba(68,26,35,0.35)] transition-colors hover:bg-[#4f252d]"
+            >
+              Buka Undangan
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>

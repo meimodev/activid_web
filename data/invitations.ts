@@ -7,6 +7,15 @@ const dt = (year: number, month: number, day: number, hour = 0, minute = 0) =>
 
 type Purpose = "marriage" | "birthday" | "event";
 
+export const DEMO_IMAGEKIT_URLS = [
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/1.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/2.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/3.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/4.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/5.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/6.webp",
+] as const;
+
 function getDefaultGratitudeMessage(purpose: Purpose): string {
   if (purpose === "marriage") {
     return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.";
@@ -178,8 +187,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       slug: "seed-marriage",
       title: "The Wedding of Alex & Maya",
       description: "You are invited to the wedding of Alex & Maya.",
-      coverImage:
-        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      coverImage: DEMO_IMAGEKIT_URLS[0],
     }),
     music: {
       title: "Theme",
@@ -189,8 +197,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       hero: {
         enabled: true,
         subtitle: "The Wedding",
-        coverImage:
-          "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[0],
       },
       title: {
         enabled: true,
@@ -200,9 +207,9 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Save The Date",
         photos: [
-          "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
-          "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=1200",
-          "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=1200",
+          DEMO_IMAGEKIT_URLS[0],
+          DEMO_IMAGEKIT_URLS[1],
+          DEMO_IMAGEKIT_URLS[2],
         ],
       },
       quote: {
@@ -219,8 +226,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Alex",
             role: "The Groom",
             parents: "Putra dari Bapak Hendra & Ibu Rina",
-            photo:
-              "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
+            photo: DEMO_IMAGEKIT_URLS[3],
           },
           {
             firstName: "Maya",
@@ -228,8 +234,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Maya",
             role: "The Bride",
             parents: "Putri dari Bapak Samuel & Ibu Maria",
-            photo:
-              "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+            photo: DEMO_IMAGEKIT_URLS[4],
           },
         ],
       },
@@ -271,10 +276,10 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "The Moments",
         photos: [
-          "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+          DEMO_IMAGEKIT_URLS[1],
+          DEMO_IMAGEKIT_URLS[2],
+          DEMO_IMAGEKIT_URLS[3],
+          DEMO_IMAGEKIT_URLS[4],
         ],
       },
       rsvp: {
@@ -328,8 +333,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       slug: "seed-birthday",
       title: "Birthday Invitation - Raka",
       description: "You are invited to celebrate Raka's birthday.",
-      coverImage:
-        "https://images.pexels.com/photos/847141/pexels-photo-847141.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      coverImage: DEMO_IMAGEKIT_URLS[1],
     }),
     music: {
       title: "Theme",
@@ -339,8 +343,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       hero: {
         enabled: true,
         subtitle: "Birthday Party",
-        coverImage:
-          "https://images.pexels.com/photos/847141/pexels-photo-847141.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[1],
       },
       title: {
         enabled: true,
@@ -350,8 +353,8 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Counting Down",
         photos: [
-          "https://images.pexels.com/photos/847141/pexels-photo-847141.jpeg?auto=compress&cs=tinysrgb&w=1200",
-          "https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=1200",
+          DEMO_IMAGEKIT_URLS[1],
+          DEMO_IMAGEKIT_URLS[2],
         ],
       },
       quote: {
@@ -368,8 +371,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Raka",
             role: "Birthday Star",
             parents: "Putra dari Bapak Mahendra & Ibu Kristina",
-            photo:
-              "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=800",
+            photo: DEMO_IMAGEKIT_URLS[3],
           },
         ],
       },
@@ -404,8 +406,8 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Gallery",
         photos: [
-          "https://images.pexels.com/photos/587741/pexels-photo-587741.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/847141/pexels-photo-847141.jpeg?auto=compress&cs=tinysrgb&w=800",
+          DEMO_IMAGEKIT_URLS[2],
+          DEMO_IMAGEKIT_URLS[1],
         ],
       },
       rsvp: {
@@ -452,8 +454,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       slug: "seed-event",
       title: "Event Invitation - Activid Meetup",
       description: "You are invited to our event.",
-      coverImage:
-        "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1200",
+      coverImage: DEMO_IMAGEKIT_URLS[2],
     }),
     music: {
       title: "Theme",
@@ -463,8 +464,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       hero: {
         enabled: true,
         subtitle: "The Event",
-        coverImage:
-          "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[2],
       },
       title: {
         enabled: true,
@@ -474,7 +474,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Starting Soon",
         photos: [
-          "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1200",
+          DEMO_IMAGEKIT_URLS[2],
         ],
       },
       quote: {
@@ -491,8 +491,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Activid",
             role: "Organizer",
             parents: "",
-            photo:
-              "https://images.pexels.com/photos/3184307/pexels-photo-3184307.jpeg?auto=compress&cs=tinysrgb&w=800",
+            photo: DEMO_IMAGEKIT_URLS[4],
           },
         ],
       },
@@ -534,8 +533,8 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Highlights",
         photos: [
-          "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=800",
-          "https://images.pexels.com/photos/3184307/pexels-photo-3184307.jpeg?auto=compress&cs=tinysrgb&w=800",
+          DEMO_IMAGEKIT_URLS[2],
+          DEMO_IMAGEKIT_URLS[4],
         ],
       },
       rsvp: {
@@ -581,8 +580,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[0],
       },
     },
   },
@@ -596,8 +594,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[1],
       },
     },
   },
@@ -611,8 +608,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[2],
       },
     },
   },
@@ -626,8 +622,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[3],
       },
     },
   },
@@ -641,8 +636,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[4],
       },
     },
   },
@@ -656,8 +650,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[5],
       },
     },
   },
@@ -671,8 +664,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[0],
       },
     },
   },
@@ -686,8 +678,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage:
-          "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        coverImage: DEMO_IMAGEKIT_URLS[1],
       },
     },
   },

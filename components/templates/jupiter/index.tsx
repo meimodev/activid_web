@@ -3,14 +3,24 @@
 import { type ComponentProps, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Allura, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { IconPause, IconPlay, WaveSeparator } from "./graphics";
 import { Host, InvitationConfig, InvitationDateTimeValue } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { db } from "@/lib/firebase";
-import { collection, doc, getDoc, onSnapshot, query, runTransaction, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  runTransaction,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import { DateTime } from "luxon";
 import {
   deriveInvitationPrimaryDateInfo,
@@ -28,15 +38,15 @@ interface JupiterProps {
   config: InvitationConfig;
 }
 
-const jupiterBody = Plus_Jakarta_Sans({
-  subsets: ["latin"],
+const jupiterBody = localFont({
+  src: "../../../public/fonts/poppins-regular.ttf",
   variable: "--font-jupiter-body",
-  weight: ["200", "300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
-const jupiterScript = Allura({
-  subsets: ["latin"],
-  weight: ["400"],
+const jupiterScript = localFont({
+  src: "../../../public/fonts/great-vibes-regular.ttf",
+  display: "swap",
 });
 
 function JupiterReveal(props: ComponentProps<typeof RevealOnScroll>) {
@@ -53,14 +63,11 @@ function JupiterReveal(props: ComponentProps<typeof RevealOnScroll>) {
   );
 }
 
-type AttendanceStatus = "hadir" | "tidak";
-
 interface WishDoc {
   id: string;
   invitationId: string;
   name: string;
   nameKey?: string;
-  attendance?: AttendanceStatus;
   message: string;
   createdAt?: Timestamp;
 }
@@ -167,7 +174,7 @@ export function Jupiter({ config }: JupiterProps) {
 
   return (
   <main
-  className={`relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text font-body ${jupiterBody.variable} [--font-body:var(--font-jupiter-body)]`}
+  className={`relative min-h-screen overflow-x-hidden bg-wedding-dark text-wedding-on-dark font-body ${jupiterBody.variable} [--font-body:var(--font-jupiter-body)]`}
   >
   {isOpen && derivedPhotos.length > 0 ? (
   <div className="absolute inset-0 z-0 pointer-events-none">
@@ -175,7 +182,7 @@ export function Jupiter({ config }: JupiterProps) {
   photos={derivedPhotos}
   className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"
   />
-  <div className="absolute inset-0 bg-linear-to-b from-wedding-bg/85 via-wedding-bg/70 to-wedding-bg/90" />
+  <div className="absolute inset-0 bg-linear-to-b from-wedding-dark/85 via-wedding-dark/70 to-wedding-dark/90" />
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,199,122,0.16),transparent_60%),radial-gradient(circle_at_80%_40%,rgba(56,189,248,0.08),transparent_55%)]" />
   </div>
   ) : null}
@@ -394,8 +401,8 @@ function JupiterTitleCountdown({
   <section className="relative px-6 pt-16 pb-20">
   <div className="max-w-5xl mx-auto">
   <JupiterReveal direction="up" width="100%" delay={0.35}>
-  <div className="rounded-[2.25rem] overflow-hidden border border-black/10 bg-white/70 backdrop-blur">
-  <div className="relative aspect-[16/9] w-full bg-black/5">
+  <div className="rounded-[2.25rem] overflow-hidden border border-white/10 bg-white/5 backdrop-blur">
+  <div className="relative aspect-[16/9] w-full bg-white/5">
   <Image
   src={topPhoto}
   alt={heading}
@@ -408,25 +415,25 @@ function JupiterTitleCountdown({
   </div>
 
   <div className="p-8 text-center">
-  <p className="text-xs tracking-[0.35em] uppercase text-wedding-text-light font-body">{heading || "The Wedding"}</p>
+  <p className="text-xs tracking-[0.35em] uppercase text-wedding-on-dark/60 font-body">{heading || "The Wedding"}</p>
 
-  <h2 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-wedding-text`}>
+  <h2 className={`mt-6 ${jupiterScript.className} text-6xl leading-none text-wedding-on-dark`}>
   {primary?.firstName ?? ""}
   </h2>
   {secondary ? (
   <>
-  <div className="mt-2 mb-2 text-3xl opacity-80 text-wedding-text">&</div>
-  <h2 className={`${jupiterScript.className} text-6xl leading-none text-wedding-text`}>
+  <div className="mt-2 mb-2 text-3xl opacity-80 text-wedding-on-dark">&</div>
+  <h2 className={`${jupiterScript.className} text-6xl leading-none text-wedding-on-dark`}>
   {secondary.firstName}
   </h2>
   </>
   ) : null}
 
   <div className="mt-10 grid grid-cols-1 gap-6 items-center">
-  <div className="rounded-3xl border border-wedding-text/10 bg-wedding-bg p-7">
-  <p className="text-[10px] uppercase tracking-[0.35em] text-wedding-text-light">{month}</p>
-  <p className="mt-3 text-5xl font-bold tracking-tight text-wedding-text">{day}</p>
-  <p className="mt-2 text-sm tracking-[0.25em] uppercase text-wedding-text-light">{year}</p>
+  <div className="rounded-3xl border border-white/10 bg-white/5 p-7">
+  <p className="text-[10px] uppercase tracking-[0.35em] text-wedding-on-dark/60">{month}</p>
+  <p className="mt-3 text-5xl font-bold tracking-tight text-wedding-on-dark">{day}</p>
+  <p className="mt-2 text-sm tracking-[0.25em] uppercase text-wedding-on-dark/60">{year}</p>
   </div>
 
   <div className="">
@@ -437,7 +444,7 @@ function JupiterTitleCountdown({
   <JupiterCountdownCard label="Detik" value={timeLeft.seconds} />
   </div>
 
-  <p className="mt-6 text-xs tracking-[0.25em] uppercase text-wedding-text-light font-body">
+  <p className="mt-6 text-xs tracking-[0.25em] uppercase text-wedding-on-dark/60 font-body">
   Mohon doa restu
   </p>
   </div>
@@ -452,9 +459,9 @@ function JupiterTitleCountdown({
 
 function JupiterCountdownCard({ label, value }: { label: string; value: number }) {
   return (
-  <div className="rounded-2xl border border-wedding-text/10 bg-wedding-bg/70 backdrop-blur px-4 py-4 text-center">
-  <div className="text-3xl font-semibold text-wedding-text leading-none">{value}</div>
-  <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-wedding-text-light font-body">{label}</div>
+  <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur px-4 py-4 text-center">
+  <div className="text-3xl font-semibold text-wedding-on-dark leading-none">{value}</div>
+  <div className="mt-2 text-[10px] uppercase tracking-[0.3em] text-wedding-on-dark/60 font-body">{label}</div>
   </div>
   );
 }
@@ -485,7 +492,7 @@ function JupiterQuote({ text, author, thumbnails }: { text: string; author: stri
   <JupiterReveal key={`${src}-${idx}`} direction="up" width="fit-content" delay={0.35 + idx * 0.12}>
   <div className="relative h-20 w-20 rounded-full overflow-hidden border border-wedding-on-dark/20 bg-wedding-on-dark/5">
   <Image src={src} alt="thumb" fill sizes="80px" className="object-cover" unoptimized />
-  <div className="absolute inset-0 bg-black/10" />
+  <div className="absolute inset-0 bg-white/10" />
   </div>
   </JupiterReveal>
   ))}
@@ -494,7 +501,6 @@ function JupiterQuote({ text, author, thumbnails }: { text: string; author: stri
   </div>
   </div>
 
-  <WaveSeparator position="bottom" fill="var(--invitation-bg)" />
   </section>
   );
 }
@@ -550,16 +556,16 @@ function JupiterPersonCard({
 }) {
   return (
   <JupiterReveal direction="up" width="100%" delay={delay}>
-  <div className="rounded-[2.25rem] border border-black/10 bg-white/70 backdrop-blur p-8">
+  <div className="rounded-[2.25rem] border border-white/10 bg-white/5 backdrop-blur p-8">
   <div className="flex flex-col items-center text-center">
-  <div className="relative h-40 w-40 rounded-full overflow-hidden border border-black/10 bg-black/5">
+  <div className="relative h-40 w-40 rounded-full overflow-hidden border border-white/10 bg-white/5">
   <Image src={photo} alt={name} fill sizes="160px" className="object-cover" unoptimized />
   </div>
 
-  <p className="mt-6 text-[10px] uppercase tracking-[0.35em] text-wedding-text-light">{label}</p>
-  <h4 className={`mt-3 ${jupiterScript.className} text-5xl leading-none text-wedding-text`}>{name}</h4>
-  <p className="mt-2 text-sm font-body text-wedding-text">{fullName}</p>
-  <p className="mt-4 text-xs text-wedding-text-light whitespace-pre-line">{parents}</p>
+  <p className="mt-6 text-[10px] uppercase tracking-[0.35em] text-wedding-on-dark/60">{label}</p>
+  <h4 className={`mt-3 ${jupiterScript.className} text-5xl leading-none text-wedding-on-dark`}>{name}</h4>
+  <p className="mt-2 text-sm font-body text-wedding-on-dark">{fullName}</p>
+  <p className="mt-4 text-xs text-wedding-on-dark/60 whitespace-pre-line">{parents}</p>
   </div>
   </div>
   </JupiterReveal>
@@ -615,7 +621,7 @@ function JupiterEventCard({
 }) {
   return (
   <JupiterReveal direction="up" width="100%" delay={delay}>
-  <div className="rounded-[2.25rem] overflow-hidden border border-black/10 bg-white/70 backdrop-blur">
+  <div className="rounded-[2.25rem] overflow-hidden border border-white/10 bg-white/5 backdrop-blur">
   <div className="relative px-8 pt-12 pb-10">
   <div
   className="absolute inset-0"
@@ -627,13 +633,13 @@ function JupiterEventCard({
   />
 
   <div className="relative text-center">
-  <h4 className={`${jupiterScript.className} text-5xl leading-none text-wedding-text`}>{title}</h4>
+  <h4 className={`${jupiterScript.className} text-5xl leading-none text-wedding-on-dark`}>{title}</h4>
 
-  <div className="mt-6 space-y-2 text-sm text-wedding-text">
+  <div className="mt-6 space-y-2 text-sm text-wedding-on-dark">
   {date ? <p className="font-body">{formatInvitationDateLong(date)}</p> : null}
-  {date ? <p className="text-wedding-text-light">{formatInvitationTime(date)}</p> : null}
+  {date ? <p className="text-wedding-on-dark/60">{formatInvitationTime(date)}</p> : null}
   {venue ? <p className="font-body">{venue}</p> : null}
-  {address ? <p className="text-wedding-text-light whitespace-pre-line">{address}</p> : null}
+  {address ? <p className="text-wedding-on-dark/60 whitespace-pre-line">{address}</p> : null}
   </div>
 
   {mapUrl ? (
@@ -670,7 +676,7 @@ function JupiterStory({
   <div className="grid grid-cols-1 gap-8 items-start">
   <div className="">
   <JupiterReveal direction="up" width="100%" delay={0.35}>
-  <div className="relative aspect-[4/5] rounded-[2.25rem] overflow-hidden border border-black/10 bg-white/60">
+  <div className="relative aspect-[4/5] rounded-[2.25rem] overflow-hidden border border-white/10 bg-white/5">
   <Image src={photo} alt="story" fill sizes="420px" className="object-cover" unoptimized />
   <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/10 to-transparent" />
   </div>
@@ -680,9 +686,9 @@ function JupiterStory({
   <div className=" space-y-5">
   {stories.map((s, idx) => (
   <JupiterReveal key={idx} direction="up" width="100%" delay={0.45 + idx * 0.15}>
-  <div className="rounded-[2.25rem] border border-black/10 bg-white/70 backdrop-blur p-7">
-  <p className="text-[10px] uppercase tracking-[0.35em] text-wedding-text-light">{formatInvitationMonthYear(s.date)}</p>
-  <p className="mt-4 text-sm leading-relaxed text-wedding-text whitespace-pre-line">
+  <div className="rounded-[2.25rem] border border-white/10 bg-white/5 backdrop-blur p-7">
+  <p className="text-[10px] uppercase tracking-[0.35em] text-wedding-on-dark/60">{formatInvitationMonthYear(s.date)}</p>
+  <p className="mt-4 text-sm leading-relaxed text-wedding-on-dark/90 whitespace-pre-line">
   {s.description}
   </p>
   </div>
@@ -705,19 +711,19 @@ function JupiterGratitude({ hosts, message }: { hosts: Host[]; message: string }
   <JupiterSectionHeading title="Gratitude" />
 
   <JupiterReveal direction="up" width="100%" delay={0.35}>
-  <div className="rounded-[2.25rem] border border-black/10 bg-white/70 backdrop-blur p-10 text-center">
-  <p className="text-sm text-wedding-text whitespace-pre-line">
+  <div className="rounded-[2.25rem] border border-white/10 bg-white/5 backdrop-blur p-10 text-center">
+  <p className="text-sm text-wedding-on-dark/90 whitespace-pre-line">
   {message || "Terima kasih telah menjadi bagian dari momen bahagia kami."}
   </p>
 
   <div className="mt-8">
-  <p className={`text-5xl leading-none ${jupiterScript.className} text-wedding-text`}>
+  <p className={`text-5xl leading-none ${jupiterScript.className} text-wedding-on-dark`}>
   {primary?.firstName ?? ""} {secondary?.firstName ? "&" : ""} {secondary?.firstName ?? ""}
   </p>
   </div>
 
-  <div className="mt-8 mx-auto h-px w-24 bg-black/10" />
-  <p className="mt-8 text-xs tracking-[0.25em] uppercase text-wedding-text-light">Dengan cinta</p>
+  <div className="mt-8 mx-auto h-px w-24 bg-white/10" />
+  <p className="mt-8 text-xs tracking-[0.25em] uppercase text-wedding-on-dark/60">Dengan cinta</p>
   </div>
   </JupiterReveal>
   </div>
@@ -729,8 +735,8 @@ function JupiterSectionHeading({ title }: { title: string }) {
   return (
   <JupiterReveal direction="up" width="100%" delay={0.15}>
   <div className="text-center mb-10">
-  <h3 className={`${jupiterScript.className} text-5xl leading-none text-wedding-text`}>{title}</h3>
-  <div className="mt-5 mx-auto h-px w-24 bg-black/10" />
+  <h3 className={`${jupiterScript.className} text-5xl leading-none text-wedding-on-dark`}>{title}</h3>
+  <div className="mt-5 mx-auto h-px w-24 bg-white/10" />
   </div>
   </JupiterReveal>
   );
@@ -738,13 +744,12 @@ function JupiterSectionHeading({ title }: { title: string }) {
 
 function JupiterSectionWrap({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-  <section className="relative px-6 py-20 bg-wedding-dark text-wedding-on-dark overflow-hidden">
+  <section className="relative px-6 py-20 overflow-hidden">
   <div className="absolute inset-0">
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,color-mix(in_srgb,var(--invitation-accent-2)_12%,transparent),transparent_50%),radial-gradient(circle_at_80%_40%,color-mix(in_srgb,var(--invitation-accent)_10%,transparent),transparent_55%)]" />
-  <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/55 to-black/75" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(56,189,248,0.05),transparent_50%)]" />
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(197,160,89,0.05),transparent_50%)]" />
   </div>
-
-  <div className="relative max-w-5xl mx-auto">
+  <div className="relative max-w-xl mx-auto">
   <JupiterReveal direction="up" width="100%">
   <div className="text-center mb-10">
   <h3 className={`${jupiterScript.className} text-5xl leading-none text-wedding-on-dark`}>{title}</h3>
@@ -769,13 +774,18 @@ function JupiterWishesFirestore({
   placeholder: string;
   thankYouMessage: string;
 }) {
-  const [attendance, setAttendance] = useState<AttendanceStatus>("hadir");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasPosted, setHasPosted] = useState(false);
   const [error, setError] = useState("");
   const [existingWish, setExistingWish] = useState<WishDoc | null>(null);
   const [wishes, setWishes] = useState<WishDoc[]>([]);
+
+  const [visibleCount, setVisibleCount] = useState(10);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const isDemo = useMemo(() => invitationId.endsWith("-demo"), [invitationId]);
+  const effectiveInviteeName = inviteeName ?? (isDemo ? "Demo Guest" : null);
 
   const inviteeNameKey = useMemo(() => {
   if (!inviteeName) return null;
@@ -787,8 +797,55 @@ function JupiterWishesFirestore({
   return doc(db, "wishes", `${invitationId}_${inviteeNameKey}`);
   }, [invitationId, inviteeNameKey]);
 
+  const demoSeedWishes = useMemo(() => {
+  if (!isDemo) return [] as WishDoc[];
+  const now = Date.now();
+  return [
+  {
+  id: `demo_${invitationId}_1`,
+  invitationId,
+  name: "Raka",
+  message: "Selamat menempuh hidup baru. Semoga selalu diberi kebahagiaan dan keberkahan.",
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 18),
+  },
+  {
+  id: `demo_${invitationId}_2`,
+  invitationId,
+  name: "Nadya",
+  message: "Happy wedding! Semoga langgeng sampai tua dan saling menguatkan dalam setiap keadaan.",
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 2),
+  },
+  {
+  id: `demo_${invitationId}_3`,
+  invitationId,
+  name: "Dimas",
+  message: "Semoga pernikahannya penuh cinta, rezeki lancar, dan rumah tangga sakinah mawaddah warahmah.",
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 9),
+  },
+  {
+  id: `demo_${invitationId}_4`,
+  invitationId,
+  name: "Alya",
+  message: "Congrats! Semoga jadi pasangan yang saling melengkapi dan selalu kompak.",
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 26),
+  },
+  {
+  id: `demo_${invitationId}_5`,
+  invitationId,
+  name: "Bima",
+  message: "Doa terbaik untuk kalian berdua. Semoga acaranya lancar dan pernikahannya bahagia selalu.",
+  createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 54),
+  },
+  ];
+  }, [invitationId, isDemo]);
+
   useEffect(() => {
   if (!invitationId) return;
+
+  if (isDemo) {
+  setWishes(demoSeedWishes);
+  return;
+  }
 
   const q = query(collection(db, "wishes"), where("invitationId", "==", invitationId));
   const unsub = onSnapshot(q, (snapshot) => {
@@ -800,33 +857,117 @@ function JupiterWishesFirestore({
   return bTime - aTime;
   });
 
-  setWishes(next);
+  const seen = new Set<string>();
+  const deduped: WishDoc[] = [];
+  for (const w of next) {
+  const key = w.nameKey || normalizeNameKey(w.name || "");
+  if (!key) {
+  deduped.push(w);
+  continue;
+  }
+  if (seen.has(key)) continue;
+  seen.add(key);
+  deduped.push(w);
+  }
+
+  setWishes(deduped);
   });
 
   return () => unsub();
-  }, [invitationId]);
+  }, [demoSeedWishes, invitationId, isDemo]);
 
   useEffect(() => {
   const checkExisting = async () => {
+  if (isDemo) return;
   if (!inviteeName || !inviteeWishRef) return;
 
   const snap = await getDoc(inviteeWishRef);
-  if (!snap.exists()) return;
-
+  if (snap.exists()) {
   const wish = { id: snap.id, ...(snap.data() as Omit<WishDoc, "id">) } as WishDoc;
   setExistingWish(wish);
+  setHasPosted(true);
+  return;
+  }
+
+  const q = query(
+  collection(db, "wishes"),
+  where("invitationId", "==", invitationId),
+  where("name", "==", inviteeName),
+  );
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return;
+
+  const docs = snapshot.docs
+  .map((d) => ({ id: d.id, ...(d.data() as Omit<WishDoc, "id">) }))
+  .sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
+
+  const top = docs[0] as WishDoc | undefined;
+  if (!top) return;
+  setExistingWish(top);
   setHasPosted(true);
   };
 
   checkExisting();
-  }, [inviteeName, inviteeWishRef]);
+  }, [invitationId, inviteeName, inviteeWishRef, isDemo]);
+
+  useEffect(() => {
+  setVisibleCount(10);
+  }, [invitationId]);
+
+  const visibleWishes = useMemo(() => {
+  return wishes.slice(0, visibleCount);
+  }, [visibleCount, wishes]);
+
+  useEffect(() => {
+  const sentinel = loadMoreRef.current;
+  if (!sentinel) return;
+
+  const observer = new IntersectionObserver(
+  (entries) => {
+  const entry = entries[0];
+  if (!entry?.isIntersecting) return;
+  setVisibleCount((prev) => {
+  if (prev >= wishes.length) return prev;
+  return Math.min(wishes.length, prev + 10);
+  });
+  },
+  {
+  root: null,
+  rootMargin: "600px 0px",
+  threshold: 0.01,
+  },
+  );
+
+  observer.observe(sentinel);
+  return () => observer.disconnect();
+  }, [wishes.length]);
 
   const submit = async () => {
+  if (!message.trim()) return;
+
+  if (isDemo) {
+  setIsSubmitting(true);
+  setError("");
+  try {
+  const next: WishDoc = {
+  id: `demo_post_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+  invitationId,
+  name: effectiveInviteeName ?? "Demo Guest",
+  message: message.trim(),
+  createdAt: Timestamp.now(),
+  };
+  setWishes((prev) => [next, ...prev]);
+  setMessage("");
+  } finally {
+  setIsSubmitting(false);
+  }
+  return;
+  }
+
   if (!inviteeName || !inviteeNameKey || !inviteeWishRef) {
   setError("Fitur ini hanya tersedia untuk tamu yang mengakses link undangan personal.");
   return;
   }
-  if (!message.trim()) return;
 
   setIsSubmitting(true);
   setError("");
@@ -836,7 +977,6 @@ function JupiterWishesFirestore({
   invitationId,
   name: inviteeName,
   nameKey: inviteeNameKey,
-  attendance,
   message: message.trim(),
   createdAt: Timestamp.now(),
   };
@@ -850,6 +990,7 @@ function JupiterWishesFirestore({
   });
 
   setMessage("");
+  setExistingWish({ id: inviteeWishRef.id, ...(nextData as Omit<WishDoc, "id">) } as WishDoc);
   setHasPosted(true);
   } catch (err) {
   if (err instanceof Error && err.message === "already-posted") {
@@ -872,18 +1013,13 @@ function JupiterWishesFirestore({
   return (
   <div className="space-y-6">
   <div className="rounded-[2.25rem] border border-white/10 bg-white/5 backdrop-blur p-7">
-  {!inviteeName ? (
+  {!effectiveInviteeName ? (
   <div className="text-center">
   <p className="text-sm text-white/70">Untuk mengisi konfirmasi & ucapan, silakan akses dari link undangan personal.</p>
   </div>
-  ) : hasPosted ? (
+  ) : hasPosted && !isDemo ? (
   <div className="text-center">
-  <p className="text-xs tracking-[0.35em] uppercase text-white/60 font-body">{inviteeName}</p>
-  {existingWish?.attendance ? (
-  <p className="mt-3 text-xs uppercase tracking-[0.25em] font-body text-white">
-  {existingWish.attendance === "hadir" ? "Hadir" : "Tidak Hadir"}
-  </p>
-  ) : null}
+  <p className="text-xs tracking-[0.35em] uppercase text-white/60 font-body">{effectiveInviteeName}</p>
   <p className="mt-4 text-sm text-white">{thankYouMessage}</p>
   {existingWish?.message ? (
   <p className="mt-4 text-sm text-white/80 whitespace-pre-line">{existingWish.message}</p>
@@ -893,24 +1029,7 @@ function JupiterWishesFirestore({
   <div className="grid grid-cols-1 gap-4">
   <div className="text-center">
   <p className="text-xs tracking-[0.35em] uppercase text-white/60 font-body">Dari</p>
-  <p className="mt-2 text-sm font-body text-white">{inviteeName}</p>
-  </div>
-
-  <div className="grid grid-cols-2 gap-3">
-  <button
-  type="button"
-  onClick={() => setAttendance("hadir")}
-  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "hadir" ? "bg-wedding-accent text-wedding-on-accent border-wedding-accent" : "bg-wedding-on-dark/5 text-wedding-on-dark border-wedding-on-dark/10 hover:bg-wedding-on-dark/10"}`}
-  >
-  Hadir
-  </button>
-  <button
-  type="button"
-  onClick={() => setAttendance("tidak")}
-  className={`rounded-2xl px-4 py-3 text-xs uppercase tracking-[0.25em] font-body border transition ${attendance === "tidak" ? "bg-wedding-accent text-wedding-on-accent border-wedding-accent" : "bg-wedding-on-dark/5 text-wedding-on-dark border-wedding-on-dark/10 hover:bg-wedding-on-dark/10"}`}
-  >
-  Tidak
-  </button>
+  <p className="mt-2 text-sm font-body text-white">{effectiveInviteeName}</p>
   </div>
 
   <textarea
@@ -943,20 +1062,13 @@ function JupiterWishesFirestore({
   <p className="text-sm text-white/70">Belum ada ucapan. Jadilah yang pertama.</p>
   </div>
   ) : (
-  wishes.map((w, idx) => (
+  visibleWishes.map((w, idx) => (
   <JupiterReveal key={w.id} width="100%" direction="up" delay={0.35 + idx * 0.08}>
   <div className="rounded-[2.25rem] border border-white/10 bg-white/5 backdrop-blur p-7">
   <div className="flex items-start justify-between gap-4">
   <div>
   <p className="text-xs tracking-[0.35em] uppercase text-white/60 font-body">{w.name}</p>
   <div className="mt-2 flex items-center gap-2">
-  {w.attendance ? (
-  <span
-  className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.25em] font-body border ${w.attendance === "tidak" ? "bg-wedding-on-dark/5 text-wedding-on-dark border-wedding-on-dark/10" : "bg-wedding-accent text-wedding-on-accent border-wedding-accent"}`}
-  >
-  {w.attendance === "tidak" ? "Tidak" : "Hadir"}
-  </span>
-  ) : null}
   <span className="text-[10px] text-white/40 uppercase tracking-[0.25em] font-body">
   {w.createdAt ? formatRelativeToNow(w.createdAt) || "Baru saja" : "Baru saja"}
   </span>
@@ -969,6 +1081,7 @@ function JupiterWishesFirestore({
   </JupiterReveal>
   ))
   )}
+  <div ref={loadMoreRef} className="h-px" />
   </div>
   </div>
   );

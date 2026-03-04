@@ -15,7 +15,7 @@ export function GratitudeSection({
   const effectiveMessage = message?.trim();
 
   return (
-    <SectionWrap id="gratitude" title="Gratitude">
+    <SectionWrap id="gratitude" title="Gratitude" maskBackground>
       <VenusReveal direction="up" width="100%" delay={0.12}>
         <div className="rounded-[32px] border border-white/10 bg-wedding-dark/55 backdrop-blur p-8 text-center text-wedding-on-dark shadow-[0_22px_70px_rgba(0,0,0,0.35)]">
           <p className="text-sm leading-relaxed text-wedding-on-dark/85 whitespace-pre-line">

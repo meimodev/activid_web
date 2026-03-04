@@ -173,8 +173,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "flow-demo",
     templateId: "flow",
     title: "Flow",
-    image:
-      "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/1.webp",
     tags: ["Wedding", "Maroon"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -183,8 +182,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "saturn-demo",
     templateId: "saturn",
     title: "Saturn",
-    image:
-      "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/2.webp",
     tags: ["Wedding", "Saturn"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -193,8 +191,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "venus-demo",
     templateId: "venus",
     title: "Venus",
-    image:
-      "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/3.webp",
     tags: ["Wedding", "Haruki"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -203,8 +200,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "neptune-demo",
     templateId: "neptune",
     title: "Neptune",
-    image:
-      "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/4.webp",
     tags: ["Wedding", "Neptune"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -213,8 +209,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "mercury-demo",
     templateId: "mercury",
     title: "Mercury",
-    image:
-      "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/5.webp",
     tags: ["Wedding", "Floral"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -223,8 +218,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "pluto-demo",
     templateId: "pluto",
     title: "Pluto",
-    image:
-      "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/6.webp",
     tags: ["Wedding", "Pluto"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -233,8 +227,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "amalthea-demo",
     templateId: "amalthea",
     title: "Amalthea",
-    image:
-      "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/1.webp",
     tags: ["Wedding", "Sky Blue"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -243,8 +236,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "jupiter-demo",
     templateId: "jupiter",
     title: "Jupiter",
-    image:
-      "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
+    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/2.webp",
     tags: ["Wedding", "Jupiter"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",

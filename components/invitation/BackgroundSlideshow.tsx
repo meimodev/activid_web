@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface BackgroundSlideshowProps {
     photos: string[];
@@ -29,19 +30,21 @@ export function BackgroundSlideshow({ photos, className }: BackgroundSlideshowPr
             <AnimatePresence mode="popLayout" initial={false}>
                 <motion.div
                     key={photos[safeIndex]}
-                    initial={{ opacity: 0, scale: 1.05 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 1.05 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 3, ease: "easeInOut" }}
-                    className="absolute inset-0 w-full h-full"
-                    style={{
-                        backgroundImage: `url(${photos[safeIndex]})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        willChange: "opacity, transform"
-                    }}
-                />
+                    className="absolute inset-0 w-full h-full bg-black"
+                >
+                    <Image
+                        src={photos[safeIndex]}
+                        alt="Background"
+                        fill
+                        priority
+                        className="object-contain md:object-cover object-center"
+                        unoptimized
+                    />
+                </motion.div>
             </AnimatePresence>
         </div>
     );

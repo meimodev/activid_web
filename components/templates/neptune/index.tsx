@@ -14,7 +14,6 @@ import {
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import {
  AuroraLayer,
@@ -65,10 +64,10 @@ interface NeptuneProps {
  config: InvitationConfig;
 }
 
-const neptuneBody = Plus_Jakarta_Sans({
- subsets: ["latin"],
+const neptuneBody = localFont({
+ src: "../../../public/fonts/poppins-regular.ttf",
  variable: "--font-neptune-body",
- weight: ["200", "300", "400", "500", "600", "700"],
+ display: "swap",
 });
 
 const neptuneScript = localFont({
@@ -76,10 +75,10 @@ const neptuneScript = localFont({
  display: "swap",
 });
 
-const neptuneSerif = Cormorant_Garamond({
- subsets: ["latin"],
- weight: ["400", "500", "600", "700"],
+const neptuneSerif = localFont({
+ src: "../../../public/fonts/garet-book.ttf",
  variable: "--font-neptune-serif",
+ display: "swap",
 });
 
 function NeptuneReveal(props: ComponentProps<typeof RevealOnScroll>) {

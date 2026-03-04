@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { PLUTO_OVERLAY_ASSETS } from "../pluto/graphics/overlays";
 import type { Host } from "@/types/invitation";
 
 interface HeroProps {
@@ -33,11 +32,9 @@ export function Hero({
 
   useEffect(() => {
     const handleResize = () => {
-      // Base height where everything fits perfectly is around 850px.
-      // If the screen is shorter, we scale down the content proportionally.
       const currentHeight = window.innerHeight;
-      if (currentHeight < 850) {
-        setScale(Math.max(0.65, currentHeight / 850));
+      if (currentHeight < 800) {
+        setScale(Math.max(0.7, currentHeight / 800));
       } else {
         setScale(1);
       }
@@ -52,35 +49,31 @@ export function Hero({
     hidden: { opacity: 1 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.24 },
+      transition: { staggerChildren: 0.15, delayChildren: 0.3 },
     },
     exit: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.08,
+        staggerChildren: 0.1,
+        delayChildren: 0.1,
         staggerDirection: -1,
       },
     },
   } as const;
 
   const itemVariants = {
-    hidden: {
-      opacity: 0,
-      y: 18,
-      scale: 0.985,
-    },
+    hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
     visible: {
       opacity: 1,
       y: 0,
-      scale: 1,
-      transition: { duration: 0.95, ease: revealEase },
+      filter: "blur(0px)",
+      transition: { duration: 1.2, ease: revealEase },
     },
     exit: {
       opacity: 0,
-      y: 14,
-      scale: 0.995,
-      transition: { duration: 0.7, ease: revealEase },
+      y: -20,
+      filter: "blur(4px)",
+      transition: { duration: 0.8, ease: revealEase },
     },
   } as const;
 
@@ -92,132 +85,127 @@ export function Hero({
     };
   }, []);
 
-  const primaryInitial = primary?.firstName?.charAt(0).toUpperCase() || "D";
-  const secondaryInitial = secondary?.firstName?.charAt(0).toUpperCase() || "A";
   const displayGuest = guestName?.trim() || "NAMA TAMU";
   const heading = subtitle?.trim() || "The Wedding of";
   const primaryName = primary?.shortName || primary?.firstName || "";
   const secondaryName = secondary?.shortName || secondary?.firstName || "";
-  const nameLine = secondaryName ? `${primaryName} & ${secondaryName}` : primaryName;
 
   const handleOpen = () => {
     if (isOpening) return;
     setIsOpening(true);
     openTimeoutRef.current = window.setTimeout(() => {
       onOpen();
-    }, 1380);
+    }, 1200);
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg">
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-[610px] items-center justify-center px-4">
+    <div className="relative h-full w-full overflow-hidden bg-black">
+      {/* Cinematic Background Image */}
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.15, opacity: 0 }}
+        animate={isOpening ? { scale: 1.2, opacity: 0 } : { scale: 1, opacity: 1 }}
+        transition={{ 
+          scale: { duration: 20, ease: "easeOut" },
+          opacity: { duration: 2, ease: "easeOut" }
+        }}
+      >
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${coverImage})` }}
+        />
+        {/* Elegant Dark Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/90" />
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px]" />
+      </motion.div>
+
+      {/* Elegant Thin Frame */}
+      <motion.div 
+        className="absolute inset-5 sm:inset-7 md:inset-9 border-[0.5px] border-white/20 z-10 pointer-events-none rounded-sm"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={isOpening ? { opacity: 0, scale: 1.05 } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: revealEase, delay: 0.5 }}
+      >
+        <div className="absolute inset-2 border-[0.5px] border-white/10 rounded-sm" />
+      </motion.div>
+
+      {/* Main Content Container */}
+      <div className="relative z-20 flex h-full w-full flex-col items-center justify-between py-24 px-8 text-center">
+        
+        {/* Top: Names and Title */}
         <motion.div
           style={{ scale }}
           variants={containerVariants}
           initial="hidden"
           animate={isOpening ? "exit" : "visible"}
-          className="relative w-full text-center origin-center flex flex-col items-center justify-center"
+          className="w-full flex flex-col items-center pt-8"
         >
-          <motion.div variants={itemVariants} className="relative mx-auto h-[450px] w-full max-w-[450px]">
-            <div aria-hidden className=" absolute inset-[0px] overflow-hidden rounded-full">
-              <div
-                className="absolute inset-0 bg-cover bg-center  "
-                style={{ backgroundImage: `url(${coverImage})` }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(circle at 50% 45%, transparent 0%, color-mix(in srgb, var(--invitation-bg) 50%, transparent) 50%, var(--invitation-bg) 70%, var(--invitation-bg) 100%)",
-                }}
-              />
-            </div>
-
-            <motion.div
-              aria-hidden
-              className="h-full w-full bg-contain bg-center bg-no-repeat"
-              style={{
-                backgroundImage: `url(${PLUTO_OVERLAY_ASSETS.heroFrame})`,
-              }}
-              animate={
-                isOpening
-                  ? {
-                      opacity: 0,
-                      scale: 2,
-                      x: 0,
-                      y: 0,
-                      rotate: 10,
-                    }
-                  : {
-                      rotate: [10, 0, 10, 0, 10],
-                      scale: [1, 0.9, 1],
-                    }
-              }
-              transition={
-                isOpening
-                  ? { duration: 1.05, ease: revealEase }
-                  : { duration: 25, repeat: Infinity, ease: "easeInOut" }
-              }
-            />
-
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="font-great-vibes font-bold text-white drop-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
-                <div className="flex items-center uppercase">
-                  <span className="text-[70px] leading-none pb-24">{primaryInitial}</span>
-                  <span className="text-[40px] leading-none">&</span>
-                  <span className="text-[70px] leading-none pt-24">{secondaryInitial}</span>
+          <motion.p variants={itemVariants} className="font-garet-book text-[11px] tracking-[0.4em] text-white/70 uppercase mb-6">
+            {heading}
+          </motion.p>
+          
+          <motion.div variants={itemVariants} className="relative flex flex-col items-center">
+            <h1 className="font-tan-mon-cheri text-5xl md:text-6xl text-white/95 tracking-wide drop-shadow-2xl">
+              {primaryName}
+            </h1>
+            {secondaryName && (
+              <>
+                <div className="my-3 font-great-vibes text-4xl text-wedding-accent-light opacity-90">
+                  &
                 </div>
-              </div>
-            </div>
+                <h1 className="font-tan-mon-cheri text-5xl md:text-6xl text-white/95 tracking-wide drop-shadow-2xl">
+                  {secondaryName}
+                </h1>
+              </>
+            )}
           </motion.div>
 
-          <motion.div variants={itemVariants}>
-            <p className="font-stoic text-[30px] leading-none text-wedding-accent pt-8">
-              {heading}
-            </p>
-            <p className="mt-4 font-tan-mon-cheri text-[35px] leading-none text-wedding-accent">
-              {nameLine}
-            </p>
-            <p className="mt-1 font-garet-book text-[18px] tracking-[0.18em] text-wedding-accent">
+          <motion.div variants={itemVariants} className="mt-12 flex items-center justify-center gap-6">
+            <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-wedding-accent-light/60" />
+            <p className="font-garet-book text-sm tracking-[0.25em] text-wedding-accent-light">
               {date}
             </p>
+            <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-wedding-accent-light/60" />
           </motion.div>
+        </motion.div>
 
-          <motion.div className="mt-10 space-y-2 text-wedding-text-light" variants={itemVariants}>
-            <p className="font-poppins text-sm">Kepada Yth.</p>
-            <p className="font-poppins text-sm">Bapak/Ibu/Saudara-i</p>
-            <p className="pt-2 font-poppins-bold text-2xl tracking-wide text-wedding-accent">
+        {/* Bottom: Guest Info and Button inside Glassmorphic Panel */}
+        <motion.div
+          style={{ scale }}
+          variants={containerVariants}
+          initial="hidden"
+          animate={isOpening ? "exit" : "visible"}
+          className="w-full max-w-sm pb-4"
+        >
+          <motion.div 
+            variants={itemVariants} 
+            className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+          >
+            {/* Subtle inner glow */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+            
+            <p className="font-poppins text-[10px] text-white/50 uppercase tracking-[0.3em] mb-3">
+              Kepada Yth.
+            </p>
+            <p className="font-stoic text-2xl text-white mb-8 drop-shadow-md">
               {displayGuest}
             </p>
-          </motion.div>
-
-          <motion.div variants={itemVariants}>
+            
             <motion.button
-              whileHover={isOpening ? {} : { scale: 1.02 }}
+              whileHover={isOpening ? {} : { scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.95)" }}
               whileTap={isOpening ? {} : { scale: 0.98 }}
               onClick={handleOpen}
               disabled={isOpening}
-              className="mt-6 inline-flex items-center justify-center gap-3 rounded-full bg-wedding-accent px-10 py-3 font-poppins text-sm tracking-wide text-wedding-on-accent shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-colors hover:bg-wedding-accent/90 disabled:opacity-70"
-              animate={
-                isOpening
-                  ? undefined
-                  : {
-                      y: [0, -3, 0],
-                    }
-              }
-              transition={
-                isOpening
-                  ? undefined
-                  : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }
-              }
+              className="w-full relative overflow-hidden rounded-full bg-white px-8 py-3.5 transition-all duration-500 disabled:opacity-70 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
             >
-              Buka Undangan
+              <span className="relative z-10 font-garet-book text-xs font-bold tracking-[0.2em] uppercase text-black">
+                Buka Undangan
+              </span>
             </motion.button>
           </motion.div>
         </motion.div>
-      </div>
 
-      <div className="pointer-events-none absolute inset-0 z-20 shadow-[inset_0_0_120px_rgba(0,0,0,0.14)]" />
+      </div>
     </div>
   );
 }

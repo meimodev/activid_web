@@ -2,8 +2,8 @@
 
 import {
   WishesFirestore as NeptuneWishesFirestore,
-  WishesSectionClassic,
 } from "../neptune";
+import { SectionWrap } from "./SectionWrap";
 
 export function WishesSection({
   invitationId,
@@ -19,19 +19,21 @@ export function WishesSection({
   thankYouMessage: string;
 }) {
   return (
-    <WishesSectionClassic id="wishes" heading={heading || "Friends Wishes"}>
-      <NeptuneWishesFirestore
-        invitationId={invitationId}
-        inviteeName={inviteeName}
-        placeholder={placeholder}
-        thankYouMessage={
-          thankYouMessage || "Terima kasih atas konfirmasi dan ucapannya."
-        }
-        mode="both"
-        withAttendance={false}
-        submitLabel="Kirim Ucapan"
-        uiVariant="classic"
-      />
-    </WishesSectionClassic>
+    <SectionWrap id="wishes" title={heading || "Friends Wishes"}>
+      <div className="mx-auto w-full max-w-3xl">
+        <NeptuneWishesFirestore
+          invitationId={invitationId}
+          inviteeName={inviteeName}
+          placeholder={placeholder}
+          thankYouMessage={
+            thankYouMessage || "Terima kasih atas konfirmasi dan ucapannya."
+          }
+          mode="both"
+          withAttendance={false}
+          submitLabel="Kirim Ucapan"
+          uiVariant="classic"
+        />
+      </div>
+    </SectionWrap>
   );
 }

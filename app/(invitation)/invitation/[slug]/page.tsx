@@ -1,4 +1,4 @@
-import { buildInvitationDemoConfig } from "@/data/invitations";
+import { buildInvitationDemoConfig, DEMO_IMAGEKIT_URLS } from "@/data/invitations";
 import { Flow } from "@/components/templates/flow";
 import { Saturn } from "@/components/templates/saturn";
 import { Mercury } from "@/components/templates/mercury";
@@ -114,27 +114,15 @@ function getTemplateLabel(templateId: string) {
 }
 
 function getDemoCoverImage(templateId: string) {
-    if (templateId === "venus") {
-        return "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    }
-
-    if (templateId === "neptune") {
-        return "https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    }
-
-    if (templateId === "jupiter") {
-        return "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    }
-
-    if (templateId === "mercury") {
-        return "https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    }
-
-    if (templateId === "amalthea") {
-        return "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200";
-    }
-
-    return "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200";
+    if (templateId === "flow") return DEMO_IMAGEKIT_URLS[0];
+    if (templateId === "saturn") return DEMO_IMAGEKIT_URLS[1];
+    if (templateId === "venus") return DEMO_IMAGEKIT_URLS[2];
+    if (templateId === "neptune") return DEMO_IMAGEKIT_URLS[3];
+    if (templateId === "mercury") return DEMO_IMAGEKIT_URLS[4];
+    if (templateId === "pluto") return DEMO_IMAGEKIT_URLS[5];
+    if (templateId === "amalthea") return DEMO_IMAGEKIT_URLS[0];
+    if (templateId === "jupiter") return DEMO_IMAGEKIT_URLS[1];
+    return DEMO_IMAGEKIT_URLS[0];
 }
 
 function withInvitationChrome(

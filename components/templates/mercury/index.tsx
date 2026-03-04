@@ -21,18 +21,19 @@ import {
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
+import { DEMO_IMAGEKIT_URLS } from "@/data/invitations";
 
 const MERCURY_DEMO_ASSETS = {
-    host1Photo: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
-    host2Photo: "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
-    coverImage: "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    host1Photo: DEMO_IMAGEKIT_URLS[3],
+    host2Photo: DEMO_IMAGEKIT_URLS[4],
+    coverImage: DEMO_IMAGEKIT_URLS[4],
     galleryPhotos: [
-        "https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/313707/pexels-photo-313707.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/2959196/pexels-photo-2959196.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/169198/pexels-photo-169198.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/169211/pexels-photo-169211.jpeg?auto=compress&cs=tinysrgb&w=800",
+        DEMO_IMAGEKIT_URLS[0],
+        DEMO_IMAGEKIT_URLS[1],
+        DEMO_IMAGEKIT_URLS[2],
+        DEMO_IMAGEKIT_URLS[3],
+        DEMO_IMAGEKIT_URLS[4],
+        DEMO_IMAGEKIT_URLS[5],
     ],
 } as const;
 

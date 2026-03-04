@@ -15,7 +15,7 @@ export function GallerySection({
   photos: string[];
 }) {
   return (
-    <SectionWrap id="gallery" title={heading || "Gallery"}>
+    <SectionWrap id="gallery" title={heading || "Gallery"} maskBackground>
       <GalleryGrid photos={photos} />
     </SectionWrap>
   );

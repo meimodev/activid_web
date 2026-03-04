@@ -25,21 +25,19 @@ import {
   INVITATION_ZONE,
   parseInvitationDateTime,
 } from "@/lib/date-time";
+import { DEMO_IMAGEKIT_URLS } from "@/data/invitations";
 
 const AMALTHEA_DEMO_ASSETS = {
-  groomPhoto:
-    "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800",
-  bridePhoto:
-    "https://images.pexels.com/photos/3014856/pexels-photo-3014856.jpeg?auto=compress&cs=tinysrgb&w=800",
-  coverImage:
-    "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=1200",
+  groomPhoto: DEMO_IMAGEKIT_URLS[3],
+  bridePhoto: DEMO_IMAGEKIT_URLS[4],
+  coverImage: DEMO_IMAGEKIT_URLS[0],
   galleryPhotos: [
-    "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "https://images.pexels.com/photos/5138883/pexels-photo-5138883.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "https://images.pexels.com/photos/8102189/pexels-photo-8102189.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "https://images.pexels.com/photos/17593652/pexels-photo-17593652.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "https://images.pexels.com/photos/29981994/pexels-photo-29981994.jpeg?auto=compress&cs=tinysrgb&w=800",
-    "https://images.pexels.com/photos/2528324/pexels-photo-2528324.jpeg?auto=compress&cs=tinysrgb&w=800",
+    DEMO_IMAGEKIT_URLS[0],
+    DEMO_IMAGEKIT_URLS[1],
+    DEMO_IMAGEKIT_URLS[2],
+    DEMO_IMAGEKIT_URLS[3],
+    DEMO_IMAGEKIT_URLS[4],
+    DEMO_IMAGEKIT_URLS[5],
   ],
 } as const;
 

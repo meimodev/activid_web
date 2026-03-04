@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
+import localFont from "next/font/local";
 import "../globals.css";
 import SmoothScroll from "@/components/layouts/SmoothScroll";
 import Navigation from "@/components/layouts/Navigation";
@@ -6,19 +6,22 @@ import PageTransition from "@/components/layouts/PageTransition";
 import { ProgressIndicator } from "@/components/animations/ProgressIndicator";
 import { Footer } from "@/components/sections/Footer";
 
-const geistSans = Geist({
+const geistSans = localFont({
+    src: "../../public/fonts/poppins-regular.ttf",
     variable: "--font-geist-sans",
-    subsets: ["latin"],
+    display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+    src: "../../public/fonts/poppins-regular.ttf",
     variable: "--font-geist-mono",
-    subsets: ["latin"],
+    display: "swap",
 });
 
-const bricolageGrotesque = Bricolage_Grotesque({
+const bricolageGrotesque = localFont({
+    src: "../../public/fonts/garet-book.ttf",
     variable: "--font-bricolage",
-    subsets: ["latin"],
+    display: "swap",
 });
 
 export default function MainLayout({

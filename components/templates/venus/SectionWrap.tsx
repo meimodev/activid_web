@@ -8,14 +8,14 @@ import type { NavSectionId } from "./types";
 export function SectionWrap({
   id,
   title,
+  maskBackground = false,
   children,
 }: {
   id: NavSectionId;
   title: string;
+  maskBackground?: boolean;
   children: ReactNode;
 }) {
-  const maskBackground =
-    id === "event" || id === "gallery" || id === "gift" || id === "wishes" || id === "gratitude";
   const isOverPhoto = !maskBackground;
 
   return (

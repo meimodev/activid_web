@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { createPortal } from "react-dom";
 import {
   IconCalendar,
   IconChat,
@@ -38,10 +39,12 @@ interface VenusProps {
 export function Venus({ config }: VenusProps) {
   const [isOpen, setIsOpen] = useState(() => !config.sections.hero.enabled);
   const [isContentReady, setIsContentReady] = useState(
-  () => !config.sections.hero.enabled,
+    () => !config.sections.hero.enabled,
   );
   const [activeSection, setActiveSection] = useState<NavSectionId>("home");
-  const [heroViewportHeight, setHeroViewportHeight] = useState<number | null>(null);
+  const [heroViewportHeight, setHeroViewportHeight] = useState<number | null>(
+    null,
+  );
 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -50,257 +53,281 @@ export function Venus({ config }: VenusProps) {
   const inviteeName = searchParams.get("to");
 
   // Convert Dropbox "dl=1" or "dl=0" to "raw=1" for reliable streaming
-  const audioStreamUrl = useMemo(() => config.music.url.replace(/dl=[01]/, "raw=1"), [config.music.url]);
+  const audioStreamUrl = useMemo(
+    () => config.music.url.replace(/dl=[01]/, "raw=1"),
+    [config.music.url],
+  );
 
   const persistentBackgroundPhotos = useMemo(() => {
-  return pickDeterministicRandomSubset(
-    config.sections.gallery.photos ?? [],
-    config.id,
-    5,
-  );
+    return pickDeterministicRandomSubset(
+      config.sections.gallery.photos ?? [],
+      config.id,
+      5,
+    );
   }, [config.id, config.sections.gallery.photos]);
 
   const quoteBackgroundImage = useMemo(() => {
-  if (persistentBackgroundPhotos.length >= 2) return persistentBackgroundPhotos[1];
-  return persistentBackgroundPhotos[0] || "";
+    if (persistentBackgroundPhotos.length >= 2)
+      return persistentBackgroundPhotos[1];
+    return persistentBackgroundPhotos[0] || "";
   }, [persistentBackgroundPhotos]);
 
   useEffect(() => {
-  if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
-  const update = () => {
-  setHeroViewportHeight(window.visualViewport?.height ?? window.innerHeight);
-  };
+    const update = () => {
+      setHeroViewportHeight(
+        window.visualViewport?.height ?? window.innerHeight,
+      );
+    };
 
-  update();
-  window.addEventListener("resize", update);
-  const vv = window.visualViewport;
-  vv?.addEventListener("resize", update);
+    update();
+    window.addEventListener("resize", update);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", update);
 
-  return () => {
-  window.removeEventListener("resize", update);
-  vv?.removeEventListener("resize", update);
-  };
+    return () => {
+      window.removeEventListener("resize", update);
+      vv?.removeEventListener("resize", update);
+    };
   }, []);
 
   const guestName = inviteeName || searchParams.get("guest") || "Tamu";
 
   const hosts = config.sections.hosts.hosts;
   const hostsSection = config.sections.hosts;
-  const dateInfo = deriveInvitationPrimaryDateInfo(config.sections.event.events[0]?.date);
+  const dateInfo = deriveInvitationPrimaryDateInfo(
+    config.sections.event.events[0]?.date,
+  );
 
   const navItems = useMemo(
-  () =>
-  [
-  { id: "home" as const, label: "Cover", icon: <IconHome /> },
-  { id: "couple" as const, label: "Hosts", icon: <IconCouple /> },
-  { id: "event" as const, label: "Event", icon: <IconCalendar /> },
-  { id: "gallery" as const, label: "Gallery", icon: <IconGallery /> },
-  { id: "wishes" as const, label: "Wishes", icon: <IconChat /> },
-  { id: "gratitude" as const, label: "Gratitude", icon: <IconChat /> },
-  ],
-  []
+    () => [
+      { id: "home" as const, label: "Cover", icon: <IconHome /> },
+      { id: "couple" as const, label: "Hosts", icon: <IconCouple /> },
+      { id: "event" as const, label: "Event", icon: <IconCalendar /> },
+      { id: "gallery" as const, label: "Gallery", icon: <IconGallery /> },
+      { id: "wishes" as const, label: "Wishes", icon: <IconChat /> },
+      { id: "gratitude" as const, label: "Gratitude", icon: <IconChat /> },
+    ],
+    [],
   );
 
   useEffect(() => {
-  if (!isOpen || !isContentReady) return;
+    if (!isOpen || !isContentReady) return;
 
-  // Attempt to autoplay once the invitation is opened (user just interacted)
-  if (audioRef.current) {
-  const playPromise = audioRef.current.play();
-  if (playPromise !== undefined) {
-  playPromise
-  .then(() => setIsPlaying(true))
-  .catch(() => setIsPlaying(false));
-  }
-  }
+    // Attempt to autoplay once the invitation is opened (user just interacted)
+    if (audioRef.current) {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
+      }
+    }
 
-  const ids: NavSectionId[] = ["home", "couple", "event", "gallery", "wishes", "gratitude"];
-  const els = ids
-  .map((id) => document.getElementById(id))
-  .filter(Boolean) as HTMLElement[];
+    const ids: NavSectionId[] = [
+      "home",
+      "couple",
+      "event",
+      "gallery",
+      "wishes",
+      "gratitude",
+    ];
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
 
-  if (els.length === 0) return;
+    if (els.length === 0) return;
 
-  const observer = new IntersectionObserver(
-  (entries) => {
-  const visible = entries
-  .filter((e) => e.isIntersecting)
-  .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort(
+            (a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0),
+          );
 
-  const top = visible[0];
-  if (!top?.target) return;
+        const top = visible[0];
+        if (!top?.target) return;
 
-  const id = (top.target as HTMLElement).id as NavSectionId;
-  setActiveSection(id);
-  },
-  {
-  root: null,
-  rootMargin: "-45% 0px -45% 0px",
-  threshold: [0.05, 0.1, 0.2, 0.35, 0.5],
-  }
-  );
+        const id = (top.target as HTMLElement).id as NavSectionId;
+        setActiveSection(id);
+      },
+      {
+        root: null,
+        rootMargin: "-45% 0px -45% 0px",
+        threshold: [0.05, 0.1, 0.2, 0.35, 0.5],
+      },
+    );
 
-  els.forEach((el) => observer.observe(el));
-  return () => observer.disconnect();
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, [isContentReady, isOpen]);
 
   const togglePlay = () => {
-  if (!audioRef.current) return;
-  if (isPlaying) {
-  audioRef.current.pause();
-  setIsPlaying(false);
-  return;
-  }
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      return;
+    }
 
-  const p = audioRef.current.play();
-  if (p !== undefined) {
-  p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
-  } else {
-  setIsPlaying(true);
-  }
+    const p = audioRef.current.play();
+    if (p !== undefined) {
+      p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    } else {
+      setIsPlaying(true);
+    }
   };
 
   const scrollTo = (id: NavSectionId) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const openInvitation = () => {
-  setIsOpen(true);
-  if (typeof window !== "undefined") {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+    setIsOpen(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
-  <main
-  className={`relative min-h-[100dvh] w-full overflow-x-hidden bg-wedding-bg text-wedding-text font-body ${venusBody.variable} [--font-body:var(--font-venus-body)]`}
-  >
-  {isOpen && persistentBackgroundPhotos.length > 0 ? (
-  <div className="fixed inset-0 z-0 pointer-events-none">
-  <BackgroundSlideshow photos={persistentBackgroundPhotos} />
-  <div className="absolute inset-0 bg-black/45" />
-  <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/25 to-black/65" />
-  </div>
-  ) : null}
+    <main
+      className={`relative min-h-[100dvh] w-full overflow-x-hidden bg-wedding-bg text-wedding-text font-body ${venusBody.variable} [--font-body:var(--font-venus-body)]`}
+    >
+      {isOpen && persistentBackgroundPhotos.length > 0 ? (
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <BackgroundSlideshow photos={persistentBackgroundPhotos} />
+          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/25 to-black/65" />
+        </div>
+      ) : null}
 
-  <audio ref={audioRef} src={audioStreamUrl} loop preload="auto" />
+      <audio ref={audioRef} src={audioStreamUrl} loop preload="auto" />
 
-  {config.sections.hero.enabled ? (
-      <motion.div
-      className="fixed inset-0 z-[200] bg-wedding-bg"
-      style={heroViewportHeight ? { height: heroViewportHeight } : undefined}
-      initial={false}
-      animate={{
-      opacity: isOpen ? 0 : 1,
-      transitionEnd: { display: isOpen ? "none" : "block" },
-      }}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      onAnimationComplete={() => {
-      if (isOpen) setIsContentReady(true);
-      }}
+      {config.sections.hero.enabled ? (
+        <motion.div
+          className="fixed inset-0 z-[200] bg-black"
+          style={
+            heroViewportHeight ? { height: heroViewportHeight } : undefined
+          }
+          initial={false}
+          animate={{
+            opacity: isOpen ? 0 : 1,
+            transitionEnd: { display: isOpen ? "none" : "block" },
+          }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          onAnimationComplete={() => {
+            if (isOpen) setIsContentReady(true);
+          }}
+        >
+          <Hero
+            onOpen={openInvitation}
+            hosts={hosts}
+            date={dateInfo?.displayShort ?? ""}
+            subtitle={config.sections.hero.subtitle}
+            coverImage={config.sections.hero.coverImage}
+            guestName={guestName}
+          />
+        </motion.div>
+      ) : null}
+
+      <div
+        className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}
       >
-      <Hero
-      onOpen={openInvitation}
-      hosts={hosts}
-      date={dateInfo?.displayShort ?? ""}
-      subtitle={config.sections.hero.subtitle}
-      coverImage={config.sections.hero.coverImage}
-      guestName={guestName}
-      />
-      </motion.div>
-  ) : null}
+        <div className={isContentReady ? "" : "h-[100dvh] overflow-hidden"}>
+          {isContentReady ? (
+            <>
+              <HeaderIntroSection hosts={hosts} />
 
-  <div
-  className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}
-  >
-  <div className={isContentReady ? "" : "h-[100dvh] overflow-hidden"}>
-  {isContentReady ? (
-  <>
-  <HeaderIntroSection hosts={hosts} />
+              {config.sections.quote.enabled ? (
+                <QuoteSection
+                  text={config.sections.quote.text}
+                  targetDate={dateInfo?.countdownTarget ?? ""}
+                  backgroundImage={quoteBackgroundImage}
+                />
+              ) : null}
 
-  {config.sections.quote.enabled ? (
-  <QuoteSection
-  text={config.sections.quote.text}
-  targetDate={dateInfo?.countdownTarget ?? ""}
-  backgroundImage={quoteBackgroundImage}
-  />
-  ) : null}
+              {hostsSection.enabled ? (
+                <CoupleSection hosts={hosts} title="Milea & Dilan" />
+              ) : null}
 
-  {hostsSection.enabled ? (
-  <CoupleSection hosts={hosts} title="Milea & Dilan" />
-  ) : null}
+              {config.sections.event.enabled ? (
+                <EventSection
+                  events={config.sections.event.events}
+                  heading={config.sections.event.heading}
+                />
+              ) : null}
 
-  {config.sections.event.enabled ? (
-  <EventSection
-  events={config.sections.event.events}
-  heading={config.sections.event.heading}
-  />
-  ) : null}
+              {config.sections.story.enabled ? (
+                <StorySection
+                  heading={config.sections.story.heading}
+                  stories={config.sections.story.stories}
+                />
+              ) : null}
 
-  {config.sections.story.enabled ? (
-  <StorySection
-  heading={config.sections.story.heading}
-  stories={config.sections.story.stories}
-  />
-  ) : null}
+              {config.sections.gallery.enabled ? (
+                <GallerySection
+                  heading={config.sections.gallery.heading}
+                  photos={config.sections.gallery.photos}
+                />
+              ) : null}
 
-  {config.sections.gallery.enabled ? (
-  <GallerySection
-  heading={config.sections.gallery.heading}
-  photos={config.sections.gallery.photos}
-  />
-  ) : null}
+              {config.sections.gift.enabled ? (
+                <GiftSection
+                  heading={config.sections.gift.heading || "Wedding Gift"}
+                  bankAccounts={config.sections.gift.bankAccounts}
+                  description={config.sections.gift.description}
+                  templateName={config.templateId}
+                  eventDate={dateInfo?.display ?? ""}
+                />
+              ) : null}
 
-  {config.sections.gift.enabled ? (
-  <GiftSection
-  heading={config.sections.gift.heading || "Wedding Gift"}
-  bankAccounts={config.sections.gift.bankAccounts}
-  description={config.sections.gift.description}
-  templateName={config.templateId}
-  eventDate={dateInfo?.display ?? ""}
-  />
-  ) : null}
+              {config.sections.wishes.enabled ? (
+                <WishesSection
+                  invitationId={config.id}
+                  inviteeName={inviteeName}
+                  heading={config.sections.wishes.heading || "Friends Wishes"}
+                  placeholder={config.sections.wishes.placeholder}
+                  thankYouMessage={config.sections.wishes.thankYouMessage}
+                />
+              ) : null}
 
-  {config.sections.wishes.enabled ? (
-  <WishesSection
-  invitationId={config.id}
-  inviteeName={inviteeName}
-  heading={config.sections.wishes.heading || "Friends Wishes"}
-  placeholder={config.sections.wishes.placeholder}
-  thankYouMessage={config.sections.wishes.thankYouMessage}
-  />
-  ) : null}
+              {config.sections.gratitude.enabled ? (
+                <GratitudeSection
+                  hosts={hosts}
+                  message={config.sections.gratitude.message}
+                />
+              ) : null}
 
-  {config.sections.gratitude.enabled ? (
-  <GratitudeSection hosts={hosts} message={config.sections.gratitude.message} />
-  ) : null}
+              <FooterSection hosts={hosts} />
 
-  <FooterSection hosts={hosts} />
-
-  {isOpen ? (
-      <FloatingNav
-      items={navItems}
-      active={activeSection}
-      onSelect={(id) => scrollTo(id)}
-      right={
-      <button
-      type="button"
-      onClick={togglePlay}
-      className="h-11 w-11 rounded-full flex items-center justify-center transition border bg-wedding-bg/60 text-wedding-text border-wedding-text/10 hover:bg-wedding-bg"
-      aria-label={isPlaying ? "Pause Music" : "Play Music"}
-      >
-      {isPlaying ? <IconPause /> : <IconPlay />}
-      </button>
-      }
-      />
-  ) : null}
-  </>
-  ) : null}
-  </div>
-  </div>
-  </main>
+              {isOpen && typeof document !== "undefined"
+                ? createPortal(
+                    <FloatingNav
+                      items={navItems}
+                      active={activeSection}
+                      onSelect={(id) => scrollTo(id)}
+                      right={
+                        <button
+                          type="button"
+                          onClick={togglePlay}
+                          className="h-11 w-11 rounded-full flex items-center justify-center transition border bg-wedding-bg/60 text-wedding-text border-wedding-text/10 hover:bg-wedding-bg"
+                          aria-label={isPlaying ? "Pause Music" : "Play Music"}
+                        >
+                          {isPlaying ? <IconPause /> : <IconPlay />}
+                        </button>
+                      }
+                    />,
+                    document.body,
+                  )
+                : null}
+            </>
+          ) : null}
+        </div>
+      </div>
+    </main>
   );
 }

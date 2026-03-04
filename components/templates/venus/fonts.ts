@@ -1,12 +1,12 @@
-import { Allura, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
-export const venusBody = Plus_Jakarta_Sans({
-  subsets: ["latin"],
+export const venusBody = localFont({
+  src: "../../../public/fonts/poppins-regular.ttf",
   variable: "--font-venus-body",
-  weight: ["200", "300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
-export const venusScript = Allura({
-  subsets: ["latin"],
-  weight: ["400"],
+export const venusScript = localFont({
+  src: "../../../public/fonts/great-vibes-regular.ttf",
+  display: "swap",
 });

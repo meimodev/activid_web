@@ -1,5 +1,6 @@
 "use server";
 
+import { isAffiliateId } from "@/lib/affiliate-config";
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
   toInvitationIso,
@@ -16,6 +17,7 @@ import {
   MetadataConfig,
 } from "@/types/invitation";
 import { cookies } from "next/headers";
+import { FieldValue } from "firebase-admin/firestore";
 
 export type RegisterInvitationState = {
   ok?: boolean;
@@ -257,6 +259,18 @@ export async function registerInvitation(
   const sessionCookie = cookieStore.get(cookieName)?.value;
   const hasValidSession = isInvitationRegisterSessionValid(sessionCookie);
 
+  const affiliateCookie = cookieStore.get("inv_affiliate")?.value;
+  let affiliateId: string | null = null;
+  if (affiliateCookie && isAffiliateId(affiliateCookie)) {
+    try {
+      const aSnap = await getAdminDb().collection("invitationAffiliates").doc(affiliateCookie).get();
+      const data = aSnap.exists ? (aSnap.data() as { enabled?: unknown } | undefined) : undefined;
+      if (aSnap.exists && data?.enabled !== false) {
+        affiliateId = affiliateCookie;
+      }
+    } catch {}
+  }
+
   const password = readString(formData, "password");
   if (!hasValidSession && password !== expectedPassword) {
     return { error: "Invalid password." };
@@ -357,6 +371,7 @@ export async function registerInvitation(
     const toSave: InvitationConfig = {
       id: candidateSlug,
       imagekitFolderKey,
+      affiliateId: affiliateId ?? undefined,
       templateId,
       purpose,
       theme: config.theme,
@@ -403,6 +418,32 @@ export async function registerInvitation(
 
   if (!finalSlug) {
     return { error: "Failed to allocate a unique mission code. Please try again." };
+  }
+
+  if (affiliateId) {
+    try {
+      await db
+        .collection("invitationAffiliates")
+        .doc(affiliateId)
+        .set(
+          {
+            generatedInvitationCount: FieldValue.increment(1),
+            lastGeneratedInvitationAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        );
+
+      await db
+        .collection("invitationAffiliates")
+        .doc(affiliateId)
+        .collection("generatedInvitations")
+        .doc(finalSlug)
+        .set({
+          createdAt: FieldValue.serverTimestamp(),
+          templateId,
+          invitationId: finalSlug,
+        });
+    } catch {}
   }
 
   const invitationUrl = `${SITE_ORIGIN}/${finalSlug}`;
@@ -530,6 +571,10 @@ export async function updateInvitation(
       }
 
       const existingData = snap.data() as Partial<InvitationConfig> | undefined;
+      const existingAffiliateId =
+        typeof existingData?.affiliateId === "string" && existingData.affiliateId.trim()
+          ? existingData.affiliateId
+          : undefined;
       const existingFolderKey =
         typeof existingData?.imagekitFolderKey === "string" && existingData.imagekitFolderKey.trim()
           ? existingData.imagekitFolderKey
@@ -541,6 +586,7 @@ export async function updateInvitation(
       const toSave: InvitationConfig = {
         id: existingSlug,
         imagekitFolderKey,
+        affiliateId: existingAffiliateId,
         templateId,
         purpose,
         theme: config.theme,
