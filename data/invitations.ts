@@ -7,13 +7,28 @@ const dt = (year: number, month: number, day: number, hour = 0, minute = 0) =>
 
 type Purpose = "marriage" | "birthday" | "event";
 
-export const DEMO_IMAGEKIT_URLS = [
+export const DEMO_COVER_IMAGE_URL =
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/cover.webp" as const;
+
+export const DEMO_GROOM_PROFILE_IMAGE_URL =
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/grooms_profile.webp" as const;
+
+export const DEMO_BRIDE_PROFILE_IMAGE_URL =
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/brides_profile.webp" as const;
+
+export const DEMO_GALLERY_IMAGEKIT_URLS = [
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/1.webp",
-  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/2.webp",
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/3.webp",
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/4.webp",
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/5.webp",
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/6.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/7.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/9.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/10.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/12.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/13.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/14.webp",
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/15.webp",
 ] as const;
 
 function getDefaultGratitudeMessage(purpose: Purpose): string {
@@ -187,7 +202,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       slug: "seed-marriage",
       title: "The Wedding of Alex & Maya",
       description: "You are invited to the wedding of Alex & Maya.",
-      coverImage: DEMO_IMAGEKIT_URLS[0],
+      coverImage: DEMO_COVER_IMAGE_URL,
     }),
     music: {
       title: "Theme",
@@ -197,7 +212,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       hero: {
         enabled: true,
         subtitle: "The Wedding",
-        coverImage: DEMO_IMAGEKIT_URLS[0],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
       title: {
         enabled: true,
@@ -207,9 +222,9 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Save The Date",
         photos: [
-          DEMO_IMAGEKIT_URLS[0],
-          DEMO_IMAGEKIT_URLS[1],
-          DEMO_IMAGEKIT_URLS[2],
+          DEMO_GALLERY_IMAGEKIT_URLS[0],
+          DEMO_GALLERY_IMAGEKIT_URLS[1],
+          DEMO_GALLERY_IMAGEKIT_URLS[2],
         ],
       },
       quote: {
@@ -226,7 +241,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Alex",
             role: "The Groom",
             parents: "Putra dari Bapak Hendra & Ibu Rina",
-            photo: DEMO_IMAGEKIT_URLS[3],
+            photo: DEMO_GROOM_PROFILE_IMAGE_URL,
           },
           {
             firstName: "Maya",
@@ -234,7 +249,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Maya",
             role: "The Bride",
             parents: "Putri dari Bapak Samuel & Ibu Maria",
-            photo: DEMO_IMAGEKIT_URLS[4],
+            photo: DEMO_BRIDE_PROFILE_IMAGE_URL,
           },
         ],
       },
@@ -276,10 +291,10 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "The Moments",
         photos: [
-          DEMO_IMAGEKIT_URLS[1],
-          DEMO_IMAGEKIT_URLS[2],
-          DEMO_IMAGEKIT_URLS[3],
-          DEMO_IMAGEKIT_URLS[4],
+          DEMO_GALLERY_IMAGEKIT_URLS[3],
+          DEMO_GALLERY_IMAGEKIT_URLS[4],
+          DEMO_GALLERY_IMAGEKIT_URLS[5],
+          DEMO_GALLERY_IMAGEKIT_URLS[6],
         ],
       },
       rsvp: {
@@ -333,7 +348,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       slug: "seed-birthday",
       title: "Birthday Invitation - Raka",
       description: "You are invited to celebrate Raka's birthday.",
-      coverImage: DEMO_IMAGEKIT_URLS[1],
+      coverImage: DEMO_COVER_IMAGE_URL,
     }),
     music: {
       title: "Theme",
@@ -343,7 +358,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       hero: {
         enabled: true,
         subtitle: "Birthday Party",
-        coverImage: DEMO_IMAGEKIT_URLS[1],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
       title: {
         enabled: true,
@@ -353,8 +368,8 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Counting Down",
         photos: [
-          DEMO_IMAGEKIT_URLS[1],
-          DEMO_IMAGEKIT_URLS[2],
+          DEMO_GALLERY_IMAGEKIT_URLS[4],
+          DEMO_GALLERY_IMAGEKIT_URLS[5],
         ],
       },
       quote: {
@@ -371,7 +386,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Raka",
             role: "Birthday Star",
             parents: "Putra dari Bapak Mahendra & Ibu Kristina",
-            photo: DEMO_IMAGEKIT_URLS[3],
+            photo: DEMO_GROOM_PROFILE_IMAGE_URL,
           },
         ],
       },
@@ -406,8 +421,8 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Gallery",
         photos: [
-          DEMO_IMAGEKIT_URLS[2],
-          DEMO_IMAGEKIT_URLS[1],
+          DEMO_GALLERY_IMAGEKIT_URLS[7],
+          DEMO_GALLERY_IMAGEKIT_URLS[8],
         ],
       },
       rsvp: {
@@ -454,7 +469,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       slug: "seed-event",
       title: "Event Invitation - Activid Meetup",
       description: "You are invited to our event.",
-      coverImage: DEMO_IMAGEKIT_URLS[2],
+      coverImage: DEMO_COVER_IMAGE_URL,
     }),
     music: {
       title: "Theme",
@@ -464,7 +479,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
       hero: {
         enabled: true,
         subtitle: "The Event",
-        coverImage: DEMO_IMAGEKIT_URLS[2],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
       title: {
         enabled: true,
@@ -474,7 +489,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Starting Soon",
         photos: [
-          DEMO_IMAGEKIT_URLS[2],
+          DEMO_GALLERY_IMAGEKIT_URLS[9],
         ],
       },
       quote: {
@@ -491,7 +506,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
             shortName: "Activid",
             role: "Organizer",
             parents: "",
-            photo: DEMO_IMAGEKIT_URLS[4],
+            photo: DEMO_GROOM_PROFILE_IMAGE_URL,
           },
         ],
       },
@@ -533,8 +548,8 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
         enabled: true,
         heading: "Highlights",
         photos: [
-          DEMO_IMAGEKIT_URLS[2],
-          DEMO_IMAGEKIT_URLS[4],
+          DEMO_GALLERY_IMAGEKIT_URLS[10],
+          DEMO_GALLERY_IMAGEKIT_URLS[11],
         ],
       },
       rsvp: {
@@ -580,7 +595,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[0],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
@@ -594,7 +609,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[1],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
@@ -608,21 +623,21 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[2],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
   neptune: {
     templateId: "neptune",
     theme: {
-      mainColor: "#020615",
+      mainColor: "#F8F4EC",
       accentColor: "#7DD3FC",
       accent2Color: "#C5A059",
       darkColor: "#020615",
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[3],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
@@ -636,7 +651,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[4],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
@@ -650,7 +665,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[5],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
@@ -664,7 +679,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[0],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },
@@ -678,7 +693,7 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
     },
     sections: {
       hero: {
-        coverImage: DEMO_IMAGEKIT_URLS[1],
+        coverImage: DEMO_COVER_IMAGE_URL,
       },
     },
   },

@@ -1041,6 +1041,29 @@ function GallerySectionClassic({
   <div className="absolute inset-0 pointer-events-none">
   {/* <FloralCorner className="left-0 bottom-0 w-56 opacity-30" flipX /> */}
   {/* <FloralCorner className="right-0 top-0 w-52 opacity-25" /> */}
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+   alt=""
+   className="absolute left-0 bottom-0 w-[200px] opacity-30 -translate-x-12 translate-y-10"
+   amplitude={4.6}
+   duration={9.4}
+   rotate={1.1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+   alt=""
+   className="absolute right-0 top-0 w-[200px] opacity-25 translate-x-12 -translate-y-10"
+   amplitude={5.1}
+   duration={9.8}
+   delay={0.2}
+   rotate={-1.1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
   </div>
 
   <div className="relative z-10 max-w-5xl mx-auto">
@@ -1566,7 +1589,31 @@ function StorySectionClassic({
   id={id}
   className="relative scroll-mt-24 overflow-hidden bg-wedding-bg text-wedding-text px-6 py-16"
   >
-  <div className="absolute inset-0 pointer-events-none"></div>
+  <div className="absolute inset-0 pointer-events-none">
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+   alt=""
+   className="absolute left-0 top-12 w-[180px] opacity-22 -translate-x-10"
+   amplitude={4.4}
+   duration={9.2}
+   rotate={1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+   alt=""
+   className="absolute right-0 bottom-10 w-[180px] opacity-20 translate-x-10"
+   amplitude={4.8}
+   duration={9.6}
+   delay={0.25}
+   rotate={-1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  </div>
 
   <div className="relative z-10 max-w-md mx-auto">
   <div className="rounded-[34px] border border-black/10 bg-white/70 shadow-[0_24px_60px_rgba(0,0,0,0.10)]">
@@ -1689,7 +1736,43 @@ export function WishesSectionClassic({
   id={id}
   className="relative scroll-mt-24 overflow-hidden bg-wedding-bg text-wedding-text px-6 py-16"
   >
-  <div className="absolute inset-0 pointer-events-none"></div>
+  <div className="absolute inset-0 pointer-events-none">
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.flourishes}
+   alt=""
+   className="absolute left-1/2 top-10 w-[260px] opacity-18 -translate-x-1/2"
+   amplitude={4.2}
+   duration={10.2}
+   rotate={0.6}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+   alt=""
+   className="absolute left-0 bottom-0 w-[190px] opacity-22 -translate-x-12 translate-y-10"
+   amplitude={4.6}
+   duration={9.6}
+   delay={0.12}
+   rotate={1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+   alt=""
+   className="absolute right-0 top-0 w-[190px] opacity-18 translate-x-12 -translate-y-10"
+   amplitude={5}
+   duration={10.1}
+   delay={0.28}
+   rotate={-1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  </div>
 
   <div className="relative z-10 max-w-md mx-auto">
   <NeptuneStagger baseDelay={0.1}>
@@ -1720,6 +1803,32 @@ export function GiftSectionClassic({
   className="relative scroll-mt-24 overflow-hidden bg-wedding-dark text-wedding-on-dark px-6 py-16"
   >
   <div className="absolute inset-0 bg-linear-to-b from-wedding-accent-2/20 via-wedding-dark to-wedding-dark" />
+
+  <div className="absolute inset-0 pointer-events-none">
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+   alt=""
+   className="absolute -left-6 top-[4.5rem] w-[190px] opacity-18"
+   amplitude={4.8}
+   duration={9.8}
+   rotate={1.1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  <NeptuneOverlayFloat
+   src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+   alt=""
+   className="absolute -right-8 bottom-10 w-[210px] opacity-16"
+   amplitude={5.2}
+   duration={10.3}
+   delay={0.2}
+   rotate={-1.1}
+   breeze
+   loading="lazy"
+   draggable={false}
+  />
+  </div>
 
   <div className="relative z-10 max-w-xl mx-auto">
   <div className="rounded-[34px] border border-wedding-on-dark/10 bg-wedding-dark/75 backdrop-blur shadow-[0_24px_60px_rgba(0,0,0,0.45)]">

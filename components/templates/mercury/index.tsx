@@ -21,20 +21,18 @@ import {
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
-import { DEMO_IMAGEKIT_URLS } from "@/data/invitations";
+import {
+    DEMO_BRIDE_PROFILE_IMAGE_URL,
+    DEMO_COVER_IMAGE_URL,
+    DEMO_GALLERY_IMAGEKIT_URLS,
+    DEMO_GROOM_PROFILE_IMAGE_URL,
+} from "@/data/invitations";
 
 const MERCURY_DEMO_ASSETS = {
-    host1Photo: DEMO_IMAGEKIT_URLS[3],
-    host2Photo: DEMO_IMAGEKIT_URLS[4],
-    coverImage: DEMO_IMAGEKIT_URLS[4],
-    galleryPhotos: [
-        DEMO_IMAGEKIT_URLS[0],
-        DEMO_IMAGEKIT_URLS[1],
-        DEMO_IMAGEKIT_URLS[2],
-        DEMO_IMAGEKIT_URLS[3],
-        DEMO_IMAGEKIT_URLS[4],
-        DEMO_IMAGEKIT_URLS[5],
-    ],
+    host1Photo: DEMO_GROOM_PROFILE_IMAGE_URL,
+    host2Photo: DEMO_BRIDE_PROFILE_IMAGE_URL,
+    coverImage: DEMO_COVER_IMAGE_URL,
+    galleryPhotos: DEMO_GALLERY_IMAGEKIT_URLS,
 } as const;
 
 interface MercuryProps {
@@ -80,10 +78,6 @@ export function Mercury({ config }: MercuryProps) {
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text font-serif">
             {/* Background Slideshow (Fades out or stays subtle) */}
-            <BackgroundSlideshow
-                photos={derivedPhotos}
-                className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-15"
-            />
 
             <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 

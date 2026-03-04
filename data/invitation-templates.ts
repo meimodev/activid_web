@@ -17,6 +17,9 @@ export type InvitationTemplateTheme = {
   darkColor?: string;
 };
 
+const DEMO_TEMPLATE_LISTING_IMAGE =
+  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/cover.webp";
+
 export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[]> = {
   flow: [
     {
@@ -74,10 +77,10 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
   ],
   neptune: [
     {
-      id: "midnight-cyan",
-      title: "Midnight Cyan",
-      mainColor: "#020615",
-      accentColor: "#7DD3FC",
+      id: "daylight-cyan",
+      title: "Daylight Cyan",
+      mainColor: "#F8F4EC",
+      accentColor: "#5E737A",
       accent2Color: "#C5A059",
       darkColor: "#020615",
     },
@@ -173,7 +176,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "flow-demo",
     templateId: "flow",
     title: "Flow",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/1.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Maroon"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -182,7 +185,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "saturn-demo",
     templateId: "saturn",
     title: "Saturn",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/2.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Saturn"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -191,7 +194,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "venus-demo",
     templateId: "venus",
     title: "Venus",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/3.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Haruki"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -200,7 +203,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "neptune-demo",
     templateId: "neptune",
     title: "Neptune",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/4.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Neptune"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -209,7 +212,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "mercury-demo",
     templateId: "mercury",
     title: "Mercury",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/5.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Floral"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -218,7 +221,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "pluto-demo",
     templateId: "pluto",
     title: "Pluto",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/6.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Pluto"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -227,7 +230,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "amalthea-demo",
     templateId: "amalthea",
     title: "Amalthea",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/1.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Sky Blue"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -236,7 +239,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "jupiter-demo",
     templateId: "jupiter",
     title: "Jupiter",
-    image: "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/2.webp",
+    image: DEMO_TEMPLATE_LISTING_IMAGE,
     tags: ["Wedding", "Jupiter"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",

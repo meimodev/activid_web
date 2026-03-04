@@ -1,4 +1,4 @@
-import { buildInvitationDemoConfig, DEMO_IMAGEKIT_URLS } from "@/data/invitations";
+import { buildInvitationDemoConfig, DEMO_COVER_IMAGE_URL } from "@/data/invitations";
 import { Flow } from "@/components/templates/flow";
 import { Saturn } from "@/components/templates/saturn";
 import { Mercury } from "@/components/templates/mercury";
@@ -114,15 +114,8 @@ function getTemplateLabel(templateId: string) {
 }
 
 function getDemoCoverImage(templateId: string) {
-    if (templateId === "flow") return DEMO_IMAGEKIT_URLS[0];
-    if (templateId === "saturn") return DEMO_IMAGEKIT_URLS[1];
-    if (templateId === "venus") return DEMO_IMAGEKIT_URLS[2];
-    if (templateId === "neptune") return DEMO_IMAGEKIT_URLS[3];
-    if (templateId === "mercury") return DEMO_IMAGEKIT_URLS[4];
-    if (templateId === "pluto") return DEMO_IMAGEKIT_URLS[5];
-    if (templateId === "amalthea") return DEMO_IMAGEKIT_URLS[0];
-    if (templateId === "jupiter") return DEMO_IMAGEKIT_URLS[1];
-    return DEMO_IMAGEKIT_URLS[0];
+    void templateId;
+    return DEMO_COVER_IMAGE_URL;
 }
 
 function withInvitationChrome(

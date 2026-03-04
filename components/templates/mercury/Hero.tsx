@@ -157,7 +157,7 @@ export function Hero({
       </motion.div>
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -bottom-12 -right-12 z-[60] h-[300px] rotate-180 w-[300px] bg-contain bg-no-repeat"
+        className="pointer-events-none absolute bottom-70 right-65 z-[60] h-[300px] w-[300px] bg-contain bg-no-repeat rotate-180 "
         style={{ scale, transformOrigin: "bottom right" }}
         initial={{ opacity: 0, scale: 0.92, y: 14 }}
         animate={

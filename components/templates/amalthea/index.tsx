@@ -25,20 +25,18 @@ import {
   INVITATION_ZONE,
   parseInvitationDateTime,
 } from "@/lib/date-time";
-import { DEMO_IMAGEKIT_URLS } from "@/data/invitations";
+import {
+  DEMO_BRIDE_PROFILE_IMAGE_URL,
+  DEMO_COVER_IMAGE_URL,
+  DEMO_GALLERY_IMAGEKIT_URLS,
+  DEMO_GROOM_PROFILE_IMAGE_URL,
+} from "@/data/invitations";
 
 const AMALTHEA_DEMO_ASSETS = {
-  groomPhoto: DEMO_IMAGEKIT_URLS[3],
-  bridePhoto: DEMO_IMAGEKIT_URLS[4],
-  coverImage: DEMO_IMAGEKIT_URLS[0],
-  galleryPhotos: [
-    DEMO_IMAGEKIT_URLS[0],
-    DEMO_IMAGEKIT_URLS[1],
-    DEMO_IMAGEKIT_URLS[2],
-    DEMO_IMAGEKIT_URLS[3],
-    DEMO_IMAGEKIT_URLS[4],
-    DEMO_IMAGEKIT_URLS[5],
-  ],
+  groomPhoto: DEMO_GROOM_PROFILE_IMAGE_URL,
+  bridePhoto: DEMO_BRIDE_PROFILE_IMAGE_URL,
+  coverImage: DEMO_COVER_IMAGE_URL,
+  galleryPhotos: DEMO_GALLERY_IMAGEKIT_URLS,
 } as const;
 
 interface AmaltheaProps {
