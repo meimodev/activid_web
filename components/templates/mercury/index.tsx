@@ -11,13 +11,11 @@ import { MusicPlayer } from "@/components/invitation/MusicPlayer";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { StorySection } from "./StorySection";
 import { GratitudeSection } from "./GratitudeSection";
-import {
-    TitleSection,
-    CoupleSection,
-    EventSection,
-    GiftSection,
-    FooterSection
-} from "./InfoSections";
+import { TitleSection } from "./TitleSection";
+import { CoupleSection } from "./CoupleSection";
+import { EventSection } from "./EventSection";
+import { GiftSection } from "./GiftSection";
+import { FooterSection } from "./FooterSection";
 import { InvitationConfig } from "@/types/invitation";
 import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
@@ -68,7 +66,7 @@ export function Mercury({ config }: MercuryProps) {
         () => (isDemo ? Array.from(MERCURY_DEMO_ASSETS.galleryPhotos) : (sections.gallery?.photos ?? [])),
         [isDemo, sections.gallery?.photos],
     );
-    const effectiveCoverImage = isDemo ? MERCURY_DEMO_ASSETS.coverImage : sections.hero.coverImage;
+    const effectiveCoverImage = sections.hero.coverImage;
 
     const derivedPhotos = useMemo(
         () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
@@ -112,8 +110,6 @@ export function Mercury({ config }: MercuryProps) {
 
             {/* Main Content - Visible underneath or revealed */}
             <div className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}>
-                {/* Only allow scrolling when content is visible */}
-                <div className={isContentReady ? "" : "h-screen overflow-hidden"}>
                     {isContentReady && (
                         <>
                             {sections.title.enabled && (
@@ -176,7 +172,6 @@ export function Mercury({ config }: MercuryProps) {
                             )}
                         </>
                     )}
-                </div>
             </div>
         </main>
     );
