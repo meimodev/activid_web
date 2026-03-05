@@ -128,7 +128,7 @@ function withInvitationChrome(
     return (
         <div className="invitation-mobile-shell" style={themeStyle as CSSProperties}>
             <div className="invitation-mobile-frame">
-                <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-accent selection:text-white">
+                <div className="font-body antialiased bg-wedding-bg text-wedding-text selection:bg-wedding-accent selection:text-white">
                     {children}
                 </div>
             </div>
@@ -278,11 +278,11 @@ export default async function InvitationPage({ params, searchParams }: PageProps
             return withInvitationChrome(
                 "flow",
                 undefined,
-                <div className="min-h-screen flex items-center justify-center px-6 py-16">
+                <div className="flex items-center justify-center px-6 py-16">
                     <div className="max-w-sm text-center">
                         <div className="text-lg font-semibold">Undangan sedang sibuk</div>
                         <div className="mt-2 text-sm opacity-80">
-                            Silakan coba lagi dalam beberapa menit.
+                            Silakan coba beberapa saat lagi.
                         </div>
                     </div>
                 </div>,

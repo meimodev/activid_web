@@ -9,10 +9,12 @@ import {
 } from "@/data/invitation-templates";
 import { DateTime } from "luxon";
 
+const DEFAULT_WHATSAPP_NUMBER = "62881080088816";
+
 export default function InvitationLandingClient({
-  whatsappNumber,
+  affiliateWhatsappNumber,
 }: {
-  whatsappNumber: string;
+  affiliateWhatsappNumber?: string;
 }) {
   // Demo Data as requested
   const templates = INVITATION_TEMPLATE_LISTINGS;
@@ -72,8 +74,13 @@ export default function InvitationLandingClient({
     setPreviewTemplate(template);
   };
 
+  const whatsappNumberForLeads = affiliateWhatsappNumber || DEFAULT_WHATSAPP_NUMBER;
+
   const createWhatsAppUrl = (message: string) =>
-    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    `https://wa.me/${whatsappNumberForLeads}?text=${encodeURIComponent(message)}`;
+
+  const createWhatsAppUrlForMarkas = (message: string) =>
+    `https://wa.me/${DEFAULT_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
   const customWhatsappMessage =
     "[INV] Halo activid 👋\n\nMau bikin undangan digital *custom* ✨\n\nProses custom itu lumayan detail (dan agak \"ribet\" juga 😅)\nKarena akan   mengikuti kebutuhan \ndari konsep besar sampai elemen yang kecil-kecil 🤍\n\nUntuk bisa mulai prosesnya pembuatan undangan *custom*, \nAkan dikenakan biaya buat booking slot & mulai diskusi konsep/moodboard senilai Rp. 200.000 sebagai Down Payment / Uang Muka dari Total harga undangan custom dimulai dari Rp500.000\n(tapi tergantung tingkat kompleksitasnya sesuai yang akan dibicarakan nanti).\n\nUang Muka yang sudah dibayar *TIDAK BISA DIKEMBALIKAN* 🙏🏻 apabila pelanggan membatalkan pemesanan undangan *custom* karena telah dihitung sebagai jasa konsultasi langsung ke tim developer 🙏🏻 \n\nSilahkan menunggu sebentar untuk konfirmasi lebih lanjut 😊";
@@ -384,7 +391,7 @@ export default function InvitationLandingClient({
                       Custom
                     </div>
                     <div className="mt-2 text-xs sm:text-sm text-amber-100/80 leading-relaxed">
-                      Undangan dibuat dari nol sesuai vibe kamu.
+                      Undangan dibuat sesuai keinginan kamu.
                     </div>
                     <div className="mt-4 flex items-baseline gap-2">
                       <div className="text-base sm:text-xl font-black tracking-tight text-white">
@@ -544,7 +551,7 @@ export default function InvitationLandingClient({
                     }}
                     className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-green-500/15 border border-green-500/40 text-green-100 font-bold tracking-wide hover:bg-green-500/25 hover:border-green-400/70 transition-colors"
                   >
-                    Sambungkan Markas
+                    Sambungkan Stasiun
                   </motion.button>
                 </div>
               </div>
@@ -612,14 +619,14 @@ export default function InvitationLandingClient({
                         type="button"
                         onClick={() => {
                           window.open(
-                            createWhatsAppUrl("INV tolong informasi tentang: "),
+                            createWhatsAppUrlForMarkas("INV tolong informasi tentang: "),
                             "_blank",
                             "noopener,noreferrer",
                           );
                         }}
                         className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-green-500/15 border border-green-500/40 text-green-100 text-xs font-bold uppercase tracking-wider hover:bg-green-500/25 hover:border-green-400/70 transition-colors"
                       >
-                        Hubungi stasiun
+                        Hubungi Markas
                       </button>
                     </div>
                   </div>

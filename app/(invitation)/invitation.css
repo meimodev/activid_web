@@ -17,7 +17,6 @@
 }
 
 .invitation-mobile-shell {
-  min-height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -40,7 +39,6 @@
   position: relative;
   width: 100%;
   max-width: var(--invitation-mobile-max-width);
-  min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: visible;
   isolation: isolate;
@@ -49,7 +47,7 @@
 }
 
 .invitation-mobile-frame > * {
-  min-height: 100%;
+  min-height: auto;
 }
 
 @theme inline {

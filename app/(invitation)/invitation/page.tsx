@@ -1,24 +1,50 @@
-import { getInvitationAffiliate, isAffiliateId, normalizeWhatsappNumber } from "@/lib/affiliate-config";
-import { cookies } from "next/headers";
 import InvitationLandingClient from "./InvitationLandingClient";
 
-const DEFAULT_WHATSAPP_NUMBER = "62881080088816";
+import { cookies } from "next/headers";
+import {
+  getInvitationAffiliate,
+  isAffiliateId,
+  normalizeWhatsappNumber,
+} from "@/lib/affiliate-config";
 
-export default async function InvitationLandingPage() {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+function getSingleSearchParam(
+  searchParams: { [key: string]: string | string[] | undefined },
+  key: string,
+): string | undefined {
+  const value = searchParams[key];
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value[0];
+  return undefined;
+}
+
+export default async function InvitationLandingPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   const cookieStore = await cookies();
-  const affiliateIdRaw = cookieStore.get("inv_affiliate")?.value ?? "";
 
-  let whatsappNumber = DEFAULT_WHATSAPP_NUMBER;
+  const queryAffiliateId =
+    getSingleSearchParam(resolvedSearchParams, "affiliateId") ??
+    getSingleSearchParam(resolvedSearchParams, "affiliate_id") ??
+    "";
+  const cookieAffiliateId = cookieStore.get("inv_affiliate")?.value ?? "";
 
-  if (affiliateIdRaw && isAffiliateId(affiliateIdRaw)) {
-    const affiliate = await getInvitationAffiliate(affiliateIdRaw).catch(() => null);
-    if (affiliate?.enabled) {
-      const normalized = normalizeWhatsappNumber(affiliate.whatsappNumber);
-      if (normalized) {
-        whatsappNumber = normalized;
+  const rawAffiliateId = (queryAffiliateId || cookieAffiliateId || "")
+    .trim()
+    .toUpperCase();
+
+  let affiliateWhatsappNumber: string | undefined;
+  if (rawAffiliateId && isAffiliateId(rawAffiliateId)) {
+    try {
+      const affiliate = await getInvitationAffiliate(rawAffiliateId);
+      if (affiliate && affiliate.enabled !== false) {
+        const digits = normalizeWhatsappNumber(affiliate.whatsappNumber);
+        if (digits) affiliateWhatsappNumber = digits;
       }
-    }
+    } catch {}
   }
 
-  return <InvitationLandingClient whatsappNumber={whatsappNumber} />;
+  return <InvitationLandingClient affiliateWhatsappNumber={affiliateWhatsappNumber} />;
 }

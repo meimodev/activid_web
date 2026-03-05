@@ -15,7 +15,7 @@ import {
   INVITATION_TEMPLATE_LISTINGS,
   type InvitationTemplateTheme,
 } from "@/data/invitation-templates";
-import { INVITATION_PURPOSE_SEEDS } from "@/data/invitations";
+import { getInvitationPurposeSeed } from "@/data/invitations";
 import { RegisterInvitationState, VerifyRegisterPasswordState } from "./actions";
 import { useDeferredEffect } from "@/hooks/useDeferredEffect";
 
@@ -1573,7 +1573,7 @@ export function RegisterInvitationForm({
       return;
     }
 
-    const seed = INVITATION_PURPOSE_SEEDS[nextPurpose] ?? INVITATION_PURPOSE_SEEDS.marriage;
+    const seed = getInvitationPurposeSeed(nextPurpose);
     const seedGratitudeMessage = seed.sections.gratitude.message?.trim()
       ? seed.sections.gratitude.message
       : getDefaultGratitudeMessage(nextPurpose);

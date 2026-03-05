@@ -8,6 +8,25 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
 
+  const segments = pathname.split("/").filter(Boolean);
+  const maybeAffiliateIdInInvitationPath =
+    segments.length === 2 && segments[0] === "invitation" ? segments[1] : "";
+  const normalizedAffiliateIdInInvitationPath = (maybeAffiliateIdInInvitationPath ?? "")
+    .trim()
+    .toUpperCase();
+  if (normalizedAffiliateIdInInvitationPath && AFFILIATE_ID_REGEX.test(normalizedAffiliateIdInInvitationPath)) {
+    const response = NextResponse.rewrite(new URL(`/invitation`, request.url));
+    response.cookies.set({
+      name: AFFILIATE_COOKIE_NAME,
+      value: normalizedAffiliateIdInInvitationPath,
+      path: "/",
+      sameSite: "lax",
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    return response;
+  }
+
   // Check if the hostname is the invitation subdomain
   // Adjust 'invitation.activid.id' to match your production domain
   // Also checking 'invitation.localhost' for local development testing
@@ -30,13 +49,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const segments = pathname.split("/").filter(Boolean);
     const maybeAffiliateId = segments.length === 1 ? segments[0] : "";
-    if (maybeAffiliateId && AFFILIATE_ID_REGEX.test(maybeAffiliateId)) {
+    const normalizedAffiliateId = (maybeAffiliateId ?? "").trim().toUpperCase();
+    if (normalizedAffiliateId && AFFILIATE_ID_REGEX.test(normalizedAffiliateId)) {
       const response = NextResponse.rewrite(new URL(`/invitation`, request.url));
       response.cookies.set({
         name: AFFILIATE_COOKIE_NAME,
-        value: maybeAffiliateId,
+        value: normalizedAffiliateId,
         path: "/",
         sameSite: "lax",
         httpOnly: true,

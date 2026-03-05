@@ -59,18 +59,17 @@ function formatRupiah(value: number): string {
 export default function AffiliateDashboardClient({
   affiliate,
   unlocked,
-  recentSlugs,
+  generatedInvitations,
 }: {
   affiliate: AffiliateView;
   unlocked: boolean;
-  recentSlugs: string[];
+  generatedInvitations: { slug: string; templateId: string; createdAtMs: number }[];
 }) {
   const router = useRouter();
   const [loginState, loginAction, loginPending] = useActionState(loginAffiliate, {});
   const [profileState, profileAction, profilePending] = useActionState(updateAffiliateProfile, {});
   const [passwordState, passwordAction, passwordPending] = useActionState(changeAffiliatePassword, {});
 
-  const [salesCount, setSalesCount] = useState<number>(1);
   const [profileWhatsappLocal, setProfileWhatsappLocal] = useState<string>(() => {
     const digits = normalizeDigits(affiliate.whatsappNumber);
     const local = digits.startsWith("62") ? digits.slice(2) : digits;
@@ -79,17 +78,32 @@ export default function AffiliateDashboardClient({
 
   const shareLink = useMemo(() => `${SITE_ORIGIN}/${affiliate.id}`, [affiliate.id]);
 
-  const commissionRows = useMemo(() => {
-    return INVITATION_TEMPLATE_LISTINGS.map((t) => {
-      const price = parsePriceToRupiahInt(t.priceOriginal);
-      const commission = price * 0.35;
+  const generatedRows = useMemo(() => {
+    const discountedPriceByTemplateId = new Map(
+      INVITATION_TEMPLATE_LISTINGS.map((t) => [t.templateId, parsePriceToRupiahInt(t.priceDiscount)]),
+    );
+
+    return (generatedInvitations ?? []).map((i) => {
+      const discountedPrice = discountedPriceByTemplateId.get(i.templateId) ?? 0;
+      const commission = discountedPrice * 0.35;
       return {
-        templateId: t.templateId,
-        title: t.title,
-        price,
+        ...i,
+        discountedPrice,
         commission,
       };
     });
+  }, [generatedInvitations]);
+
+  const totalCommission = useMemo(() => {
+    return generatedRows.reduce((acc, r) => acc + (Number.isFinite(r.commission) ? r.commission : 0), 0);
+  }, [generatedRows]);
+
+  const exampleDiscountedPrice = useMemo(() => {
+    const prices = Array.from(
+      new Set(INVITATION_TEMPLATE_LISTINGS.map((t) => parsePriceToRupiahInt(t.priceDiscount)).filter(Boolean)),
+    );
+    if (prices.length === 1) return prices[0] ?? 0;
+    return 0;
   }, []);
 
   useEffect(() => {
@@ -194,58 +208,64 @@ export default function AffiliateDashboardClient({
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-xs font-black uppercase tracking-wider text-white/60">Estimated income (simple)</div>
-              <div className="mt-2 text-sm text-white/70">Pick a template below and multiply by sales.</div>
-              <div className="mt-3 flex items-center gap-2">
-                <input
-                  type="number"
-                  min={0}
-                  value={salesCount}
-                  onChange={(e) => setSalesCount(Number.parseInt(e.target.value || "0", 10))}
-                  className="w-28 rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white"
-                />
-                <div className="text-sm text-white/70">sales</div>
-              </div>
+              <div className="text-xs font-black uppercase tracking-wider text-white/60">Commission</div>
+              <div className="mt-2 text-sm text-white/70">You earn 35% commission from the discounted price.</div>
+              {exampleDiscountedPrice ? (
+                <div className="mt-3 grid gap-1">
+                  <div className="text-xs text-white/60">Example (current promo)</div>
+                  <div className="text-sm text-white/80">
+                    Discounted price: <span className="font-bold text-white">{formatRupiah(exampleDiscountedPrice)}</span>
+                  </div>
+                  <div className="text-sm text-emerald-200">
+                    Your commission: {formatRupiah(exampleDiscountedPrice * 0.35)}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
-
-          {recentSlugs.length ? (
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-xs font-black uppercase tracking-wider text-white/60">Recent generated slugs</div>
-              <div className="mt-2 grid gap-1">
-                {recentSlugs.map((s) => (
-                  <div key={s} className="font-mono text-xs text-white/80 break-all">{s}</div>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
 
       <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="text-lg font-black tracking-tight">Commission table (35% of priceOriginal)</div>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-lg font-black tracking-tight">Generated pages</div>
+            <div className="mt-1 text-sm text-white/60">
+              List of slugs generated under your affiliate id, including commission and generated date.
+            </div>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="text-xs font-black uppercase tracking-wider text-white/60">Total commission</div>
+            <div className="mt-1 text-lg font-black text-emerald-200">{formatRupiah(totalCommission)}</div>
+          </div>
+        </div>
+
         <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
           <div className="grid grid-cols-12 gap-3 bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/60">
-            <div className="col-span-5">Template</div>
-            <div className="col-span-3">Real price</div>
+            <div className="col-span-5">Slug</div>
+            <div className="col-span-3">Generated</div>
+            <div className="col-span-2">Template</div>
             <div className="col-span-2">Commission</div>
-            <div className="col-span-2">Est.</div>
           </div>
-          <div className="divide-y divide-white/10">
-            {commissionRows.map((r) => (
-              <div key={r.templateId} className="grid grid-cols-12 gap-3 px-4 py-3">
-                <div className="col-span-5">
-                  <div className="text-sm font-bold text-white">{r.title}</div>
-                  <div className="text-xs font-mono text-white/50">{r.templateId}</div>
+
+          {generatedRows.length ? (
+            <div className="divide-y divide-white/10">
+              {generatedRows.map((r) => (
+                <div key={r.slug} className="grid grid-cols-12 gap-3 px-4 py-3">
+                  <div className="col-span-5">
+                    <div className="font-mono text-xs text-white/80 break-all">{r.slug}</div>
+                  </div>
+                  <div className="col-span-3 text-xs text-white/70">
+                    {r.createdAtMs ? new Date(r.createdAtMs).toLocaleString("id-ID") : "-"}
+                  </div>
+                  <div className="col-span-2 text-xs font-mono text-white/60">{r.templateId || "-"}</div>
+                  <div className="col-span-2 text-xs text-emerald-200">{formatRupiah(r.commission)}</div>
                 </div>
-                <div className="col-span-3 text-sm text-white/80">{formatRupiah(r.price)}</div>
-                <div className="col-span-2 text-sm text-emerald-200">{formatRupiah(r.commission)}</div>
-                <div className="col-span-2 text-sm text-white/80">
-                  {formatRupiah(r.commission * Math.max(0, salesCount || 0))}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-4 py-8 text-sm text-white/60">No generated pages yet.</div>
+          )}
         </div>
       </div>
 

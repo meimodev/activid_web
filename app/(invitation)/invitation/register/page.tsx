@@ -1,4 +1,4 @@
-import { INVITATION_PURPOSE_SEEDS } from "@/data/invitations";
+import { getInvitationPurposeSeed } from "@/data/invitations";
 import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
 import {
   getInvitationRegisterSessionCookieName,
@@ -9,7 +9,7 @@ import { RegisterInvitationForm } from "./RegisterInvitationForm";
 import { registerInvitation, verifyInvitationRegisterPassword } from "./actions";
 
 export default async function InvitationRegisterPage() {
-  const baseSeed = INVITATION_PURPOSE_SEEDS.marriage;
+  const baseSeed = getInvitationPurposeSeed("marriage");
   const baseConfig = {
     ...baseSeed,
     music: {
@@ -52,7 +52,7 @@ export default async function InvitationRegisterPage() {
   };
 
   if (!baseConfig) {
-    throw new Error("Missing base invitation config in INVITATION_PURPOSE_SEEDS.");
+    throw new Error("Missing base invitation config in getInvitationPurposeSeed().");
   }
 
   const templateOptions = INVITATION_TEMPLATE_LISTINGS.map((t) => ({

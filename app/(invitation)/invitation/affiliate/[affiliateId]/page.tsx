@@ -21,6 +21,11 @@ type AffiliateDoc = {
   joinedAt?: unknown;
 };
 
+type GeneratedInvitationDoc = {
+  createdAt?: unknown;
+  templateId?: unknown;
+};
+
 export default async function AffiliateDashboardPage({ params }: PageProps) {
   const { affiliateId: rawAffiliateId } = await params;
   const affiliateId = (rawAffiliateId ?? "").trim().toUpperCase();
@@ -61,7 +66,7 @@ export default async function AffiliateDashboardPage({ params }: PageProps) {
   const generatedInvitationCount =
     typeof data.generatedInvitationCount === "number" ? data.generatedInvitationCount : 0;
 
-  let recentSlugs: string[] = [];
+  let generatedInvitations: { slug: string; templateId: string; createdAtMs: number }[] = [];
   if (unlocked) {
     try {
       const slugSnap = await getAdminDb()
@@ -69,9 +74,22 @@ export default async function AffiliateDashboardPage({ params }: PageProps) {
         .doc(affiliateId)
         .collection("generatedInvitations")
         .orderBy("createdAt", "desc")
-        .limit(20)
+        .limit(200)
         .get();
-      recentSlugs = slugSnap.docs.map((d) => d.id);
+
+      generatedInvitations = slugSnap.docs.map((d) => {
+        const docData = (d.data() as GeneratedInvitationDoc | undefined) ?? {};
+        const templateId = typeof docData.templateId === "string" ? docData.templateId : "";
+        const createdAtMs =
+          typeof (docData.createdAt as { toMillis?: unknown } | null)?.toMillis === "function"
+            ? (docData.createdAt as { toMillis: () => number }).toMillis()
+            : 0;
+        return {
+          slug: d.id,
+          templateId,
+          createdAtMs,
+        };
+      });
     } catch {}
   }
 
@@ -87,7 +105,7 @@ export default async function AffiliateDashboardPage({ params }: PageProps) {
             generatedInvitationCount,
           }}
           unlocked={unlocked}
-          recentSlugs={recentSlugs}
+          generatedInvitations={generatedInvitations}
         />
       </div>
     </div>

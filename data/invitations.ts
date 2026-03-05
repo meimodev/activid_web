@@ -1,9 +1,39 @@
+import { DateTime } from "luxon";
 import { InvitationConfig } from "@/types/invitation";
-import { toInvitationIso } from "@/lib/date-time";
+import { INVITATION_ZONE, toInvitationIso } from "@/lib/date-time";
 
 const dt = (year: number, month: number, day: number, hour = 0, minute = 0) =>
   toInvitationIso({ year, month, day, hour, minute }) ??
   `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00+07:00`;
+
+function getRelativeDemoBaseDateTime(): DateTime {
+  return DateTime.now()
+    .setZone(INVITATION_ZONE)
+    .plus({ days: 3 })
+    .set({ hour: 13, minute: 0, second: 0, millisecond: 0 });
+}
+
+function withRelativeDemoEventDates(config: InvitationConfig): InvitationConfig {
+  const events = config.sections.event.events;
+  if (!Array.isArray(events) || events.length < 1) return config;
+
+  const base = getRelativeDemoBaseDateTime();
+  const nextEvents = events.map((event, index) => {
+    const iso = toInvitationIso(base.plus({ hours: index * 5 }));
+    return iso ? { ...event, date: iso } : event;
+  });
+
+  return {
+    ...config,
+    sections: {
+      ...config.sections,
+      event: {
+        ...config.sections.event,
+        events: nextEvents as InvitationConfig["sections"]["event"]["events"],
+      },
+    },
+  };
+}
 
 type Purpose = "marriage" | "birthday" | "event";
 
@@ -30,6 +60,41 @@ export const DEMO_GALLERY_IMAGEKIT_URLS = [
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/14.webp",
   "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/15.webp",
 ] as const;
+
+export const DEMO_MARRIAGE_MUSIC_URLS = [
+  "https://www.dropbox.com/scl/fi/1pouwgrjv6a5cy9nkra5k/Carpenters-Close-to-you.mp3?rlkey=eord3gjxoautf9j48hj5ro5dh&st=vwx6q4xw&dl=1",
+  "https://www.dropbox.com/scl/fi/ufkmtkrtl959yx0oqvmh2/Michael-Bubl-feat.-C-cile-McLorin-Salvant-La-vie-en-rose.mp3?rlkey=b7ni3b2g7tmiv81uqjfr91mr3&st=tpur1kzc&dl=1",
+  "https://www.dropbox.com/scl/fi/ix1jaxuz8o1jg0mz0funz/Elvis-Presley-Can-t-Help-Falling-In-Love.mp3?rlkey=02wjb0gpvma31l9vf465hsra1&st=vfxagrzl&dl=1",
+  "https://www.dropbox.com/scl/fi/b5sb1zdpv2x9fz3d192dx/Michael-Bubl-L.O.V.E.mp3?rlkey=b1o4rd26c060144gd1cfza9iy&st=twv5bhwb&dl=1",
+  "https://www.dropbox.com/scl/fi/42ivyxp3vlquwlvvd3fz3/Take-My-Hand-Emily-Hackett-Will-Anderson-of-Parachute.mp3?rlkey=jytais4j6m4gtif79l22rqo7x&st=zbe60ame&dl=1",
+  "https://www.dropbox.com/scl/fi/z8fnzyzbdv7jiplpfmgx2/Boyce-Avenue-Beautiful-Soul.mp3?rlkey=ky1pvj6p0s4fkr32crrnhju5d&st=mpbddf2v&dl=1",
+  "https://www.dropbox.com/scl/fi/sfpu18ukc1n7i4qzw93ef/Boyce-Avenue-Say-You-Won-t-Let-Go.mp3?rlkey=5y5wt29xdq1jh10maijs57oa0&st=q2aqvkhn&dl=1",
+  "https://www.dropbox.com/scl/fi/0w731ekqg1wlpwp5qmhvv/Shane-Filan-Beautiful-In-White.mp3?rlkey=qo4agwhv931nrpozo7o4e95o1&st=rp576tln&dl=1",
+] as const;
+
+export const DEMO_BIRTHDAY_MUSIC_URLS = [
+  "https://www.dropbox.com/scl/fi/h7ifzjltghy5hz9311750/Pamungkas-Happy-Birthday-To-You.mp3?rlkey=esy51sf2rrsbo9gaojc81vltp&st=pkguab2h&dl=1",
+  "https://www.dropbox.com/scl/fi/6mfrg76gr31p4iakc7byl/Nosstress-Semoga-Ya.mp3?rlkey=l2lazj9usofashaq0kilbyo89&st=lbiwx0pe&dl=1",
+  "https://www.dropbox.com/scl/fi/r1ymtmmbogk8lla0fytdm/Jhon-Legend-Happy-Birthday.mp3?rlkey=tt2a2dhjvzgmnfm7pc0eizoiy&st=x6tig9k0&dl=1",
+  "https://www.dropbox.com/scl/fi/ck3bes25c6coyu5s7bbzj/Anne-Marie-Birthday.mp3?rlkey=r43wnhibjxkoa8f83rq85tqcp&st=g18mpkwz&dl=1",
+] as const;
+
+function pickRandomIndex(maxExclusive: number): number {
+  if (maxExclusive <= 1) return 0;
+
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    return buf[0] % maxExclusive;
+  }
+
+  return Math.floor(Math.random() * maxExclusive);
+}
+
+export function pickRandomDemoMusicUrl(purpose: InvitationConfig["purpose"]): string {
+  const pool = purpose === "birthday" ? DEMO_BIRTHDAY_MUSIC_URLS : DEMO_MARRIAGE_MUSIC_URLS;
+  return pool[pickRandomIndex(pool.length)] ?? pool[0] ?? "";
+}
 
 function getDefaultGratitudeMessage(purpose: Purpose): string {
   if (purpose === "marriage") {
@@ -187,7 +252,7 @@ function makeMetadata({
   };
 }
 
-export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
+const INVITATION_PURPOSE_SEEDS_BASE: Record<Purpose, InvitationConfig> = {
   marriage: {
     id: "seed-marriage",
     templateId: "flow",
@@ -206,7 +271,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     }),
     music: {
       title: "Theme",
-      url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
+      url: DEMO_MARRIAGE_MUSIC_URLS[0] ?? "",
     },
     sections: {
       hero: {
@@ -352,7 +417,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     }),
     music: {
       title: "Theme",
-      url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
+      url: DEMO_BIRTHDAY_MUSIC_URLS[0] ?? "",
     },
     sections: {
       hero: {
@@ -473,7 +538,7 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     }),
     music: {
       title: "Theme",
-      url: "https://www.dropbox.com/scl/fi/836uloz6uqs28nlvk38sl/theme.mp3?rlkey=e53vsdwfkz59a13y2vngsbmuv&e=1&st=4c2q7ea2&dl=1",
+      url: DEMO_MARRIAGE_MUSIC_URLS[0] ?? "",
     },
     sections: {
       hero: {
@@ -583,6 +648,19 @@ export const INVITATION_PURPOSE_SEEDS: Record<Purpose, InvitationConfig> = {
     },
   },
 };
+
+export function getInvitationPurposeSeed(purpose: Purpose): InvitationConfig {
+  const seed = INVITATION_PURPOSE_SEEDS_BASE[purpose] ?? INVITATION_PURPOSE_SEEDS_BASE.marriage;
+  return withRelativeDemoEventDates(seed);
+}
+
+export function getInvitationPurposeSeeds(): Record<Purpose, InvitationConfig> {
+  return {
+    marriage: getInvitationPurposeSeed("marriage"),
+    birthday: getInvitationPurposeSeed("birthday"),
+    event: getInvitationPurposeSeed("event"),
+  };
+}
 
 const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
   flow: {
@@ -708,7 +786,7 @@ export function buildInvitationDemoConfig({
   templateId: string;
   purpose: Purpose;
 }): InvitationConfig {
-  const seed = INVITATION_PURPOSE_SEEDS[purpose] ?? INVITATION_PURPOSE_SEEDS.marriage;
+  const seed = getInvitationPurposeSeed(purpose);
   const templateOverrides = DEMO_TEMPLATE_OVERRIDES[templateId] ?? { templateId };
 
   const gratitudeMessage = seed.sections.gratitude.message?.trim()
@@ -744,7 +822,7 @@ export function buildInvitationDemoConfig({
 
   const coverImage = next.sections.hero.coverImage;
 
-  return mergeInvitationConfig(next, {
+  const withMetadata = mergeInvitationConfig(next, {
     metadata: {
       openGraph: {
         images: [
@@ -761,6 +839,8 @@ export function buildInvitationDemoConfig({
       },
     },
   });
+
+  return withRelativeDemoEventDates(withMetadata);
 }
 
 export const INVITATION_DEFAULTS: Record<string, InvitationConfig> = {

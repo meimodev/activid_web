@@ -23,13 +23,14 @@ export function StarfieldLayer({ density }: { density?: number }) {
             {stars.map((s) => (
                 <motion.span
                     key={s.id}
-                    className="absolute rounded-full bg-white"
+                    className="absolute rounded-full bg-wedding-on-dark"
                     style={{
                         top: `${s.top}%`,
                         left: `${s.left}%`,
                         width: `${s.size}px`,
                         height: `${s.size}px`,
-                        boxShadow: "0 0 12px rgba(255,255,255,0.55)",
+                        boxShadow:
+                            "0 0 12px color-mix(in srgb, var(--invitation-on-dark) 55%, transparent)",
                     }}
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: [0, s.opacity, 0], scale: [0.85, 1.25, 0.85] }}
@@ -45,22 +46,22 @@ export function AuroraLayer() {
         <>
             <StarfieldLayer />
             <motion.div
-                className="absolute -top-56 -right-64 w-[920px] h-[920px] rounded-full bg-cyan-400/10 blur-[170px] mix-blend-screen"
+                className="absolute -top-56 -right-64 w-[920px] h-[920px] rounded-full bg-wedding-accent-2/10 blur-[170px] mix-blend-screen"
                 animate={{ opacity: [0.12, 0.34, 0.12], y: [0, 18, 0], x: [0, -14, 0] }}
                 transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-                className="absolute -bottom-72 -left-64 w-[980px] h-[980px] rounded-full bg-emerald-400/10 blur-[190px] mix-blend-screen"
+                className="absolute -bottom-72 -left-64 w-[980px] h-[980px] rounded-full bg-wedding-accent/10 blur-[190px] mix-blend-screen"
                 animate={{ opacity: [0.1, 0.32, 0.1], y: [0, -16, 0], x: [0, 14, 0] }}
                 transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-                className="absolute top-[28%] left-[8%] w-[520px] h-[520px] rounded-full bg-teal-300/8 blur-[160px] mix-blend-screen"
+                className="absolute top-[28%] left-[8%] w-[520px] h-[520px] rounded-full bg-wedding-accent-light/8 blur-[160px] mix-blend-screen"
                 animate={{ opacity: [0.08, 0.22, 0.08], y: [0, 14, 0], x: [0, 10, 0] }}
                 transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-                className="absolute top-[10%] -left-[35%] w-[70%] h-[2px] bg-linear-to-r from-transparent via-white/60 to-transparent opacity-0"
+                className="absolute top-[10%] -left-[35%] w-[70%] h-[2px] bg-linear-to-r from-transparent via-wedding-on-dark/60 to-transparent opacity-0"
                 animate={{ x: ["0%", "250%"], y: ["0%", "120%"], opacity: [0, 1, 0] }}
                 transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", repeatDelay: 7.2 }}
                 style={{ transform: "rotate(18deg)" }}

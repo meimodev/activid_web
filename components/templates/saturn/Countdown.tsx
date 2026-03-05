@@ -50,28 +50,28 @@ export function Countdown({ targetDate, photos, heading }: CountdownProps) {
             <span className="font-heading text-3xl text-wedding-on-dark font-bold block mb-2 drop-shadow-md">
               {timeLeft.days}
             </span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-wedding-accent">Days</span>
+            <span className="text-[10px] font-body tracking-[0.2em] text-wedding-accent">Hari</span>
           </div>
 
           <div className="text-center p-4 bg-wedding-on-dark/5 backdrop-blur-sm border border-wedding-accent/30 rounded-sm min-w-[80px] ">
             <span className="font-heading text-3xl text-wedding-on-dark font-bold block mb-2 drop-shadow-md">
               {timeLeft.hours}
             </span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-wedding-accent">Hours</span>
+            <span className="text-[10px] font-body tracking-[0.2em] text-wedding-accent">Jam</span>
           </div>
 
           <div className="text-center p-4 bg-wedding-on-dark/5 backdrop-blur-sm border border-wedding-accent/30 rounded-sm min-w-[80px] ">
             <span className="font-heading text-3xl text-wedding-on-dark font-bold block mb-2 drop-shadow-md">
               {timeLeft.minutes}
             </span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-wedding-accent">Mins</span>
+            <span className="text-[10px] font-body tracking-[0.2em] text-wedding-accent">Menit</span>
           </div>
 
           <div className="text-center p-4 bg-wedding-on-dark/5 backdrop-blur-sm border border-wedding-accent/30 rounded-sm min-w-[80px] ">
             <span className="font-heading text-3xl text-wedding-on-dark font-bold block mb-2 drop-shadow-md">
               {timeLeft.seconds}
             </span>
-            <span className="text-[10px] uppercase tracking-[0.2em] text-wedding-accent">Secs</span>
+            <span className="text-[10px] font-body tracking-[0.2em] text-wedding-accent">Detik</span>
           </div>
         </StaggerRevealOnScroll>
       </div>
