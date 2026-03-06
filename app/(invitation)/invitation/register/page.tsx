@@ -1,5 +1,10 @@
 import { getInvitationPurposeSeed } from "@/data/invitations";
 import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
+import { getInvitationAffiliate, isAffiliateId } from "@/lib/affiliate-config";
+import {
+  getInvitationAffiliateSessionCookieName,
+  isInvitationAffiliateSessionValid,
+} from "@/lib/invitation-affiliate-session";
 import {
   getInvitationRegisterSessionCookieName,
   isInvitationRegisterSessionValid,
@@ -62,7 +67,33 @@ export default async function InvitationRegisterPage() {
 
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(getInvitationRegisterSessionCookieName())?.value;
-  const initialUnlocked = isInvitationRegisterSessionValid(sessionCookie);
+  const hasAdminSession = isInvitationRegisterSessionValid(sessionCookie);
+
+  const affiliateCookieRaw = cookieStore.get("inv_affiliate")?.value ?? "";
+  const affiliateCookie = affiliateCookieRaw.trim().toUpperCase();
+
+  const affiliateCookieId = affiliateCookie && isAffiliateId(affiliateCookie) ? affiliateCookie : undefined;
+  const hasAffiliateCookie = Boolean(affiliateCookieId);
+
+  const affiliateSessionCookie = cookieStore.get(getInvitationAffiliateSessionCookieName())?.value;
+  const hasAffiliateSession = affiliateCookieId
+    ? isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateCookieId)
+    : false;
+
+  const initialUnlocked = hasAdminSession || hasAffiliateSession;
+
+  let affiliateAttribution: { id: string; name?: string } | null = null;
+  if (affiliateCookieId) {
+    try {
+      const affiliate = await getInvitationAffiliate(affiliateCookieId);
+      if (affiliate && affiliate.enabled !== false) {
+        affiliateAttribution = {
+          id: affiliateCookieId,
+          name: typeof affiliate.name === "string" ? affiliate.name.trim() : undefined,
+        };
+      }
+    } catch {}
+  }
 
   return (
     <div className="min-h-[100dvh] bg-[#020205] text-white">
@@ -73,6 +104,9 @@ export default async function InvitationRegisterPage() {
           action={registerInvitation}
           verifyPasswordAction={verifyInvitationRegisterPassword}
           initialUnlocked={initialUnlocked}
+          hasAffiliateCookie={hasAffiliateCookie}
+          affiliateCookieId={affiliateCookieId}
+          affiliateAttribution={affiliateAttribution}
         />
       </div>
     </div>

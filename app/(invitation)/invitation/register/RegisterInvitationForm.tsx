@@ -1,6 +1,15 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   EventDetail,
   Host,
@@ -16,7 +25,10 @@ import {
   type InvitationTemplateTheme,
 } from "@/data/invitation-templates";
 import { getInvitationPurposeSeed } from "@/data/invitations";
-import { RegisterInvitationState, VerifyRegisterPasswordState } from "./actions";
+import {
+  RegisterInvitationState,
+  VerifyRegisterPasswordState,
+} from "./actions";
 import { useDeferredEffect } from "@/hooks/useDeferredEffect";
 
 type TemplateOption = {
@@ -24,11 +36,19 @@ type TemplateOption = {
   label: string;
 };
 
+type AffiliateAttribution = {
+  id: string;
+  name?: string;
+};
+
 type RegisterInvitationFormProps = {
   initialConfig: InvitationConfig;
   mode?: "create" | "edit";
   existingSlug?: string;
   templateOptions: TemplateOption[];
+  hasAffiliateCookie?: boolean;
+  affiliateCookieId?: string;
+  affiliateAttribution?: AffiliateAttribution | null;
   action: (
     prevState: RegisterInvitationState,
     formData: FormData,
@@ -40,7 +60,11 @@ type RegisterInvitationFormProps = {
   initialUnlocked?: boolean;
 };
 
-function updateAtPath<T extends object>(obj: T, path: string[], value: unknown): T {
+function updateAtPath<T extends object>(
+  obj: T,
+  path: string[],
+  value: unknown,
+): T {
   const next = structuredClone(obj) as unknown as Record<string, unknown>;
   let cursor: Record<string, unknown> = next;
 
@@ -74,7 +98,10 @@ function normalizeSlugSegment(value: string): string {
     .replace(/-+$/, "");
 }
 
-function deriveBaseSlug(purpose: "marriage" | "birthday" | "event", hosts: Host[]): string {
+function deriveBaseSlug(
+  purpose: "marriage" | "birthday" | "event",
+  hosts: Host[],
+): string {
   const hostParts = (hosts ?? [])
     .map((h) => normalizeSlugSegment(h.firstName ?? ""))
     .filter(Boolean);
@@ -93,7 +120,9 @@ function deriveImagekitFolderKey(
   return `${purpose}-${hostSegment}-${unixEpochSeconds}`;
 }
 
-function getDefaultGratitudeMessage(purpose: "marriage" | "birthday" | "event"): string {
+function getDefaultGratitudeMessage(
+  purpose: "marriage" | "birthday" | "event",
+): string {
   if (purpose === "marriage") {
     return "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kedua mempelai.";
   }
@@ -106,10 +135,26 @@ function getDefaultGratitudeMessage(purpose: "marriage" | "birthday" | "event"):
 const MAX_IMAGE_SIZE_BYTES = 25 * 1024 * 1024;
 const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
 
-const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/avif", "image/webp", "image/jpeg", "image/png"]);
-const ALLOWED_IMAGE_EXTENSIONS = new Set(["avif", "webp", "jpg", "jpeg", "png", "apng"]);
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  "image/avif",
+  "image/webp",
+  "image/jpeg",
+  "image/png",
+]);
+const ALLOWED_IMAGE_EXTENSIONS = new Set([
+  "avif",
+  "webp",
+  "jpg",
+  "jpeg",
+  "png",
+  "apng",
+]);
 const IMAGE_INPUT_ACCEPT = "image/avif,image/webp,image/jpeg,image/png,.apng";
-const TINYPNG_OPTIMIZABLE_MIME_TYPES = new Set(["image/webp", "image/jpeg", "image/png"]);
+const TINYPNG_OPTIMIZABLE_MIME_TYPES = new Set([
+  "image/webp",
+  "image/jpeg",
+  "image/png",
+]);
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -159,7 +204,10 @@ async function tryOptimizeWithTinyPng(file: File): Promise<File> {
   try {
     const form = new FormData();
     form.set("file", file);
-    const res = await fetch("/api/tinypng/optimize", { method: "POST", body: form });
+    const res = await fetch("/api/tinypng/optimize", {
+      method: "POST",
+      body: form,
+    });
     if (!res.ok) {
       return file;
     }
@@ -169,7 +217,10 @@ async function tryOptimizeWithTinyPng(file: File): Promise<File> {
     }
     const nextType = blob.type || file.type || "application/octet-stream";
     try {
-      return new File([blob], file.name, { type: nextType, lastModified: file.lastModified });
+      return new File([blob], file.name, {
+        type: nextType,
+        lastModified: file.lastModified,
+      });
     } catch {
       return file;
     }
@@ -201,7 +252,10 @@ type UploadDraftV1 = {
   imagekitFolderKey?: string;
   music?: { url: string; dropboxPath: string };
   imagesByFieldKey?: Record<string, { url: string; fileId?: string }>;
-  imageListsByFieldKey?: Record<string, Array<{ url: string; fileId?: string }>>;
+  imageListsByFieldKey?: Record<
+    string,
+    Array<{ url: string; fileId?: string }>
+  >;
   urlToFileId?: Record<string, string>;
 };
 
@@ -227,7 +281,10 @@ function writeUploadDraft(key: string, draft: UploadDraftV1) {
   }
 }
 
-function updateUploadDraft(key: string, updater: (prev: UploadDraftV1) => UploadDraftV1) {
+function updateUploadDraft(
+  key: string,
+  updater: (prev: UploadDraftV1) => UploadDraftV1,
+) {
   const prev = readUploadDraft(key) ?? {};
   writeUploadDraft(key, updater(prev));
 }
@@ -317,9 +374,13 @@ async function uploadToDropboxAudio({
   form.set("file", file);
   form.set("folderKey", folderKey);
 
-  const data = await xhrPostFormData<{ url?: string; dropboxPath?: string }>("/api/dropbox/audio", form, {
-    onProgress,
-  });
+  const data = await xhrPostFormData<{ url?: string; dropboxPath?: string }>(
+    "/api/dropbox/audio",
+    form,
+    {
+      onProgress,
+    },
+  );
   if (!data.url || !data.dropboxPath) {
     throw new Error("Upload failed: missing URL.");
   }
@@ -469,7 +530,9 @@ function ImageUrlPicker({
     setDeleting(true);
     try {
       const draft = readUploadDraft(draftKey);
-      const fileId = draft?.urlToFileId?.[url] ?? draft?.imagesByFieldKey?.[fieldKey]?.fileId;
+      const fileId =
+        draft?.urlToFileId?.[url] ??
+        draft?.imagesByFieldKey?.[fieldKey]?.fileId;
       if (fileId) {
         await deleteImageKitFile(fileId);
       }
@@ -503,7 +566,9 @@ function ImageUrlPicker({
   return (
     <div className="grid gap-2">
       <TextInput label={label} value={value} onChange={onChange} />
-      <div className="text-[11px] text-white/50">Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)</div>
+      <div className="text-[11px] text-white/50">
+        Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)
+      </div>
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -555,9 +620,14 @@ function ImageUrlPicker({
                     });
 
                     updateUploadDraft(draftKey, (prev) => {
-                      const nextImagesByFieldKey = { ...(prev.imagesByFieldKey ?? {}) };
+                      const nextImagesByFieldKey = {
+                        ...(prev.imagesByFieldKey ?? {}),
+                      };
                       const previousUrl = nextImagesByFieldKey[fieldKey]?.url;
-                      nextImagesByFieldKey[fieldKey] = { url: uploaded.url, fileId: uploaded.fileId };
+                      nextImagesByFieldKey[fieldKey] = {
+                        url: uploaded.url,
+                        fileId: uploaded.fileId,
+                      };
 
                       const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
                       if (previousUrl && previousUrl !== uploaded.url) {
@@ -626,7 +696,10 @@ function ImageUrlPicker({
 
       {uploading && !optimizing && uploadProgress !== null ? (
         <div className="h-1.5 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
-          <div className="h-full bg-indigo-400/70" style={{ width: `${uploadProgress}%` }} />
+          <div
+            className="h-full bg-indigo-400/70"
+            style={{ width: `${uploadProgress}%` }}
+          />
         </div>
       ) : null}
 
@@ -688,7 +761,9 @@ function ImageUrlListPicker({
   return (
     <div className="grid gap-3">
       <div className="text-sm text-white/70">{label}</div>
-      <div className="text-[11px] text-white/50">Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)</div>
+      <div className="text-[11px] text-white/50">
+        Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)
+      </div>
 
       {error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
@@ -698,7 +773,10 @@ function ImageUrlListPicker({
 
       <div className="grid gap-2">
         {(items ?? []).map((item, idx) => (
-          <div key={`${item}-${idx}`} className="grid gap-2 rounded-2xl border border-white/10 bg-white/5 p-3">
+          <div
+            key={`${item}-${idx}`}
+            className="grid gap-2 rounded-2xl border border-white/10 bg-white/5 p-3"
+          >
             <div className="flex items-start gap-3">
               <img
                 src={item}
@@ -741,11 +819,17 @@ function ImageUrlListPicker({
                           onChange(nextItems);
 
                           updateUploadDraft(draftKey, (prev) => {
-                            const nextLists = { ...(prev.imageListsByFieldKey ?? {}) };
+                            const nextLists = {
+                              ...(prev.imageListsByFieldKey ?? {}),
+                            };
                             const current = nextLists[fieldKey] ?? [];
-                            nextLists[fieldKey] = current.filter((x) => x.url !== url);
+                            nextLists[fieldKey] = current.filter(
+                              (x) => x.url !== url,
+                            );
 
-                            const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
+                            const nextUrlToFileId = {
+                              ...(prev.urlToFileId ?? {}),
+                            };
                             delete nextUrlToFileId[url];
 
                             return {
@@ -774,7 +858,10 @@ function ImageUrlListPicker({
                           await navigator.clipboard.writeText(item);
                           setCopiedUrl(item);
                           window.setTimeout(
-                            () => setCopiedUrl((prev) => (prev === item ? null : prev)),
+                            () =>
+                              setCopiedUrl((prev) =>
+                                prev === item ? null : prev,
+                              ),
                             1200,
                           );
                         } catch {
@@ -804,17 +891,15 @@ function ImageUrlListPicker({
                 alt=""
                 className="h-12 w-12 rounded-xl border border-white/10 bg-white/5 object-cover"
               />
-              <div className="min-w-0 flex-1 truncate text-xs text-white/70">{p.name}</div>
+              <div className="min-w-0 flex-1 truncate text-xs text-white/70">
+                {p.name}
+              </div>
               <div className="text-xs text-white/70">
-                {p.status === "uploading" ? (
-                  p.phase === "optimizing" ? (
-                    "Optimizing..."
-                  ) : (
-                    `Uploading${typeof p.progress === "number" ? ` ${p.progress}%` : "..."}`
-                  )
-                ) : (
-                  p.error ?? "Failed"
-                )}
+                {p.status === "uploading"
+                  ? p.phase === "optimizing"
+                    ? "Optimizing..."
+                    : `Uploading${typeof p.progress === "number" ? ` ${p.progress}%` : "..."}`
+                  : (p.error ?? "Failed")}
               </div>
             </div>
           ))}
@@ -850,7 +935,13 @@ function ImageUrlListPicker({
 
                 setPending((prev) => [
                   ...prev,
-                  { id, previewUrl, name: file.name, status: "uploading", phase: "optimizing" },
+                  {
+                    id,
+                    previewUrl,
+                    name: file.name,
+                    status: "uploading",
+                    phase: "optimizing",
+                  },
                 ]);
 
                 try {
@@ -873,14 +964,19 @@ function ImageUrlListPicker({
                     },
                     onProgress: (p) =>
                       setPending((prev) =>
-                        prev.map((x) => (x.id === id ? { ...x, progress: p } : x)),
+                        prev.map((x) =>
+                          x.id === id ? { ...x, progress: p } : x,
+                        ),
                       ),
                   });
 
                   updateUploadDraft(draftKey, (prev) => {
                     const nextLists = { ...(prev.imageListsByFieldKey ?? {}) };
                     const current = nextLists[fieldKey] ?? [];
-                    nextLists[fieldKey] = [...current, { url: uploaded.url, fileId: uploaded.fileId }];
+                    nextLists[fieldKey] = [
+                      ...current,
+                      { url: uploaded.url, fileId: uploaded.fileId },
+                    ];
 
                     const nextUrlToFileId = { ...(prev.urlToFileId ?? {}) };
                     if (uploaded.fileId) {
@@ -894,7 +990,10 @@ function ImageUrlListPicker({
                     };
                   });
 
-                  const mergedItems = [...(itemsRef.current ?? []), uploaded.url];
+                  const mergedItems = [
+                    ...(itemsRef.current ?? []),
+                    uploaded.url,
+                  ];
                   itemsRef.current = mergedItems;
                   onChange(mergedItems);
                   URL.revokeObjectURL(previewUrl);
@@ -902,7 +1001,9 @@ function ImageUrlListPicker({
                 } catch (err) {
                   setPending((prev) =>
                     prev.map((p) =>
-                      p.id === id ? { ...p, status: "error", error: getErrorMessage(err) } : p,
+                      p.id === id
+                        ? { ...p, status: "error", error: getErrorMessage(err) }
+                        : p,
                     ),
                   );
                 }
@@ -926,7 +1027,13 @@ const HOST_FIELDS: Array<[keyof Host, string]> = [
 
 const RSVP_FIELDS: Array<
   [
-    "heading" | "description" | "successMessage" | "alreadySubmittedMessage" | "seeYouMessage",
+    (
+      | "heading"
+      | "description"
+      | "successMessage"
+      | "alreadySubmittedMessage"
+      | "seeYouMessage"
+    ),
     string,
   ]
 > = [
@@ -937,12 +1044,13 @@ const RSVP_FIELDS: Array<
   ["seeYouMessage", "See You Message"],
 ];
 
-const EVENT_FIELDS: Array<["title" | "venue" | "address" | "mapUrl", string]> = [
-  ["title", "Title"],
-  ["venue", "Venue"],
-  ["address", "Address"],
-  ["mapUrl", "Map URL"],
-];
+const EVENT_FIELDS: Array<["title" | "venue" | "address" | "mapUrl", string]> =
+  [
+    ["title", "Title"],
+    ["venue", "Venue"],
+    ["address", "Address"],
+    ["mapUrl", "Map URL"],
+  ];
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -975,7 +1083,9 @@ function isInvitationDateTime(value: unknown): value is InvitationDateTime {
   );
 }
 
-function tryParseDateStringToDateTime(input: string): InvitationDateTime | null {
+function tryParseDateStringToDateTime(
+  input: string,
+): InvitationDateTime | null {
   const raw = (input || "").trim();
   if (!raw) return null;
 
@@ -1110,7 +1220,10 @@ function toTimeInputValue(value: InvitationDateTime) {
   return `${pad2(value.time.hour)}:${pad2(value.time.minute)}`;
 }
 
-function withDateFromInput(value: InvitationDateTime, input: string): InvitationDateTime {
+function withDateFromInput(
+  value: InvitationDateTime,
+  input: string,
+): InvitationDateTime {
   const parts = (input || "").split("-");
   if (parts.length !== 3) return value;
   const year = Number(parts[0]);
@@ -1119,12 +1232,18 @@ function withDateFromInput(value: InvitationDateTime, input: string): Invitation
   if (!Number.isInteger(year) || year < 1900) return value;
   if (!Number.isInteger(month) || month < 1 || month > 12) return value;
   if (!Number.isInteger(day) || day < 1 || day > 31) return value;
-  const dt = DateTime.fromObject({ year, month, day }, { zone: INVITATION_ZONE });
+  const dt = DateTime.fromObject(
+    { year, month, day },
+    { zone: INVITATION_ZONE },
+  );
   if (!dt.isValid) return value;
   return { ...value, date: { year, month, day } };
 }
 
-function withTimeFromInput(value: InvitationDateTime, input: string): InvitationDateTime {
+function withTimeFromInput(
+  value: InvitationDateTime,
+  input: string,
+): InvitationDateTime {
   const parts = (input || "").split(":");
   if (parts.length !== 2) return value;
   const hour = Number(parts[0]);
@@ -1134,7 +1253,9 @@ function withTimeFromInput(value: InvitationDateTime, input: string): Invitation
   return { ...value, time: { hour, minute } };
 }
 
-function ensureEventList(raw: InvitationConfig["sections"]["event"]["events"]): [EventDetail, ...EventDetail[]] {
+function ensureEventList(
+  raw: InvitationConfig["sections"]["event"]["events"],
+): [EventDetail, ...EventDetail[]] {
   const emptyEvent: EventDetail = {
     title: "",
     date: createTodayDateTime(),
@@ -1198,7 +1319,9 @@ function DateInput({
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
         value={toDateInputValue(normalized)}
         type="date"
-        onChange={(e) => onChange(withDateFromInput(normalized, e.target.value))}
+        onChange={(e) =>
+          onChange(withDateFromInput(normalized, e.target.value))
+        }
       />
     </label>
   );
@@ -1221,7 +1344,9 @@ function TimeInput({
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60"
         value={toTimeInputValue(normalized)}
         type="time"
-        onChange={(e) => onChange(withTimeFromInput(normalized, e.target.value))}
+        onChange={(e) =>
+          onChange(withTimeFromInput(normalized, e.target.value))
+        }
       />
     </label>
   );
@@ -1309,7 +1434,9 @@ function SectionCard({
             />
             Enabled
           </button>
-          <span className="text-white/40 group-open:rotate-180 transition-transform duration-300">▼</span>
+          <span className="text-white/40 group-open:rotate-180 transition-transform duration-300">
+            ▼
+          </span>
         </span>
       </summary>
 
@@ -1323,15 +1450,53 @@ export function RegisterInvitationForm({
   mode = "create",
   existingSlug,
   templateOptions,
+  hasAffiliateCookie,
+  affiliateCookieId,
+  affiliateAttribution,
   action,
   verifyPasswordAction,
   initialUnlocked,
 }: RegisterInvitationFormProps) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(action, {});
-  const [verifyState, verifyAction, verifying] = useActionState(verifyPasswordAction, {});
+  const [verifyState, verifyAction, verifying] = useActionState(
+    verifyPasswordAction,
+    {},
+  );
 
   const isUnlocked = Boolean(initialUnlocked || verifyState.ok);
   const isEditMode = mode === "edit";
+  const existingAffiliateId =
+    isEditMode && typeof initialConfig.affiliateId === "string" && initialConfig.affiliateId.trim()
+      ? initialConfig.affiliateId.trim()
+      : undefined;
+
+  const requiresAffiliateAcknowledgement =
+    !isEditMode && !isUnlocked && hasAffiliateCookie === false;
+  const [affiliateAcknowledged, setAffiliateAcknowledged] = useState(
+    () => !requiresAffiliateAcknowledgement,
+  );
+  const [affiliateAcknowledgedChecked, setAffiliateAcknowledgedChecked] =
+    useState(false);
+  const [affiliateAckModalOpen, setAffiliateAckModalOpen] = useState(
+    () => requiresAffiliateAcknowledgement,
+  );
+
+  useEffect(() => {
+    if (!requiresAffiliateAcknowledgement) {
+      setAffiliateAcknowledged(true);
+      setAffiliateAckModalOpen(false);
+      return;
+    }
+    setAffiliateAcknowledged(false);
+    setAffiliateAcknowledgedChecked(false);
+    setAffiliateAckModalOpen(true);
+  }, [requiresAffiliateAcknowledgement]);
+
+  useEffect(() => {
+    if (!verifyState.ok) return;
+    router.refresh();
+  }, [router, verifyState.ok]);
 
   const uploadDraftKey = useMemo(() => {
     const base = "activid_invitation_register_upload_draft_v1";
@@ -1340,38 +1505,53 @@ export function RegisterInvitationForm({
     return suffix ? `${base}:${suffix}` : base;
   }, [existingSlug, initialConfig.id, isEditMode]);
 
-  const initialTemplateId = initialConfig.templateId || templateOptions[0]?.id || "flow";
+  const initialTemplateId =
+    initialConfig.templateId || templateOptions[0]?.id || "flow";
   const initialTemplateThemes = getInvitationTemplateThemes(initialTemplateId);
   const initialThemeFromTemplate = initialTemplateThemes[0];
   const initialThemeMatch = initialConfig.theme
-    ? initialTemplateThemes.find((t) =>
-        t.mainColor === initialConfig.theme.mainColor
-        && t.accentColor === initialConfig.theme.accentColor
-        && t.accent2Color === initialConfig.theme.accent2Color
-        && t.darkColor === initialConfig.theme.darkColor,
+    ? initialTemplateThemes.find(
+        (t) =>
+          t.mainColor === initialConfig.theme.mainColor &&
+          t.accentColor === initialConfig.theme.accentColor &&
+          t.accent2Color === initialConfig.theme.accent2Color &&
+          t.darkColor === initialConfig.theme.darkColor,
       )
     : undefined;
-  const initialThemeIdValue = initialThemeMatch?.id ?? initialThemeFromTemplate?.id ?? "";
+  const initialThemeIdValue =
+    initialThemeMatch?.id ?? initialThemeFromTemplate?.id ?? "";
 
   const [slug, setSlug] = useState("");
   const [templateId, setTemplateId] = useState(initialTemplateId);
-  const initialTheme = useMemo(() => getInvitationTemplateThemes(templateId)[0], [templateId]);
+  const initialTheme = useMemo(
+    () => getInvitationTemplateThemes(templateId)[0],
+    [templateId],
+  );
   const [themeId, setThemeId] = useState(() => initialThemeIdValue);
+  const [affiliateId, setAffiliateId] = useState("");
   const [password, setPassword] = useState("");
   const [musicUploading, setMusicUploading] = useState(false);
-  const [musicUploadProgress, setMusicUploadProgress] = useState<number | null>(null);
+  const [musicUploadProgress, setMusicUploadProgress] = useState<number | null>(
+    null,
+  );
   const [musicDeleting, setMusicDeleting] = useState(false);
   const [musicError, setMusicError] = useState<string | null>(null);
   const [musicCopied, setMusicCopied] = useState(false);
   const initialPurpose = initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
-  const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(initialPurpose);
+  const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(
+    initialPurpose,
+  );
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
     id: isEditMode ? (existingSlug ?? initialConfig.id) : initialConfig.id,
     imagekitFolderKey:
-      initialConfig.imagekitFolderKey
-      ?? deriveImagekitFolderKey(initialPurpose, initialConfig.sections.hosts.hosts, Math.floor(Date.now() / 1000)),
+      initialConfig.imagekitFolderKey ??
+      deriveImagekitFolderKey(
+        initialPurpose,
+        initialConfig.sections.hosts.hosts,
+        Math.floor(Date.now() / 1000),
+      ),
     templateId: isEditMode ? initialTemplateId : templateId,
     theme: isEditMode
       ? initialConfig.theme
@@ -1402,9 +1582,9 @@ export function RegisterInvitationForm({
         enabled: isEditMode ? initialConfig.sections.gratitude.enabled : true,
         message: isEditMode
           ? initialConfig.sections.gratitude.message
-          : (initialConfig.sections.gratitude.message?.trim()
+          : initialConfig.sections.gratitude.message?.trim()
             ? initialConfig.sections.gratitude.message
-            : getDefaultGratitudeMessage(initialPurpose)),
+            : getDefaultGratitudeMessage(initialPurpose),
       },
     },
   }));
@@ -1412,7 +1592,9 @@ export function RegisterInvitationForm({
   useDeferredEffect(() => {
     const initialSlug = isEditMode ? (existingSlug ?? config.id) : config.id;
     setSlug((prev) => (prev === initialSlug ? prev : initialSlug));
-    setConfig((prev) => (prev.id === initialSlug ? prev : { ...prev, id: initialSlug }));
+    setConfig((prev) =>
+      prev.id === initialSlug ? prev : { ...prev, id: initialSlug },
+    );
   }, [existingSlug, isEditMode]);
 
   useEffect(() => {
@@ -1423,18 +1605,25 @@ export function RegisterInvitationForm({
     setConfig((prev) => {
       let next = prev;
 
-      if (draft.imagekitFolderKey && prev.imagekitFolderKey !== draft.imagekitFolderKey) {
+      if (
+        draft.imagekitFolderKey &&
+        prev.imagekitFolderKey !== draft.imagekitFolderKey
+      ) {
         next = { ...next, imagekitFolderKey: draft.imagekitFolderKey };
       }
 
       if (
-        draft.music?.url
-        && draft.music.dropboxPath
-        && !prev.music.url
-        && !prev.music.dropboxPath
+        draft.music?.url &&
+        draft.music.dropboxPath &&
+        !prev.music.url &&
+        !prev.music.dropboxPath
       ) {
         next = updateAtPath(next, ["music", "url"], draft.music.url);
-        next = updateAtPath(next, ["music", "dropboxPath"], draft.music.dropboxPath);
+        next = updateAtPath(
+          next,
+          ["music", "dropboxPath"],
+          draft.music.dropboxPath,
+        );
       }
 
       const heroUrl = draft.imagesByFieldKey?.["hero-cover"]?.url;
@@ -1494,11 +1683,14 @@ export function RegisterInvitationForm({
     if (isEditMode) return;
     const nextSlug = deriveBaseSlug(purpose, config.sections.hosts.hosts);
     setSlug((prev) => (prev === nextSlug ? prev : nextSlug));
-    setConfig((prev) => (prev.id === nextSlug ? prev : { ...prev, id: nextSlug }));
+    setConfig((prev) =>
+      prev.id === nextSlug ? prev : { ...prev, id: nextSlug },
+    );
   }, [config.sections.hosts.hosts, purpose, isEditMode]);
-  const hasImageUploads = Boolean(config.sections?.hero?.coverImage)
-    || Boolean(config.sections.hosts.hosts.some((h) => Boolean(h.photo)))
-    || Boolean((config.sections?.gallery?.photos ?? []).length);
+  const hasImageUploads =
+    Boolean(config.sections?.hero?.coverImage) ||
+    Boolean(config.sections.hosts.hosts.some((h) => Boolean(h.photo))) ||
+    Boolean((config.sections?.gallery?.photos ?? []).length);
 
   useDeferredEffect(() => {
     if (isEditMode) return;
@@ -1525,9 +1717,17 @@ export function RegisterInvitationForm({
     );
 
     setConfig((prev) =>
-      prev.imagekitFolderKey === nextFolderKey ? prev : { ...prev, imagekitFolderKey: nextFolderKey },
+      prev.imagekitFolderKey === nextFolderKey
+        ? prev
+        : { ...prev, imagekitFolderKey: nextFolderKey },
     );
-  }, [config.sections.hosts.hosts, hasImageUploads, isEditMode, purpose, uploadDraftKey]);
+  }, [
+    config.sections.hosts.hosts,
+    hasImageUploads,
+    isEditMode,
+    purpose,
+    uploadDraftKey,
+  ]);
 
   const handleTemplateChange = (nextTemplateId: string) => {
     const nextTheme = getInvitationTemplateThemes(nextTemplateId)[0];
@@ -1547,7 +1747,10 @@ export function RegisterInvitationForm({
     }));
   };
 
-  const templateThemes = useMemo(() => getInvitationTemplateThemes(templateId), [templateId]);
+  const templateThemes = useMemo(
+    () => getInvitationTemplateThemes(templateId),
+    [templateId],
+  );
 
   const handleThemeChange = (nextTheme: InvitationTemplateTheme) => {
     setThemeId(nextTheme.id);
@@ -1562,7 +1765,9 @@ export function RegisterInvitationForm({
     }));
   };
 
-  const handlePurposeChange = (nextPurpose: "marriage" | "birthday" | "event") => {
+  const handlePurposeChange = (
+    nextPurpose: "marriage" | "birthday" | "event",
+  ) => {
     setPurpose(nextPurpose);
 
     if (isEditMode) {
@@ -1644,7 +1849,9 @@ export function RegisterInvitationForm({
   };
 
   const templateListingByTemplateId = useMemo(() => {
-    return new Map(INVITATION_TEMPLATE_LISTINGS.map((t) => [t.templateId, t] as const));
+    return new Map(
+      INVITATION_TEMPLATE_LISTINGS.map((t) => [t.templateId, t] as const),
+    );
   }, []);
 
   const templateCards = useMemo(() => {
@@ -1698,26 +1905,29 @@ export function RegisterInvitationForm({
   const [themeDragging, setThemeDragging] = useState(false);
   const [themeDisplayedIndex, setThemeDisplayedIndex] = useState(1);
 
-  const getDisplayedIndexFromScroller = useCallback((el: HTMLDivElement): number => {
-    const children = Array.from(el.children) as HTMLElement[];
-    if (!children.length) return 1;
+  const getDisplayedIndexFromScroller = useCallback(
+    (el: HTMLDivElement): number => {
+      const children = Array.from(el.children) as HTMLElement[];
+      if (!children.length) return 1;
 
-    const center = el.scrollLeft + el.clientWidth / 2;
-    let bestIdx = 0;
-    let bestDist = Number.POSITIVE_INFINITY;
+      const center = el.scrollLeft + el.clientWidth / 2;
+      let bestIdx = 0;
+      let bestDist = Number.POSITIVE_INFINITY;
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i]!;
-      const childCenter = child.offsetLeft + child.clientWidth / 2;
-      const dist = Math.abs(childCenter - center);
-      if (dist < bestDist) {
-        bestDist = dist;
-        bestIdx = i;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]!;
+        const childCenter = child.offsetLeft + child.clientWidth / 2;
+        const dist = Math.abs(childCenter - center);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestIdx = i;
+        }
       }
-    }
 
-    return bestIdx + 1;
-  }, []);
+      return bestIdx + 1;
+    },
+    [],
+  );
 
   const updateTemplateDisplayedIndex = useCallback(() => {
     const el = templateScrollerRef.current;
@@ -1774,16 +1984,24 @@ export function RegisterInvitationForm({
   }, [templateThemes.length]);
 
   const templatePosition = {
-    current: Math.min(Math.max(templateDisplayedIndex, 1), templateCards.length || 1),
+    current: Math.min(
+      Math.max(templateDisplayedIndex, 1),
+      templateCards.length || 1,
+    ),
     total: templateCards.length,
   };
 
   const themePosition = {
-    current: Math.min(Math.max(themeDisplayedIndex, 1), templateThemes.length || 1),
+    current: Math.min(
+      Math.max(themeDisplayedIndex, 1),
+      templateThemes.length || 1,
+    ),
     total: templateThemes.length,
   };
 
-  const handleThemeScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleThemeScrollerPointerDown = (
+    e: React.PointerEvent<HTMLDivElement>,
+  ) => {
     if (e.button !== 0) return;
     const el = themeScrollerRef.current;
     if (!el) return;
@@ -1798,7 +2016,9 @@ export function RegisterInvitationForm({
     setThemeDragging(false);
   };
 
-  const handleThemeScrollerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleThemeScrollerPointerMove = (
+    e: React.PointerEvent<HTMLDivElement>,
+  ) => {
     const el = themeScrollerRef.current;
     const drag = themeDragRef.current;
     if (!el || !drag.active) return;
@@ -1834,7 +2054,9 @@ export function RegisterInvitationForm({
     setThemeDragging(false);
   };
 
-  const handleTemplateScrollerPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleTemplateScrollerPointerDown = (
+    e: React.PointerEvent<HTMLDivElement>,
+  ) => {
     if (e.button !== 0) return;
     const el = templateScrollerRef.current;
     if (!el) return;
@@ -1849,7 +2071,9 @@ export function RegisterInvitationForm({
     setTemplateDragging(false);
   };
 
-  const handleTemplateScrollerPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleTemplateScrollerPointerMove = (
+    e: React.PointerEvent<HTMLDivElement>,
+  ) => {
     const el = templateScrollerRef.current;
     const drag = templateDragRef.current;
     if (!el || !drag.active) return;
@@ -1929,7 +2153,9 @@ export function RegisterInvitationForm({
     const dateText = dt?.date
       ? `${dt.date.year}-${pad2(dt.date.month)}-${pad2(dt.date.day)}`
       : "";
-    const timeText = dt?.time ? `${pad2(dt.time.hour)}:${pad2(dt.time.minute)}` : "";
+    const timeText = dt?.time
+      ? `${pad2(dt.time.hour)}:${pad2(dt.time.minute)}`
+      : "";
     const title = (first as { title?: string } | null)?.title ?? "";
     const venue = (first as { venue?: string } | null)?.venue ?? "";
 
@@ -1945,10 +2171,11 @@ export function RegisterInvitationForm({
     if (!templateId) return "Ship Template is required.";
     const hosts = config.sections.hosts.hosts;
     const hasHostName = Boolean(
-      (hosts[0]?.firstName || hosts[0]?.fullName || "").trim()
-        || (hosts[1]?.firstName || hosts[1]?.fullName || "").trim(),
+      (hosts[0]?.firstName || hosts[0]?.fullName || "").trim() ||
+      (hosts[1]?.firstName || hosts[1]?.fullName || "").trim(),
     );
-    if (!hosts.length || !hasHostName) return "At least 1 host name is required.";
+    if (!hosts.length || !hasHostName)
+      return "At least 1 host name is required.";
 
     const first = config.sections.event.events[0] as { date?: unknown };
     const dt = coerceInvitationDateTime(first?.date);
@@ -1957,7 +2184,29 @@ export function RegisterInvitationForm({
     return null;
   };
 
-  const invitationUrl = state.invitationUrl ?? (state.slug ? `https://invitation.activid.id/${state.slug}` : "");
+  const invitationUrl =
+    state.invitationUrl ??
+    (state.slug ? `https://invitation.activid.id/${state.slug}` : "");
+
+  const affiliateSummaryText = useMemo(() => {
+    if (affiliateAttribution) {
+      const name = (affiliateAttribution.name ?? "").trim();
+      if (name) {
+        return `Diakreditasikan ke: ${name} (${affiliateAttribution.id})`;
+      }
+      return `Diakreditasikan ke: (${affiliateAttribution.id})`;
+    }
+
+    if (isEditMode && existingAffiliateId) {
+      return `Diakreditasikan ke: (${existingAffiliateId})`;
+    }
+
+    if (!isEditMode && affiliateCookieId) {
+      return `Kode afiliasi ${affiliateCookieId} terdeteksi, tetapi affiliator tidak ditemukan / tidak aktif (tidak ada komisi).`;
+    }
+
+    return "Tidak terhubung ke affiliator manapun.";
+  }, [affiliateAttribution, affiliateCookieId, existingAffiliateId, isEditMode]);
   const whatsappMessages = useMemo(() => {
     if (!state.ok || !invitationUrl) return [];
     const who = hostLabel || "kami";
@@ -2006,9 +2255,21 @@ export function RegisterInvitationForm({
             </div>
           ) : null}
 
-          <div className="relative z-10">
-            <TextInput label="Access Password" value={password} type="password" onChange={setPassword} />
+          <div className="relative z-10 grid gap-4">
+            <TextInput
+              label="Affiliate ID"
+              value={affiliateId}
+              type="text"
+              onChange={setAffiliateId}
+            />
+            <TextInput
+              label="Password"
+              value={password}
+              type="password"
+              onChange={setPassword}
+            />
           </div>
+          <input type="hidden" name="affiliateId" value={affiliateId} />
           <input type="hidden" name="password" value={password} />
 
           <button
@@ -2029,28 +2290,55 @@ export function RegisterInvitationForm({
         <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 sm:p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
           <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-emerald-500/10 blur-[60px] pointer-events-none" />
           <div className="text-xl font-black tracking-tight bg-linear-to-r from-emerald-200 via-white to-emerald-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
-            <span className="text-xl">✅</span> {isEditMode ? "Mission Updated" : "Mission Created"}
+            <span className="text-xl">✅</span>{" "}
+            {isEditMode ? "Mission Updated" : "Mission Created"}
           </div>
 
           <div className="grid gap-3 relative z-10">
             <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
-              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Mission Code</div>
-              <div className="mt-1 text-lg font-black tracking-tight text-white">{state.slug}</div>
+              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                Mission Code
+              </div>
+              <div className="mt-1 text-lg font-black tracking-tight text-white">
+                {state.slug}
+              </div>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
-              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Invitation Link</div>
-              <div className="mt-1 break-all text-sm font-mono text-white/80">{invitationUrl}</div>
+              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                Afiliasi
+              </div>
+              {state.affiliateId ? (
+                <div className="mt-1 text-sm text-white/80">
+                  <span className="font-black text-white">
+                    {state.affiliateName?.trim() || "(Tanpa nama)"}
+                  </span>{" "}
+                  <span className="font-mono text-white/70">({state.affiliateId})</span>
+                </div>
+              ) : (
+                <div className="mt-1 text-sm text-amber-100">
+                  Tidak terhubung ke affiliator manapun (tidak ada komisi).
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
+              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                Invitation Link
+              </div>
+              <div className="mt-1 break-all text-sm font-mono text-white/80">
+                {invitationUrl}?to=NAMA_UNDANGAN
+              </div>
               <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
-                  onClick={() => void copyText("link", invitationUrl)}
+                  onClick={() => void copyText("link", (invitationUrl+"?to=NAMA_UNDANGAN"))}
                 >
                   {copiedKey === "link" ? "Copied" : "Copy Link"}
                 </button>
                 <a
-                  href={invitationUrl}
+                  href={invitationUrl+"?to=NAMA_UNDANGAN"}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500/30 via-green-500/25 to-cyan-500/25 border border-emerald-400/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-100 hover:border-emerald-300/70"
@@ -2070,7 +2358,9 @@ export function RegisterInvitationForm({
         </div>
 
         <div className="grid gap-3">
-          <div className="text-sm font-black tracking-tight text-white/90">WhatsApp Messages</div>
+          <div className="text-sm font-black tracking-tight text-white/90">
+            WhatsApp Messages
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {whatsappMessages.map((m) => {
               const waUrl = `https://wa.me/?text=${encodeURIComponent(m.text)}`;
@@ -2085,7 +2375,7 @@ export function RegisterInvitationForm({
                     </div>
                     <button
                       type="button"
-                      className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
+                      className=" shrink-0 ß rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
                       onClick={() => void copyText(m.key, m.text)}
                     >
                       {copiedKey === m.key ? "Copied" : "Copy"}
@@ -2096,14 +2386,7 @@ export function RegisterInvitationForm({
                     {m.text}
                   </pre>
 
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-auto inline-flex w-full items-center justify-center rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
-                  >
-                    Open WhatsApp
-                  </a>
+                  
                 </div>
               );
             })}
@@ -2120,25 +2403,157 @@ export function RegisterInvitationForm({
       className="grid gap-6"
       onSubmit={(e) => {
         if (confirmedSubmitRef.current || confirmedSubmit) return;
+
+        if (requiresAffiliateAcknowledgement && !affiliateAcknowledged) {
+          e.preventDefault();
+          setClientError(
+            "Cookie afiliasi tidak terdeteksi. Undangan ini tidak akan mendapatkan komisi kecuali Anda mengakui dan melanjutkan.",
+          );
+          setAffiliateAckModalOpen(true);
+          return;
+        }
+
         e.preventDefault();
         const err = validateBeforeReview();
         setClientError(err);
         if (!err) setReviewOpen(true);
       }}
     >
-      {isEditMode ? <input type="hidden" name="existingSlug" value={slug} /> : null}
+      {isEditMode ? (
+        <input type="hidden" name="existingSlug" value={slug} />
+      ) : null}
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="templateId" value={templateId} />
       <input type="hidden" name="password" value={password} />
       <input type="hidden" name="configJson" value={configJson} />
+      {requiresAffiliateAcknowledgement ? (
+        <input
+          type="hidden"
+          name="affiliateAcknowledged"
+          value={affiliateAcknowledged ? "1" : ""}
+        />
+      ) : null}
+
+      {affiliateAckModalOpen &&
+      requiresAffiliateAcknowledgement &&
+      !affiliateAcknowledged ? (
+        <div className="fixed inset-0 z-[90] flex items-end justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:items-center">
+          <div className="absolute inset-0 bg-black/80" />
+          <div className="relative w-full max-w-xl rounded-3xl border border-amber-500/25 bg-black/40 backdrop-blur-md p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 shadow-[0_0_70px_-15px_rgba(245,158,11,0.35)]">
+            <div className="grid gap-4">
+              <div className="text-xs font-mono uppercase tracking-[0.22em] text-amber-200/70">
+                Atribusi afiliasi
+              </div>
+              <div className="text-lg font-black tracking-tight text-white">
+                Link Afiliasi Tidak Terdeteksi
+              </div>
+              <div className="text-sm text-white/75 leading-relaxed">
+                Pendaftaran dari{" "}
+                <span className="font-mono text-white/90">
+                  /invitation/register
+                </span>{" "}
+                tanpa link afiliasi tidak akan mendapat komisi.
+              </div>
+
+              <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={affiliateAcknowledgedChecked}
+                  onChange={(e) =>
+                    setAffiliateAcknowledgedChecked(e.target.checked)
+                  }
+                />
+                <span>
+                  Saya mengerti dan ingin melanjutkan.
+                </span>
+              </label>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white hover:border-white/25"
+                  onClick={() => window.location.reload()}
+                >
+                  Reload
+                </button>
+                <Link
+                  href="/invitation"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white hover:border-white/25"
+                >
+                  Kembali ke halaman utama
+                </Link>
+                <button
+                  type="button"
+                  disabled={!affiliateAcknowledgedChecked}
+                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-amber-500/40 via-orange-500/35 to-yellow-500/35 border border-amber-300/40 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-amber-50 hover:border-amber-200/70 disabled:opacity-50"
+                  onClick={() => {
+                    setAffiliateAcknowledged(true);
+                    setAffiliateAckModalOpen(false);
+                  }}
+                >
+                  Lanjut
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 sm:p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
         {/* Decorative background glow */}
         <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-indigo-500/10 blur-[60px] pointer-events-none" />
-        
+
         <div className="text-xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
-          <span className="text-xl">🚀</span> {isEditMode ? "Edit Mission" : "Create New Mission"}
+          <span className="text-xl">🚀</span>{" "}
+          {isEditMode ? "Edit Mission" : "Create New Mission"}
         </div>
+
+        {affiliateAttribution ? (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100 relative z-10">
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-emerald-200/70">
+              Afiliasi terdeteksi
+            </div>
+            <div className="mt-1 leading-relaxed">
+              Undangan ini akan diakreditasikan ke affiliator berikut:
+              <div className="mt-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                <div className="text-xs font-black text-white">
+                  {affiliateAttribution.name?.trim() || "(Tanpa nama)"}
+                </div>
+                <div className="text-[11px] font-mono text-white/70">
+                  {affiliateAttribution.id}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : !isEditMode && affiliateCookieId ? (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 relative z-10">
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-amber-200/70">
+              Kode afiliasi tidak aktif
+            </div>
+            <div className="mt-1 leading-relaxed">
+              Kode afiliasi <span className="font-mono font-bold">{affiliateCookieId}</span> terdeteksi, tetapi
+              affiliator tidak ditemukan / tidak aktif. Undangan ini tidak akan mendapatkan komisi.
+            </div>
+          </div>
+        ) : null}
+
+        {requiresAffiliateAcknowledgement ? (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 relative z-10">
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-amber-200/70">
+              Tanpa afiliasi
+            </div>
+            <div className="mt-1 leading-relaxed">
+              ! Pembuatan undangan ini tidak menggunakan affiliate link. Hasil
+              undangan ini tidak akan diberikan komisi. Untuk mendapatkan komisi
+              silahkan kunjungi link utama undangan activid dengan kode unik
+              affiliate anda,{" "}
+              <span className="font-bold">
+                invitation.activid.id/KODE_AFILIASI
+              </span>
+            </div>
+          </div>
+        ) : null}
 
         {state.error ? (
           <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200 relative z-10">
@@ -2162,7 +2577,9 @@ export function RegisterInvitationForm({
 
           <div className="grid gap-2 text-sm sm:col-span-2">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-indigo-200/70 font-medium tracking-wide">Ship Template</span>
+              <span className="text-indigo-200/70 font-medium tracking-wide">
+                Ship Template
+              </span>
               <span className="text-[11px] font-mono text-white/40">
                 {templatePosition.current}/{templatePosition.total}
               </span>
@@ -2220,7 +2637,9 @@ export function RegisterInvitationForm({
                     </div>
 
                     <div className="grid gap-1 p-2">
-                      <div className="text-sm font-black tracking-tight text-white">{card.label}</div>
+                      <div className="text-sm font-black tracking-tight text-white">
+                        {card.label}
+                      </div>
                       <div className="text-sm font-black tracking-tight text-white/90">
                         {card.priceDiscount || "-"}
                       </div>
@@ -2233,7 +2652,9 @@ export function RegisterInvitationForm({
 
           <div className="grid gap-2 text-sm sm:col-span-2">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-indigo-200/70 font-medium tracking-wide">Color Combination</span>
+              <span className="text-indigo-200/70 font-medium tracking-wide">
+                Color Combination
+              </span>
               <span className="text-[11px] font-mono text-white/40">
                 {themePosition.current}/{themePosition.total}
               </span>
@@ -2305,13 +2726,17 @@ export function RegisterInvitationForm({
           </div>
 
           <label className="grid gap-1 text-sm sm:col-span-2">
-            <span className="text-indigo-200/70 font-medium tracking-wide">Mission Purpose</span>
+            <span className="text-indigo-200/70 font-medium tracking-wide">
+              Mission Purpose
+            </span>
             <select
               name="purpose"
               className="rounded-xl border border-white/10 bg-[#0b0b16]/80 px-3 py-2 text-white outline-none focus:border-indigo-500/60 transition-colors"
               value={purpose}
               onChange={(e) =>
-                handlePurposeChange(e.target.value as "marriage" | "birthday" | "event")
+                handlePurposeChange(
+                  e.target.value as "marriage" | "birthday" | "event",
+                )
               }
             >
               <option value="marriage">Marriage</option>
@@ -2329,22 +2754,28 @@ export function RegisterInvitationForm({
             <TextInput
               label="Title (optional)"
               value={config.music.title ?? ""}
-              onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "title"], v))}
+              onChange={(v) =>
+                setConfig((prev) => updateAtPath(prev, ["music", "title"], v))
+              }
             />
             <TextInput
               label="Audio URL"
               value={config.music.url}
               readOnly={Boolean(config.music.dropboxPath)}
-              onChange={(v) => setConfig((prev) => updateAtPath(prev, ["music", "url"], v))}
+              onChange={(v) =>
+                setConfig((prev) => updateAtPath(prev, ["music", "url"], v))
+              }
             />
 
             <div className="flex flex-wrap items-center gap-3">
               {!config.music.dropboxPath ? (
                 <label className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white hover:border-indigo-500/60">
                   {musicUploading
-                    ? (musicUploadProgress !== null
-                      ? (musicUploadProgress >= 99 ? "Finalizing..." : `Uploading ${musicUploadProgress}%`)
-                      : "Uploading...")
+                    ? musicUploadProgress !== null
+                      ? musicUploadProgress >= 99
+                        ? "Finalizing..."
+                        : `Uploading ${musicUploadProgress}%`
+                      : "Uploading..."
                     : "Choose Audio"}
                   <input
                     type="file"
@@ -2374,14 +2805,25 @@ export function RegisterInvitationForm({
                         });
 
                         setConfig((prev) => {
-                          let next = updateAtPath(prev, ["music", "url"], uploaded.url);
-                          next = updateAtPath(next, ["music", "dropboxPath"], uploaded.dropboxPath);
+                          let next = updateAtPath(
+                            prev,
+                            ["music", "url"],
+                            uploaded.url,
+                          );
+                          next = updateAtPath(
+                            next,
+                            ["music", "dropboxPath"],
+                            uploaded.dropboxPath,
+                          );
                           return next;
                         });
 
                         updateUploadDraft(uploadDraftKey, (prev) => ({
                           ...prev,
-                          music: { url: uploaded.url, dropboxPath: uploaded.dropboxPath },
+                          music: {
+                            url: uploaded.url,
+                            dropboxPath: uploaded.dropboxPath,
+                          },
                         }));
                       } catch (err) {
                         setMusicError(getErrorMessage(err));
@@ -2393,7 +2835,9 @@ export function RegisterInvitationForm({
                   />
                 </label>
               ) : (
-                <div className="text-xs text-white/60">Audio URL is locked (Dropbox-managed).</div>
+                <div className="text-xs text-white/60">
+                  Audio URL is locked (Dropbox-managed).
+                </div>
               )}
 
               {config.music.url ? (
@@ -2430,7 +2874,11 @@ export function RegisterInvitationForm({
                     try {
                       await deleteDropboxAudio(path);
                       setConfig((prev) => {
-                        let next = updateAtPath(prev, ["music", "dropboxPath"], undefined);
+                        let next = updateAtPath(
+                          prev,
+                          ["music", "dropboxPath"],
+                          undefined,
+                        );
                         next = updateAtPath(next, ["music", "url"], "");
                         return next;
                       });
@@ -2455,7 +2903,9 @@ export function RegisterInvitationForm({
               <div className="h-2 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
                 <div
                   className="h-full bg-indigo-500/60"
-                  style={{ width: `${Math.max(0, Math.min(100, musicUploadProgress))}%` }}
+                  style={{
+                    width: `${Math.max(0, Math.min(100, musicUploadProgress))}%`,
+                  }}
                 />
               </div>
             ) : null}
@@ -2474,10 +2924,22 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.hero.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "hero", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "hero", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "hero", "subtitle"], "");
-                  next = updateAtPath(next, ["sections", "hero", "coverImage"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "hero", "subtitle"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "hero", "coverImage"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -2488,7 +2950,9 @@ export function RegisterInvitationForm({
                 label="Subtitle (Greeting)"
                 value={config.sections.hero.subtitle}
                 onChange={(v) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "hero", "subtitle"], v))
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "hero", "subtitle"], v),
+                  )
                 }
               />
               <ImageUrlPicker
@@ -2498,7 +2962,9 @@ export function RegisterInvitationForm({
                 fieldKey="hero-cover"
                 draftKey={uploadDraftKey}
                 onChange={(v) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "hero", "coverImage"], v))
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "hero", "coverImage"], v),
+                  )
                 }
               />
             </div>
@@ -2509,9 +2975,17 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.title.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "title", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "title", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "title", "heading"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "title", "heading"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -2521,7 +2995,9 @@ export function RegisterInvitationForm({
               label="Title"
               value={config.sections.title.heading}
               onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "title", "heading"], v))
+                setConfig((prev) =>
+                  updateAtPath(prev, ["sections", "title", "heading"], v),
+                )
               }
             />
           </SectionCard>
@@ -2531,9 +3007,17 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.countdown.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "countdown", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "countdown", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "countdown", "heading"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "countdown", "heading"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -2543,7 +3027,9 @@ export function RegisterInvitationForm({
               label="Title"
               value={config.sections.countdown.heading}
               onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "countdown", "heading"], v))
+                setConfig((prev) =>
+                  updateAtPath(prev, ["sections", "countdown", "heading"], v),
+                )
               }
             />
           </SectionCard>
@@ -2553,10 +3039,18 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.quote.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "quote", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "quote", "enabled"],
+                  v,
+                );
                 if (!v) {
                   next = updateAtPath(next, ["sections", "quote", "text"], "");
-                  next = updateAtPath(next, ["sections", "quote", "author"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "quote", "author"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -2565,14 +3059,20 @@ export function RegisterInvitationForm({
             <TextArea
               label="Quote Text"
               value={config.sections.quote.text}
-              onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "quote", "text"], v))}
+              onChange={(v) =>
+                setConfig((prev) =>
+                  updateAtPath(prev, ["sections", "quote", "text"], v),
+                )
+              }
               rows={3}
             />
             <TextInput
               label="Author / Source"
               value={config.sections.quote.author}
               onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "quote", "author"], v))
+                setConfig((prev) =>
+                  updateAtPath(prev, ["sections", "quote", "author"], v),
+                )
               }
             />
           </SectionCard>
@@ -2581,7 +3081,9 @@ export function RegisterInvitationForm({
             title="🧑‍🤝‍🧑 Hosts"
             enabled={asBoolean(config.sections.hosts.enabled)}
             onEnabledChange={(v) =>
-              setConfig((prev) => updateAtPath(prev, ["sections", "hosts", "enabled"], v))
+              setConfig((prev) =>
+                updateAtPath(prev, ["sections", "hosts", "enabled"], v),
+              )
             }
           >
             {config.sections.hosts.hosts.map((host, idx) => (
@@ -2599,7 +3101,9 @@ export function RegisterInvitationForm({
                     className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                     disabled={config.sections.hosts.hosts.length <= 1}
                     onClick={() => {
-                      const next = config.sections.hosts.hosts.filter((_, i) => i !== idx);
+                      const next = config.sections.hosts.hosts.filter(
+                        (_, i) => i !== idx,
+                      );
                       setHosts(next.length ? next : [host]);
                     }}
                   >
@@ -2665,10 +3169,22 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.story.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "story", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "story", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "story", "heading"], "");
-                  next = updateAtPath(next, ["sections", "story", "stories"], []);
+                  next = updateAtPath(
+                    next,
+                    ["sections", "story", "heading"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "story", "stories"],
+                    [],
+                  );
                 }
                 return next;
               })
@@ -2678,13 +3194,17 @@ export function RegisterInvitationForm({
               label="Title"
               value={config.sections.story.heading}
               onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["sections", "story", "heading"], v))
+                setConfig((prev) =>
+                  updateAtPath(prev, ["sections", "story", "heading"], v),
+                )
               }
             />
 
             <div className="grid gap-2 mt-4">
               <div className="flex items-center justify-between">
-                <div className="text-sm font-bold text-indigo-100">Story List</div>
+                <div className="text-sm font-bold text-indigo-100">
+                  Story List
+                </div>
               </div>
 
               <div className="grid gap-4 mt-2">
@@ -2694,14 +3214,23 @@ export function RegisterInvitationForm({
                     className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                      <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Story {idx + 1}</div>
+                      <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">
+                        Story {idx + 1}
+                      </div>
                       <button
                         type="button"
                         className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors"
                         onClick={() => {
-                          const nextStories = config.sections.story.stories.filter((_, i) => i !== idx);
+                          const nextStories =
+                            config.sections.story.stories.filter(
+                              (_, i) => i !== idx,
+                            );
                           setConfig((prev) =>
-                            updateAtPath(prev, ["sections", "story", "stories"], nextStories),
+                            updateAtPath(
+                              prev,
+                              ["sections", "story", "stories"],
+                              nextStories,
+                            ),
                           );
                         }}
                       >
@@ -2717,7 +3246,13 @@ export function RegisterInvitationForm({
                           ...nextStories[idx],
                           date: { ...v, time: { hour: 0, minute: 0 } },
                         };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
+                        setConfig((prev) =>
+                          updateAtPath(
+                            prev,
+                            ["sections", "story", "stories"],
+                            nextStories,
+                          ),
+                        );
                       }}
                     />
                     <TextArea
@@ -2725,8 +3260,17 @@ export function RegisterInvitationForm({
                       value={story.description}
                       onChange={(v) => {
                         const nextStories = [...config.sections.story.stories];
-                        nextStories[idx] = { ...nextStories[idx], description: v };
-                        setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
+                        nextStories[idx] = {
+                          ...nextStories[idx],
+                          description: v,
+                        };
+                        setConfig((prev) =>
+                          updateAtPath(
+                            prev,
+                            ["sections", "story", "stories"],
+                            nextStories,
+                          ),
+                        );
                       }}
                       rows={3}
                     />
@@ -2735,18 +3279,37 @@ export function RegisterInvitationForm({
                         label="Story Title (optional)"
                         value={story.title ?? ""}
                         onChange={(v) => {
-                          const nextStories = [...config.sections.story.stories];
+                          const nextStories = [
+                            ...config.sections.story.stories,
+                          ];
                           nextStories[idx] = { ...nextStories[idx], title: v };
-                          setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
+                          setConfig((prev) =>
+                            updateAtPath(
+                              prev,
+                              ["sections", "story", "stories"],
+                              nextStories,
+                            ),
+                          );
                         }}
                       />
                       <TextInput
                         label="Image URL (optional)"
                         value={story.imageUrl ?? ""}
                         onChange={(v) => {
-                          const nextStories = [...config.sections.story.stories];
-                          nextStories[idx] = { ...nextStories[idx], imageUrl: v };
-                          setConfig((prev) => updateAtPath(prev, ["sections", "story", "stories"], nextStories));
+                          const nextStories = [
+                            ...config.sections.story.stories,
+                          ];
+                          nextStories[idx] = {
+                            ...nextStories[idx],
+                            imageUrl: v,
+                          };
+                          setConfig((prev) =>
+                            updateAtPath(
+                              prev,
+                              ["sections", "story", "stories"],
+                              nextStories,
+                            ),
+                          );
                         }}
                       />
                     </div>
@@ -2757,13 +3320,17 @@ export function RegisterInvitationForm({
               <div className="mt-3">
                 <button
                   type="button"
-                   className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2 w-full"
+                  className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3.5 text-sm font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-colors flex items-center justify-center gap-2 w-full"
                   onClick={() =>
                     setConfig((prev) =>
-                      updateAtPath(prev, ["sections", "story", "stories"], [
-                        ...prev.sections.story.stories,
-                        { date: createTodayDateTime(), description: "" },
-                      ]),
+                      updateAtPath(
+                        prev,
+                        ["sections", "story", "stories"],
+                        [
+                          ...prev.sections.story.stories,
+                          { date: createTodayDateTime(), description: "" },
+                        ],
+                      ),
                     )
                   }
                 >
@@ -2778,9 +3345,17 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.event.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "event", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "event", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "event", "heading"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "event", "heading"],
+                    "",
+                  );
                   next = updateAtPath(
                     next,
                     ["sections", "event", "events"],
@@ -2795,12 +3370,18 @@ export function RegisterInvitationForm({
               <TextInput
                 label="Title"
                 value={config.sections.event.heading}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "event", "heading"], v))}
+                onChange={(v) =>
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "event", "heading"], v),
+                  )
+                }
               />
 
               <div className="grid gap-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-bold text-indigo-100">Event List</div>
+                  <div className="text-sm font-bold text-indigo-100">
+                    Event List
+                  </div>
                 </div>
 
                 <div className="grid gap-4">
@@ -2810,15 +3391,18 @@ export function RegisterInvitationForm({
                       className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner"
                     >
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                        <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Event {idx + 1}</div>
+                        <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">
+                          Event {idx + 1}
+                        </div>
                         <button
                           type="button"
                           disabled={config.sections.event.events.length <= 1}
                           className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                           onClick={() => {
-                            const nextEvents = config.sections.event.events.filter(
-                              (_, i) => i !== idx,
-                            );
+                            const nextEvents =
+                              config.sections.event.events.filter(
+                                (_, i) => i !== idx,
+                              );
                             setConfig((prev) =>
                               updateAtPath(
                                 prev,
@@ -2834,18 +3418,33 @@ export function RegisterInvitationForm({
 
                       <div className="grid gap-4 sm:grid-cols-2">
                         {EVENT_FIELDS.map(([field, fieldLabel]) => (
-                          <div key={field} className={field === "address" || field === "mapUrl" ? "sm:col-span-2" : ""}>
+                          <div
+                            key={field}
+                            className={
+                              field === "address" || field === "mapUrl"
+                                ? "sm:col-span-2"
+                                : ""
+                            }
+                          >
                             <TextInput
                               label={fieldLabel}
                               value={event[field]}
                               onChange={(v) => {
-                                const nextEvents = [...config.sections.event.events];
-                                nextEvents[idx] = { ...nextEvents[idx]!, [field]: v };
+                                const nextEvents = [
+                                  ...config.sections.event.events,
+                                ];
+                                nextEvents[idx] = {
+                                  ...nextEvents[idx]!,
+                                  [field]: v,
+                                };
                                 setConfig((prev) =>
                                   updateAtPath(
                                     prev,
                                     ["sections", "event", "events"],
-                                    nextEvents as [EventDetail, ...EventDetail[]],
+                                    nextEvents as [
+                                      EventDetail,
+                                      ...EventDetail[],
+                                    ],
                                   ),
                                 );
                               }}
@@ -2857,7 +3456,9 @@ export function RegisterInvitationForm({
                           label="Date"
                           value={event.date}
                           onChange={(v) => {
-                            const nextEvents = [...config.sections.event.events];
+                            const nextEvents = [
+                              ...config.sections.event.events,
+                            ];
                             nextEvents[idx] = { ...nextEvents[idx]!, date: v };
                             setConfig((prev) =>
                               updateAtPath(
@@ -2872,7 +3473,9 @@ export function RegisterInvitationForm({
                           label="Time"
                           value={event.date}
                           onChange={(v) => {
-                            const nextEvents = [...config.sections.event.events];
+                            const nextEvents = [
+                              ...config.sections.event.events,
+                            ];
                             nextEvents[idx] = { ...nextEvents[idx]!, date: v };
                             setConfig((prev) =>
                               updateAtPath(
@@ -2904,7 +3507,11 @@ export function RegisterInvitationForm({
                         },
                       ] as [EventDetail, ...EventDetail[]];
                       setConfig((prev) =>
-                        updateAtPath(prev, ["sections", "event", "events"], nextEvents),
+                        updateAtPath(
+                          prev,
+                          ["sections", "event", "events"],
+                          nextEvents,
+                        ),
                       );
                     }}
                   >
@@ -2920,10 +3527,22 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.gallery.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "gallery", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "gallery", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "gallery", "heading"], "");
-                  next = updateAtPath(next, ["sections", "gallery", "photos"], []);
+                  next = updateAtPath(
+                    next,
+                    ["sections", "gallery", "heading"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "gallery", "photos"],
+                    [],
+                  );
                 }
                 return next;
               })
@@ -2934,7 +3553,9 @@ export function RegisterInvitationForm({
                 label="Title"
                 value={config.sections.gallery.heading}
                 onChange={(v) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "heading"], v))
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "gallery", "heading"], v),
+                  )
                 }
               />
               <ImageUrlListPicker
@@ -2944,7 +3565,13 @@ export function RegisterInvitationForm({
                 fieldKey="gallery-photo"
                 draftKey={uploadDraftKey}
                 onChange={(items) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "gallery", "photos"], items))
+                  setConfig((prev) =>
+                    updateAtPath(
+                      prev,
+                      ["sections", "gallery", "photos"],
+                      items,
+                    ),
+                  )
                 }
               />
             </div>
@@ -2955,13 +3582,37 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.rsvp.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "rsvp", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "rsvp", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "rsvp", "heading"], "");
-                  next = updateAtPath(next, ["sections", "rsvp", "description"], "");
-                  next = updateAtPath(next, ["sections", "rsvp", "successMessage"], "");
-                  next = updateAtPath(next, ["sections", "rsvp", "alreadySubmittedMessage"], "");
-                  next = updateAtPath(next, ["sections", "rsvp", "seeYouMessage"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "rsvp", "heading"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "rsvp", "description"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "rsvp", "successMessage"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "rsvp", "alreadySubmittedMessage"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "rsvp", "seeYouMessage"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -2973,7 +3624,11 @@ export function RegisterInvitationForm({
                   key={field}
                   label={label}
                   value={config.sections.rsvp[field]}
-                  onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "rsvp", field], v))}
+                  onChange={(v) =>
+                    setConfig((prev) =>
+                      updateAtPath(prev, ["sections", "rsvp", field], v),
+                    )
+                  }
                   rows={2}
                 />
               ))}
@@ -2985,11 +3640,27 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.gift.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "gift", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "gift", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "gift", "heading"], "");
-                  next = updateAtPath(next, ["sections", "gift", "description"], "");
-                  next = updateAtPath(next, ["sections", "gift", "bankAccounts"], []);
+                  next = updateAtPath(
+                    next,
+                    ["sections", "gift", "heading"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "gift", "description"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "gift", "bankAccounts"],
+                    [],
+                  );
                 }
                 return next;
               })
@@ -2999,20 +3670,28 @@ export function RegisterInvitationForm({
               <TextInput
                 label="Title"
                 value={config.sections.gift.heading}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "gift", "heading"], v))}
+                onChange={(v) =>
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "gift", "heading"], v),
+                  )
+                }
               />
               <TextArea
                 label="Description"
                 value={config.sections.gift.description}
                 onChange={(v) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "gift", "description"], v))
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "gift", "description"], v),
+                  )
                 }
                 rows={2}
               />
 
               <div className="grid gap-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-bold text-indigo-100">Bank Accounts / E-Wallet</div>
+                  <div className="text-sm font-bold text-indigo-100">
+                    Bank Accounts / E-Wallet
+                  </div>
                 </div>
                 <div className="grid gap-4">
                   {config.sections.gift.bankAccounts.map((acc, idx) => (
@@ -3021,30 +3700,48 @@ export function RegisterInvitationForm({
                       className="grid gap-4 rounded-xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner"
                     >
                       <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                        <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">Account {idx + 1}</div>
+                        <div className="text-sm font-black text-indigo-200 uppercase tracking-wider">
+                          Account {idx + 1}
+                        </div>
                         <button
                           type="button"
                           className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-bold tracking-wide text-red-200 hover:bg-red-500/20 transition-colors"
                           onClick={() => {
-                            const nextAccounts = config.sections.gift.bankAccounts.filter((_, i) => i !== idx);
+                            const nextAccounts =
+                              config.sections.gift.bankAccounts.filter(
+                                (_, i) => i !== idx,
+                              );
                             setConfig((prev) =>
-                              updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                              updateAtPath(
+                                prev,
+                                ["sections", "gift", "bankAccounts"],
+                                nextAccounts,
+                              ),
                             );
                           }}
                         >
                           Remove
                         </button>
                       </div>
-                      
+
                       <div className="grid gap-4 sm:grid-cols-2">
                         <TextInput
                           label="Bank / Platform Name"
                           value={acc.bankName}
                           onChange={(v) => {
-                            const nextAccounts = [...config.sections.gift.bankAccounts];
-                            nextAccounts[idx] = { ...nextAccounts[idx], bankName: v };
+                            const nextAccounts = [
+                              ...config.sections.gift.bankAccounts,
+                            ];
+                            nextAccounts[idx] = {
+                              ...nextAccounts[idx],
+                              bankName: v,
+                            };
                             setConfig((prev) =>
-                              updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                              updateAtPath(
+                                prev,
+                                ["sections", "gift", "bankAccounts"],
+                                nextAccounts,
+                              ),
                             );
                           }}
                         />
@@ -3052,10 +3749,19 @@ export function RegisterInvitationForm({
                           label="Account Number"
                           value={acc.accountNumber}
                           onChange={(v) => {
-                            const nextAccounts = [...config.sections.gift.bankAccounts];
-                            nextAccounts[idx] = { ...nextAccounts[idx], accountNumber: v };
+                            const nextAccounts = [
+                              ...config.sections.gift.bankAccounts,
+                            ];
+                            nextAccounts[idx] = {
+                              ...nextAccounts[idx],
+                              accountNumber: v,
+                            };
                             setConfig((prev) =>
-                              updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                              updateAtPath(
+                                prev,
+                                ["sections", "gift", "bankAccounts"],
+                                nextAccounts,
+                              ),
                             );
                           }}
                         />
@@ -3064,10 +3770,19 @@ export function RegisterInvitationForm({
                             label="Account Holder Name"
                             value={acc.accountHolder}
                             onChange={(v) => {
-                              const nextAccounts = [...config.sections.gift.bankAccounts];
-                              nextAccounts[idx] = { ...nextAccounts[idx], accountHolder: v };
+                              const nextAccounts = [
+                                ...config.sections.gift.bankAccounts,
+                              ];
+                              nextAccounts[idx] = {
+                                ...nextAccounts[idx],
+                                accountHolder: v,
+                              };
                               setConfig((prev) =>
-                                updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                                updateAtPath(
+                                  prev,
+                                  ["sections", "gift", "bankAccounts"],
+                                  nextAccounts,
+                                ),
                               );
                             }}
                           />
@@ -3087,7 +3802,11 @@ export function RegisterInvitationForm({
                         { bankName: "", accountNumber: "", accountHolder: "" },
                       ];
                       setConfig((prev) =>
-                        updateAtPath(prev, ["sections", "gift", "bankAccounts"], nextAccounts),
+                        updateAtPath(
+                          prev,
+                          ["sections", "gift", "bankAccounts"],
+                          nextAccounts,
+                        ),
                       );
                     }}
                   >
@@ -3103,11 +3822,27 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.wishes.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "wishes", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "wishes", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "wishes", "heading"], "");
-                  next = updateAtPath(next, ["sections", "wishes", "placeholder"], "");
-                  next = updateAtPath(next, ["sections", "wishes", "thankYouMessage"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "wishes", "heading"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "wishes", "placeholder"],
+                    "",
+                  );
+                  next = updateAtPath(
+                    next,
+                    ["sections", "wishes", "thankYouMessage"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -3117,17 +3852,37 @@ export function RegisterInvitationForm({
               <TextInput
                 label="Title"
                 value={config.sections.wishes.heading ?? ""}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "heading"], v))}
+                onChange={(v) =>
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "wishes", "heading"], v),
+                  )
+                }
               />
               <TextInput
                 label="Placeholder Text"
                 value={config.sections.wishes.placeholder ?? ""}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "placeholder"], v))}
+                onChange={(v) =>
+                  setConfig((prev) =>
+                    updateAtPath(
+                      prev,
+                      ["sections", "wishes", "placeholder"],
+                      v,
+                    ),
+                  )
+                }
               />
               <TextArea
                 label="Thank You Message"
                 value={config.sections.wishes.thankYouMessage ?? ""}
-                onChange={(v) => setConfig((prev) => updateAtPath(prev, ["sections", "wishes", "thankYouMessage"], v))}
+                onChange={(v) =>
+                  setConfig((prev) =>
+                    updateAtPath(
+                      prev,
+                      ["sections", "wishes", "thankYouMessage"],
+                      v,
+                    ),
+                  )
+                }
                 rows={2}
               />
             </div>
@@ -3138,9 +3893,17 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.gratitude.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "gratitude", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "gratitude", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "gratitude", "message"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "gratitude", "message"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -3151,7 +3914,9 @@ export function RegisterInvitationForm({
                 label="Message"
                 value={config.sections.gratitude.message}
                 onChange={(v) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "gratitude", "message"], v))
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "gratitude", "message"], v),
+                  )
                 }
                 rows={3}
               />
@@ -3163,9 +3928,17 @@ export function RegisterInvitationForm({
             enabled={asBoolean(config.sections.footer.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
-                let next = updateAtPath(prev, ["sections", "footer", "enabled"], v);
+                let next = updateAtPath(
+                  prev,
+                  ["sections", "footer", "enabled"],
+                  v,
+                );
                 if (!v) {
-                  next = updateAtPath(next, ["sections", "footer", "message"], "");
+                  next = updateAtPath(
+                    next,
+                    ["sections", "footer", "message"],
+                    "",
+                  );
                 }
                 return next;
               })
@@ -3176,27 +3949,42 @@ export function RegisterInvitationForm({
                 label="Footer Message"
                 value={config.sections.footer.message}
                 onChange={(v) =>
-                  setConfig((prev) => updateAtPath(prev, ["sections", "footer", "message"], v))
+                  setConfig((prev) =>
+                    updateAtPath(prev, ["sections", "footer", "message"], v),
+                  )
                 }
                 rows={3}
               />
             </div>
           </SectionCard>
-      </div>
-
+        </div>
       </div>
 
       <button
         type="button"
-        disabled={pending}
+        disabled={
+          pending ||
+          (requiresAffiliateAcknowledgement && !affiliateAcknowledged)
+        }
         className="mt-2 rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none w-full"
         onClick={() => {
+          if (requiresAffiliateAcknowledgement && !affiliateAcknowledged) {
+            setClientError(
+              "Cookie afiliasi tidak terdeteksi. Undangan ini tidak akan mendapatkan komisi kecuali Anda mengakui dan melanjutkan.",
+            );
+            setAffiliateAckModalOpen(true);
+            return;
+          }
           const err = validateBeforeReview();
           setClientError(err);
           if (!err) setReviewOpen(true);
         }}
       >
-        {pending ? "Launching Mission..." : isEditMode ? "Update Mission (Save)" : "Launch Mission (Save)"}
+        {pending
+          ? "Launching Mission..."
+          : isEditMode
+            ? "Update Mission (Save)"
+            : "Launch Mission (Save)"}
       </button>
 
       {reviewOpen ? (
@@ -3212,9 +4000,13 @@ export function RegisterInvitationForm({
             <div className="relative z-10 grid gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-xs font-mono text-white/40 uppercase tracking-wider">Review Summary</div>
+                  <div className="text-xs font-mono text-white/40 uppercase tracking-wider">
+                    Review Summary
+                  </div>
                   <div className="mt-1 text-lg font-black tracking-tight text-white">
-                    {isEditMode ? "Ready to update this mission?" : "Ready to create this mission?"}
+                    {isEditMode
+                      ? "Ready to update this mission?"
+                      : "Ready to create this mission?"}
                   </div>
                 </div>
                 <button
@@ -3229,40 +4021,75 @@ export function RegisterInvitationForm({
               <div className="grid gap-3 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div>
-                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Mission Code</div>
-                    <div className="mt-1 font-mono text-sm text-white/80 break-all">{slug}</div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                      Mission Code
+                    </div>
+                    <div className="mt-1 font-mono text-sm text-white/80 break-all">
+                      {slug}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Purpose</div>
-                    <div className="mt-1 text-sm font-black text-white/90">{purpose}</div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                      Purpose
+                    </div>
+                    <div className="mt-1 text-sm font-black text-white/90">
+                      {purpose}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Template</div>
-                    <div className="mt-1 text-sm font-black text-white/90">{templateLabel}</div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                      Template
+                    </div>
+                    <div className="mt-1 text-sm font-black text-white/90">
+                      {templateLabel}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Color Combination</div>
-                    <div className="mt-1 text-sm font-black text-white/90">{themeLabel}</div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                      Color Combination
+                    </div>
+                    <div className="mt-1 text-sm font-black text-white/90">
+                      {themeLabel}
+                    </div>
                   </div>
                   <div className="sm:col-span-2">
-                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Hosts</div>
-                    <div className="mt-1 text-sm font-black text-white/90">{hostLabel || "-"}</div>
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                      Hosts
+                    </div>
+                    <div className="mt-1 text-sm font-black text-white/90">
+                      {hostLabel || "-"}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                      Afiliasi
+                    </div>
+                    <div className="mt-1 text-sm text-white/80">
+                      {affiliateSummaryText}
+                    </div>
                   </div>
                 </div>
 
                 <div className="h-px bg-white/10" />
 
                 <div className="grid gap-2">
-                  <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">First Event</div>
+                  <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                    First Event
+                  </div>
                   {firstEventSummary ? (
                     <div className="grid gap-1 text-sm text-white/85">
                       <div className="font-black text-white">
                         {firstEventSummary.title || "Event"}
                       </div>
                       <div className="text-white/80">
-                        {firstEventSummary.dateText}{firstEventSummary.timeText ? ` • ${firstEventSummary.timeText}` : ""}
+                        {firstEventSummary.dateText}
+                        {firstEventSummary.timeText
+                          ? ` • ${firstEventSummary.timeText}`
+                          : ""}
                       </div>
-                      <div className="text-white/70">{firstEventSummary.venue || ""}</div>
+                      <div className="text-white/70">
+                        {firstEventSummary.venue || ""}
+                      </div>
                     </div>
                   ) : (
                     <div className="text-sm text-white/60">-</div>
@@ -3293,7 +4120,13 @@ export function RegisterInvitationForm({
                     }, 0);
                   }}
                 >
-                  {pending ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update Mission" : "Create Mission"}
+                  {pending
+                    ? isEditMode
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditMode
+                      ? "Update Mission"
+                      : "Create Mission"}
                 </button>
               </div>
             </div>

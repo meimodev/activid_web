@@ -20,7 +20,7 @@ import {
   NEPTUNE_OVERLAY_URLS,
 } from "./graphics";
 import { HeroSection } from "./HeroSection";
-import { CoupleProfileSection } from "./CoupleProfileSection";
+import { HostsSection } from "./HostsSection";
 import { FooterMark } from "./FooterMark";
 import { GiftSectionClassic } from "./GiftSectionClassic";
 import { GallerySectionClassic } from "./GallerySectionClassic";
@@ -304,7 +304,7 @@ export function Neptune({ config }: NeptuneProps) {
             ) : null}
 
             {hostsSection.enabled ? (
-              <CoupleProfileSection hosts={hosts} inviteLine={inviteLine} />
+              <HostsSection hosts={hosts} inviteLine={inviteLine} />
             ) : null}
 
             {config.sections.event.enabled && (

@@ -1,11 +1,16 @@
 "use server";
 
-import { isAffiliateId, normalizeWhatsappNumberE164 } from "@/lib/affiliate-config";
+import {
+  isAffiliateId,
+  normalizeWhatsappNumber,
+  normalizeWhatsappNumberE164,
+} from "@/lib/affiliate-config";
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
   createInvitationAffiliateSessionCookieValue,
   getInvitationAffiliateSessionCookieName,
   isInvitationAffiliateSessionValid,
+  getSessionCookieOptions,
 } from "@/lib/invitation-affiliate-session";
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "crypto";
 import { FieldValue } from "firebase-admin/firestore";
@@ -20,13 +25,7 @@ const scrypt = promisify(scryptCallback) as unknown as (
   keylen: number,
 ) => Promise<Buffer>;
 
-function readString(formData: FormData, key: string): string {
-  const value = formData.get(key);
-  if (typeof value !== "string") return "";
-  return value;
-}
-
-async function hashPassword(password: string, salt: string): Promise<string> {
+export async function hashPassword(password: string, salt: string): Promise<string> {
   const buf = await scrypt(password, salt, 64);
   return buf.toString("hex");
 }
@@ -35,19 +34,25 @@ function normalizeAffiliateId(raw: string): string {
   return (raw ?? "").trim().toUpperCase();
 }
 
-function getSessionCookieOptions() {
-  return {
-    httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 12,
-  };
+function isAlreadyExistsError(err: unknown): boolean {
+  const code = (err as { code?: unknown } | null)?.code;
+  return code === 6 || code === "already-exists";
+}
+
+
+function readString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  if (typeof value !== "string") return "";
+  return value;
 }
 
 export type RegisterAffiliateState = {
   ok?: boolean;
   affiliateId?: string;
+  duplicateUnverified?: boolean;
+  existingAffiliateId?: string;
+  existingName?: string;
+  existingWhatsappNumber?: string;
   error?: string;
 };
 
@@ -84,6 +89,11 @@ export async function registerAffiliate(
     return { error: "WhatsApp number is required (start with 8, no leading 0)." };
   }
 
+  const whatsappDigits = normalizeWhatsappNumber(whatsappNumber);
+  if (!whatsappDigits) {
+    return { error: "WhatsApp number is required (start with 8, no leading 0)." };
+  }
+
   if (!password || password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
@@ -92,28 +102,146 @@ export async function registerAffiliate(
     return { error: "Passwords do not match." };
   }
 
-  const affiliateId = generateAffiliateId();
+  const db = getAdminDb();
+
+  function stateFromExistingAffiliateDoc(
+    affiliateId: string,
+    data: { [key: string]: unknown } | undefined,
+  ): RegisterAffiliateState {
+    const enabled = data?.enabled !== false;
+    if (enabled) {
+      return { error: "WhatsApp number already registered." };
+    }
+
+    const existingName = typeof data?.name === "string" ? data.name : "";
+    const existingWhatsappNumber = typeof data?.whatsappNumber === "string" ? data.whatsappNumber : "";
+    return {
+      duplicateUnverified: true,
+      existingAffiliateId: affiliateId,
+      existingName,
+      existingWhatsappNumber,
+    };
+  }
+
+  try {
+    const existing = await db
+      .collection("invitationAffiliates")
+      .where("whatsappNumber", "==", whatsappNumber)
+      .limit(1)
+      .get();
+    if (!existing.empty) {
+      const doc = existing.docs[0];
+      return stateFromExistingAffiliateDoc(doc.id, doc.data() as { [key: string]: unknown });
+    }
+  } catch {}
+
   const salt = randomBytes(16).toString("hex");
   const passwordHash = await hashPassword(password, salt);
 
+  const whatsappIndexRef = db.collection("invitationAffiliateWhatsappIndex").doc(whatsappDigits);
+
   try {
-    await getAdminDb()
-      .collection("invitationAffiliates")
-      .doc(affiliateId)
-      .create({
-        name,
-        whatsappNumber,
-        enabled: true,
-        joinedAt: FieldValue.serverTimestamp(),
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-        passwordSalt: salt,
-        passwordHash,
-        generatedInvitationCount: 0,
-        lastGeneratedInvitationAt: null,
+    const indexSnap = await whatsappIndexRef.get();
+    if (indexSnap.exists) {
+      const indexData = (indexSnap.data() ?? {}) as { affiliateId?: unknown };
+      const existingAffiliateId =
+        typeof indexData.affiliateId === "string" ? normalizeAffiliateId(indexData.affiliateId) : "";
+      if (!existingAffiliateId || !isAffiliateId(existingAffiliateId)) {
+        return { error: "WhatsApp number already registered." };
+      }
+
+      try {
+        const existingAffiliateSnap = await db
+          .collection("invitationAffiliates")
+          .doc(existingAffiliateId)
+          .get();
+        if (!existingAffiliateSnap.exists) {
+          return { error: "WhatsApp number already registered." };
+        }
+
+        return stateFromExistingAffiliateDoc(
+          existingAffiliateId,
+          existingAffiliateSnap.data() as { [key: string]: unknown },
+        );
+      } catch {
+        return { error: "WhatsApp number already registered." };
+      }
+    }
+  } catch {}
+
+  let affiliateId = "";
+  let registered = false;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    affiliateId = generateAffiliateId();
+    const affiliateRef = db.collection("invitationAffiliates").doc(affiliateId);
+    try {
+      await db.runTransaction(async (tx) => {
+        tx.create(whatsappIndexRef, {
+          affiliateId,
+          whatsappDigits,
+          whatsappNumber,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        tx.create(affiliateRef, {
+          name,
+          whatsappNumber,
+          enabled: false,
+          verificationStatus: "pending",
+          verificationRequestedAt: null,
+          joinedAt: FieldValue.serverTimestamp(),
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+          passwordSalt: salt,
+          passwordHash,
+          generatedInvitationCount: 0,
+          lastGeneratedInvitationAt: null,
+        });
       });
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : "Failed to register." };
+      registered = true;
+      break;
+    } catch (err) {
+      if (isAlreadyExistsError(err)) {
+        try {
+          const indexSnap = await whatsappIndexRef.get();
+          if (indexSnap.exists) {
+            const indexData = (indexSnap.data() ?? {}) as { affiliateId?: unknown };
+            const existingAffiliateId =
+              typeof indexData.affiliateId === "string"
+                ? normalizeAffiliateId(indexData.affiliateId)
+                : "";
+            if (!existingAffiliateId || !isAffiliateId(existingAffiliateId)) {
+              return { error: "WhatsApp number already registered." };
+            }
+
+            try {
+              const existingAffiliateSnap = await db
+                .collection("invitationAffiliates")
+                .doc(existingAffiliateId)
+                .get();
+              if (!existingAffiliateSnap.exists) {
+                return { error: "WhatsApp number already registered." };
+              }
+
+              return stateFromExistingAffiliateDoc(
+                existingAffiliateId,
+                existingAffiliateSnap.data() as { [key: string]: unknown },
+              );
+            } catch {
+              return { error: "WhatsApp number already registered." };
+            }
+          }
+        } catch {}
+
+        continue;
+      }
+      return { error: err instanceof Error ? err.message : "Failed to register." };
+    }
+  }
+
+  if (!registered) {
+    return { error: "Failed to register." };
   }
 
   const cookieStore = await cookies();
@@ -156,7 +284,7 @@ export async function loginAffiliate(
   };
 
   if (!data || data.enabled === false) {
-    return { error: "Affiliate disabled." };
+    return { error: "Affiliate pending verification." };
   }
 
   const salt = typeof data.passwordSalt === "string" ? data.passwordSalt : "";
@@ -225,19 +353,108 @@ export async function updateAffiliateProfile(
     return { error: "WhatsApp number is required (start with 8, no leading 0)." };
   }
 
-  await getAdminDb()
-    .collection("invitationAffiliates")
-    .doc(affiliateId)
-    .set(
-      {
-        name,
-        whatsappNumber,
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    );
+  const whatsappDigits = normalizeWhatsappNumber(whatsappNumber);
+  if (!whatsappDigits) {
+    return { error: "WhatsApp number is required (start with 8, no leading 0)." };
+  }
+
+  const db = getAdminDb();
+
+  try {
+    const existing = await db
+      .collection("invitationAffiliates")
+      .where("whatsappNumber", "==", whatsappNumber)
+      .limit(2)
+      .get();
+    const dupDoc = existing.docs.find((d) => d.id !== affiliateId);
+    if (dupDoc) {
+      return { error: "WhatsApp number already registered." };
+    }
+  } catch {}
+
+  const affiliateRef = db.collection("invitationAffiliates").doc(affiliateId);
+  const newIndexRef = db.collection("invitationAffiliateWhatsappIndex").doc(whatsappDigits);
+
+  try {
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(affiliateRef);
+      if (!snap.exists) {
+        throw new Error("Affiliate not found.");
+      }
+
+      const existingData = (snap.data() ?? {}) as { whatsappNumber?: unknown };
+      const currentWhatsapp =
+        typeof existingData.whatsappNumber === "string" ? existingData.whatsappNumber : "";
+      const currentDigits = currentWhatsapp ? normalizeWhatsappNumber(currentWhatsapp) : "";
+
+      const indexSnap = await tx.get(newIndexRef);
+      const owner = (indexSnap.data() as { affiliateId?: unknown } | undefined)?.affiliateId;
+
+      if (indexSnap.exists && owner && owner !== affiliateId) {
+        throw new Error("WhatsApp number already registered.");
+      }
+
+      if (!indexSnap.exists) {
+        tx.create(newIndexRef, {
+          affiliateId,
+          whatsappDigits,
+          whatsappNumber,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      } else {
+        tx.set(
+          newIndexRef,
+          {
+            affiliateId,
+            whatsappDigits,
+            whatsappNumber,
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        );
+      }
+
+      tx.set(
+        affiliateRef,
+        {
+          name,
+          whatsappNumber,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+
+      if (currentDigits && currentDigits !== whatsappDigits) {
+        const oldIndexRef = db.collection("invitationAffiliateWhatsappIndex").doc(currentDigits);
+        const oldIndexSnap = await tx.get(oldIndexRef);
+        const oldOwner = (oldIndexSnap.data() as { affiliateId?: unknown } | undefined)?.affiliateId;
+        if (oldIndexSnap.exists && oldOwner === affiliateId) {
+          tx.delete(oldIndexRef);
+        }
+      }
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to save profile." };
+  }
 
   return { ok: true };
+}
+
+export async function verifyAffiliateAction(
+  affiliateId: string,
+): Promise<{ ok?: boolean; error?: string }> {
+  try {
+    const db = getAdminDb();
+    await db.collection("invitationAffiliates").doc(affiliateId).update({
+      enabled: true,
+      verificationStatus: "verified",
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return { ok: true };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Failed to verify affiliate." };
+  }
 }
 
 export async function changeAffiliatePassword(

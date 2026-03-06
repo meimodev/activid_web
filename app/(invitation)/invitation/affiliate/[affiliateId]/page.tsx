@@ -6,6 +6,7 @@ import {
 } from "@/lib/invitation-affiliate-session";
 import { cookies } from "next/headers";
 import AffiliateDashboardClient from "./AffiliateDashboardClient";
+import GalaxyBackground from "../GalaxyBackground";
 
 interface PageProps {
   params: Promise<{
@@ -34,8 +35,9 @@ export default async function AffiliateDashboardPage({ params }: PageProps) {
     return (
       <div className="min-h-[100dvh] bg-[#020205] text-white">
         <div className="mx-auto max-w-4xl px-4 py-10">
-          <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-            <div className="text-xl font-black">Invalid affiliate id</div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 text-center shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+            <div className="text-xl font-black text-indigo-100">Affiliate ID Tidak Valid</div>
+            <div className="mt-2 text-sm text-indigo-200/70">Tautan Affiliate yang Anda tuju tidak ditemukan atau formatnya salah.</div>
           </div>
         </div>
       </div>
@@ -51,8 +53,9 @@ export default async function AffiliateDashboardPage({ params }: PageProps) {
     return (
       <div className="min-h-[100dvh] bg-[#020205] text-white">
         <div className="mx-auto max-w-4xl px-4 py-10">
-          <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-            <div className="text-xl font-black">Affiliate not found</div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 text-center shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+            <div className="text-xl font-black text-indigo-100">Affiliate Tidak Ditemukan</div>
+            <div className="mt-2 text-sm text-indigo-200/70">Akun Affiliate ini belum terdaftar di sistem kami.</div>
           </div>
         </div>
       </div>
@@ -94,8 +97,10 @@ export default async function AffiliateDashboardPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#020205] text-white">
-      <div className="mx-auto max-w-4xl px-4 py-10">
+    <div className="relative min-h-[100dvh] bg-slate-950 text-white overflow-hidden selection:bg-indigo-500/30">
+      <GalaxyBackground />
+
+      <div className="relative z-10 mx-auto max-w-4xl px-4 py-10">
         <AffiliateDashboardClient
           affiliate={{
             id: affiliateId,

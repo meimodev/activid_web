@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import CopyLinkButton from "../CopyLinkButton";
 import {
   changeAffiliatePassword,
@@ -12,6 +13,9 @@ import {
 import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
 
 const SITE_ORIGIN = "https://invitation.activid.id";
+const COMMISSION_RATE = 0.4;
+const COMMISSION_PERCENT = Math.round(COMMISSION_RATE * 100);
+const DEFAULT_VERIFICATION_WHATSAPP_NUMBER = "62881080088816";
 
 type AffiliateView = {
   id: string;
@@ -85,7 +89,7 @@ export default function AffiliateDashboardClient({
 
     return (generatedInvitations ?? []).map((i) => {
       const discountedPrice = discountedPriceByTemplateId.get(i.templateId) ?? 0;
-      const commission = discountedPrice * 0.35;
+      const commission = discountedPrice * COMMISSION_RATE;
       return {
         ...i,
         discountedPrice,
@@ -112,67 +116,101 @@ export default function AffiliateDashboardClient({
     }
   }, [loginState.ok, loginState.affiliateId, router]);
 
-  if (!affiliate.enabled) {
-    return (
-      <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="text-xl font-black tracking-tight">Affiliate disabled</div>
-        <div className="mt-2 text-sm text-white/70">{affiliate.id}</div>
-      </div>
-    );
-  }
+    if (!affiliate.enabled) {
+      return (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+        >
+          <div className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Menunggu Verifikasi</div>
+          <div className="mt-3 text-sm leading-relaxed text-indigo-100/70">
+            Akun Affiliate Anda belum diverifikasi oleh admin.
+            <br />
+            Silakan kirim permintaan verifikasi melalui WhatsApp.
+          </div>
+
+          <motion.a
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-4 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all"
+            target="_blank"
+            rel="noreferrer noopener"
+            href={
+              `https://wa.me/${DEFAULT_VERIFICATION_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                `[INV-AFFILIATE-VERIFY]\n\nAffiliate ID: ${affiliate.id}\nName: ${affiliate.name}\nWhatsApp: ${affiliate.whatsappNumber}`,
+              )}`
+            }
+          >
+            Kirim Permintaan Verifikasi
+          </motion.a>
+        </motion.div>
+      );
+    }
 
   if (!unlocked) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="text-2xl font-black tracking-tight">Affiliate dashboard</div>
-        <div className="mt-2 text-sm text-white/70">Login to access: <span className="font-mono text-white">{affiliate.id}</span></div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
+        <div className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Affiliate Dashboard</div>
+        <div className="mt-2 text-sm text-indigo-100/70">Masuk untuk mengakses: <span className="font-mono text-indigo-200 font-bold">{affiliate.id}</span></div>
 
-        <form action={loginAction} className="mt-6 grid gap-4">
+        <form action={loginAction} className="mt-8 grid gap-5">
           <input type="hidden" name="affiliateId" value={affiliate.id} />
 
-          <label className="grid gap-1 text-sm text-white/80">
-            Password
+          <label className="grid gap-1.5 text-sm font-medium text-indigo-100/80">
+            Kata Sandi
             <input
               name="password"
               type="password"
-              className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white"
+              className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder:text-white/30 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none transition-all"
             />
           </label>
 
           {loginState.error ? (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3.5 text-sm text-rose-200 backdrop-blur-md">
               {loginState.error}
             </div>
           ) : null}
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
-            className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="rounded-2xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all disabled:opacity-60"
             disabled={loginPending}
           >
-            {loginPending ? "Logging in..." : "Login"}
-          </button>
+            {loginPending ? "Masuk..." : "Masuk"}
+          </motion.button>
         </form>
 
         <button
           type="button"
-          className="mt-4 text-xs font-black uppercase tracking-wider text-indigo-200 hover:underline underline-offset-4"
+          className="mt-6 text-xs font-bold uppercase tracking-widest text-indigo-300 hover:text-indigo-200 hover:underline underline-offset-4 transition-colors"
           onClick={() => router.push("/invitation/affiliate")}
         >
-          Back to portal
+          Kembali ke Portal
         </button>
-      </div>
+      </motion.div>
     );
   }
 
   return (
     <div className="grid gap-6">
-      <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="flex items-start justify-between gap-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <div className="text-2xl font-black tracking-tight">Dashboard</div>
-            <div className="mt-1 text-sm text-white/70">
-              Affiliate id: <span className="font-mono text-white">{affiliate.id}</span>
+            <div className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Dashboard</div>
+            <div className="mt-1 text-sm text-indigo-100/70">
+              Affiliate ID: <span className="font-mono text-indigo-200 font-bold">{affiliate.id}</span>
             </div>
           </div>
 
@@ -181,98 +219,156 @@ export default function AffiliateDashboardClient({
               await logoutAffiliate();
               router.push("/invitation/affiliate");
             }}
+            className="self-start"
           >
             <button
               type="submit"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-white/10"
+              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-indigo-100 hover:bg-white/10 hover:text-white transition-all shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
             >
-              Logout
+              Keluar
             </button>
           </form>
         </div>
 
-        <div className="mt-6 grid gap-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="text-xs font-black uppercase tracking-wider text-white/60">Share link</div>
-            <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/30 px-3 py-2">
-              <div className="font-mono text-xs text-white/80 break-all">{shareLink}</div>
-              <CopyLinkButton link={shareLink} />
+        <div className="mt-8 grid gap-4">
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-5 backdrop-blur-sm shadow-inner">
+            <div className="text-xs font-black uppercase tracking-widest text-indigo-300">Link tautan anda</div>
+            <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-4 py-3 shadow-[inset_0_0_12px_rgba(99,102,241,0.1)]">
+              <div className="font-mono text-xs sm:text-sm text-indigo-100 break-all">{shareLink}</div>
+              <div className="shrink-0">
+                <CopyLinkButton link={shareLink} />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-xs font-black uppercase tracking-wider text-white/60">Generated invitations</div>
-              <div className="mt-2 text-3xl font-black text-white">{affiliate.generatedInvitationCount}</div>
-              <div className="mt-1 text-xs text-white/60">Count of invitation slugs created under your affiliate id.</div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-xs font-black uppercase tracking-wider text-white/60">Commission</div>
-              <div className="mt-2 text-sm text-white/70">You earn 35% commission from the discounted price.</div>
-              {exampleDiscountedPrice ? (
-                <div className="mt-3 grid gap-1">
-                  <div className="text-xs text-white/60">Example (current promo)</div>
-                  <div className="text-sm text-white/80">
-                    Discounted price: <span className="font-bold text-white">{formatRupiah(exampleDiscountedPrice)}</span>
-                  </div>
-                  <div className="text-sm text-emerald-200">
-                    Your commission: {formatRupiah(exampleDiscountedPrice * 0.35)}
-                  </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              animate={{ y: [0, -3, 0] }}
+              transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
+              className="rounded-2xl border border-white/10 bg-black/20 p-5 backdrop-blur-sm relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="text-xs font-black uppercase tracking-widest text-indigo-300">Undangan Dibuat</div>
+                <div className="mt-2 text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
+                  {affiliate.generatedInvitationCount}
                 </div>
-              ) : null}
-            </div>
+                <div className="mt-2 text-xs leading-relaxed text-indigo-100/60">Jumlah undangan yang berhasil dibuat melalui tautan Anda.</div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              animate={{ y: [0, -3, 0] }}
+              transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
+              className="rounded-2xl border border-white/10 bg-black/20 p-5 backdrop-blur-sm relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10">
+                <div className="text-xs font-black uppercase tracking-widest text-emerald-300">Komisi</div>
+                <div className="mt-2 text-sm leading-relaxed text-indigo-100/70">Anda mendapatkan komisi <span className="font-bold text-emerald-200">{COMMISSION_PERCENT}%</span> dari harga diskon.</div>
+                {exampleDiscountedPrice ? (
+                  <div className="mt-4 grid gap-1.5 rounded-xl bg-black/30 p-3 border border-white/5">
+                    <div className="text-xs font-medium text-indigo-200/50">Contoh (Promo Saat Ini)</div>
+                    <div className="text-sm text-indigo-100/90">
+                      Harga diskon: <span className="font-bold text-white">{formatRupiah(exampleDiscountedPrice)}</span>
+                    </div>
+                    <div className="text-sm font-bold text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]">
+                      Komisi Anda: {formatRupiah(exampleDiscountedPrice * COMMISSION_RATE)}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="flex items-start justify-between gap-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="text-lg font-black tracking-tight">Generated pages</div>
-            <div className="mt-1 text-sm text-white/60">
-              List of slugs generated under your affiliate id, including commission and generated date.
+            <div className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Halaman Dibuat</div>
+            <div className="mt-1 text-sm text-indigo-100/60 max-w-md">
+              Daftar undangan yang dibuat melalui Affiliate ID Anda, beserta komisi dan tanggal pembuatan.
             </div>
           </div>
-          <div className="shrink-0 text-right">
-            <div className="text-xs font-black uppercase tracking-wider text-white/60">Total commission</div>
-            <div className="mt-1 text-lg font-black text-emerald-200">{formatRupiah(totalCommission)}</div>
+          <div className="shrink-0 text-left sm:text-right rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-3 backdrop-blur-md relative overflow-hidden">
+            <motion.div 
+              className="absolute inset-0 bg-emerald-400/10 blur-[20px]"
+              animate={{ opacity: [0.3, 0.6, 0.3], scale: [0.9, 1.1, 0.9] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <div className="relative z-10 text-xs font-black uppercase tracking-widest text-emerald-300/80">Total Komisi</div>
+            <div className="relative z-10 mt-1 text-2xl font-black text-emerald-300 drop-shadow-[0_0_12px_rgba(52,211,153,0.4)]">{formatRupiah(totalCommission)}</div>
           </div>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
-          <div className="grid grid-cols-12 gap-3 bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/60">
-            <div className="col-span-5">Slug</div>
-            <div className="col-span-3">Generated</div>
+        <div className="mt-8">
+          <div className="hidden sm:grid grid-cols-12 gap-4 px-4 pb-3 text-xs font-black uppercase tracking-widest text-indigo-300/70 border-b border-white/10">
+            <div className="col-span-5 md:col-span-4">Slug</div>
+            <div className="col-span-3 md:col-span-4">Tanggal</div>
             <div className="col-span-2">Template</div>
-            <div className="col-span-2">Commission</div>
+            <div className="col-span-2 text-right">Komisi</div>
           </div>
 
           {generatedRows.length ? (
-            <div className="divide-y divide-white/10">
-              {generatedRows.map((r) => (
-                <div key={r.slug} className="grid grid-cols-12 gap-3 px-4 py-3">
-                  <div className="col-span-5">
-                    <div className="font-mono text-xs text-white/80 break-all">{r.slug}</div>
+            <div className="grid gap-3 mt-4">
+              {generatedRows.map((r, i) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * i, duration: 0.3 }}
+                  key={r.slug} 
+                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-5 py-4 rounded-2xl bg-black/20 border border-white/5 hover:bg-white/5 hover:border-indigo-500/30 transition-all group"
+                >
+                  <div className="sm:col-span-5 md:col-span-4 flex flex-col justify-center">
+                    <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Slug</span>
+                    <div className="font-mono text-sm sm:text-sm text-indigo-100 break-all group-hover:text-white transition-colors">{r.slug}</div>
                   </div>
-                  <div className="col-span-3 text-xs text-white/70">
-                    {r.createdAtMs ? new Date(r.createdAtMs).toLocaleString("id-ID") : "-"}
+                  <div className="sm:col-span-3 md:col-span-4 flex flex-col justify-center">
+                    <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Tanggal</span>
+                    <div className="text-sm text-indigo-200/70">
+                      {r.createdAtMs ? new Date(r.createdAtMs).toLocaleString("id-ID") : "-"}
+                    </div>
                   </div>
-                  <div className="col-span-2 text-xs font-mono text-white/60">{r.templateId || "-"}</div>
-                  <div className="col-span-2 text-xs text-emerald-200">{formatRupiah(r.commission)}</div>
-                </div>
+                  <div className="sm:col-span-2 flex flex-col justify-center">
+                    <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Template</span>
+                    <div className="text-sm font-mono text-indigo-200/70 bg-black/40 inline-flex px-2 py-1 rounded-lg w-fit">
+                      {r.templateId || "-"}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-col justify-center sm:text-right">
+                    <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-emerald-300/50 mb-1">Komisi</span>
+                    <div className="text-base sm:text-sm font-bold text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.2)]">
+                      {formatRupiah(r.commission)}
+                    </div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           ) : (
-            <div className="px-4 py-8 text-sm text-white/60">No generated pages yet.</div>
+            <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-black/10 px-6 py-12 text-center">
+              <div className="text-indigo-200/50 text-sm">Belum ada halaman yang dibuat.</div>
+            </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="text-lg font-black tracking-tight">Profile</div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
+        <div className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Profile</div>
 
-        <form action={profileAction} className="mt-4 grid gap-4">
+        <form action={profileAction} className="mt-8 grid gap-5">
           <input type="hidden" name="affiliateId" value={affiliate.id} />
           <input
             type="hidden"
@@ -280,19 +376,19 @@ export default function AffiliateDashboardClient({
             value={`+62${stripLeadingZeros(normalizeDigits(profileWhatsappLocal))}`}
           />
 
-          <label className="grid gap-1 text-sm text-white/80">
-            Name
+          <label className="grid gap-1.5 text-sm font-medium text-indigo-100/80">
+            Nama Lengkap
             <input
               name="name"
               defaultValue={affiliate.name}
-              className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white"
+              className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder:text-white/30 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none transition-all"
             />
           </label>
 
-          <label className="grid gap-1 text-sm text-white/80">
-            WhatsApp number
-            <div className="flex items-center rounded-2xl border border-white/10 bg-black/30 px-4 py-3">
-              <div className="shrink-0 pr-2 text-sm font-mono text-white/70">+62</div>
+          <label className="grid gap-1.5 text-sm font-medium text-indigo-100/80">
+            Nomor WhatsApp
+            <div className="flex items-center rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/50 transition-all">
+              <div className="shrink-0 pr-3 text-sm font-mono text-indigo-300/70 border-r border-white/10 mr-3">+62</div>
               <input
                 value={profileWhatsappLocal}
                 inputMode="numeric"
@@ -304,88 +400,109 @@ export default function AffiliateDashboardClient({
                   const formatted = formatLocalWhatsapp(profileWhatsappLocal);
                   setProfileWhatsappLocal(formatted);
                 }}
-                className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none"
+                className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
                 placeholder="812 1234 1234"
               />
             </div>
           </label>
 
           {profileState.error ? (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3.5 text-sm text-rose-200 backdrop-blur-md">
               {profileState.error}
             </div>
           ) : null}
 
           {profileState.ok ? (
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-              Saved.
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3.5 text-sm text-emerald-200 backdrop-blur-md"
+            >
+              Profil berhasil disimpan.
+            </motion.div>
           ) : null}
 
-          <button
-            type="submit"
-            className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black text-white hover:bg-indigo-500 disabled:opacity-60"
-            disabled={profilePending}
-          >
-            {profilePending ? "Saving..." : "Save profile"}
-          </button>
+          <div className="flex justify-end mt-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="rounded-2xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all disabled:opacity-60"
+              disabled={profilePending}
+            >
+              {profilePending ? "Menyimpan..." : "Simpan Profil"}
+            </motion.button>
+          </div>
         </form>
-      </div>
+      </motion.div>
 
-      <div className="rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-6">
-        <div className="text-lg font-black tracking-tight">Change password</div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      >
+        <div className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Ubah Kata Sandi</div>
 
-        <form action={passwordAction} className="mt-4 grid gap-4">
+        <form action={passwordAction} className="mt-8 grid gap-5">
           <input type="hidden" name="affiliateId" value={affiliate.id} />
 
-          <label className="grid gap-1 text-sm text-white/80">
-            Current password
+          <label className="grid gap-1.5 text-sm font-medium text-indigo-100/80">
+            Kata Sandi Saat Ini
             <input
               name="currentPassword"
               type="password"
-              className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white"
+              className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder:text-white/30 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none transition-all"
             />
           </label>
 
-          <label className="grid gap-1 text-sm text-white/80">
-            New password
+          <label className="grid gap-1.5 text-sm font-medium text-indigo-100/80">
+            Kata Sandi Baru
             <input
               name="newPassword"
               type="password"
-              className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white"
+              className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder:text-white/30 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none transition-all"
             />
           </label>
 
-          <label className="grid gap-1 text-sm text-white/80">
-            Confirm new password
+          <label className="grid gap-1.5 text-sm font-medium text-indigo-100/80">
+            Konfirmasi Kata Sandi Baru
             <input
               name="confirmPassword"
               type="password"
-              className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white"
+              className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder:text-white/30 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 focus:outline-none transition-all"
             />
           </label>
 
           {passwordState.error ? (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3.5 text-sm text-rose-200 backdrop-blur-md">
               {passwordState.error}
             </div>
           ) : null}
 
           {passwordState.ok ? (
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-              Password updated.
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3.5 text-sm text-emerald-200 backdrop-blur-md"
+            >
+              Kata sandi berhasil diubah.
+            </motion.div>
           ) : null}
 
-          <button
-            type="submit"
-            className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-black text-white hover:bg-indigo-500 disabled:opacity-60"
-            disabled={passwordPending}
-          >
-            {passwordPending ? "Updating..." : "Update password"}
-          </button>
+          <div className="flex justify-end mt-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="rounded-2xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-6 py-3.5 text-sm font-bold text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:shadow-[0_0_30px_rgba(99,102,241,0.6)] transition-all disabled:opacity-60"
+              disabled={passwordPending}
+            >
+              {passwordPending ? "Menyimpan..." : "Ubah Kata Sandi"}
+            </motion.button>
+          </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

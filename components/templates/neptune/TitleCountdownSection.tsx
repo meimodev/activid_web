@@ -11,7 +11,11 @@ import { getCountdownParts } from "@/lib/date-time";
 import { neptuneSerif } from "./fonts";
 import { NeptuneStagger } from "./reveal";
 import type { NavSectionId } from "./types";
-import { NEPTUNE_OVERLAY_ASSETS, NeptuneOverlayFloat, TitleDecoration10 } from "./graphics";
+import {
+  NEPTUNE_OVERLAY_ASSETS,
+  NeptuneOverlayFloat,
+  TitleDecoration10,
+} from "./graphics";
 
 export function TitleCountdownSection({
   id,
@@ -52,7 +56,7 @@ export function TitleCountdownSection({
       id={id}
       className="relative h-screen overflow-hidden text-wedding-text"
     >
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-10">
         <div className="absolute inset-0 overflow-hidden">
           <AnimatePresence initial={false}>
             {activePhoto ? (
@@ -77,7 +81,6 @@ export function TitleCountdownSection({
                     src={activePhoto}
                     alt="Background"
                     fill
-                    sizes="100vw"
                     className="object-cover opacity-[0.36]"
                     unoptimized
                   />
@@ -88,59 +91,52 @@ export function TitleCountdownSection({
         </div>
 
         <div className="absolute inset-x-0 bottom-0 h-[72%] bg-linear-to-t from-wedding-bg via-wedding-bg/82 to-transparent" />
-        {/* <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[radial-gradient(ellipse_at_50%_100%,rgba(0,0,0,0.08),transparent_68%)]" /> */}
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-[radial-gradient(ellipse_at_50%_100%,rgba(0,0,0,0.08),transparent_68%)]" />
+      </div>
+
+      <div className="absolute -left-4 bottom-10 z-10">
+        <NeptuneOverlayFloat
+          src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
+          alt=""
+          className="w-[140px] max-w-[55vw] "
+          amplitude={4.6}
+          duration={8.6}
+          rotate={1}
+          breeze
+          loading="eager"
+          draggable={false}
+        />
+      </div>
+      <div className="absolute -right-10 bottom-15 z-10">
+        <NeptuneOverlayFloat
+          src={NEPTUNE_OVERLAY_ASSETS.leafRight}
+          alt=""
+          className="w-[140px] max-w-[55vw] "
+          amplitude={5.4}
+          duration={9.2}
+          delay={0.15}
+          rotate={-1}
+          breeze
+          loading="eager"
+          draggable={false}
+        />
       </div>
 
       <motion.div
-        className="absolute inset-x-0 -bottom-38 z-20 pointer-events-none flex justify-center"
+        className="absolute inset-x-0 -bottom-30 z-30 pointer-events-none flex justify-center"
         initial={false}
         animate={{
-          x: [0, isMobile ? 8 : 12, isMobile ? -5 : -8, isMobile ? 5 : 8, 0],
           y: [0, isMobile ? -6 : -10, isMobile ? 4 : 6, isMobile ? -4 : -6, 0],
-          rotate: [
-            0,
-            isMobile ? -1.1 : -1.6,
-            isMobile ? 0.8 : 1.1,
-            isMobile ? -0.8 : -1.1,
-            0,
-          ],
         }}
         transition={{ duration: 10.5, repeat: Infinity, ease: "easeInOut" }}
       >
-        <TitleDecoration10 className="w-full text-wedding-text-light/60" />
+        <TitleDecoration10 className="w-full bg-wedding" />
       </motion.div>
 
-      <div className="relative z-30 min-h-[820px] flex flex-col items-center justify-end text-center px-6 pb-32 pt-18">
+      <div className="relative z-30 h-screen flex flex-col items-center justify-end text-center px-6 pb-32 pt-18">
         <NeptuneStagger className="relative w-full max-w-sm" baseDelay={0.15}>
           <div className="pointer-events-none absolute inset-0 z-0">
             <div className="absolute left-1/2 top-[18%] -translate-x-1/2 w-[240px] h-[360px] rounded-t-[999px] border border-wedding-text/15 opacity-25" />
-            <div className="absolute -left-4 bottom-10">
-              <NeptuneOverlayFloat
-                src={NEPTUNE_OVERLAY_ASSETS.leafLeft}
-                alt=""
-                className="w-[140px] max-w-[55vw] opacity-95"
-                amplitude={4.6}
-                duration={8.6}
-                rotate={1}
-                breeze
-                loading="eager"
-                draggable={false}
-              />
-            </div>
-            <div className="absolute -right-10 bottom-15">
-              <NeptuneOverlayFloat
-                src={NEPTUNE_OVERLAY_ASSETS.leafRight}
-                alt=""
-                className="w-[140px] max-w-[55vw] opacity-95"
-                amplitude={5.4}
-                duration={9.2}
-                delay={0.15}
-                rotate={-1}
-                breeze
-                loading="eager"
-                draggable={false}
-              />
-            </div>
           </div>
 
           <p

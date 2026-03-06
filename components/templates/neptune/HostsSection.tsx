@@ -9,7 +9,7 @@ import { neptuneScript, neptuneSerif } from "./fonts";
 import { NEPTUNE_OVERLAY_ASSETS, NeptuneOverlayFloat } from "./graphics";
 import { NeptuneStagger } from "./reveal";
 
-export function CoupleProfileSection({
+export function HostsSection({
   hosts,
   inviteLine,
 }: {

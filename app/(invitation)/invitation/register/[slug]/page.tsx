@@ -1,8 +1,13 @@
 import { INVITATION_TEMPLATE_LISTINGS } from "@/data/invitation-templates";
 import {
+  getInvitationAffiliateSessionCookieName,
+  isInvitationAffiliateSessionValid,
+} from "@/lib/invitation-affiliate-session";
+import {
   getInvitationRegisterSessionCookieName,
   isInvitationRegisterSessionValid,
 } from "@/lib/invitation-register-session";
+import { getInvitationAffiliate, isAffiliateId } from "@/lib/affiliate-config";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -26,7 +31,17 @@ export default async function InvitationRegisterEditPage({ params }: PageProps) 
 
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(getInvitationRegisterSessionCookieName())?.value;
-  const initialUnlocked = isInvitationRegisterSessionValid(sessionCookie);
+  const hasAdminSession = isInvitationRegisterSessionValid(sessionCookie);
+
+  const affiliateCookieRaw = cookieStore.get("inv_affiliate")?.value ?? "";
+  const affiliateCookie = affiliateCookieRaw.trim().toUpperCase();
+  const affiliateCookieId = affiliateCookie && isAffiliateId(affiliateCookie) ? affiliateCookie : "";
+  const affiliateSessionCookie = cookieStore.get(getInvitationAffiliateSessionCookieName())?.value;
+  const hasAffiliateSession = affiliateCookieId
+    ? isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateCookieId)
+    : false;
+
+  const initialUnlocked = hasAdminSession || hasAffiliateSession;
 
   const snap = await getAdminDb().collection("invitations").doc(slug).get();
   const config = (snap.exists ? (snap.data() as InvitationConfig) : null) as InvitationConfig | null;
@@ -52,6 +67,22 @@ export default async function InvitationRegisterEditPage({ params }: PageProps) 
     );
   }
 
+  const existingAffiliateId =
+    typeof config.affiliateId === "string" ? config.affiliateId.trim().toUpperCase() : "";
+
+  let affiliateAttribution: { id: string; name?: string } | null = null;
+  if (existingAffiliateId && isAffiliateId(existingAffiliateId)) {
+    try {
+      const affiliate = await getInvitationAffiliate(existingAffiliateId);
+      if (affiliate) {
+        affiliateAttribution = {
+          id: existingAffiliateId,
+          name: typeof affiliate.name === "string" ? affiliate.name.trim() : undefined,
+        };
+      }
+    } catch {}
+  }
+
   return (
     <div className="min-h-[100dvh] bg-[#020205] text-white">
       <div className="mx-auto max-w-4xl px-4 py-6 sm:py-10">
@@ -63,6 +94,7 @@ export default async function InvitationRegisterEditPage({ params }: PageProps) 
           action={updateInvitation}
           verifyPasswordAction={verifyInvitationRegisterPassword}
           initialUnlocked={initialUnlocked}
+          affiliateAttribution={affiliateAttribution}
         />
       </div>
     </div>

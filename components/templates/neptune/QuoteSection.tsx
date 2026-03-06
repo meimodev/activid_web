@@ -22,7 +22,7 @@ export function QuoteSection({
   const quoteAuthor = trimmedAuthor || inlineCitation;
 
   return (
-    <section className="relative overflow-hidden bg-wedding-dark text-wedding-on-dark px-6 py-4">
+    <section className="relative overflow-hidden bg-wedding-text text-wedding-text px-6 py-4">
       <div className="relative z-10 py-10 flex items-center justify-center">
         <NeptuneStagger
           className="max-w-3xl text-center"

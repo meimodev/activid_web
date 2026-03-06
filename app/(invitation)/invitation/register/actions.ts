@@ -1,10 +1,14 @@
 "use server";
 
-import { isAffiliateId } from "@/lib/affiliate-config";
+import { getInvitationAffiliate, isAffiliateId } from "@/lib/affiliate-config";
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
   toInvitationIso,
 } from "@/lib/date-time";
+import {
+  getInvitationAffiliateSessionCookieName,
+  isInvitationAffiliateSessionValid,
+} from "@/lib/invitation-affiliate-session";
 import {
   createInvitationRegisterSessionCookieValue,
   getInvitationRegisterSessionCookieName,
@@ -23,8 +27,46 @@ export type RegisterInvitationState = {
   ok?: boolean;
   slug?: string;
   invitationUrl?: string;
+  affiliateId?: string;
+  affiliateName?: string;
   error?: string;
 };
+
+import { hashPassword } from "../affiliate/actions";
+import { timingSafeEqual } from "crypto";
+
+const AFFILIATE_COOKIE_NAME = "inv_affiliate";
+const AFFILIATE_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+
+function getAffiliateCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: AFFILIATE_COOKIE_MAX_AGE_SECONDS,
+  };
+}
+
+function getAffiliateCookieClearOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  };
+}
+
+function getAffiliateSessionCookieClearOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  };
+}
 
 export type VerifyRegisterPasswordState = {
   ok?: boolean;
@@ -60,7 +102,7 @@ function readString(formData: FormData, key: string): string {
 }
 
 function getExpectedPassword(): string | null {
-  return process.env.INVITATION_REGISTER_PASSWORD ?? null;
+  return process.env.INVITATION_ADMIN_PASSWORD ?? null;
 }
 
 const SITE_ORIGIN = "https://invitation.activid.id";
@@ -217,14 +259,77 @@ export async function verifyInvitationRegisterPassword(
 ): Promise<VerifyRegisterPasswordState> {
   const expectedPassword = getExpectedPassword();
   if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_REGISTER_PASSWORD." };
+    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
   }
 
   const password = readString(formData, "password");
-  if (password !== expectedPassword) {
-    return { error: "Invalid password." };
+  const affiliateIdInput = readString(formData, "affiliateId").trim().toUpperCase();
+
+  // If the admin password matches, grant global session right away
+  if (password === expectedPassword) {
+    return grantGlobalSession();
   }
 
+  // If they provided an affiliate ID, verify it as an affiliate login
+  if (affiliateIdInput && isAffiliateId(affiliateIdInput)) {
+    const snap = await getAdminDb().collection("invitationAffiliates").doc(affiliateIdInput).get();
+    if (!snap.exists) {
+      return { error: "Invalid password or affiliate credentials." };
+    }
+
+    const data = snap.data() as {
+      enabled?: unknown;
+      passwordSalt?: unknown;
+      passwordHash?: unknown;
+    };
+
+    if (!data || data.enabled === false) {
+      return { error: "Affiliate account is pending verification." };
+    }
+
+    const salt = typeof data.passwordSalt === "string" ? data.passwordSalt : "";
+    const expectedHash = typeof data.passwordHash === "string" ? data.passwordHash : "";
+    if (!salt || !expectedHash) {
+      return { error: "Invalid password or affiliate credentials." };
+    }
+
+    const actualHash = await hashPassword(password, salt);
+    try {
+      const ok = timingSafeEqual(
+        Buffer.from(actualHash, "hex"),
+        Buffer.from(expectedHash, "hex"),
+      );
+      if (ok) {
+        // Affiliate authenticated. We set the affiliate session cookie
+        // so that the register form recognizes them as logged in.
+        const { createInvitationAffiliateSessionCookieValue, getInvitationAffiliateSessionCookieName, getSessionCookieOptions } = await import("@/lib/invitation-affiliate-session");
+        
+        const cookieName = getInvitationAffiliateSessionCookieName();
+        let cookieValue: string;
+        try {
+          cookieValue = createInvitationAffiliateSessionCookieValue(affiliateIdInput);
+        } catch (err) {
+          return { error: err instanceof Error ? err.message : "Failed to create session." };
+        }
+        
+        const cookieStore = await cookies();
+        cookieStore.set(cookieName, cookieValue, getSessionCookieOptions());
+        cookieStore.set(
+          AFFILIATE_COOKIE_NAME,
+          affiliateIdInput,
+          getAffiliateCookieOptions(),
+        );
+        return { ok: true };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  return { error: "Invalid password or affiliate credentials." };
+}
+
+async function grantGlobalSession(): Promise<VerifyRegisterPasswordState> {
   const cookieName = getInvitationRegisterSessionCookieName();
   let cookieValue: string;
   try {
@@ -234,6 +339,12 @@ export async function verifyInvitationRegisterPassword(
   }
 
   const cookieStore = await cookies();
+  cookieStore.set(AFFILIATE_COOKIE_NAME, "", getAffiliateCookieClearOptions());
+  cookieStore.set(
+    getInvitationAffiliateSessionCookieName(),
+    "",
+    getAffiliateSessionCookieClearOptions(),
+  );
   cookieStore.set(cookieName, cookieValue, {
     httpOnly: true,
     sameSite: "lax",
@@ -251,7 +362,7 @@ export async function registerInvitation(
 ): Promise<RegisterInvitationState> {
   const expectedPassword = getExpectedPassword();
   if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_REGISTER_PASSWORD." };
+    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
   }
 
   const cookieStore = await cookies();
@@ -259,20 +370,53 @@ export async function registerInvitation(
   const sessionCookie = cookieStore.get(cookieName)?.value;
   const hasValidSession = isInvitationRegisterSessionValid(sessionCookie);
 
-  const affiliateCookie = cookieStore.get("inv_affiliate")?.value;
+  const password = readString(formData, "password");
+  const isAdminPassword = password === expectedPassword;
+  const isAdminAuth = hasValidSession || isAdminPassword;
+
+  if (isAdminPassword) {
+    cookieStore.set(AFFILIATE_COOKIE_NAME, "", getAffiliateCookieClearOptions());
+    cookieStore.set(
+      getInvitationAffiliateSessionCookieName(),
+      "",
+      getAffiliateSessionCookieClearOptions(),
+    );
+  }
+
+  const affiliateSessionCookieName = getInvitationAffiliateSessionCookieName();
+  const affiliateSessionCookie = cookieStore.get(affiliateSessionCookieName)?.value;
+
+  const affiliateCookieRaw = isAdminAuth
+    ? ""
+    : (cookieStore.get(AFFILIATE_COOKIE_NAME)?.value ?? "");
+  const affiliateCookie = affiliateCookieRaw.trim().toUpperCase();
+  const affiliateCookieId = affiliateCookie && isAffiliateId(affiliateCookie) ? affiliateCookie : "";
+  const hasAffiliateCookie = Boolean(affiliateCookieId);
+  const hasValidAffiliateSession = affiliateCookieId
+    ? isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateCookieId)
+    : false;
+  const hasValidAuth = hasValidSession || hasValidAffiliateSession;
+  const affiliateAcknowledged = readString(formData, "affiliateAcknowledged").trim();
+  if (!isAdminAuth && !hasAffiliateCookie && affiliateAcknowledged !== "1") {
+    return {
+      error:
+        "Cookie afiliasi tidak terdeteksi. Silakan akui dan lanjutkan pada halaman register sebelum membuat undangan ini.",
+    };
+  }
+
   let affiliateId: string | null = null;
-  if (affiliateCookie && isAffiliateId(affiliateCookie)) {
+  let affiliateName: string | undefined;
+  if (!isAdminAuth && affiliateCookieId) {
     try {
-      const aSnap = await getAdminDb().collection("invitationAffiliates").doc(affiliateCookie).get();
-      const data = aSnap.exists ? (aSnap.data() as { enabled?: unknown } | undefined) : undefined;
-      if (aSnap.exists && data?.enabled !== false) {
-        affiliateId = affiliateCookie;
+      const affiliate = await getInvitationAffiliate(affiliateCookieId);
+      if (affiliate && affiliate.enabled !== false) {
+        affiliateId = affiliateCookieId;
+        affiliateName = typeof affiliate.name === "string" ? affiliate.name.trim() : undefined;
       }
     } catch {}
   }
 
-  const password = readString(formData, "password");
-  if (!hasValidSession && password !== expectedPassword) {
+  if (!hasValidAuth && password !== expectedPassword) {
     return { error: "Invalid password." };
   }
 
@@ -451,6 +595,8 @@ export async function registerInvitation(
     ok: true,
     slug: finalSlug,
     invitationUrl,
+    affiliateId: affiliateId ?? undefined,
+    affiliateName,
   };
 }
 
@@ -460,7 +606,7 @@ export async function updateInvitation(
 ): Promise<RegisterInvitationState> {
   const expectedPassword = getExpectedPassword();
   if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_REGISTER_PASSWORD." };
+    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
   }
 
   const cookieStore = await cookies();
@@ -468,8 +614,22 @@ export async function updateInvitation(
   const sessionCookie = cookieStore.get(cookieName)?.value;
   const hasValidSession = isInvitationRegisterSessionValid(sessionCookie);
 
+  const affiliateSessionCookieName = getInvitationAffiliateSessionCookieName();
+  const affiliateSessionCookie = cookieStore.get(affiliateSessionCookieName)?.value;
+
+  const affiliateCookieRaw = cookieStore.get(AFFILIATE_COOKIE_NAME)?.value ?? "";
+  const affiliateCookie = affiliateCookieRaw.trim().toUpperCase();
+  const affiliateCookieId = affiliateCookie && isAffiliateId(affiliateCookie) ? affiliateCookie : "";
+  const hasValidAffiliateSession = affiliateCookieId
+    ? isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateCookieId)
+    : false;
   const password = readString(formData, "password");
-  if (!hasValidSession && password !== expectedPassword) {
+  const isAdminPassword = password === expectedPassword;
+  const isAdminAuth = hasValidSession || isAdminPassword;
+  const hasValidAuth = isAdminAuth || hasValidAffiliateSession;
+  const isAffiliateAuth = !isAdminAuth && hasValidAffiliateSession;
+
+  if (!hasValidAuth && password !== expectedPassword) {
     return { error: "Invalid password." };
   }
 
@@ -563,6 +723,8 @@ export async function updateInvitation(
   const db = getAdminDb();
   const docRef = db.collection("invitations").doc(existingSlug);
 
+  let returnAffiliateId: string | undefined;
+
   try {
     await db.runTransaction(async (tx) => {
       const snap = await tx.get(docRef);
@@ -575,6 +737,17 @@ export async function updateInvitation(
         typeof existingData?.affiliateId === "string" && existingData.affiliateId.trim()
           ? existingData.affiliateId
           : undefined;
+
+      if (isAffiliateAuth) {
+        if (!existingAffiliateId) {
+          throw new Error("Unauthorized.");
+        }
+        if (existingAffiliateId.trim().toUpperCase() !== affiliateCookieId) {
+          throw new Error("Unauthorized.");
+        }
+      }
+
+      returnAffiliateId = existingAffiliateId;
       const existingFolderKey =
         typeof existingData?.imagekitFolderKey === "string" && existingData.imagekitFolderKey.trim()
           ? existingData.imagekitFolderKey
@@ -627,10 +800,20 @@ export async function updateInvitation(
     return { error: err instanceof Error ? err.message : "Failed to update invitation." };
   }
 
+  let affiliateName: string | undefined;
+  if (returnAffiliateId && isAffiliateId(returnAffiliateId)) {
+    try {
+      const affiliate = await getInvitationAffiliate(returnAffiliateId);
+      affiliateName = typeof affiliate?.name === "string" ? affiliate.name.trim() : undefined;
+    } catch {}
+  }
+
   const invitationUrl = `${SITE_ORIGIN}/${existingSlug}`;
   return {
     ok: true,
     slug: existingSlug,
     invitationUrl,
+    affiliateId: returnAffiliateId,
+    affiliateName,
   };
 }
