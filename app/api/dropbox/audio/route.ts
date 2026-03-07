@@ -14,7 +14,7 @@ import type { NextRequest } from "next/server";
 export const runtime = "nodejs";
 
 const DEFAULT_ROOT = "/activid web/invitation-audio";
-const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_AUDIO_SIZE_BYTES = 250 * 1024 * 1024;
 
 type DropboxAccessTokenCache = {
   token: string;
@@ -196,6 +196,123 @@ function sanitizeFilename(value: string): string {
     .slice(0, 120);
 }
 
+async function dropboxUploadSessionStart(
+  token: string,
+  chunk: ArrayBuffer,
+): Promise<{ sessionId: string }> {
+  let res: Response;
+  try {
+    res = await fetch("https://content.dropboxapi.com/2/files/upload_session/start", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": JSON.stringify({ close: false }),
+      },
+      body: chunk,
+    });
+  } catch (err) {
+    const causeMessage = getFetchFailureCauseMessage(err);
+    const message =
+      err instanceof Error
+        ? `Dropbox upload session start failed: ${err.message}${causeMessage ? ` (${causeMessage})` : ""}`
+        : "Dropbox upload session start failed.";
+    throw new Error(message);
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(getDropboxErrorMessageFromText(text) || "Failed to start Dropbox upload session.");
+  }
+
+  const data = (await res.json()) as { session_id?: unknown };
+  const sessionId = typeof data.session_id === "string" ? data.session_id.trim() : "";
+  if (!sessionId) {
+    throw new Error("Dropbox upload session start response is missing session_id.");
+  }
+
+  return { sessionId };
+}
+
+async function dropboxUploadSessionAppend(
+  token: string,
+  sessionId: string,
+  offset: number,
+  chunk: ArrayBuffer,
+): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch("https://content.dropboxapi.com/2/files/upload_session/append_v2", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": JSON.stringify({
+          cursor: { session_id: sessionId, offset },
+          close: false,
+        }),
+      },
+      body: chunk,
+    });
+  } catch (err) {
+    const causeMessage = getFetchFailureCauseMessage(err);
+    const message =
+      err instanceof Error
+        ? `Dropbox upload session append failed: ${err.message}${causeMessage ? ` (${causeMessage})` : ""}`
+        : "Dropbox upload session append failed.";
+    throw new Error(message);
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(getDropboxErrorMessageFromText(text) || "Failed to append Dropbox upload session.");
+  }
+}
+
+async function dropboxUploadSessionFinish(
+  token: string,
+  sessionId: string,
+  offset: number,
+  dropboxPath: string,
+  chunk: ArrayBuffer,
+): Promise<{ path_lower?: string }> {
+  let res: Response;
+  try {
+    res = await fetch("https://content.dropboxapi.com/2/files/upload_session/finish", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": JSON.stringify({
+          cursor: { session_id: sessionId, offset },
+          commit: {
+            path: dropboxPath,
+            mode: "add",
+            autorename: true,
+            mute: false,
+            strict_conflict: false,
+          },
+        }),
+      },
+      body: chunk,
+    });
+  } catch (err) {
+    const causeMessage = getFetchFailureCauseMessage(err);
+    const message =
+      err instanceof Error
+        ? `Dropbox upload session finish failed: ${err.message}${causeMessage ? ` (${causeMessage})` : ""}`
+        : "Dropbox upload session finish failed.";
+    throw new Error(message);
+  }
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(getDropboxErrorMessageFromText(text) || "Failed to finish Dropbox upload session.");
+  }
+
+  return (await res.json()) as { path_lower?: string };
+}
+
 async function dropboxApiJson<T>(
   token: string,
   path: string,
@@ -309,7 +426,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (file.size >= MAX_AUDIO_SIZE_BYTES) {
-    return jsonError("Audio must be smaller than 10MB.", 400);
+    return jsonError("Audio must be smaller than 250MB.", 400);
   }
 
   const folderKey = typeof folderKeyRaw === "string" ? sanitizeFolderSegment(folderKeyRaw) : "";
@@ -321,7 +438,7 @@ export async function POST(request: NextRequest) {
   const safeName = sanitizeFilename(file.name) || "audio";
   const dropboxPath = `${root}/${folderKey}/music-${Date.now()}-${safeName}`;
 
-  const fileBuf = Buffer.from(await file.arrayBuffer());
+  const fileBuf = await file.arrayBuffer();
 
   let uploadRes: Response;
   try {
@@ -366,6 +483,122 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     return jsonError(err instanceof Error ? err.message : "Failed to generate shared link.", 500);
   }
+}
+
+export async function PUT(request: NextRequest) {
+  const unauthorized = requireAuthorized(request);
+  if (unauthorized) return unauthorized;
+
+  const action = (request.nextUrl.searchParams.get("uploadSession") ?? "").trim();
+  if (!action) {
+    return jsonError("Missing uploadSession.", 400);
+  }
+
+  let token: string | null = null;
+  try {
+    token = await getDropboxToken();
+  } catch (err) {
+    return jsonError(
+      err instanceof Error ? err.message : "Failed to authenticate with Dropbox.",
+      500,
+    );
+  }
+  if (!token) {
+    return jsonError(
+      "Server is missing Dropbox credentials. Configure DROPBOX_REFRESH_TOKEN + DROPBOX_APP_KEY + DROPBOX_APP_SECRET (recommended) or DROPBOX_ACCESS_TOKEN (legacy).",
+      500,
+    );
+  }
+
+  const bodyBuf = await request.arrayBuffer();
+  const bodyLength = bodyBuf.byteLength;
+
+  if (action === "start") {
+    const folderKeyRaw = request.nextUrl.searchParams.get("folderKey");
+    const fileNameRaw = request.nextUrl.searchParams.get("fileName");
+    const folderKey = sanitizeFolderSegment(typeof folderKeyRaw === "string" ? folderKeyRaw : "");
+    if (!folderKey) {
+      return jsonError("Missing folderKey.", 400);
+    }
+
+    if (bodyLength === 0) {
+      return jsonError("Missing upload chunk.", 400);
+    }
+
+    if (bodyLength > MAX_AUDIO_SIZE_BYTES) {
+      return jsonError("Audio must be smaller than 250MB.", 400);
+    }
+
+    const root = getRootPath();
+    const safeName = sanitizeFilename(typeof fileNameRaw === "string" ? fileNameRaw : "") || "audio";
+    const dropboxPath = `${root}/${folderKey}/music-${Date.now()}-${safeName}`;
+
+    try {
+      const started = await dropboxUploadSessionStart(token, bodyBuf);
+      return NextResponse.json({
+        sessionId: started.sessionId,
+        dropboxPath,
+        nextOffset: bodyLength,
+      });
+    } catch (err) {
+      return jsonError(err instanceof Error ? err.message : "Failed to start upload session.", 502);
+    }
+  }
+
+  if (action === "append") {
+    const sessionId = (request.nextUrl.searchParams.get("sessionId") ?? "").trim();
+    const offsetRaw = request.nextUrl.searchParams.get("offset");
+    const offset = typeof offsetRaw === "string" ? Number(offsetRaw) : NaN;
+    if (!sessionId) {
+      return jsonError("Missing sessionId.", 400);
+    }
+    if (!Number.isFinite(offset) || offset < 0) {
+      return jsonError("Invalid offset.", 400);
+    }
+    if (bodyLength === 0) {
+      return jsonError("Missing upload chunk.", 400);
+    }
+    if (offset + bodyLength > MAX_AUDIO_SIZE_BYTES) {
+      return jsonError("Audio must be smaller than 250MB.", 400);
+    }
+
+    try {
+      await dropboxUploadSessionAppend(token, sessionId, offset, bodyBuf);
+      return NextResponse.json({ ok: true, nextOffset: offset + bodyLength });
+    } catch (err) {
+      return jsonError(err instanceof Error ? err.message : "Failed to append upload session.", 502);
+    }
+  }
+
+  if (action === "finish") {
+    const sessionId = (request.nextUrl.searchParams.get("sessionId") ?? "").trim();
+    const dropboxPath = (request.nextUrl.searchParams.get("dropboxPath") ?? "").trim();
+    const offsetRaw = request.nextUrl.searchParams.get("offset");
+    const offset = typeof offsetRaw === "string" ? Number(offsetRaw) : NaN;
+    if (!sessionId) {
+      return jsonError("Missing sessionId.", 400);
+    }
+    if (!dropboxPath) {
+      return jsonError("Missing dropboxPath.", 400);
+    }
+    if (!Number.isFinite(offset) || offset < 0) {
+      return jsonError("Invalid offset.", 400);
+    }
+    if (offset + bodyLength > MAX_AUDIO_SIZE_BYTES) {
+      return jsonError("Audio must be smaller than 250MB.", 400);
+    }
+
+    try {
+      const finished = await dropboxUploadSessionFinish(token, sessionId, offset, dropboxPath, bodyBuf);
+      const storedPath = finished.path_lower || dropboxPath;
+      const url = await ensureSharedLink(token, storedPath);
+      return NextResponse.json({ url, dropboxPath: storedPath });
+    } catch (err) {
+      return jsonError(err instanceof Error ? err.message : "Failed to finalize upload session.", 502);
+    }
+  }
+
+  return jsonError("Invalid uploadSession.", 400);
 }
 
 export async function DELETE(request: NextRequest) {

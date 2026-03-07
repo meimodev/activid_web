@@ -141,7 +141,10 @@ function getDefaultGratitudeMessage(
 }
 
 const MAX_IMAGE_SIZE_BYTES = 25 * 1024 * 1024;
-const MAX_AUDIO_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_AUDIO_SIZE_BYTES = 250 * 1024 * 1024;
+
+const DROPBOX_AUDIO_LEGACY_UPLOAD_MAX_BYTES = 3 * 1024 * 1024;
+const DROPBOX_AUDIO_SESSION_CHUNK_BYTES = 2 * 1024 * 1024;
 
 const ALLOWED_IMAGE_MIME_TYPES = new Set([
   "image/avif",
@@ -242,7 +245,7 @@ function validateAudioFile(file: File): string | null {
     return "Hanya file audio yang diperbolehkan.";
   }
   if (file.size >= MAX_AUDIO_SIZE_BYTES) {
-    return "Ukuran audio maksimal 10MB.";
+    return "Ukuran audio maksimal 250MB.";
   }
   return null;
 }
@@ -405,22 +408,113 @@ async function uploadToDropboxAudio({
     throw new Error("Upload folder is required before uploading audio.");
   }
 
-  const form = new FormData();
-  form.set("file", file);
-  form.set("folderKey", folderKey);
+  if (file.size <= DROPBOX_AUDIO_LEGACY_UPLOAD_MAX_BYTES) {
+    const form = new FormData();
+    form.set("file", file);
+    form.set("folderKey", folderKey);
 
-  const data = await xhrPostFormData<{ url?: string; dropboxPath?: string }>(
-    "/api/dropbox/audio",
-    form,
-    {
-      onProgress,
-    },
-  );
-  if (!data.url || !data.dropboxPath) {
-    throw new Error("Upload failed: missing URL.");
+    const data = await xhrPostFormData<{ url?: string; dropboxPath?: string }>(
+      "/api/dropbox/audio",
+      form,
+      {
+        onProgress,
+      },
+    );
+    if (!data.url || !data.dropboxPath) {
+      throw new Error("Upload failed: missing URL.");
+    }
+
+    return { url: data.url, dropboxPath: data.dropboxPath };
   }
 
-  return { url: data.url, dropboxPath: data.dropboxPath };
+  const fetchChunkJson = async <T,>(url: string, chunk: ArrayBuffer): Promise<T> => {
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/octet-stream",
+        },
+        body: chunk,
+        credentials: "include",
+      });
+    } catch (err) {
+      throw new Error(getErrorMessage(err) || "Upload failed.");
+    }
+
+    const text = await res.text();
+    if (!res.ok) {
+      let message = text || "Upload failed.";
+      if (text) {
+        try {
+          const parsed: unknown = JSON.parse(text);
+          if (parsed && typeof parsed === "object") {
+            const obj = parsed as Record<string, unknown>;
+            const errMsg = typeof obj.error === "string" ? obj.error.trim() : "";
+            if (errMsg) message = errMsg;
+          }
+        } catch {
+          // ignore
+        }
+      }
+      throw new Error(message);
+    }
+
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      throw new Error(text || "Upload failed.");
+    }
+  };
+
+  const chunkSize = Math.max(1, Math.min(DROPBOX_AUDIO_SESSION_CHUNK_BYTES, file.size));
+
+  const fileName = encodeURIComponent(file.name);
+  const encodedFolderKey = encodeURIComponent(folderKey);
+
+  const startChunk = await file.slice(0, chunkSize).arrayBuffer();
+  const started = await fetchChunkJson<{
+    sessionId: string;
+    dropboxPath: string;
+    nextOffset: number;
+  }>(
+    `/api/dropbox/audio?uploadSession=start&folderKey=${encodedFolderKey}&fileName=${fileName}`,
+    startChunk,
+  );
+
+  let offset = started.nextOffset;
+  onProgress?.(Math.max(0, Math.min(99, Math.floor((offset / file.size) * 100))));
+
+  while (offset < file.size) {
+    const nextEnd = Math.min(offset + chunkSize, file.size);
+    const chunk = await file.slice(offset, nextEnd).arrayBuffer();
+
+    if (nextEnd >= file.size) {
+      const finished = await fetchChunkJson<{ url?: string; dropboxPath?: string }>(
+        `/api/dropbox/audio?uploadSession=finish&sessionId=${encodeURIComponent(started.sessionId)}&dropboxPath=${encodeURIComponent(started.dropboxPath)}&offset=${String(offset)}`,
+        chunk,
+      );
+      if (!finished.url || !finished.dropboxPath) {
+        throw new Error("Upload failed: missing URL.");
+      }
+      onProgress?.(100);
+      return { url: finished.url, dropboxPath: finished.dropboxPath };
+    }
+
+    const appended = await fetchChunkJson<{ ok?: boolean; nextOffset?: number }>(
+      `/api/dropbox/audio?uploadSession=append&sessionId=${encodeURIComponent(started.sessionId)}&offset=${String(offset)}`,
+      chunk,
+    );
+
+    const nextOffset = typeof appended.nextOffset === "number" ? appended.nextOffset : NaN;
+    if (!Number.isFinite(nextOffset) || nextOffset <= offset) {
+      throw new Error("Upload failed.");
+    }
+    offset = nextOffset;
+    onProgress?.(Math.max(0, Math.min(99, Math.floor((offset / file.size) * 100))));
+  }
+
+  throw new Error("Upload failed.");
 }
 
 async function deleteDropboxAudio(dropboxPath: string): Promise<void> {
