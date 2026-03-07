@@ -2508,53 +2508,71 @@ export function RegisterInvitationForm({
 
   if (state.ok && state.slug && invitationUrl) {
     return (
-      <div className="grid gap-6">
-        <div className="grid gap-5 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 sm:p-6 shadow-[0_0_40px_-10px_rgba(79,70,229,0.15)] relative overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-emerald-500/10 blur-[60px] pointer-events-none" />
-          <div className="text-xl font-black tracking-tight bg-linear-to-r from-emerald-200 via-white to-emerald-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
-            <span className="text-xl">✅</span>{" "}
-            {isEditMode ? "Mission Updated" : "Mission Created"}
+      <div className="grid gap-6 relative">
+        {/* Galaxy Background Elements */}
+        <div className="absolute -inset-10 overflow-hidden pointer-events-none rounded-[3rem] z-0">
+          <div className="absolute top-0 left-1/4 w-[30rem] h-[30rem] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '7s' }} />
+          <div className="absolute bottom-0 right-1/4 w-[25rem] h-[25rem] bg-fuchsia-600/20 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDuration: '5s', animationDirection: 'reverse' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-cyan-500/10 rounded-full blur-[150px] mix-blend-screen" />
+          {/* Floating Stars */}
+          <div className="absolute top-[10%] left-[20%] w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+          <div className="absolute top-[30%] right-[15%] w-1.5 h-1.5 bg-indigo-200 rounded-full animate-ping" style={{ animationDuration: '4s' }} />
+          <div className="absolute bottom-[20%] left-[30%] w-2 h-2 bg-fuchsia-200 rounded-full animate-ping" style={{ animationDuration: '2.5s' }} />
+          <div className="absolute bottom-[40%] right-[25%] w-1 h-1 bg-cyan-200 rounded-full animate-ping" style={{ animationDuration: '5s' }} />
+        </div>
+
+        <div className="grid gap-5 rounded-3xl border border-indigo-500/30 bg-[#05050a]/60 backdrop-blur-xl p-6 sm:p-8 shadow-[0_0_60px_-15px_rgba(99,102,241,0.4)] relative z-10 overflow-hidden">
+          <div className="flex flex-col items-center text-center gap-4 mb-2">
+            <div className="w-16 h-16 rounded-full bg-linear-to-tr from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.5)]">
+              <span className="text-3xl text-white">✨</span>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-fuchsia-200 to-cyan-200 bg-clip-text text-transparent">
+              {isEditMode ? "Undangan Berhasil Diperbarui" : "Undangan Berhasil Dibuat"}
+            </div>
+            <div className="text-sm text-indigo-200/70 max-w-md">
+              Misi selesai. Undangan Anda sekarang mengorbit di galaksi dan siap dibagikan.
+            </div>
           </div>
 
-          <div className="grid gap-3 relative z-10">
-            <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
-              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
-                Mission Code
+          <div className="grid gap-4 mt-4">
+            <div className="rounded-2xl border border-indigo-500/20 bg-black/40 p-4 hover:border-indigo-400/40 transition-colors">
+              <div className="text-[11px] font-mono text-indigo-300/50 uppercase tracking-wider mb-1">
+                Slug ID
               </div>
-              <div className="mt-1 text-lg font-black tracking-tight text-white">
-                {state.slug}
+              <div className="text-lg font-black tracking-tight text-white flex items-center gap-2">
+                <span className="text-indigo-400">#</span>{state.slug}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
-              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+            <div className="rounded-2xl border border-indigo-500/20 bg-black/40 p-4 hover:border-indigo-400/40 transition-colors">
+              <div className="text-[11px] font-mono text-indigo-300/50 uppercase tracking-wider mb-1">
                 Afiliasi
               </div>
               {state.affiliateId ? (
-                <div className="mt-1 text-sm text-white/80">
+                <div className="text-sm text-indigo-100/90">
                   <span className="font-black text-white">
                     {state.affiliateName?.trim() || "(Tanpa nama)"}
                   </span>{" "}
-                  <span className="font-mono text-white/70">({state.affiliateId})</span>
+                  <span className="font-mono text-indigo-300/70">({state.affiliateId})</span>
                 </div>
               ) : (
-                <div className="mt-1 text-sm text-amber-100">
+                <div className="text-sm text-amber-200/80 bg-amber-500/10 inline-block px-3 py-1 rounded-lg border border-amber-500/20">
                   Tidak terhubung ke affiliator manapun (tidak ada komisi).
                 </div>
               )}
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4">
-              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
-                Invitation Link
+            <div className="rounded-2xl border border-indigo-500/20 bg-black/40 p-5 hover:border-indigo-400/40 transition-colors">
+              <div className="text-[11px] font-mono text-indigo-300/50 uppercase tracking-wider mb-2">
+                Link Undangan
               </div>
-              <div className="mt-1 break-all text-sm font-mono text-white/80">
+              <div className="break-all text-sm font-mono text-white/90 bg-indigo-950/30 p-3 rounded-xl border border-indigo-500/20">
                 {invitationUrl}?to=NAMA_UNDANGAN
               </div>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-emerald-400/60"
+                  className="flex-1 inline-flex items-center justify-center rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 text-xs font-black uppercase tracking-wider text-indigo-200 hover:bg-indigo-500/20 hover:border-indigo-400/60 transition-all"
                   onClick={() => void copyText("link", (invitationUrl+"?to=NAMA_UNDANGAN"))}
                 >
                   {copiedKey === "link" ? "Copied" : "Copy Link"}
@@ -2563,51 +2581,48 @@ export function RegisterInvitationForm({
                   href={invitationUrl+"?to=NAMA_UNDANGAN"}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-emerald-500/30 via-green-500/25 to-cyan-500/25 border border-emerald-400/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-100 hover:border-emerald-300/70"
+                  className="flex-[2] inline-flex items-center justify-center rounded-xl bg-linear-to-r from-indigo-500 via-fuchsia-500 to-cyan-500 px-4 py-3 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_20px_-5px_rgba(139,92,246,0.5)] hover:shadow-[0_0_30px_-5px_rgba(139,92,246,0.7)] transition-all"
                 >
-                  Open Invitation
+                  Buka Undangan 🚀
                 </a>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-indigo-400/60"
+                  className="flex-1 inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-black uppercase tracking-wider text-white/70 hover:text-white hover:bg-white/10 transition-all"
                   onClick={() => window.location.reload()}
                 >
-                  {isEditMode ? "Reload" : "New Mission"}
+                  {isEditMode ? "Reload" : "Buat Baru"}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-3">
-          <div className="text-sm font-black tracking-tight text-white/90">
-            WhatsApp Messages
+        <div className="grid gap-3 relative z-10">
+          <div className="text-sm font-black tracking-tight text-indigo-200 px-2 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse" /> WhatsApp Messages
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {whatsappMessages.map((m) => {
               return (
                 <div
                   key={m.key}
-                  className="flex min-w-0 flex-col gap-3 rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 shadow-[0_0_30px_-12px_rgba(34,211,238,0.25)]"
+                  className="flex min-w-0 flex-col gap-3 rounded-3xl border border-indigo-500/20 bg-black/40 backdrop-blur-md p-5 hover:border-indigo-400/40 transition-colors shadow-[0_0_30px_-12px_rgba(99,102,241,0.15)] group"
                 >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="min-w-0 flex-1 truncate text-xs font-black uppercase tracking-wider text-white/80">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-0 flex-1 truncate text-xs font-black uppercase tracking-wider text-indigo-300">
                       {m.title}
                     </div>
                     <button
                       type="button"
-                      className="shrink-0 rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
+                      className="shrink-0 rounded-xl bg-indigo-500/10 border border-indigo-500/30 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-indigo-200 group-hover:bg-indigo-500/20 group-hover:border-indigo-400/60 transition-all"
                       onClick={() => void copyText(m.key, m.text)}
                     >
                       {copiedKey === m.key ? "Copied" : "Copy"}
                     </button>
                   </div>
-
-                  <pre className="min-w-0 flex-1 whitespace-pre-wrap break-words rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-3 text-[12px] leading-relaxed text-white/80 font-mono">
+                  <pre className="min-w-0 flex-1 whitespace-pre-wrap break-words rounded-xl border border-white/5 bg-black/50 p-4 text-[12px] leading-relaxed text-indigo-100/70 font-mono">
                     {m.text}
                   </pre>
-
-                  
                 </div>
               );
             })}
@@ -2654,6 +2669,31 @@ export function RegisterInvitationForm({
           value={affiliateAcknowledged ? "1" : ""}
         />
       ) : null}
+
+      {pending && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#05050a]/90 backdrop-blur-md p-4">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px]" />
+             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-[100px]" />
+          </div>
+          <div className="relative z-10 flex flex-col items-center justify-center gap-8 w-full max-w-sm text-center rounded-3xl border border-indigo-500/20 bg-black/50 backdrop-blur-xl p-8 shadow-[0_0_60px_-15px_rgba(99,102,241,0.4)]">
+            <div className="relative flex items-center justify-center w-24 h-24">
+              <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-transparent border-t-indigo-400 border-l-indigo-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <div className="absolute inset-2 rounded-full border-r-2 border-b-2 border-transparent border-r-fuchsia-400 border-b-fuchsia-400 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2.5s' }} />
+              <div className="absolute inset-4 rounded-full border-t-2 border-r-2 border-transparent border-t-cyan-400 border-r-cyan-400 animate-spin" style={{ animationDuration: '2s' }} />
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_10px_#fff]" />
+            </div>
+            <div className="grid gap-2">
+              <div className="text-xl font-black bg-linear-to-r from-indigo-200 via-white to-fuchsia-200 bg-clip-text text-transparent tracking-tight">
+                {isEditMode ? "Memperbarui Undangan..." : "Membuat Undangan..."}
+              </div>
+              <div className="text-sm text-indigo-200/60 font-medium">
+                Mohon tunggu sebentar. Mengirim transmisi ke ruang angkasa... 🚀
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {affiliateAckModalOpen &&
       requiresAffiliateAcknowledgement &&
@@ -4420,8 +4460,8 @@ export function RegisterInvitationForm({
                       ? "Updating..."
                       : "Creating..."
                     : isEditMode
-                      ? "Update Mission"
-                      : "Create Mission"}
+                      ? "Update Undangan"
+                      : "Buat Undangan"}
                 </button>
               </div>
             </div>
