@@ -18,6 +18,7 @@ import {
   InvitationDateTimeValue,
 } from "@/types/invitation";
 import { DateTime } from "luxon";
+import { AnimatePresence, motion } from "framer-motion";
 import { INVITATION_ZONE, parseInvitationDateTime } from "@/lib/date-time";
 import {
   getInvitationTemplateThemes,
@@ -58,6 +59,13 @@ type RegisterInvitationFormProps = {
     formData: FormData,
   ) => Promise<VerifyRegisterPasswordState>;
   initialUnlocked?: boolean;
+};
+
+type FieldErrors = {
+  musicTitle?: string;
+  musicUrl?: string;
+  coverImage?: string;
+  hostPhotoByIndex?: Record<number, string>;
 };
 
 function updateAtPath<T extends object>(
@@ -159,7 +167,7 @@ const TINYPNG_OPTIMIZABLE_MIME_TYPES = new Set([
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   if (typeof err === "string") return err;
-  return "Upload failed.";
+  return "Upload gagal.";
 }
 
 function getFileExtension(name: string): string {
@@ -174,19 +182,19 @@ function validateImageFile(file: File): string | null {
 
   if (type) {
     if (!type.startsWith("image/")) {
-      return "Only AVIF, WebP, JPG, PNG, or APNG images are allowed.";
+      return "Hanya gambar AVIF, WebP, JPG, PNG, atau APNG yang diperbolehkan.";
     }
     if (!ALLOWED_IMAGE_MIME_TYPES.has(type)) {
-      return "Only AVIF, WebP, JPG, PNG, or APNG images are allowed.";
+      return "Hanya gambar AVIF, WebP, JPG, PNG, atau APNG yang diperbolehkan.";
     }
   } else {
     if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
-      return "Only AVIF, WebP, JPG, PNG, or APNG images are allowed.";
+      return "Hanya gambar AVIF, WebP, JPG, PNG, atau APNG yang diperbolehkan.";
     }
   }
 
   if (file.size >= MAX_IMAGE_SIZE_BYTES) {
-    return "Image must be smaller than 25MB.";
+    return "Ukuran gambar maksimal 25MB.";
   }
   return null;
 }
@@ -231,10 +239,24 @@ async function tryOptimizeWithTinyPng(file: File): Promise<File> {
 
 function validateAudioFile(file: File): string | null {
   if (!file.type || !file.type.startsWith("audio/")) {
-    return "Only audio files are allowed.";
+    return "Hanya file audio yang diperbolehkan.";
   }
   if (file.size >= MAX_AUDIO_SIZE_BYTES) {
-    return "Audio must be smaller than 10MB.";
+    return "Ukuran audio maksimal 10MB.";
+  }
+  return null;
+}
+
+function validateHttpUrl(value: string): string | null {
+  const raw = (value ?? "").trim();
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return "URL audio tidak valid. Gunakan URL lengkap yang diawali http:// atau https://.";
+    }
+  } catch {
+    return "URL audio tidak valid. Gunakan URL lengkap yang diawali http:// atau https://.";
   }
   return null;
 }
@@ -341,7 +363,20 @@ function xhrPostFormData<T>(
     xhr.onload = () => {
       const text = xhr.responseText;
       if (xhr.status < 200 || xhr.status >= 300) {
-        reject(new Error(text || "Upload failed."));
+        let message = text || "Upload failed.";
+        if (text) {
+          try {
+            const parsed: unknown = JSON.parse(text);
+            if (parsed && typeof parsed === "object") {
+              const obj = parsed as Record<string, unknown>;
+              const err = typeof obj.error === "string" ? obj.error.trim() : "";
+              if (err) message = err;
+            }
+          } catch {
+            // ignore
+          }
+        }
+        reject(new Error(message));
         return;
       }
 
@@ -477,6 +512,7 @@ function ImageUrlPicker({
   label,
   value,
   onChange,
+  note,
   folderKey,
   fieldKey,
   draftKey,
@@ -484,6 +520,7 @@ function ImageUrlPicker({
   label: string;
   value: string;
   onChange: (value: string) => void;
+  note?: string;
   folderKey: string;
   fieldKey: string;
   draftKey: string;
@@ -567,7 +604,7 @@ function ImageUrlPicker({
     <div className="grid gap-2">
       <TextInput label={label} value={value} onChange={onChange} />
       <div className="text-[11px] text-white/50">
-        Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)
+        {note ?? "Allowed: AVIF, WebP, JPG, PNG, APNG (max 25MB)"}
       </div>
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
@@ -1279,26 +1316,69 @@ function TextInput({
   onChange,
   type = "text",
   readOnly = false,
+  error,
+  note,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
   readOnly?: boolean;
+  error?: string;
+  note?: string;
 }) {
   return (
     <label className="grid gap-1 text-sm">
       <span className="text-white/70">{label}</span>
       <input
-        className={`rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60 ${
+        className={`rounded-xl border bg-white/5 px-3 py-2 text-white outline-none focus:border-indigo-500/60 ${
           readOnly ? "cursor-default" : ""
-        }`}
+        } ${error ? "border-red-500/50" : "border-white/10"}`}
         value={value}
         type={type}
         readOnly={readOnly}
         onChange={readOnly ? undefined : (e) => onChange(e.target.value)}
       />
+      {note ? <span className="text-[11px] text-white/50">{note}</span> : null}
+      {error ? (
+        <span className="text-[11px] text-red-200">{error}</span>
+      ) : null}
     </label>
+  );
+}
+
+function ImportantFieldWrap({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        boxShadow: [
+          "0 0 0 0 rgba(34,211,238,0.00)",
+          "0 0 28px -12px rgba(34,211,238,0.35)",
+          "0 0 0 0 rgba(34,211,238,0.00)",
+        ],
+      }}
+      transition={{
+        opacity: { duration: 0.45, ease: "easeOut" },
+        y: { duration: 0.45, ease: "easeOut" },
+        boxShadow: {
+          duration: 4.6,
+          repeat: Infinity,
+          ease: "easeInOut",
+        },
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -1537,6 +1617,7 @@ export function RegisterInvitationForm({
   const [musicDeleting, setMusicDeleting] = useState(false);
   const [musicError, setMusicError] = useState<string | null>(null);
   const [musicCopied, setMusicCopied] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const initialPurpose = initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(
@@ -1674,6 +1755,7 @@ export function RegisterInvitationForm({
   }, [isUnlocked, state.ok, uploadDraftKey]);
 
   function setHosts(nextHosts: Host[]) {
+    setFieldErrors((prev) => ({ ...prev, hostPhotoByIndex: undefined }));
     setConfig((prev) =>
       updateAtPath(prev, ["sections", "hosts", "hosts"], nextHosts),
     );
@@ -2168,20 +2250,66 @@ export function RegisterInvitationForm({
   }, [firstEvent]);
 
   const validateBeforeReview = (): string | null => {
-    if (!templateId) return "Ship Template is required.";
+    const nextFieldErrors: FieldErrors = {};
+    let globalError: string | null = null;
+
+    if (!templateId) globalError = "Ship Template is required.";
     const hosts = config.sections.hosts.hosts;
     const hasHostName = Boolean(
       (hosts[0]?.firstName || hosts[0]?.fullName || "").trim() ||
       (hosts[1]?.firstName || hosts[1]?.fullName || "").trim(),
     );
-    if (!hosts.length || !hasHostName)
-      return "At least 1 host name is required.";
+
+    if (!hosts.length || !hasHostName) {
+      globalError = "At least 1 host name is required.";
+    }
+
+    const musicTitle = (config.music.title ?? "").trim();
+    if (!musicTitle) {
+      nextFieldErrors.musicTitle = "Judul musik wajib diisi.";
+    }
+
+    const musicUrl = (config.music.url ?? "").trim();
+    if (!musicUrl) {
+      nextFieldErrors.musicUrl = "URL audio wajib diisi.";
+    } else {
+      const urlError = validateHttpUrl(musicUrl);
+      if (urlError) nextFieldErrors.musicUrl = urlError;
+    }
+
+    if (asBoolean(config.sections.hero.enabled)) {
+      const coverImage = (config.sections.hero.coverImage ?? "").trim();
+      if (!coverImage) {
+        nextFieldErrors.coverImage = "Gambar cover wajib diisi.";
+      }
+    }
+
+    hosts.forEach((h, idx) => {
+      const photo = (h?.photo ?? "").trim();
+      if (!photo) {
+        nextFieldErrors.hostPhotoByIndex = nextFieldErrors.hostPhotoByIndex ?? {};
+        nextFieldErrors.hostPhotoByIndex[idx] = "Foto host wajib diisi.";
+      }
+    });
 
     const first = config.sections.event.events[0] as { date?: unknown };
     const dt = coerceInvitationDateTime(first?.date);
-    if (!dt?.date?.year) return "First event date is required.";
+    if (!dt?.date?.year) globalError = "First event date is required.";
 
-    return null;
+    setFieldErrors(nextFieldErrors);
+
+    const hasFieldError = Boolean(
+      nextFieldErrors.musicTitle ||
+        nextFieldErrors.musicUrl ||
+        nextFieldErrors.coverImage ||
+        (nextFieldErrors.hostPhotoByIndex &&
+          Object.keys(nextFieldErrors.hostPhotoByIndex).length > 0),
+    );
+    if (hasFieldError && !globalError) {
+      globalError = "Mohon lengkapi semua field yang wajib.";
+    }
+
+    return globalError;
   };
 
   const invitationUrl =
@@ -2192,13 +2320,13 @@ export function RegisterInvitationForm({
     if (affiliateAttribution) {
       const name = (affiliateAttribution.name ?? "").trim();
       if (name) {
-        return `Diakreditasikan ke: ${name} (${affiliateAttribution.id})`;
+        return `${name} (${affiliateAttribution.id})`;
       }
-      return `Diakreditasikan ke: (${affiliateAttribution.id})`;
+      return `(${affiliateAttribution.id})`;
     }
 
     if (isEditMode && existingAffiliateId) {
-      return `Diakreditasikan ke: (${existingAffiliateId})`;
+      return `(${existingAffiliateId})`;
     }
 
     if (!isEditMode && affiliateCookieId) {
@@ -2363,7 +2491,6 @@ export function RegisterInvitationForm({
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {whatsappMessages.map((m) => {
-              const waUrl = `https://wa.me/?text=${encodeURIComponent(m.text)}`;
               return (
                 <div
                   key={m.key}
@@ -2375,7 +2502,7 @@ export function RegisterInvitationForm({
                     </div>
                     <button
                       type="button"
-                      className=" shrink-0 ß rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
+                      className="shrink-0 rounded-2xl bg-linear-to-r from-green-500/15 via-emerald-500/10 to-cyan-500/10 border border-green-500/40 px-4 py-2 text-xs font-black uppercase tracking-wider text-green-100 hover:bg-green-500/20 hover:border-green-400/70"
                       onClick={() => void copyText(m.key, m.text)}
                     >
                       {copiedKey === m.key ? "Copied" : "Copy"}
@@ -2506,7 +2633,7 @@ export function RegisterInvitationForm({
 
         <div className="text-xl font-black tracking-tight bg-linear-to-r from-indigo-200 via-white to-indigo-200 bg-clip-text text-transparent relative z-10 flex items-center gap-3">
           <span className="text-xl">🚀</span>{" "}
-          {isEditMode ? "Edit Mission" : "Create New Mission"}
+          {isEditMode ? "Edit Undangan" : "Buat Undangan Baru"}
         </div>
 
         {affiliateAttribution ? (
@@ -2568,17 +2695,21 @@ export function RegisterInvitationForm({
         ) : null}
 
         <div className="grid gap-4 relative z-10 sm:grid-cols-2">
-          <TextInput
-            label="Mission Code (slug/document id)"
-            value={slug}
-            onChange={() => {}}
-            readOnly
-          />
+
+         
+           <div className="rounded-2xl border border-emerald-600/10 bg-emerald-500/20 p-4">
+              <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                slug id
+              </div>
+              <div className="mt-1 text-lg font-black tracking-tight text-white">
+                {slug}
+              </div>
+            </div>
 
           <div className="grid gap-2 text-sm sm:col-span-2">
             <div className="flex items-center justify-between gap-3">
               <span className="text-indigo-200/70 font-medium tracking-wide">
-                Ship Template
+                Template undangan
               </span>
               <span className="text-[11px] font-mono text-white/40">
                 {templatePosition.current}/{templatePosition.total}
@@ -2653,7 +2784,7 @@ export function RegisterInvitationForm({
           <div className="grid gap-2 text-sm sm:col-span-2">
             <div className="flex items-center justify-between gap-3">
               <span className="text-indigo-200/70 font-medium tracking-wide">
-                Color Combination
+                Kombinasi Warna
               </span>
               <span className="text-[11px] font-mono text-white/40">
                 {themePosition.current}/{themePosition.total}
@@ -2727,7 +2858,7 @@ export function RegisterInvitationForm({
 
           <label className="grid gap-1 text-sm sm:col-span-2">
             <span className="text-indigo-200/70 font-medium tracking-wide">
-              Mission Purpose
+              Tipe Undangan
             </span>
             <select
               name="purpose"
@@ -2746,25 +2877,47 @@ export function RegisterInvitationForm({
           </label>
         </div>
 
-        <div className="grid gap-4 rounded-2xl border border-white/10 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            boxShadow: [
+              "0 0 0 0 rgba(16,185,129,0.00)",
+              "0 0 34px -14px rgba(16,185,129,0.40)",
+              "0 0 0 0 rgba(16,185,129,0.00)",
+            ],
+          }}
+          transition={{
+            opacity: { duration: 0.5, ease: "easeOut" },
+            y: { duration: 0.5, ease: "easeOut" },
+            boxShadow: { duration: 4.8, repeat: Infinity, ease: "easeInOut" },
+          }}
+          className="grid gap-4 rounded-2xl border border-emerald-400/15 bg-[#0b0b16]/60 p-4 sm:p-5 shadow-inner relative z-10"
+        >
           <div className="text-sm font-black text-indigo-100 uppercase tracking-wide">
             Music
           </div>
           <div className="grid gap-4">
             <TextInput
-              label="Title (optional)"
+              label="Judul Musik"
               value={config.music.title ?? ""}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["music", "title"], v))
-              }
+              error={fieldErrors.musicTitle}
+              onChange={(v) => {
+                setFieldErrors((prev) => ({ ...prev, musicTitle: undefined }));
+                setConfig((prev) => updateAtPath(prev, ["music", "title"], v));
+              }}
             />
             <TextInput
-              label="Audio URL"
+              label="URL Audio"
               value={config.music.url}
               readOnly={Boolean(config.music.dropboxPath)}
-              onChange={(v) =>
-                setConfig((prev) => updateAtPath(prev, ["music", "url"], v))
-              }
+              error={fieldErrors.musicUrl}
+              note="Gunakan URL lengkap (http:// atau https://)."
+              onChange={(v) => {
+                setFieldErrors((prev) => ({ ...prev, musicUrl: undefined }));
+                setConfig((prev) => updateAtPath(prev, ["music", "url"], v));
+              }}
             />
 
             <div className="flex flex-wrap items-center gap-3">
@@ -2817,6 +2970,11 @@ export function RegisterInvitationForm({
                           );
                           return next;
                         });
+
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          musicUrl: undefined,
+                        }));
 
                         updateUploadDraft(uploadDraftKey, (prev) => ({
                           ...prev,
@@ -2916,11 +3074,11 @@ export function RegisterInvitationForm({
               </div>
             ) : null}
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid gap-5 relative z-10">
           <SectionCard
-            title="👋 Hero"
+            title="👋 Cover Pembuka / hero"
             enabled={asBoolean(config.sections.hero.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -2930,6 +3088,10 @@ export function RegisterInvitationForm({
                   v,
                 );
                 if (!v) {
+                  setFieldErrors((prevErrors) => ({
+                    ...prevErrors,
+                    coverImage: undefined,
+                  }));
                   next = updateAtPath(
                     next,
                     ["sections", "hero", "subtitle"],
@@ -2955,23 +3117,36 @@ export function RegisterInvitationForm({
                   )
                 }
               />
-              <ImageUrlPicker
-                label="Cover Image"
-                value={config.sections.hero.coverImage}
-                folderKey={config.imagekitFolderKey ?? ""}
-                fieldKey="hero-cover"
-                draftKey={uploadDraftKey}
-                onChange={(v) =>
-                  setConfig((prev) =>
-                    updateAtPath(prev, ["sections", "hero", "coverImage"], v),
-                  )
-                }
-              />
+              <ImportantFieldWrap className="rounded-3xl border border-cyan-400/15 bg-cyan-500/5 p-3">
+                <ImageUrlPicker
+                  label="Cover Image"
+                  value={config.sections.hero.coverImage}
+                  note="Format: AVIF, WebP, JPG, PNG, APNG (maks 25MB)"
+                  folderKey={config.imagekitFolderKey ?? ""}
+                  fieldKey="hero-cover"
+                  draftKey={uploadDraftKey}
+                  onChange={(v) => {
+                    setFieldErrors((prev) => ({ ...prev, coverImage: undefined }));
+                    setConfig((prev) =>
+                      updateAtPath(
+                        prev,
+                        ["sections", "hero", "coverImage"],
+                        v,
+                      ),
+                    );
+                  }}
+                />
+                {fieldErrors.coverImage ? (
+                  <div className="mt-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
+                    {fieldErrors.coverImage}
+                  </div>
+                ) : null}
+              </ImportantFieldWrap>
             </div>
           </SectionCard>
 
           <SectionCard
-            title="🏷️ Main Title"
+            title="🏷️ Judul Utama"
             enabled={asBoolean(config.sections.title.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -3003,7 +3178,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="⏳ Countdown"
+            title="⏳ Hitung Mundur"
             enabled={asBoolean(config.sections.countdown.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -3107,7 +3282,7 @@ export function RegisterInvitationForm({
                       setHosts(next.length ? next : [host]);
                     }}
                   >
-                    Remove Host
+                    Hapus
                   </button>
                 </div>
 
@@ -3115,18 +3290,34 @@ export function RegisterInvitationForm({
                   {HOST_FIELDS.map(([key, label]) =>
                     key === "photo" ? (
                       <div key={key} className="sm:col-span-2">
-                        <ImageUrlPicker
-                          label={label}
-                          value={host.photo}
-                          folderKey={config.imagekitFolderKey ?? ""}
-                          fieldKey={`host-${idx}-photo`}
-                          draftKey={uploadDraftKey}
-                          onChange={(v) => {
-                            const next = [...config.sections.hosts.hosts];
-                            next[idx] = { ...next[idx]!, photo: v };
-                            setHosts(next);
-                          }}
-                        />
+                        <ImportantFieldWrap className="rounded-3xl border border-cyan-400/10 bg-cyan-500/5 p-3">
+                          <ImageUrlPicker
+                            label={label}
+                            value={host.photo}
+                            note="Format: AVIF, WebP, JPG, PNG, APNG (maks 25MB)"
+                            folderKey={config.imagekitFolderKey ?? ""}
+                            fieldKey={`host-${idx}-photo`}
+                            draftKey={uploadDraftKey}
+                            onChange={(v) => {
+                              setFieldErrors((prev) => {
+                                if (!prev.hostPhotoByIndex?.[idx]) return prev;
+                                const nextMap = {
+                                  ...(prev.hostPhotoByIndex ?? {}),
+                                };
+                                delete nextMap[idx];
+                                return { ...prev, hostPhotoByIndex: nextMap };
+                              });
+                              const next = [...config.sections.hosts.hosts];
+                              next[idx] = { ...next[idx]!, photo: v };
+                              setHosts(next);
+                            }}
+                          />
+                          {fieldErrors.hostPhotoByIndex?.[idx] ? (
+                            <div className="mt-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-200">
+                              {fieldErrors.hostPhotoByIndex[idx]}
+                            </div>
+                          ) : null}
+                        </ImportantFieldWrap>
                       </div>
                     ) : (
                       <TextInput
@@ -3341,7 +3532,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="📅 Events"
+            title="📅 Acara / Kegiatan"
             enabled={asBoolean(config.sections.event.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -3578,7 +3769,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="✅ RSVP"
+            title="✅ RSVP / Konfirmasi"
             enabled={asBoolean(config.sections.rsvp.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -3818,7 +4009,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="📝 Wishes"
+            title="📝 Ucapan"
             enabled={asBoolean(config.sections.wishes.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -3889,7 +4080,7 @@ export function RegisterInvitationForm({
           </SectionCard>
 
           <SectionCard
-            title="🙏 Gratitude"
+            title="🙏 Ucapan Terimakasih"
             enabled={asBoolean(config.sections.gratitude.enabled)}
             onEnabledChange={(v) =>
               setConfig((prev) => {
@@ -3981,23 +4172,40 @@ export function RegisterInvitationForm({
         }}
       >
         {pending
-          ? "Launching Mission..."
+          ? "Loading..."
           : isEditMode
-            ? "Update Mission (Save)"
-            : "Launch Mission (Save)"}
+            ? "Tinjau Update"
+            : "Tinjau Undangan"}
       </button>
 
-      {reviewOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:items-center">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setReviewOpen(false)}
-            aria-label="Close review"
-          />
-          <div className="relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 shadow-[0_0_60px_-15px_rgba(79,70,229,0.35)] overflow-hidden overflow-y-auto overscroll-contain">
-            <div className="absolute -top-32 -right-24 w-64 h-64 rounded-full bg-indigo-500/10 blur-[70px] pointer-events-none" />
-            <div className="relative z-10 grid gap-4">
+      <AnimatePresence>
+        {reviewOpen ? (
+          <motion.div
+            className="fixed inset-0 z-[80] flex items-end justify-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:items-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            <motion.button
+              type="button"
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setReviewOpen(false)}
+              aria-label="Close review"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            />
+            <motion.div
+              className="relative w-full max-w-2xl max-h-[calc(100dvh-2rem)] rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 shadow-[0_0_60px_-15px_rgba(79,70,229,0.35)] overflow-hidden overflow-y-auto overscroll-contain"
+              initial={{ opacity: 0, y: 22, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 18, scale: 0.985 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+            >
+              <div className="absolute -top-32 -right-24 w-64 h-64 rounded-full bg-indigo-500/10 blur-[70px] pointer-events-none" />
+              <div className="relative z-10 grid gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="text-xs font-mono text-white/40 uppercase tracking-wider">
@@ -4005,8 +4213,8 @@ export function RegisterInvitationForm({
                   </div>
                   <div className="mt-1 text-lg font-black tracking-tight text-white">
                     {isEditMode
-                      ? "Ready to update this mission?"
-                      : "Ready to create this mission?"}
+                      ? "Review update undangan"
+                      : "Review pembuatan undangan"}
                   </div>
                 </div>
                 <button
@@ -4014,7 +4222,7 @@ export function RegisterInvitationForm({
                   className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-black uppercase tracking-wider text-white hover:border-white/25"
                   onClick={() => setReviewOpen(false)}
                 >
-                  Back
+                  Kembali
                 </button>
               </div>
 
@@ -4022,7 +4230,7 @@ export function RegisterInvitationForm({
                 <div className="grid gap-2 sm:grid-cols-2">
                   <div>
                     <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
-                      Mission Code
+                      Slug ID
                     </div>
                     <div className="mt-1 font-mono text-sm text-white/80 break-all">
                       {slug}
@@ -4098,17 +4306,10 @@ export function RegisterInvitationForm({
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-black uppercase tracking-wider text-white hover:border-white/25 disabled:opacity-60"
-                  disabled={pending}
-                  onClick={() => setReviewOpen(false)}
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-6 py-3 text-sm font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-3 text-sm font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(139,92,246,0.55)] hover:shadow-[0_0_55px_-10px_rgba(217,70,239,0.7)] disabled:opacity-60"
                   disabled={pending}
                   onClick={() => {
                     setClientError(null);
@@ -4130,9 +4331,10 @@ export function RegisterInvitationForm({
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      ) : null}
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </form>
   );
 }

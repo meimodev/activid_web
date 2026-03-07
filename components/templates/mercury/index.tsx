@@ -8,7 +8,6 @@ import { QuoteSection } from "./QuoteSection";
 import { Gallery } from "./Gallery";
 import { Wishes } from "./Wishes";
 import { MusicPlayer } from "@/components/invitation/MusicPlayer";
-import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { StorySection } from "./StorySection";
 import { GratitudeSection } from "./GratitudeSection";
 import { TitleSection } from "./TitleSection";
@@ -17,7 +16,6 @@ import { EventSection } from "./EventSection";
 import { GiftSection } from "./GiftSection";
 import { FooterSection } from "./FooterSection";
 import { InvitationConfig } from "@/types/invitation";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 import {
     DEMO_BRIDE_PROFILE_IMAGE_URL,
@@ -67,11 +65,6 @@ export function Mercury({ config }: MercuryProps) {
         [isDemo, sections.gallery?.photos],
     );
     const effectiveCoverImage = sections.hero.coverImage;
-
-    const derivedPhotos = useMemo(
-        () => pickDeterministicRandomSubset(effectiveGalleryPhotos, config.id, 5),
-        [config.id, effectiveGalleryPhotos],
-    );
 
     return (
         <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text font-serif">

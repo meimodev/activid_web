@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 
 const SESSION_SECRET = process.env.INVITATION_REGISTER_SESSION_SECRET;

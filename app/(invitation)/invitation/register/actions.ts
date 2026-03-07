@@ -107,6 +107,20 @@ function getExpectedPassword(): string | null {
 
 const SITE_ORIGIN = "https://invitation.activid.id";
 
+function validateHttpUrl(rawValue: string): string | null {
+  const raw = (rawValue ?? "").trim();
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return "URL audio tidak valid. Gunakan URL lengkap yang diawali http:// atau https://.";
+    }
+  } catch {
+    return "URL audio tidak valid. Gunakan URL lengkap yang diawali http:// atau https://.";
+  }
+  return null;
+}
+
 function generateMetadata({
   slug,
   purpose,
@@ -451,6 +465,27 @@ export async function registerInvitation(
     return { error: "Config payload is missing required fields." };
   }
 
+  const musicTitle = (config.music.title ?? "").trim();
+  if (!musicTitle) {
+    return { error: "Judul musik wajib diisi." };
+  }
+
+  const musicUrl = (config.music.url ?? "").trim();
+  if (!musicUrl) {
+    return { error: "URL audio wajib diisi." };
+  }
+
+  const musicUrlError = validateHttpUrl(musicUrl);
+  if (musicUrlError) {
+    return { error: musicUrlError };
+  }
+
+  const heroEnabled = Boolean(config.sections?.hero?.enabled);
+  const coverImage = (config.sections?.hero?.coverImage ?? "").trim();
+  if (heroEnabled && !coverImage) {
+    return { error: "Gambar cover wajib diisi." };
+  }
+
   if (
     !config.sections.gratitude ||
     typeof config.sections.gratitude.enabled !== "boolean" ||
@@ -465,6 +500,13 @@ export async function registerInvitation(
 
   if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
     return { error: "At least 1 host is required." };
+  }
+
+  for (let i = 0; i < config.sections.hosts.hosts.length; i++) {
+    const photo = (config.sections.hosts.hosts[i]?.photo ?? "").trim();
+    if (!photo) {
+      return { error: `Foto host ${i + 1} wajib diisi.` };
+    }
   }
 
   if (!config.sections.event || !config.sections.event.events) {
@@ -677,6 +719,27 @@ export async function updateInvitation(
     return { error: "Config payload is missing required fields." };
   }
 
+  const musicTitle = (config.music.title ?? "").trim();
+  if (!musicTitle) {
+    return { error: "Judul musik wajib diisi." };
+  }
+
+  const musicUrl = (config.music.url ?? "").trim();
+  if (!musicUrl) {
+    return { error: "URL audio wajib diisi." };
+  }
+
+  const musicUrlError = validateHttpUrl(musicUrl);
+  if (musicUrlError) {
+    return { error: musicUrlError };
+  }
+
+  const heroEnabled = Boolean(config.sections?.hero?.enabled);
+  const coverImage = (config.sections?.hero?.coverImage ?? "").trim();
+  if (heroEnabled && !coverImage) {
+    return { error: "Gambar cover wajib diisi." };
+  }
+
   if (
     !config.sections.gratitude ||
     typeof config.sections.gratitude.enabled !== "boolean" ||
@@ -691,6 +754,13 @@ export async function updateInvitation(
 
   if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
     return { error: "At least 1 host is required." };
+  }
+
+  for (let i = 0; i < config.sections.hosts.hosts.length; i++) {
+    const photo = (config.sections.hosts.hosts[i]?.photo ?? "").trim();
+    if (!photo) {
+      return { error: `Foto host ${i + 1} wajib diisi.` };
+    }
   }
 
   if (!config.sections.event || !config.sections.event.events) {

@@ -1,6 +1,13 @@
 import "server-only";
 
-import { isInvitationRegisterSessionValid, getInvitationRegisterSessionCookieName } from "@/lib/invitation-register-session";
+import {
+  getInvitationRegisterSessionCookieName,
+  isInvitationRegisterSessionValid,
+} from "@/lib/invitation-register-session";
+import {
+  getInvitationAffiliateSessionCookieName,
+  isInvitationAffiliateSessionValid,
+} from "@/lib/invitation-affiliate-session";
 import { createHmac, randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -8,8 +15,19 @@ import type { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const cookieName = getInvitationRegisterSessionCookieName();
   const sessionCookie = request.cookies.get(cookieName)?.value;
-  if (!isInvitationRegisterSessionValid(sessionCookie)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const isAdmin = isInvitationRegisterSessionValid(sessionCookie);
+  if (!isAdmin) {
+    const affiliateIdRaw = request.cookies.get("inv_affiliate")?.value;
+    const affiliateId = (affiliateIdRaw ?? "").trim().toUpperCase();
+    const isAffiliateId = /^[A-Z0-9]{12}$/.test(affiliateId);
+    const affiliateSessionCookie = isAffiliateId
+      ? request.cookies.get(getInvitationAffiliateSessionCookieName())?.value
+      : undefined;
+    const isAffiliate =
+      isAffiliateId && isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateId);
+    if (!isAffiliate) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;

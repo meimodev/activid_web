@@ -4,6 +4,10 @@ import {
   getInvitationRegisterSessionCookieName,
   isInvitationRegisterSessionValid,
 } from "@/lib/invitation-register-session";
+import {
+  getInvitationAffiliateSessionCookieName,
+  isInvitationAffiliateSessionValid,
+} from "@/lib/invitation-affiliate-session";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -24,13 +28,61 @@ function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
 
+function getDropboxErrorMessageFromText(text: string): string {
+  const trimmed = (text ?? "").trim();
+  if (!trimmed) return "";
+
+  try {
+    const parsed: unknown = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object") {
+      const obj = parsed as Record<string, unknown>;
+      const errorSummary = typeof obj.error_summary === "string" ? obj.error_summary.trim() : "";
+      if (errorSummary) return errorSummary;
+      const errorDescription =
+        typeof obj.error_description === "string" ? obj.error_description.trim() : "";
+      if (errorDescription) return errorDescription;
+      const error = typeof obj.error === "string" ? obj.error.trim() : "";
+      if (error) return error;
+    }
+  } catch {
+    // ignore
+  }
+
+  return trimmed;
+}
+
+function getFetchFailureCauseMessage(err: unknown): string {
+  if (!err || typeof err !== "object") return "";
+  const anyErr = err as { cause?: unknown };
+  const cause = anyErr.cause;
+  if (!cause || typeof cause !== "object") return "";
+  const anyCause = cause as { code?: unknown; message?: unknown };
+  const code = typeof anyCause.code === "string" ? anyCause.code.trim() : "";
+  const message = typeof anyCause.message === "string" ? anyCause.message.trim() : "";
+  if (code && message) return `${code}: ${message}`;
+  if (message) return message;
+  return "";
+}
+
 function requireAuthorized(request: NextRequest): NextResponse | null {
   const cookieName = getInvitationRegisterSessionCookieName();
   const sessionCookie = request.cookies.get(cookieName)?.value;
-  if (!isInvitationRegisterSessionValid(sessionCookie)) {
-    return jsonError("Unauthorized", 401);
+  if (isInvitationRegisterSessionValid(sessionCookie)) {
+    return null;
   }
-  return null;
+
+  const affiliateIdRaw = request.cookies.get("inv_affiliate")?.value;
+  const affiliateId = (affiliateIdRaw ?? "").trim().toUpperCase();
+  const isAffiliateId = /^[A-Z0-9]{12}$/.test(affiliateId);
+  if (isAffiliateId) {
+    const affiliateSessionCookieName = getInvitationAffiliateSessionCookieName();
+    const affiliateSessionCookie = request.cookies.get(affiliateSessionCookieName)?.value;
+    if (isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateId)) {
+      return null;
+    }
+  }
+
+  return jsonError("Unauthorized", 401);
 }
 
 function hasDropboxRefreshConfig(): boolean {
@@ -60,18 +112,29 @@ async function fetchDropboxAccessTokenFromRefreshToken(): Promise<DropboxAccessT
     refresh_token: refreshToken,
   });
 
-  const res = await fetch("https://api.dropboxapi.com/oauth2/token", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
-  });
+  let res: Response;
+  try {
+    res = await fetch("https://api.dropboxapi.com/oauth2/token", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+    });
+  } catch (err) {
+    const causeMessage = getFetchFailureCauseMessage(err);
+    throw new Error(
+      err instanceof Error
+        ? `Dropbox token refresh request failed: ${err.message}${causeMessage ? ` (${causeMessage})` : ""}`
+        : "Dropbox token refresh request failed.",
+    );
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(text || "Failed to refresh Dropbox access token.");
+    const message = getDropboxErrorMessageFromText(text) || "Failed to refresh Dropbox access token.";
+    throw new Error(message);
   }
 
   const data = (await res.json()) as { access_token?: unknown; expires_in?: unknown };
@@ -138,21 +201,31 @@ async function dropboxApiJson<T>(
   path: string,
   body: unknown,
 ): Promise<{ ok: true; data: T } | { ok: false; status: number; message: string; data?: unknown }> {
-  const res = await fetch(`https://api.dropboxapi.com/2/${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`https://api.dropboxapi.com/2/${path}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    const causeMessage = getFetchFailureCauseMessage(err);
+    const message =
+      err instanceof Error
+        ? `Dropbox request failed: ${err.message}${causeMessage ? ` (${causeMessage})` : ""}`
+        : "Dropbox request failed.";
+    return { ok: false, status: 502, message };
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     return {
       ok: false,
       status: res.status,
-      message: text || `Dropbox request failed: ${path}`,
+      message: getDropboxErrorMessageFromText(text) || `Dropbox request failed: ${path}`,
     };
   }
 
@@ -201,7 +274,15 @@ export async function POST(request: NextRequest) {
   const unauthorized = requireAuthorized(request);
   if (unauthorized) return unauthorized;
 
-  const token = await getDropboxToken();
+  let token: string | null = null;
+  try {
+    token = await getDropboxToken();
+  } catch (err) {
+    return jsonError(
+      err instanceof Error ? err.message : "Failed to authenticate with Dropbox.",
+      500,
+    );
+  }
   if (!token) {
     return jsonError(
       "Server is missing Dropbox credentials. Configure DROPBOX_REFRESH_TOKEN + DROPBOX_APP_KEY + DROPBOX_APP_SECRET (recommended) or DROPBOX_ACCESS_TOKEN (legacy).",
@@ -242,25 +323,37 @@ export async function POST(request: NextRequest) {
 
   const fileBuf = Buffer.from(await file.arrayBuffer());
 
-  const uploadRes = await fetch("https://content.dropboxapi.com/2/files/upload", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/octet-stream",
-      "Dropbox-API-Arg": JSON.stringify({
-        path: dropboxPath,
-        mode: "add",
-        autorename: true,
-        mute: false,
-        strict_conflict: false,
-      }),
-    },
-    body: fileBuf,
-  });
+  let uploadRes: Response;
+  try {
+    uploadRes = await fetch("https://content.dropboxapi.com/2/files/upload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": JSON.stringify({
+          path: dropboxPath,
+          mode: "add",
+          autorename: true,
+          mute: false,
+          strict_conflict: false,
+        }),
+      },
+      body: fileBuf,
+    });
+  } catch (err) {
+    const causeMessage = getFetchFailureCauseMessage(err);
+    return jsonError(
+      err instanceof Error
+        ? `Dropbox upload request failed: ${err.message}${causeMessage ? ` (${causeMessage})` : ""}`
+        : "Dropbox upload request failed.",
+      502,
+    );
+  }
 
   if (!uploadRes.ok) {
     const text = await uploadRes.text().catch(() => "");
-    return jsonError(text || "Failed to upload to Dropbox.", 500);
+    const message = getDropboxErrorMessageFromText(text) || "Failed to upload to Dropbox.";
+    return jsonError(message, 500);
   }
 
   type UploadResponse = { path_lower?: string };
@@ -279,7 +372,15 @@ export async function DELETE(request: NextRequest) {
   const unauthorized = requireAuthorized(request);
   if (unauthorized) return unauthorized;
 
-  const token = await getDropboxToken();
+  let token: string | null = null;
+  try {
+    token = await getDropboxToken();
+  } catch (err) {
+    return jsonError(
+      err instanceof Error ? err.message : "Failed to authenticate with Dropbox.",
+      500,
+    );
+  }
   if (!token) {
     return jsonError(
       "Server is missing Dropbox credentials. Configure DROPBOX_REFRESH_TOKEN + DROPBOX_APP_KEY + DROPBOX_APP_SECRET (recommended) or DROPBOX_ACCESS_TOKEN (legacy).",
