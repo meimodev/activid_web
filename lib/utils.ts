@@ -4,6 +4,11 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
+export function normalizeInvitationGuestName(value: string | null): string | null {
+  if (value === null) return null;
+  return value.replace(/_/g, " ");
+}
+
 function fnv1a32(input: string): number {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i += 1) {

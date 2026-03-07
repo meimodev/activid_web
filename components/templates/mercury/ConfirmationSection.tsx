@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { FloralDivider } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 
 interface ConfirmationSectionProps {
   invitationId: string;
@@ -25,7 +26,7 @@ export function ConfirmationSection({
   rsvpDeadline,
 }: ConfirmationSectionProps) {
   const searchParams = useSearchParams();
-  const inviteeName = searchParams.get("to") || "";
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to")) || "";
 
   const [formData, setFormData] = useState({ guests: "1" });
   const [status, setStatus] = useState<

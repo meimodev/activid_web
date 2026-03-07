@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 import {
   collection,
   doc,
@@ -43,7 +44,7 @@ export function Wishes({
   thankYouMessage,
 }: WishesProps) {
   const searchParams = useSearchParams();
-  const inviteeName = searchParams.get("to");
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to"));
 
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [message, setMessage] = useState("");

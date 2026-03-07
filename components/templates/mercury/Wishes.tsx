@@ -9,6 +9,7 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import { FloralDivider } from "./graphics";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { MERCURY_OVERLAY_ASSETS } from "./graphics/overlays";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 
 interface Wish {
   id: string;
@@ -28,7 +29,7 @@ interface WishesProps {
 
 export function Wishes({ invitationId, heading, placeholder, thankYouMessage }: WishesProps) {
   const searchParams = useSearchParams();
-  const inviteeName = searchParams.get("to");
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to"));
 
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [message, setMessage] = useState("");

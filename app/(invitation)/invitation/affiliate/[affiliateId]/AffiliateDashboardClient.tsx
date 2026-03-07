@@ -60,6 +60,33 @@ function formatRupiah(value: number): string {
   }
 }
 
+function formatIndonesianDateTimeCompact(valueMs: number): string {
+  if (!valueMs) return "-";
+
+  try {
+    const d = new Date(valueMs);
+    if (Number.isNaN(d.getTime())) return "-";
+
+    const datePart = d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+
+    const timePart = d
+      .toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(/\./g, ":");
+
+    return `${datePart} ${timePart}`;
+  } catch {
+    return "-";
+  }
+}
+
 export default function AffiliateDashboardClient({
   affiliate,
   unlocked,
@@ -293,7 +320,7 @@ export default function AffiliateDashboardClient({
       >
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Halaman Dibuat</div>
+            <div className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Undangan yang dibuat</div>
             <div className="mt-1 text-sm text-indigo-100/60 max-w-md">
               Daftar undangan yang dibuat melalui Affiliate ID Anda, beserta komisi dan tanggal pembuatan.
             </div>
@@ -311,7 +338,7 @@ export default function AffiliateDashboardClient({
 
         <div className="mt-8">
           <div className="hidden sm:grid grid-cols-12 gap-4 px-4 pb-3 text-xs font-black uppercase tracking-widest text-indigo-300/70 border-b border-white/10">
-            <div className="col-span-5 md:col-span-4">Slug</div>
+            <div className="col-span-5 md:col-span-4">Slug Id</div>
             <div className="col-span-3 md:col-span-4">Tanggal</div>
             <div className="col-span-2">Template</div>
             <div className="col-span-2 text-right">Komisi</div>
@@ -328,13 +355,27 @@ export default function AffiliateDashboardClient({
                   className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 px-5 py-4 rounded-2xl bg-black/20 border border-white/5 hover:bg-white/5 hover:border-indigo-500/30 transition-all group"
                 >
                   <div className="sm:col-span-5 md:col-span-4 flex flex-col justify-center">
-                    <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Slug</span>
-                    <div className="font-mono text-sm sm:text-sm text-indigo-100 break-all group-hover:text-white transition-colors">{r.slug}</div>
+                    <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Slug Id</span>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 font-mono text-sm sm:text-sm text-indigo-100 break-all group-hover:text-white transition-colors">
+                        {r.slug}
+                      </div>
+                      <div className="shrink-0">
+                        <a
+                          href={`/invitation/register/${encodeURIComponent(r.slug)}`}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-200 transition-all duration-300 hover:border-indigo-500/50 hover:bg-indigo-500/20 hover:shadow-[0_0_12px_rgba(99,102,241,0.3)]"
+                        >
+                          Edit
+                        </a>
+                      </div>
+                    </div>
                   </div>
                   <div className="sm:col-span-3 md:col-span-4 flex flex-col justify-center">
                     <span className="sm:hidden text-[10px] font-black uppercase tracking-widest text-indigo-300/50 mb-1">Tanggal</span>
                     <div className="text-sm text-indigo-200/70">
-                      {r.createdAtMs ? new Date(r.createdAtMs).toLocaleString("id-ID") : "-"}
+                      {formatIndonesianDateTimeCompact(r.createdAtMs)}
                     </div>
                   </div>
                   <div className="sm:col-span-2 flex flex-col justify-center">

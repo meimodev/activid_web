@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Timestamp } from "firebase/firestore";
 import { formatRelativeToNow } from "@/lib/date-time";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { FloralDivider, OverlayReveal } from "./graphics";
@@ -42,7 +43,7 @@ export function Wishes({
 }: WishesProps) {
   const overlayAssets = useOverlayAssets();
   const searchParams = useSearchParams();
-  const inviteeName = searchParams.get("to");
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to"));
 
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [message, setMessage] = useState("");

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 import {
  collection,
  addDoc,
@@ -21,7 +22,7 @@ export function ConfirmationSection({
  rsvpDeadline,
 }: ConfirmationSectionProps) {
  const searchParams = useSearchParams();
- const inviteeName = searchParams.get("to") || "";
+ const inviteeName = normalizeInvitationGuestName(searchParams.get("to")) || "";
 
  const [formData, setFormData] = useState({ guests: "1" });
  const [status, setStatus] = useState<

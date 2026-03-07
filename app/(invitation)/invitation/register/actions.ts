@@ -498,14 +498,16 @@ export async function registerInvitation(
     return { error: "Hosts section config is required." };
   }
 
-  if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
-    return { error: "At least 1 host is required." };
-  }
+  if (config.sections.hosts.enabled) {
+    if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
+      return { error: "At least 1 host is required." };
+    }
 
-  for (let i = 0; i < config.sections.hosts.hosts.length; i++) {
-    const photo = (config.sections.hosts.hosts[i]?.photo ?? "").trim();
-    if (!photo) {
-      return { error: `Foto host ${i + 1} wajib diisi.` };
+    for (let i = 0; i < config.sections.hosts.hosts.length; i++) {
+      const photo = (config.sections.hosts.hosts[i]?.photo ?? "").trim();
+      if (!photo) {
+        return { error: `Foto host ${i + 1} wajib diisi.` };
+      }
     }
   }
 
@@ -513,19 +515,26 @@ export async function registerInvitation(
     return { error: "Event section is required." };
   }
 
-  const events = normalizeEventList(config.sections.event.events);
-  if (events.length < 1) {
-    return { error: "At least 1 event is required." };
-  }
-
-  const normalizedEvents = events.map((event) => {
+  let normalizedEvents = normalizeEventList(config.sections.event.events).map((event) => {
     const iso = toInvitationIso(event.date);
-    if (!iso) return null;
-    return { ...event, date: iso };
+    return { ...event, date: iso ?? event.date };
   });
 
-  if (normalizedEvents.some((e) => !e)) {
-    return { error: "All event dates are required." };
+  if (config.sections.event.enabled) {
+    const events = normalizeEventList(config.sections.event.events);
+    if (events.length < 1) {
+      return { error: "At least 1 event is required." };
+    }
+
+    normalizedEvents = events.map((event) => {
+      const iso = toInvitationIso(event.date);
+      if (!iso) return null;
+      return { ...event, date: iso };
+    });
+
+    if (normalizedEvents.some((e) => !e)) {
+      return { error: "All event dates are required." };
+    }
   }
 
   const normalizedStories = (config.sections?.story?.stories ?? []).map((story) => {
@@ -752,14 +761,16 @@ export async function updateInvitation(
     return { error: "Hosts section config is required." };
   }
 
-  if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
-    return { error: "At least 1 host is required." };
-  }
+  if (config.sections.hosts.enabled) {
+    if (!Array.isArray(config.sections.hosts.hosts) || config.sections.hosts.hosts.length < 1) {
+      return { error: "At least 1 host is required." };
+    }
 
-  for (let i = 0; i < config.sections.hosts.hosts.length; i++) {
-    const photo = (config.sections.hosts.hosts[i]?.photo ?? "").trim();
-    if (!photo) {
-      return { error: `Foto host ${i + 1} wajib diisi.` };
+    for (let i = 0; i < config.sections.hosts.hosts.length; i++) {
+      const photo = (config.sections.hosts.hosts[i]?.photo ?? "").trim();
+      if (!photo) {
+        return { error: `Foto host ${i + 1} wajib diisi.` };
+      }
     }
   }
 
@@ -767,19 +778,26 @@ export async function updateInvitation(
     return { error: "Event section is required." };
   }
 
-  const events = normalizeEventList(config.sections.event.events);
-  if (events.length < 1) {
-    return { error: "At least 1 event is required." };
-  }
-
-  const normalizedEvents = events.map((event) => {
+  let normalizedEvents = normalizeEventList(config.sections.event.events).map((event) => {
     const iso = toInvitationIso(event.date);
-    if (!iso) return null;
-    return { ...event, date: iso };
+    return { ...event, date: iso ?? event.date };
   });
 
-  if (normalizedEvents.some((e) => !e)) {
-    return { error: "All event dates are required." };
+  if (config.sections.event.enabled) {
+    const events = normalizeEventList(config.sections.event.events);
+    if (events.length < 1) {
+      return { error: "At least 1 event is required." };
+    }
+
+    normalizedEvents = events.map((event) => {
+      const iso = toInvitationIso(event.date);
+      if (!iso) return null;
+      return { ...event, date: iso };
+    });
+
+    if (normalizedEvents.some((e) => !e)) {
+      return { error: "All event dates are required." };
+    }
   }
 
   const normalizedStories = (config.sections?.story?.stories ?? []).map((story) => {

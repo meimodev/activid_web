@@ -29,7 +29,7 @@ import { WishesSection } from "./WishesSection";
 import { GratitudeSection } from "./GratitudeSection";
 import { FooterSection } from "./FooterSection";
 import { FloatingNav } from "./FloatingNav";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { normalizeInvitationGuestName, pickDeterministicRandomSubset } from "@/lib/utils";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 
 interface VenusProps {
@@ -50,7 +50,7 @@ export function Venus({ config }: VenusProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const searchParams = useSearchParams();
-  const inviteeName = searchParams.get("to");
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to"));
 
   // Convert Dropbox "dl=1" or "dl=0" to "raw=1" for reliable streaming
   const audioStreamUrl = useMemo(

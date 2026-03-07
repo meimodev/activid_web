@@ -2354,8 +2354,18 @@ export function RegisterInvitationForm({
       (hosts[1]?.firstName || hosts[1]?.fullName || "").trim(),
     );
 
-    if (!hosts.length || !hasHostName) {
-      globalError = "At least 1 host name is required.";
+    if (asBoolean(config.sections.hosts.enabled)) {
+      if (!hosts.length || !hasHostName) {
+        globalError = "At least 1 host name is required.";
+      }
+
+      hosts.forEach((h, idx) => {
+        const photo = (h?.photo ?? "").trim();
+        if (!photo) {
+          nextFieldErrors.hostPhotoByIndex = nextFieldErrors.hostPhotoByIndex ?? {};
+          nextFieldErrors.hostPhotoByIndex[idx] = "Foto host wajib diisi.";
+        }
+      });
     }
 
     const musicTitle = (config.music.title ?? "").trim();
@@ -2378,17 +2388,11 @@ export function RegisterInvitationForm({
       }
     }
 
-    hosts.forEach((h, idx) => {
-      const photo = (h?.photo ?? "").trim();
-      if (!photo) {
-        nextFieldErrors.hostPhotoByIndex = nextFieldErrors.hostPhotoByIndex ?? {};
-        nextFieldErrors.hostPhotoByIndex[idx] = "Foto host wajib diisi.";
-      }
-    });
-
-    const first = config.sections.event.events[0] as { date?: unknown };
-    const dt = coerceInvitationDateTime(first?.date);
-    if (!dt?.date?.year) globalError = "First event date is required.";
+    if (asBoolean(config.sections.event.enabled)) {
+      const first = config.sections.event.events[0] as { date?: unknown };
+      const dt = coerceInvitationDateTime(first?.date);
+      if (!dt?.date?.year) globalError = "First event date is required.";
+    }
 
     setFieldErrors(nextFieldErrors);
 
@@ -2816,14 +2820,8 @@ export function RegisterInvitationForm({
           </div>
         ) : null}
 
-        {state.error ? (
-          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200 relative z-10">
-            {state.error}
-          </div>
-        ) : null}
-
         {clientError ? (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 relative z-10">
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 relative z-10 fixed bottom-0 left-0 right-0 p-4">
             {clientError}
           </div>
         ) : null}
@@ -4285,32 +4283,49 @@ export function RegisterInvitationForm({
         </div>
       </div>
 
-      <button
-        type="button"
-        disabled={
-          pending ||
-          (requiresAffiliateAcknowledgement && !affiliateAcknowledged)
-        }
-        className="mt-2 rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none w-full"
-        onClick={() => {
-          if (requiresAffiliateAcknowledgement && !affiliateAcknowledged) {
-            setClientError(
-              "Cookie afiliasi tidak terdeteksi. Undangan ini tidak akan mendapatkan komisi kecuali Anda mengakui dan melanjutkan.",
-            );
-            setAffiliateAckModalOpen(true);
-            return;
+      <div className="sticky bottom-4 z-[70] grid gap-2 mt-4">
+        <AnimatePresence>
+          {clientError && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.3, type: "spring", bounce: 0.4 }}
+              className="rounded-2xl border border-amber-500/50 bg-amber-500/20 backdrop-blur-xl px-5 py-3.5 text-sm font-medium text-amber-100 shadow-[0_10px_40px_-10px_rgba(245,158,11,0.4)] mx-auto w-full flex items-start gap-3"
+            >
+              <span className="text-xl leading-none">⚠️</span>
+              <div className="pt-0.5">{clientError}</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button
+          type="button"
+          disabled={
+            pending ||
+            (requiresAffiliateAcknowledgement && !affiliateAcknowledged)
           }
-          const err = validateBeforeReview();
-          setClientError(err);
-          if (!err) setReviewOpen(true);
-        }}
-      >
-        {pending
-          ? "Loading..."
-          : isEditMode
-            ? "Tinjau Update"
-            : "Tinjau Undangan"}
-      </button>
+          className="rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-cyan-500 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-black uppercase tracking-wider text-white shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_50px_-10px_rgba(34,211,238,0.7)] transition-all disabled:opacity-60 disabled:hover:shadow-none w-full"
+          onClick={() => {
+            if (requiresAffiliateAcknowledgement && !affiliateAcknowledged) {
+              setClientError(
+                "Cookie afiliasi tidak terdeteksi. Undangan ini tidak akan mendapatkan komisi kecuali Anda mengakui dan melanjutkan.",
+              );
+              setAffiliateAckModalOpen(true);
+              return;
+            }
+            const err = validateBeforeReview();
+            setClientError(err);
+            if (!err) setReviewOpen(true);
+          }}
+        >
+          {pending
+            ? "Loading..."
+            : isEditMode
+              ? "Tinjau Update"
+              : "Tinjau Undangan"}
+        </button>
+      </div>
 
       <AnimatePresence>
         {reviewOpen ? (

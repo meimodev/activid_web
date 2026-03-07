@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { collection, addDoc, query, where, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 
 interface ConfirmationSectionProps {
   invitationId: string;
@@ -15,7 +16,7 @@ interface ConfirmationSectionProps {
 
 export function ConfirmationSection({ invitationId, rsvpDeadline }: ConfirmationSectionProps) {
   const searchParams = useSearchParams();
-  const inviteeName = searchParams.get("to");
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to"));
   
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error" | "already_submitted">("idle");
   const [formData, setFormData] = useState({

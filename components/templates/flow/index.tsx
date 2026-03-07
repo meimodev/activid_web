@@ -25,7 +25,7 @@ import { GratitudeSection } from "./GratitudeSection";
 import Link from "next/link";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { Host, InvitationConfig } from "@/types/invitation";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { normalizeInvitationGuestName, pickDeterministicRandomSubset } from "@/lib/utils";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 
 interface FlowProps {
@@ -35,7 +35,7 @@ interface FlowProps {
 export function Flow({ config }: FlowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
-  const guestName = searchParams.get("to");
+  const guestName = normalizeInvitationGuestName(searchParams.get("to"));
 
   const { music, sections } = config;
 

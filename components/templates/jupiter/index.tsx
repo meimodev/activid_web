@@ -8,7 +8,7 @@ import { IconPause, IconPlay, WaveSeparator } from "./graphics";
 import { Host, InvitationConfig, InvitationDateTimeValue } from "@/types/invitation";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { normalizeInvitationGuestName, pickDeterministicRandomSubset } from "@/lib/utils";
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -117,7 +117,7 @@ export function Jupiter({ config }: JupiterProps) {
   const inviteeName = useMemo(() => {
   if (typeof window === "undefined") return null;
   const sp = new URLSearchParams(window.location.search);
-  return sp.get("to");
+  return normalizeInvitationGuestName(sp.get("to"));
   }, []);
 
   const guestName = useMemo(() => {

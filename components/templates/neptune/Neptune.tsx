@@ -53,7 +53,7 @@ import {
   deriveInvitationPrimaryDateInfo,
   formatRelativeToNow,
 } from "@/lib/date-time";
-import { pickDeterministicRandomSubset } from "@/lib/utils";
+import { normalizeInvitationGuestName, pickDeterministicRandomSubset } from "@/lib/utils";
 
 interface NeptuneProps {
   config: InvitationConfig;
@@ -193,7 +193,7 @@ export function Neptune({ config }: NeptuneProps) {
   const inviteeName = useMemo(() => {
     if (typeof window === "undefined") return null;
     const sp = new URLSearchParams(window.location.search);
-    return sp.get("to");
+    return normalizeInvitationGuestName(sp.get("to"));
   }, []);
 
   const guestName = useMemo(() => {

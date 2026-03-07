@@ -17,6 +17,7 @@ import { GiftSection } from "./GiftSection";
 import { FooterSection } from "./FooterSection";
 import { InvitationConfig } from "@/types/invitation";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
+import { normalizeInvitationGuestName } from "@/lib/utils";
 import {
     DEMO_BRIDE_PROFILE_IMAGE_URL,
     DEMO_COVER_IMAGE_URL,
@@ -39,7 +40,7 @@ export function Mercury({ config }: MercuryProps) {
     const [isOpen, setIsOpen] = useState(() => !config.sections.hero.enabled);
     const [isContentReady, setIsContentReady] = useState(() => !config.sections.hero.enabled);
     const searchParams = useSearchParams();
-    const guestName = searchParams.get("to");
+    const guestName = normalizeInvitationGuestName(searchParams.get("to"));
 
     const isDemo = config.id.endsWith("-demo");
 
