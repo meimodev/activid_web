@@ -27,7 +27,13 @@ const MERCURY_TEMPLATE_LISTING_VIDEO =
   "https://www.dropbox.com/scl/fi/kcvvy9g4dibqu6zdn4x03/cover-mercury.mp4?rlkey=yhprmhutdod9vdc84t6t1a1hh&st=55cn2sea&raw=1";
 const SATURN_TEMPLATE_LISTING_VIDEO =
   "https://www.dropbox.com/scl/fi/ikbpbo7j08ybsn379pi26/cover-saturn.mp4?rlkey=3f6vk2gdcrpr2c6ez2ag0ivj3&st=vdud5ugr&raw=1";
-const TEMPLATE_LISTING_PLACEHOLDER_VIDEO = "https://placeholdervideo.dev/720x720";
+const FLOW_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/iqkjwien6k1s43nszlhdp/cover-flow.mp4?rlkey=zbvw7kthvytdamnhu89p0cz87&st=c4ikn6nt&raw=1";
+const VENUS_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/37vgv0kosi8r03e6q5uy4/cover-venus.mp4?rlkey=y8kekeeathod4jdjunnw9969r&st=47bibpc1&raw=1";
+const NEPTUNE_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/zs82qg0jzi4qpwntxowse/cover-neptune.mp4?rlkey=fesndch0v3vpmhscwd8swan6o&st=titl871c&raw=1";
+
 
 export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[]> = {
   flow: [
@@ -185,7 +191,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "flow-demo",
     templateId: "flow",
     title: "Flow",
-    video: TEMPLATE_LISTING_PLACEHOLDER_VIDEO,
+    video: FLOW_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Maroon"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -203,7 +209,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "venus-demo",
     templateId: "venus",
     title: "Venus",
-    video: TEMPLATE_LISTING_PLACEHOLDER_VIDEO,
+    video: VENUS_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Haruki"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -212,7 +218,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "neptune-demo",
     templateId: "neptune",
     title: "Neptune",
-    video: TEMPLATE_LISTING_PLACEHOLDER_VIDEO,
+    video: NEPTUNE_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Neptune"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
