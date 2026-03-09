@@ -2037,7 +2037,7 @@ export function RegisterInvitationForm({
       return {
         id: opt.id,
         label: opt.label,
-        image: listing?.image ?? "",
+        video: listing?.video ?? "",
         priceDiscount: listing?.priceDiscount ?? "",
       };
     });
@@ -2882,11 +2882,16 @@ export function RegisterInvitationForm({
                     aria-pressed={selected}
                   >
                     <div className="relative aspect-[4/5] bg-black/20">
-                      {card.image ? (
-                        <img
-                          src={card.image}
-                          alt={card.label}
+                      {card.video ? (
+                        <video
+                          src={card.video}
+                          aria-label={card.label}
                           className="h-full w-full object-cover grayscale-[0.6]"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
                         />
                       ) : (
                         <div className="h-full w-full bg-white/5" />

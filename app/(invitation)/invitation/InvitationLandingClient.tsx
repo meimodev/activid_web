@@ -31,6 +31,8 @@ export default function InvitationLandingClient({
   );
   const [previewThemeId, setPreviewThemeId] = React.useState<string>("");
   const [customConfirmOpen, setCustomConfirmOpen] = React.useState(false);
+  const [templateVideoReady, setTemplateVideoReady] = React.useState<Record<string, boolean>>({});
+  const [templateVideoProgress, setTemplateVideoProgress] = React.useState<Record<string, number>>({});
 
   React.useEffect(() => {
     const stored = localStorage.getItem("activid_viewed_templates");
@@ -73,6 +75,52 @@ export default function InvitationLandingClient({
     setPreviewThemeId(nextThemeId);
     setPreviewTemplate(template);
   };
+
+  const setTemplateVideoReadyState = React.useCallback((templateId: string, ready: boolean) => {
+    setTemplateVideoReady((prev) => {
+      if (prev[templateId] === ready) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [templateId]: ready,
+      };
+    });
+  }, []);
+
+  const setTemplateVideoProgressState = React.useCallback((templateId: string, progress: number) => {
+    const nextProgress = Math.max(0, Math.min(100, Math.round(progress)));
+
+    setTemplateVideoProgress((prev) => {
+      if (prev[templateId] === nextProgress) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [templateId]: nextProgress,
+      };
+    });
+  }, []);
+
+  const syncTemplateVideoProgress = React.useCallback(
+    (templateId: string, event: React.SyntheticEvent<HTMLVideoElement>) => {
+      const video = event.currentTarget;
+      const duration = Number.isFinite(video.duration) ? video.duration : 0;
+
+      if (duration > 0 && video.buffered.length > 0) {
+        const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+        setTemplateVideoProgressState(templateId, (bufferedEnd / duration) * 100);
+        return;
+      }
+
+      if (video.readyState >= 3) {
+        setTemplateVideoProgressState(templateId, 100);
+      }
+    },
+    [setTemplateVideoProgressState],
+  );
 
   const whatsappNumberForLeads = affiliateWhatsappNumber || DEFAULT_WHATSAPP_NUMBER;
 
@@ -221,14 +269,17 @@ export default function InvitationLandingClient({
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {templates.map((template, index) => {
               const isViewed = viewedTemplates.includes(template.id);
+              const hasVideo = Boolean(template.video);
+              const isVideoReady = templateVideoReady[template.id] ?? false;
+              const videoProgress = templateVideoProgress[template.id] ?? 0;
 
               return (
                 <motion.div
-                  key={template.id + index}
+                  key={template.id}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.15, duration: 0.6 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: hasVideo }}
                   className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#0d0d1f] border transition-all duration-500 hover:shadow-[0_0_40px_-10px_rgba(79,70,229,0.3)] hover:-translate-y-1 ${
                     isViewed
                       ? "border-green-500/50 shadow-[0_0_20px_rgba(34,197,94,0.2)]"
@@ -246,26 +297,99 @@ export default function InvitationLandingClient({
                       className="aspect-4/5 overflow-hidden relative text-left"
                       aria-label={`Lihat template ${template.title}`}
                     >
-                      <img
-                        src={template.image}
-                        alt={template.title}
-                        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${isViewed ? "grayscale-[0.8] group-hover:grayscale-0" : "grayscale-[0.6] group-hover:grayscale-0"}`}
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-[#020205]/70 via-black/10 to-transparent opacity-80 group-hover:opacity-60 transition-all" />
-
-                      {/* Holographic Overlay Effect */}
-                      <motion.div
-                        aria-hidden
-                        className="absolute inset-0 opacity-0 pointer-events-none mix-blend-screen blur-[0.2px] bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.26)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]"
-                        animate={{ opacity: [0, 0.22, 0, 0] }}
-                        transition={{
-                          duration: 5.5,
-                          repeat: Infinity,
-                          repeatDelay: 7,
-                          delay: index * 1.2,
-                          ease: "easeInOut",
+                      <video
+                        src={template.video}
+                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        onLoadStart={() => {
+                          setTemplateVideoReadyState(template.id, false);
+                          setTemplateVideoProgressState(template.id, 0);
+                        }}
+                        onDurationChange={(event) => syncTemplateVideoProgress(template.id, event)}
+                        onProgress={(event) => syncTemplateVideoProgress(template.id, event)}
+                        onLoadedData={(event) => {
+                          syncTemplateVideoProgress(template.id, event);
+                          setTemplateVideoReadyState(template.id, true);
+                          setTemplateVideoProgressState(template.id, 100);
+                        }}
+                        onCanPlay={(event) => {
+                          syncTemplateVideoProgress(template.id, event);
+                          setTemplateVideoReadyState(template.id, true);
+                          setTemplateVideoProgressState(template.id, 100);
+                        }}
+                        onWaiting={(event) => {
+                          syncTemplateVideoProgress(template.id, event);
+                          setTemplateVideoReadyState(template.id, false);
+                        }}
+                        onStalled={(event) => {
+                          syncTemplateVideoProgress(template.id, event);
+                          setTemplateVideoReadyState(template.id, false);
                         }}
                       />
+                      <motion.div
+                        aria-hidden
+                        className={`absolute inset-0 z-10 overflow-hidden transition-opacity duration-500 ${
+                          isVideoReady ? "pointer-events-none opacity-0" : "opacity-100"
+                        }`}
+                        animate={
+                          isVideoReady
+                            ? { opacity: 0 }
+                            : { opacity: 1 }
+                        }
+                        transition={{ duration: 0.45, ease: "easeOut" }}
+                      >
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.35),transparent_38%),radial-gradient(circle_at_72%_30%,rgba(34,211,238,0.2),transparent_34%),radial-gradient(circle_at_50%_75%,rgba(147,51,234,0.2),transparent_42%),linear-gradient(180deg,rgba(2,2,5,0.75)_0%,rgba(8,10,28,0.9)_55%,rgba(2,2,5,0.96)_100%)]" />
+                        <motion.div
+                          className="absolute -left-8 top-8 h-24 w-24 rounded-full bg-indigo-400/20 blur-3xl"
+                          animate={{ x: [0, 26, 0], y: [0, -12, 0], scale: [1, 1.18, 1] }}
+                          transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                        <motion.div
+                          className="absolute -right-10 bottom-8 h-28 w-28 rounded-full bg-cyan-400/15 blur-3xl"
+                          animate={{ x: [0, -22, 0], y: [0, 10, 0], scale: [1.04, 0.92, 1.04] }}
+                          transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                        />
+                        <motion.div
+                          className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-200/20"
+                          animate={{ rotate: 360, scale: [0.96, 1.04, 0.96] }}
+                          transition={{ rotate: { duration: 7, repeat: Infinity, ease: "linear" }, scale: { duration: 2.6, repeat: Infinity, ease: "easeInOut" } }}
+                        />
+                        <motion.div
+                          className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-200/30"
+                          animate={{ rotate: -360, scale: [1.04, 0.94, 1.04] }}
+                          transition={{ rotate: { duration: 4.8, repeat: Infinity, ease: "linear" }, scale: { duration: 2.1, repeat: Infinity, ease: "easeInOut", delay: 0.2 } }}
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#020205] via-[#020205]/60 to-transparent" />
+                        <div className="absolute right-0 top-2 flex flex-col items-center gap-2 px-4 text-center">
+                          <motion.div
+                            className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-black/30 p-2 backdrop-blur-md"
+                            animate={{ y: [0, -2, 0] }}
+                            transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                          >
+                            <motion.span
+                              className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.8)]"
+                              animate={{ scale: [0.85, 1.25, 0.85], opacity: [0.55, 1, 0.55] }}
+                              transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                            <span className="min-w-[3rem] text-right text-[11px] font-black tabular-nums text-indigo-50">
+                              {videoProgress}%
+                            </span>
+                          </motion.div>
+                          <div className="h-1.5 w-16 overflow-hidden rounded-full border border-white/10 bg-white/10">
+                            <motion.div
+                              className="h-full rounded-full bg-linear-to-r from-indigo-400 via-cyan-300 to-purple-300 shadow-[0_0_16px_rgba(103,232,249,0.45)]"
+                              animate={{ width: `${Math.max(videoProgress, 6)}%` }}
+                              transition={{ duration: 0.2, ease: "easeOut" }}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                      <div className="absolute inset-0 bg-linear-to-t from-[#020205]/70 via-black/10 to-transparent opacity-80 group-hover:opacity-60 transition-all" />
+
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%,transparent_100%)] bg-size-[250%_250%] animate-[shimmer_2s_linear_infinite]" />
 
                       {/* Overlay Content */}
@@ -359,10 +483,6 @@ export default function InvitationLandingClient({
 
             <motion.button
               type="button"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25, duration: 0.6 }}
-              viewport={{ once: true }}
               whileHover={{ scale: 0.99 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {

@@ -2,7 +2,7 @@ export type InvitationTemplateListing = {
   id: string;
   templateId: string;
   title: string;
-  image: string;
+  video: string;
   tags: string[];
   priceOriginal: string;
   priceDiscount: string;
@@ -17,8 +17,17 @@ export type InvitationTemplateTheme = {
   darkColor?: string;
 };
 
-const DEMO_TEMPLATE_LISTING_IMAGE =
-  "https://ik.imagekit.io/geb6bfhmhx/activid-web/invitation/assets/cover.webp";
+const JUPITER_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/vbgby2wd7no73093qxpi9/cover-jupiter.mp4?rlkey=5zsk6843oadwlb1sbjs15d4c3&st=3sg4lz86&raw=1";
+const AMALTHEA_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/r178zucgwqxapqyqw6ajp/cover-amalthea.mp4?rlkey=1sop6kyp39jx2iq6vqjg3k080&st=ye89deab&raw=1";
+const PLUTO_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/wwq0rwtfkie9euynabrya/cover-pluto.mp4?rlkey=545p3ztpjqdkuhuoj68eh2wye&st=qnx0fsuj&raw=1";
+const MERCURY_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/kcvvy9g4dibqu6zdn4x03/cover-mercury.mp4?rlkey=yhprmhutdod9vdc84t6t1a1hh&st=55cn2sea&raw=1";
+const SATURN_TEMPLATE_LISTING_VIDEO =
+  "https://www.dropbox.com/scl/fi/ikbpbo7j08ybsn379pi26/cover-saturn.mp4?rlkey=3f6vk2gdcrpr2c6ez2ag0ivj3&st=vdud5ugr&raw=1";
+const TEMPLATE_LISTING_PLACEHOLDER_VIDEO = "https://placeholdervideo.dev/720x720";
 
 export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[]> = {
   flow: [
@@ -176,7 +185,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "flow-demo",
     templateId: "flow",
     title: "Flow",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: TEMPLATE_LISTING_PLACEHOLDER_VIDEO,
     tags: ["Wedding", "Maroon"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -185,7 +194,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "saturn-demo",
     templateId: "saturn",
     title: "Saturn",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: SATURN_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Saturn"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -194,7 +203,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "venus-demo",
     templateId: "venus",
     title: "Venus",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: TEMPLATE_LISTING_PLACEHOLDER_VIDEO,
     tags: ["Wedding", "Haruki"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -203,7 +212,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "neptune-demo",
     templateId: "neptune",
     title: "Neptune",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: TEMPLATE_LISTING_PLACEHOLDER_VIDEO,
     tags: ["Wedding", "Neptune"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -212,7 +221,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "mercury-demo",
     templateId: "mercury",
     title: "Mercury",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: MERCURY_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Floral"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -221,7 +230,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "pluto-demo",
     templateId: "pluto",
     title: "Pluto",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: PLUTO_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Pluto"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -230,7 +239,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "amalthea-demo",
     templateId: "amalthea",
     title: "Amalthea",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: AMALTHEA_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Sky Blue"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
@@ -239,7 +248,7 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     id: "jupiter-demo",
     templateId: "jupiter",
     title: "Jupiter",
-    image: DEMO_TEMPLATE_LISTING_IMAGE,
+    video: JUPITER_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Jupiter"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
