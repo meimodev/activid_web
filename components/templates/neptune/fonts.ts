@@ -9,7 +9,7 @@ export const neptuneBody = localFont({
 });
 
 export const neptuneScript = localFont({
-  src: "../../../public/fonts/tan-mon-cheri.woff2",
+  src: "../../../public/fonts/brittany-signature.ttf",
   display: "swap",
 });
 

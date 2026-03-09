@@ -19,7 +19,7 @@ import {
 import { NeptuneReveal } from "./reveal";
 import type { NavSectionId } from "./types";
 
-export function WeddingEventSection({
+export function EventSection({
   id,
   heading,
   events,
@@ -148,11 +148,16 @@ function EventCardClassic({
   return (
     <div className="relative rounded-[28px] bg-wedding-bg text-wedding-text shadow-[0_26px_70px_color-mix(in_srgb,var(--invitation-dark)_35%,transparent)]">
       <div className="absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_25%_20%,color-mix(in_srgb,var(--invitation-dark)_6%,transparent),transparent_60%),radial-gradient(circle_at_80%_70%,color-mix(in_srgb,var(--invitation-dark)_5%,transparent),transparent_55%)] opacity-50" />
-      <div className="relative rounded-[28px] border border-wedding-text/10 px-8 py-12">
+      <div className="relative rounded-[28px] border border-wedding-text/10 px-4 py-12">
         <h4
-          className={`${neptuneSerif.className} text-6xl leading-none text-wedding-accent text-center`}
+          className={`${neptuneSerif.className} text-5xl leading-[0.92] text-wedding-accent text-center break-words`}
         >
-          <SplitText text={title} splitBy="word" staggerDelay={0.1} />
+          <SplitText
+            text={title}
+            splitBy="word"
+            staggerDelay={0.1}
+            className="w-full whitespace-normal break-words"
+          />
         </h4>
         <div className="mt-7 flex justify-center">
           <div className="text-wedding-text-light">

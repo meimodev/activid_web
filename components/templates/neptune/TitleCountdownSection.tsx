@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { SplitText } from "@/components/animations";
 import { useWindowSize } from "@/hooks";
-import { getCountdownParts } from "@/lib/date-time";
+import { getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
+import type { InvitationDateTimeValue } from "@/types/invitation";
 
 import { neptuneSerif } from "./fonts";
 import { NeptuneStagger } from "./reveal";
@@ -23,14 +24,49 @@ export function TitleCountdownSection({
   date,
   coupleLabel,
   targetDate,
+  calendarEvent,
 }: {
   id: NavSectionId;
   backgroundPhotos?: string[];
   date: string;
   coupleLabel: string;
   targetDate: string;
+  calendarEvent?: {
+    title?: string;
+    date: InvitationDateTimeValue;
+    venue?: string;
+    address?: string;
+  };
 }) {
   const { isMobile } = useWindowSize();
+
+  const saveTheDateUrl = useMemo(() => {
+    if (!calendarEvent) return null;
+    const dt = parseInvitationDateTime(calendarEvent.date);
+    if (!dt) return null;
+
+    const startUtc = dt.setZone("utc").toFormat("yyyyLLdd'T'HHmmss'Z'");
+    const endUtc = dt
+      .plus({ hours: 2 })
+      .setZone("utc")
+      .toFormat("yyyyLLdd'T'HHmmss'Z'");
+
+    const url = new URL("https://calendar.google.com/calendar/render");
+    url.searchParams.set("action", "TEMPLATE");
+    url.searchParams.set(
+      "text",
+      `${calendarEvent.title?.trim() || "Event"} - ${coupleLabel}`,
+    );
+    url.searchParams.set("dates", `${startUtc}/${endUtc}`);
+
+    const location = [calendarEvent.venue, calendarEvent.address]
+      .map((v) => (v ?? "").trim())
+      .filter(Boolean)
+      .join(", ");
+    if (location) url.searchParams.set("location", location);
+
+    return url.toString();
+  }, [calendarEvent, coupleLabel]);
 
   const photos = useMemo(() => {
     const list = backgroundPhotos ?? [];
@@ -152,9 +188,20 @@ export function TitleCountdownSection({
           <p className="relative z-10 mt-4 text-lg tracking-wide text-wedding-text-light font-body">
             {date}
           </p>
-          <p className="relative z-10 mt-10 text-xs tracking-[0.45em] uppercase text-wedding-text-light font-body">
-            SAVE THE DATE
-          </p>
+          {saveTheDateUrl ? (
+            <a
+              href={saveTheDateUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="relative z-10 mt-10 inline-block text-xs tracking-[0.45em] uppercase text-wedding-text-light font-body hover:text-wedding-text transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wedding-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-wedding-bg"
+            >
+              SAVE THE DATE
+            </a>
+          ) : (
+            <p className="relative z-10 mt-10 text-xs tracking-[0.45em] uppercase text-wedding-text-light font-body">
+              SAVE THE DATE
+            </p>
+          )}
           <div className="relative z-10 mt-6">
             <CountdownRow targetDate={targetDate} />
           </div>
@@ -190,13 +237,13 @@ function CountdownRow({ targetDate }: { targetDate: string }) {
     >
       {cells.map((c) => (
         <div key={c.label}>
-          <div className="rounded-2xl border border-wedding-on-dark/20 bg-wedding-on-dark/10 px-2 py-3 shadow-[0_10px_35px_color-mix(in_srgb,var(--invitation-dark)_12%,transparent)]">
+          <div className="rounded-2xl border border-wedding-on-dark/20 bg-wedding-on-dark/20 px-2 py-3 shadow-[0_10px_35px_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)]">
             <div
-              className={`${neptuneSerif.className} text-3xl leading-none text-wedding-on-dark`}
+              className={`${neptuneSerif.className} text-xl leading-none text-wedding`}
             >
               {c.value}
             </div>
-            <div className="mt-2 text-[12px] leading-none text-wedding-on-dark/85 font-body">
+            <div className="mt-2 text-[12px] leading-none text-wedding opacity-50 font-body">
               {c.label}
             </div>
           </div>

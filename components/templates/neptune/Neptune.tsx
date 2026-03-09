@@ -28,7 +28,7 @@ import { QuoteSection } from "./QuoteSection";
 import { StorySectionClassic } from "./StorySectionClassic";
 import { ThankYouSection } from "./ThankYouSection";
 import { TitleCountdownSection } from "./TitleCountdownSection";
-import { WeddingEventSection } from "./WeddingEventSection";
+import { EventSection } from "./EventSection";
 import { WishesSectionClassic } from "./WishesSectionClassic";
 import { neptuneBody, neptuneScript, neptuneSerif } from "./fonts";
 import { NeptuneReveal } from "./reveal";
@@ -241,11 +241,22 @@ export function Neptune({ config }: NeptuneProps) {
     .map((e, idx) => ({ key: String(idx), ...e }))
     .filter((e) => Boolean(e?.title));
 
+  const firstCalendarEvent = useMemo(() => {
+    const first = events[0];
+    if (!first?.date) return null;
+    return {
+      title: first.title,
+      date: first.date,
+      venue: first.venue,
+      address: first.address,
+    };
+  }, [events]);
+
   const backgroundReady = pageAssetsReady && isOpen && derivedPhotos.length > 0;
 
   return (
     <main
-      className={` min-h-full overflow-hidden bg-wedding-bg text-wedding-text font-body ${neptuneBody.variable} ${neptuneSerif.variable} [--font-body:var(--font-neptune-body)]`}
+      className={`relative min-h-screen overflow-hidden bg-wedding-bg text-wedding-text font-body ${neptuneBody.variable} ${neptuneSerif.variable} [--font-body:var(--font-neptune-body)]`}
     >
       {backgroundReady && derivedPhotos.length > 0 ? (
           <BackgroundSlideshow photos={derivedPhotos} />
@@ -256,7 +267,7 @@ export function Neptune({ config }: NeptuneProps) {
 
       {config.sections.hero.enabled && (
         <motion.div
-          className="fixed inset-0 z-50 h-screen"
+          className="absolute inset-0 z-50"
           initial={false}
           animate={{
             opacity: isOpen ? 0 : 1,
@@ -294,6 +305,7 @@ export function Neptune({ config }: NeptuneProps) {
               date={dateInfo?.display ?? ""}
               coupleLabel={coupleTitle}
               targetDate={dateInfo?.countdownTarget ?? ""}
+              calendarEvent={firstCalendarEvent ?? undefined}
             />
 
             {config.sections.quote.enabled ? (
@@ -308,7 +320,7 @@ export function Neptune({ config }: NeptuneProps) {
             ) : null}
 
             {config.sections.event.enabled && (
-              <WeddingEventSection
+              <EventSection
                 id="event"
                 heading={"Wedding Event"}
                 events={events}
