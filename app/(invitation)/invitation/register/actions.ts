@@ -530,9 +530,9 @@ export async function registerInvitation(
       const iso = toInvitationIso(event.date);
       if (!iso) return null;
       return { ...event, date: iso };
-    });
+    }).filter((e): e is NonNullable<typeof e> => e !== null);
 
-    if (normalizedEvents.some((e) => !e)) {
+    if (normalizedEvents.length !== events.length) {
       return { error: "All event dates are required." };
     }
   }
@@ -793,9 +793,9 @@ export async function updateInvitation(
       const iso = toInvitationIso(event.date);
       if (!iso) return null;
       return { ...event, date: iso };
-    });
+    }).filter((e): e is NonNullable<typeof e> => e !== null);
 
-    if (normalizedEvents.some((e) => !e)) {
+    if (normalizedEvents.length !== events.length) {
       return { error: "All event dates are required." };
     }
   }
