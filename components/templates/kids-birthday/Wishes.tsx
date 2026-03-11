@@ -34,6 +34,51 @@ interface WishesProps {
   isReady?: boolean;
 }
 
+const popVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.3 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 10,
+      stiffness: 150,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.8, rotate: -5 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: "spring",
+      damping: 12,
+      stiffness: 100,
+    },
+  },
+} as const;
+
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 15,
+      stiffness: 100,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+} as const;
+
 export function Wishes({
   invitationId,
   heading,

@@ -142,6 +142,12 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
             subtitle={sections.hero.subtitle}
             coverImage={effectiveCoverImage}
             guestName={guestName || undefined}
+            isOceanExplorer={
+              /* We can't rely on config.theme.id since it doesn't exist on InvitationConfig, 
+                 but we can infer it by matching the theme colors to the Ocean Explorer theme colors */
+              config.theme.mainColor.toLowerCase() === "#f0f9ff".toLowerCase() &&
+              config.theme.accentColor.toLowerCase() === "#0369a1".toLowerCase()
+            }
           />
         </motion.div>
       ) : null}
