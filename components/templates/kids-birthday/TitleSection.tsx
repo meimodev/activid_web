@@ -76,6 +76,20 @@ export function TitleSection({
           />
         ) : null}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.7)_36%,rgba(255,255,255,0.92)_70%,rgba(255,255,255,0.98))]" />
+        
+        <motion.div
+          className="absolute -top-10 -right-10 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
+          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+          animate={{ rotate: [0, 90, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        />
+        
+        <motion.div
+          className="absolute top-40 -left-16 h-[200px] w-[200px] bg-contain bg-no-repeat opacity-70"
+          style={{ backgroundImage: `url(${overlayAssets.giftBox})` }}
+          animate={{ y: [0, 15, 0], rotate: [-15, -5, -15] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        />
         <motion.div
           className="absolute inset-x-0 top-0 h-[200px] bg-top bg-cover bg-no-repeat opacity-95"
           style={{ backgroundImage: `url(${overlayAssets.clouds})` }}
@@ -89,28 +103,38 @@ export function TitleSection({
           transition={{ duration: 7.8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-60"
+          className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-80 mix-blend-multiply"
           style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ y: [0, -10, 0], rotate: [0, 2, -2, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-10 -left-10 h-[300px] w-[300px] bg-contain bg-no-repeat opacity-50 mix-blend-multiply"
+          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+          animate={{ rotate: [0, -90, 0] }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         />
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[520px] flex-col items-center justify-end px-4 pb-14 pt-28 text-center">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%">
-          <div className="rounded-[40px] border border-wedding-accent/15 bg-white/70 px-5 pt-7 pb-8 shadow-[0_28px_80px_rgba(63,19,91,0.14)] backdrop-blur-xl">
-            <p className="font-poppins text-[12px] uppercase tracking-[0.28em] text-wedding-accent">
+          <motion.div
+            className="relative rounded-[48px] border-4 border-white bg-white/80 px-6 pt-9 pb-10 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_30%,transparent),0_30px_80px_rgba(63,19,91,0.14)] backdrop-blur-xl"
+            animate={{ rotate: [1, -1, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-4 py-1 rounded-full border-2 border-wedding-accent/20 -rotate-2">
               {displayHeading}
             </p>
-            <h2 className="mt-4 font-poppins-bold text-[40px] leading-none tracking-tight text-wedding-dark">
+            <h2 className="mt-6 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
               {celebrantName}
             </h2>
-            <p className="mt-3 font-poppins text-[13px] uppercase tracking-[0.24em] text-wedding-dark/65">
-              {date}
-            </p>
+            <div className="mt-5 inline-flex items-center justify-center rounded-2xl bg-wedding-dark px-5 py-2 text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_60%,transparent)] rotate-1">
+              <span className="font-poppins-bold text-[13px] uppercase tracking-widest">{date}</span>
+            </div>
 
             {showCountdown ? (
-              <div className="mt-8 grid grid-cols-2 gap-3">
+              <div className="mt-10 grid grid-cols-2 gap-4">
                 {(
                   [
                     { label: "Hari", value: timeLeft.days },
@@ -122,18 +146,22 @@ export function TitleSection({
                   <motion.div
                     key={item.label}
                     initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.22 + idx * 0.06, ease: "easeOut" }}
-                    className="rounded-[28px] border border-wedding-accent/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(255,255,255,0.74))] px-3 py-4 shadow-[0_16px_40px_rgba(96,57,201,0.08)]"
+                    animate={{ opacity: 1, y: 0, rotate: (idx % 2 === 0 ? [-2, 2, -2] : [2, -2, 2]) }}
+                    transition={{
+                      opacity: { duration: 0.6, delay: 0.22 + idx * 0.06, ease: "easeOut" },
+                      y: { duration: 0.6, delay: 0.22 + idx * 0.06, ease: "easeOut" },
+                      rotate: { duration: 5 + idx, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                    className="relative rounded-[32px] border-4 border-white bg-[linear-gradient(180deg,white,color-mix(in_srgb,var(--invitation-bg)_40%,white))] px-3 py-5 shadow-[0_12px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_30%,transparent)]"
                   >
                     <motion.div
-                      animate={{ scale: [1, 1.04, 1] }}
-                      transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: idx * 0.18 }}
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: idx * 0.15 }}
                     >
-                      <div className="font-poppins-bold text-[30px] leading-none text-wedding-dark">
+                      <div className="font-black text-[38px] leading-none text-wedding-dark [text-shadow:2px_2px_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)]">
                         {String(item.value).padStart(2, "0")}
                       </div>
-                      <div className="mt-2 font-poppins text-[10px] uppercase tracking-[0.22em] text-wedding-accent-2">
+                      <div className="mt-2 font-poppins-bold text-[11px] uppercase tracking-widest text-wedding-accent-2">
                         {item.label}
                       </div>
                     </motion.div>
@@ -146,13 +174,14 @@ export function TitleSection({
               href={calendarHref}
               target="_blank"
               rel="noreferrer"
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="mt-8 inline-flex items-center justify-center rounded-full bg-wedding-accent-2 px-8 py-3 font-poppins-bold text-[12px] uppercase tracking-[0.26em] text-wedding-on-accent-2 shadow-[0_16px_40px_color-mix(in_srgb,var(--invitation-accent-2)_28%,transparent)] transition hover:bg-wedding-accent-2/85"
+              animate={{ scale: [1, 1.05, 1], rotate: [2, -2, 2] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              whileTap={{ scale: 0.95, y: 4, boxShadow: "0 0px 0 0 color-mix(in_srgb,var(--invitation-accent-2)_40%,transparent)" }}
+              className="mt-10 inline-flex items-center justify-center rounded-full bg-wedding-accent-2 px-10 py-4 font-poppins-bold text-[14px] uppercase tracking-widest text-white shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_50%,transparent)] transition-all"
             >
               Save The Party
             </motion.a>
-          </div>
+          </motion.div>
         </RevealOnScroll>
       </div>
     </section>

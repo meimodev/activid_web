@@ -36,34 +36,89 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
   const displayRole = celebrant?.role?.trim() || "Birthday Star";
 
   const containerVariants = {
-    hidden: { opacity: 1 },
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.14, delayChildren: 0.18 },
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 15,
+        stiffness: 100,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
     },
     exit: {
-      opacity: 1,
+      opacity: 0,
+      scale: 0.95,
+      y: -20,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.04,
+        staggerChildren: 0.05,
         staggerDirection: -1,
+        when: "afterChildren",
       },
     },
   } as const;
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 18, scale: 0.98 },
+    hidden: { opacity: 0, y: 30, scale: 0.8, rotate: -5 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.86, ease: revealEase },
+      rotate: 0,
+      transition: { 
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
     },
     exit: {
       opacity: 0,
-      y: -18,
-      scale: 0.96,
-      transition: { duration: 0.62, ease: revealEase },
+      y: -20,
+      scale: 0.9,
+      rotate: 5,
+      transition: { duration: 0.4 },
+    },
+  } as const;
+  
+  const textVariants = {
+    hidden: { opacity: 0, scale: 0.5, rotate: 10 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: { 
+        type: "spring",
+        damping: 8,
+        stiffness: 200,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      rotate: -10,
+      transition: { duration: 0.4 },
+    },
+  } as const;
+  
+  const popVariants = {
+    hidden: { opacity: 0, y: 50, scale: 0.3 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { 
+        type: "spring",
+        damping: 10,
+        stiffness: 150,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.5,
+      transition: { duration: 0.4 },
     },
   } as const;
 
@@ -76,13 +131,13 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg max-w-[610px]">
+    <div className="relative h-screen w-full overflow-hidden bg-wedding-bg max-w-[610px] perspective-[1000px]">
       <div
         aria-hidden
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, color-mix(in_srgb,var(--invitation-bg) 80%, white 20%) 0%, var(--invitation-bg) 40%, color-mix(in_srgb,var(--invitation-accent-2) 10%, var(--invitation-bg)) 100%)",
+            "linear-gradient(180deg, var(--invitation-bg) 0%, color-mix(in_srgb,var(--invitation-accent-2) 15%, var(--invitation-bg)) 100%)",
         }}
       />
 
@@ -120,10 +175,26 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
 
       <motion.div
         aria-hidden
-        className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-70 mix-blend-multiply"
+        className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-80 mix-blend-multiply"
         style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
-        animate={isOpening ? { opacity: 0 } : { y: [0, 6, 0] }}
-        transition={isOpening ? { duration: 0.45 } : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        animate={isOpening ? { opacity: 0 } : { y: [0, -10, 0], rotate: [0, 2, -2, 0] }}
+        transition={isOpening ? { duration: 0.45 } : { duration: 15, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      <motion.div
+        aria-hidden
+        className="absolute -top-10 -right-10 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
+        style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+        animate={isOpening ? { opacity: 0, scale: 1.5 } : { rotate: [0, 90, 0] }}
+        transition={isOpening ? { duration: 0.5 } : { duration: 25, repeat: Infinity, ease: "linear" }}
+      />
+
+      <motion.div
+        aria-hidden
+        className="absolute bottom-20 -right-16 h-[200px] w-[200px] bg-contain bg-no-repeat opacity-70"
+        style={{ backgroundImage: `url(${overlayAssets.partyHat})` }}
+        animate={isOpening ? { opacity: 0, x: 50, rotate: 20 } : { y: [0, -15, 0], rotate: [-10, 5, -10] }}
+        transition={isOpening ? { duration: 0.5 } : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <div className="relative z-10 mx-auto flex h-full w-full items-center justify-center px-4 py-6">
@@ -131,15 +202,12 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
           variants={containerVariants}
           initial="hidden"
           animate={isOpening ? "exit" : "visible"}
-          className="relative w-full"
+          className="relative w-full max-w-[520px]"
         >
-          <motion.div
-            variants={itemVariants}
-            className="relative overflow-hidden rounded-[42px] border border-wedding-accent/18 bg-white/55 px-6 pt-7 pb-8 text-center shadow-[0_30px_90px_rgba(63,19,91,0.18)] backdrop-blur-xl"
-          >
+          <div className="relative overflow-hidden rounded-[48px] border-4 border-white bg-white/60 px-6 pt-9 pb-10 text-center shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_30%,transparent),0_30px_90px_rgba(63,19,91,0.18)] backdrop-blur-xl">
             <motion.div
               aria-hidden
-              className="absolute -right-12 -top-18 h-[180px] w-[180px] bg-contain bg-no-repeat opacity-80"
+              className="absolute -right-6 -top-6 h-[180px] w-[180px] bg-contain bg-no-repeat opacity-80 pointer-events-none"
               style={{ backgroundImage: `url(${overlayAssets.sparkles})` }}
               animate={isOpening ? { opacity: 0 } : { rotate: [0, 8, 0], y: [0, 8, 0] }}
               transition={isOpening ? { duration: 0.4 } : { duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
@@ -147,72 +215,98 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
 
             <motion.div
               aria-hidden
-              className="absolute -left-10 bottom-10 h-[160px] w-[160px] bg-contain bg-no-repeat opacity-70"
+              className="absolute -left-6 bottom-4 h-[160px] w-[160px] bg-contain bg-no-repeat opacity-70 pointer-events-none"
               style={{ backgroundImage: `url(${overlayAssets.sparkles})` }}
               animate={isOpening ? { opacity: 0 } : { rotate: [0, -7, 0], y: [0, -8, 0] }}
               transition={isOpening ? { duration: 0.4 } : { duration: 8.1, repeat: Infinity, ease: "easeInOut" }}
             />
 
-            <div className="relative z-10">
-              <motion.p
-                variants={itemVariants}
-                className="inline-flex items-center justify-center rounded-full bg-wedding-accent/10 px-4 py-2 font-poppins-bold text-[11px] uppercase tracking-[0.26em] text-wedding-accent"
-              >
-                You&apos;re Invited
-              </motion.p>
-
-              <motion.div variants={itemVariants} className="relative mx-auto mt-5 h-[260px] w-[260px]">
-                <div className="absolute inset-[18px] overflow-hidden rounded-[36px] shadow-[0_20px_50px_rgba(0,0,0,0.16)]">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${coverImage})` }}
-                  />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_50%,rgba(255,255,255,0.18))]" />
-                </div>
-
-                <motion.div
-                  aria-hidden
-                  className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-                  style={{ backgroundImage: `url(${overlayAssets.frame})` }}
-                  animate={isOpening ? { opacity: 0, y: -20, rotate: 8 } : { rotate: [0, 3, 0], scale: [1, 1.02, 1] }}
-                  transition={isOpening ? { duration: 0.75, ease: revealEase } : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </motion.div>
-
-              <motion.p variants={itemVariants} className="mt-6 font-poppins text-[12px] uppercase tracking-[0.32em] text-wedding-accent-2">
-                {displaySubtitle}
-              </motion.p>
-
-              <motion.h1 variants={itemVariants} className="mt-3 font-poppins-bold text-[42px] leading-none tracking-tight text-wedding-dark">
-                {celebrantName}
-              </motion.h1>
-
-              <motion.p variants={itemVariants} className="mt-3 font-poppins text-[13px] uppercase tracking-[0.24em] text-wedding-dark/65">
-                {date}
-              </motion.p>
-
-              <motion.div variants={itemVariants} className="mt-5 inline-flex items-center justify-center rounded-full bg-wedding-accent-2/12 px-4 py-2 text-wedding-dark">
-                <span className="font-poppins-bold text-[12px] uppercase tracking-[0.24em]">{displayRole}</span>
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="mt-7 rounded-[28px] border border-wedding-accent/10 bg-white/50 px-5 py-4 text-center backdrop-blur-md">
-                <p className="font-poppins text-[11px] uppercase tracking-[0.24em] text-wedding-dark/55">Special for</p>
-                <p className="mt-2 font-poppins-bold text-[22px] leading-none text-wedding-dark">{displayGuest}</p>
+            <motion.div 
+              className="relative z-10 flex flex-col items-center"
+              variants={containerVariants}
+              initial="hidden"
+              animate={isOpening ? "exit" : "visible"}
+            >
+              <motion.div variants={popVariants}>
+                <p
+                  className="inline-flex items-center justify-center rounded-full bg-wedding-accent px-5 py-2 font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-white shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] rotate-[-2deg]"
+                >
+                  You&apos;re Invited!
+                </p>
               </motion.div>
 
               <motion.div variants={itemVariants}>
+                <motion.div
+                  className="relative mx-auto mt-7 h-[240px] w-[240px]"
+                  animate={{ rotate: [-2, 2, -2] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="absolute inset-[10px] overflow-hidden rounded-full border-8 border-white shadow-[0_15px_30px_rgba(0,0,0,0.15)] hover:scale-[1.02] transition-transform duration-300">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${coverImage})` }}
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_50%,rgba(255,255,255,0.18))]" />
+                  </div>
+
+                  <motion.div
+                    aria-hidden
+                    className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(${overlayAssets.frame})` }}
+                    animate={isOpening ? { opacity: 0, y: -20, rotate: 8 } : { rotate: [0, 3, 0], scale: [1, 1.02, 1] }}
+                    transition={isOpening ? { duration: 0.75, ease: revealEase } : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </motion.div>
+              </motion.div>
+
+              <motion.div variants={textVariants}>
+                <p className="mt-8 font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent-2 bg-white/80 inline-block px-4 py-1 rounded-full border-2 border-wedding-accent-2/30 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)] -rotate-1">
+                  {displaySubtitle}
+                </p>
+              </motion.div>
+
+              <motion.div variants={popVariants}>
+                <h1 className="mt-4 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:3px_3px_0_white,5px_5px_0_var(--invitation-accent)]">
+                  {celebrantName}
+                </h1>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="mt-6 flex flex-col items-center justify-center gap-2">
+                <div className="inline-flex items-center justify-center rounded-2xl bg-wedding-accent-2 px-5 py-2 text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] rotate-1">
+                  <span className="font-poppins-bold text-[14px] tracking-widest">{date}</span>
+                </div>
+                {displayRole ? (
+                  <div className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-1.5 text-wedding-accent border-2 border-wedding-accent/20 font-poppins-bold text-[12px] uppercase tracking-wider -rotate-2">
+                    {displayRole}
+                  </div>
+                ) : null}
+              </motion.div>
+
+              <motion.div variants={popVariants} className="mt-8 relative">
+                <motion.div
+                  className="absolute -inset-2 bg-wedding-accent/10 rounded-3xl"
+                  animate={{ rotate: [2, -2, 2], scale: [1, 1.02, 1] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className="relative rounded-[24px] border-4 border-white bg-[linear-gradient(135deg,var(--invitation-bg),white)] px-5 py-4 text-center shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)]">
+                  <p className="font-poppins-bold text-[12px] uppercase tracking-widest text-wedding-accent-2">Special for</p>
+                  <p className="mt-1 font-black text-[24px] leading-tight text-wedding-dark">{displayGuest}</p>
+                </div>
+              </motion.div>
+
+              <motion.div variants={textVariants}>
                 <motion.button
                   onClick={handleOpen}
                   disabled={isOpening}
-                  className="mt-7 inline-flex items-center justify-center gap-3 rounded-full bg-wedding-accent px-9 py-3 font-poppins-bold text-sm uppercase tracking-[0.22em] text-wedding-on-accent shadow-[0_16px_40px_color-mix(in_srgb,var(--invitation-accent)_28%,transparent)] transition-colors hover:bg-wedding-accent/88 disabled:opacity-70"
-                  animate={isOpening ? { y: -8, opacity: 0 } : { y: [0, -4, 0] }}
-                  transition={isOpening ? { duration: 0.5, ease: revealEase } : { duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                  className="mt-8 inline-flex items-center justify-center gap-3 rounded-full bg-wedding-dark px-10 py-4 font-poppins-bold text-[15px] uppercase tracking-widest text-white shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-dark)_60%,transparent)] transition-all disabled:opacity-70 active:scale-95 active:translate-y-2 active:shadow-none"
+                  animate={isOpening ? { y: -8, opacity: 0, scale: 0.9 } : { y: [0, -6, 0], scale: [1, 1.02, 1] }}
+                  transition={isOpening ? { duration: 0.5, ease: revealEase } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  Open Invitation
+                  Let&apos;s Party!
                 </motion.button>
               </motion.div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
 
