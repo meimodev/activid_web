@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { DateTime } from "luxon";
 import { MusicPlayer } from "@/components/invitation/MusicPlayer";
-import { GiftSection } from "@/components/templates/amalthea/GiftSection";
+import { GiftSection } from "./GiftSection";
 import {
   DEMO_BRIDE_PROFILE_IMAGE_URL,
   DEMO_COVER_IMAGE_URL,

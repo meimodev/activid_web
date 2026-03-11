@@ -499,10 +499,16 @@ const INVITATION_PURPOSE_SEEDS_BASE: Record<Purpose, InvitationConfig> = {
         seeYouMessage: "Sampai jumpa di acara kami",
       },
       gift: {
-        enabled: false,
-        heading: "Gift",
-        description: "",
-        bankAccounts: [],
+        enabled: true,
+        heading: "Kado Spesial",
+        description: "Kehadiran dan doa terbaik kalian sudah menjadi kado yang luar biasa bagi Raka.\nNamun, jika ingin memberikan kado tambahan, kalian bisa mengirimkannya melalui:",
+        bankAccounts: [
+          {
+            bankName: "BCA",
+            accountNumber: "1234567890",
+            accountHolder: "MAHENDRA (AYAH RAKA)",
+          },
+        ],
       },
       wishes: {
         enabled: true,
