@@ -13,7 +13,10 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { RegisterInvitationForm } from "../RegisterInvitationForm";
 import { updateInvitation, verifyInvitationRegisterPassword } from "../actions";
-import type { InvitationConfig } from "@/types/invitation";
+import {
+  ADMIN_INVITATION_AFFILIATE_ID,
+  type InvitationConfig,
+} from "@/types/invitation";
 
 interface PageProps {
   params: Promise<{
@@ -71,7 +74,11 @@ export default async function InvitationRegisterEditPage({ params }: PageProps) 
     typeof config.affiliateId === "string" ? config.affiliateId.trim().toUpperCase() : "";
 
   let affiliateAttribution: { id: string; name?: string } | null = null;
-  if (existingAffiliateId && isAffiliateId(existingAffiliateId)) {
+  if (
+    existingAffiliateId &&
+    existingAffiliateId !== ADMIN_INVITATION_AFFILIATE_ID &&
+    isAffiliateId(existingAffiliateId)
+  ) {
     try {
       const affiliate = await getInvitationAffiliate(existingAffiliateId);
       if (affiliate) {

@@ -116,7 +116,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text">
-      <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
+      <MusicPlayer shouldStart={isOpen} audioUrl={music.url} variant="fun" />
 
       {sections.hero.enabled ? (
         <motion.div

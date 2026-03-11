@@ -185,7 +185,7 @@ export function StorySection({ stories, heading, fallbackImageUrl }: StorySectio
 
 export function GallerySection({ photos, heading }: GallerySectionProps) {
   const overlayAssets = useOverlayAssets();
-  const displayPhotos = useMemo(() => photos.filter(Boolean).slice(0, 8), [photos]);
+  const displayPhotos = useMemo(() => photos.filter(Boolean).slice(0, 30), [photos]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const selectedPhoto = displayPhotos[selectedIndex] ?? displayPhotos[0] ?? "";
 
@@ -254,7 +254,7 @@ export function GallerySection({ photos, heading }: GallerySectionProps) {
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.00)_50%,rgba(255,255,255,0.18))]" />
             </div>
 
-            <div className="mt-6 grid grid-cols-4 gap-3">
+            <div className="mt-6 grid grid-cols-4 gap-3 p-1 -mx-1">
               {displayPhotos.map((photo, idx) => {
                 const isActive = idx === selectedIndex;
                 return (
@@ -271,7 +271,7 @@ export function GallerySection({ photos, heading }: GallerySectionProps) {
                     }`}
                   >
                     <div className="aspect-square bg-white/40">
-                      <img src={photo} alt={`Gallery photo ${idx + 1}`} className="h-full w-full object-cover" />
+                      <img src={photo} alt={`Gallery photo ${idx + 1}`} loading="lazy" className="h-full w-full object-cover" />
                     </div>
                   </motion.button>
                 );

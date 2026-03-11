@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  ADMIN_INVITATION_AFFILIATE_ID,
   EventDetail,
   Host,
   InvitationConfig,
@@ -1641,9 +1642,16 @@ export function RegisterInvitationForm({
   const isUnlocked = Boolean(initialUnlocked || verifyState.ok);
   const isEditMode = mode === "edit";
   const existingAffiliateId =
-    isEditMode && typeof initialConfig.affiliateId === "string" && initialConfig.affiliateId.trim()
+    isEditMode &&
+    typeof initialConfig.affiliateId === "string" &&
+    initialConfig.affiliateId.trim() &&
+    initialConfig.affiliateId.trim().toUpperCase() !== ADMIN_INVITATION_AFFILIATE_ID
       ? initialConfig.affiliateId.trim()
       : undefined;
+  const visibleStateAffiliateId =
+    state.affiliateId?.trim().toUpperCase() === ADMIN_INVITATION_AFFILIATE_ID
+      ? undefined
+      : state.affiliateId;
 
   const requiresAffiliateAcknowledgement =
     !isEditMode && !isUnlocked && hasAffiliateCookie === false;
@@ -2557,12 +2565,12 @@ export function RegisterInvitationForm({
               <div className="text-[11px] font-mono text-indigo-300/50 uppercase tracking-wider mb-1">
                 Afiliasi
               </div>
-              {state.affiliateId ? (
+              {visibleStateAffiliateId ? (
                 <div className="text-sm text-indigo-100/90">
                   <span className="font-black text-white">
                     {state.affiliateName?.trim() || "(Tanpa nama)"}
                   </span>{" "}
-                  <span className="font-mono text-indigo-300/70">({state.affiliateId})</span>
+                  <span className="font-mono text-indigo-300/70">({visibleStateAffiliateId})</span>
                 </div>
               ) : (
                 <div className="text-sm text-amber-200/80 bg-amber-500/10 inline-block px-3 py-1 rounded-lg border border-amber-500/20">
@@ -2822,6 +2830,15 @@ export function RegisterInvitationForm({
                 invitation.activid.id/KODE_AFILIASI
               </span>
             </div>
+          </div>
+        ) : null}
+
+        {state.error ? (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 relative z-10">
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-red-200/70">
+              Gagal menyimpan undangan
+            </div>
+            <div className="mt-1 leading-relaxed">{state.error}</div>
           </div>
         ) : null}
 

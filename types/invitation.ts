@@ -153,6 +153,8 @@ export interface FooterSection extends SectionBase {
     message: string;
 }
 
+export const ADMIN_INVITATION_AFFILIATE_ID = "000000000000";
+
 // Main Config Interface
 export interface InvitationConfig {
     id: string; // matches document ID in firebase

@@ -15,6 +15,7 @@ import {
   isInvitationRegisterSessionValid,
 } from "@/lib/invitation-register-session";
 import {
+  ADMIN_INVITATION_AFFILIATE_ID,
   EventDetail,
   Host,
   InvitationConfig,
@@ -269,6 +270,24 @@ function normalizePhotoList(raw: unknown): string[] {
   return Array.from(new Set(raw)).filter((v): v is string => typeof v === "string" && Boolean(v));
 }
 
+function stripUndefined<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item) => item !== undefined)
+      .map((item) => stripUndefined(item)) as T;
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => [key, stripUndefined(entryValue)]),
+    ) as T;
+  }
+
+  return value;
+}
+
 export async function verifyInvitationRegisterPassword(
   _prevState: VerifyRegisterPasswordState,
   formData: FormData,
@@ -432,6 +451,10 @@ export async function registerInvitation(
     } catch {}
   }
 
+  const savedAffiliateId = isAdminAuth
+    ? ADMIN_INVITATION_AFFILIATE_ID
+    : (affiliateId ?? undefined);
+
   if (!hasValidAuth && password !== expectedPassword) {
     return { error: "Invalid password." };
   }
@@ -565,10 +588,10 @@ export async function registerInvitation(
     const candidateSlug = i === 0 ? baseSlug : `${baseSlug}-${i}`;
     if (candidateSlug.endsWith("-demo")) continue;
 
-    const toSave: InvitationConfig = {
+    const toSave = stripUndefined<InvitationConfig>({
       id: candidateSlug,
       imagekitFolderKey,
-      affiliateId: affiliateId ?? undefined,
+      affiliateId: savedAffiliateId,
       templateId,
       purpose,
       theme: config.theme,
@@ -601,7 +624,7 @@ export async function registerInvitation(
           stories: normalizedStories,
         },
       },
-    };
+    });
 
     try {
       await collection.doc(candidateSlug).create(toSave);
@@ -617,11 +640,11 @@ export async function registerInvitation(
     return { error: "Failed to allocate a unique mission code. Please try again." };
   }
 
-  if (affiliateId) {
+  if (savedAffiliateId && savedAffiliateId !== ADMIN_INVITATION_AFFILIATE_ID) {
     try {
       await db
         .collection("invitationAffiliates")
-        .doc(affiliateId)
+        .doc(savedAffiliateId)
         .set(
           {
             generatedInvitationCount: FieldValue.increment(1),
@@ -632,7 +655,7 @@ export async function registerInvitation(
 
       await db
         .collection("invitationAffiliates")
-        .doc(affiliateId)
+        .doc(savedAffiliateId)
         .collection("generatedInvitations")
         .doc(finalSlug)
         .set({
@@ -648,7 +671,8 @@ export async function registerInvitation(
     ok: true,
     slug: finalSlug,
     invitationUrl,
-    affiliateId: affiliateId ?? undefined,
+    affiliateId:
+      savedAffiliateId === ADMIN_INVITATION_AFFILIATE_ID ? undefined : savedAffiliateId,
     affiliateName,
   };
 }
@@ -826,7 +850,9 @@ export async function updateInvitation(
       const existingAffiliateId =
         typeof existingData?.affiliateId === "string" && existingData.affiliateId.trim()
           ? existingData.affiliateId
-          : undefined;
+          : isAdminAuth
+            ? ADMIN_INVITATION_AFFILIATE_ID
+            : undefined;
 
       if (isAffiliateAuth) {
         if (!existingAffiliateId) {
@@ -846,7 +872,7 @@ export async function updateInvitation(
       const imagekitFolderKey =
         config.imagekitFolderKey || existingFolderKey || deriveImagekitFolderKey(purpose, config.sections.hosts.hosts);
 
-      const toSave: InvitationConfig = {
+      const toSave = stripUndefined<InvitationConfig>({
         id: existingSlug,
         imagekitFolderKey,
         affiliateId: existingAffiliateId,
@@ -882,7 +908,7 @@ export async function updateInvitation(
             stories: normalizedStories,
           },
         },
-      };
+      });
 
       tx.set(docRef, toSave);
     });
@@ -891,7 +917,11 @@ export async function updateInvitation(
   }
 
   let affiliateName: string | undefined;
-  if (returnAffiliateId && isAffiliateId(returnAffiliateId)) {
+  if (
+    returnAffiliateId &&
+    returnAffiliateId !== ADMIN_INVITATION_AFFILIATE_ID &&
+    isAffiliateId(returnAffiliateId)
+  ) {
     try {
       const affiliate = await getInvitationAffiliate(returnAffiliateId);
       affiliateName = typeof affiliate?.name === "string" ? affiliate.name.trim() : undefined;
@@ -903,7 +933,8 @@ export async function updateInvitation(
     ok: true,
     slug: existingSlug,
     invitationUrl,
-    affiliateId: returnAffiliateId,
+    affiliateId:
+      returnAffiliateId === ADMIN_INVITATION_AFFILIATE_ID ? undefined : returnAffiliateId,
     affiliateName,
   };
 }
