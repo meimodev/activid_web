@@ -96,9 +96,10 @@ export function GiftSection({
         <motion.div
           className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
           style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
-          animate={{ x: [0, 20, 0] }}
+          animate={{ x: [0, -20, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
         />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent-2)_10%,var(--invitation-bg)),var(--invitation-bg))]" />
         <motion.div
           className="absolute -right-10 top-40 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
           style={{ backgroundImage: `url(${overlayAssets.stars})` }}
