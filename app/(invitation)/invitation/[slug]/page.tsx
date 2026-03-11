@@ -16,6 +16,8 @@ import { getInvitationThemeStyle } from "@/lib/invitation-theme";
 import { getInvitationTemplateThemes } from "@/data/invitation-templates";
 import { InvitationDemoPlayground } from "@/components/invitation/InvitationDemoPlayground";
 import {
+    getInvitationMetadataImage,
+    getInvitationMetadataText,
     getInvitationConfig,
     InvitationConfigQuotaExceededError,
 } from "@/lib/invitation-config";
@@ -197,9 +199,52 @@ export async function generateMetadata(
         };
     }
 
-    const coverImage = getDemoCoverImage("flow");
-    const title = "Invitation | Activid";
-    const description = "You are invited.";
+    if (RESERVED_TEMPLATE_SLUGS.has(slug)) {
+        notFound();
+    }
+
+    let config: InvitationConfig | null;
+    try {
+        config = await getInvitationConfig(slug);
+    } catch (err) {
+        if (err instanceof InvitationConfigQuotaExceededError) {
+            const title = "undangan digital activid";
+            const description = "design premium - pernikahan - HUT - acara - syukuran.";
+
+            return {
+                title,
+                description,
+                alternates: {
+                    canonical: canonicalUrl,
+                },
+                openGraph: {
+                    siteName: "Activid Web Invitation",
+                    locale: "id_ID",
+                    type: "website",
+                    title,
+                    description,
+                    url: canonicalUrl,
+                    images: [],
+                },
+                twitter: {
+                    card: "summary_large_image",
+                    title,
+                    description,
+                    images: [],
+                },
+            };
+        }
+
+        throw err;
+    }
+
+    if (!config) {
+        notFound();
+    }
+
+    const validated = requireInvitationConfig(config);
+    const { title, description } = getInvitationMetadataText(validated, slug);
+    const coverImage = getInvitationMetadataImage(validated);
 
     return {
         title,
@@ -214,20 +259,22 @@ export async function generateMetadata(
             title,
             description,
             url: canonicalUrl,
-            images: [
-                {
-                    url: coverImage,
-                    width: 1200,
-                    height: 630,
-                    alt: title,
-                },
-            ],
+            images: coverImage
+                ? [
+                    {
+                        url: coverImage,
+                        width: 1200,
+                        height: 630,
+                        alt: title,
+                    },
+                ]
+                : [],
         },
         twitter: {
             card: "summary_large_image",
             title,
             description,
-            images: [coverImage],
+            images: coverImage ? [coverImage] : [],
         },
     };
 }

@@ -3,6 +3,10 @@
 import { getInvitationAffiliate, isAffiliateId } from "@/lib/affiliate-config";
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
+  buildInvitationStoredMetadata,
+  revalidateInvitationConfig,
+} from "@/lib/invitation-config";
+import {
   toInvitationIso,
 } from "@/lib/date-time";
 import {
@@ -19,7 +23,6 @@ import {
   EventDetail,
   Host,
   InvitationConfig,
-  MetadataConfig,
 } from "@/types/invitation";
 import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
@@ -122,105 +125,6 @@ function validateHttpUrl(rawValue: string): string | null {
     return "URL audio tidak valid. Gunakan URL lengkap yang diawali http:// atau https://.";
   }
   return null;
-}
-
-function generateMetadata({
-  slug,
-  purpose,
-  config,
-}: {
-  slug: string;
-  purpose: "marriage" | "birthday" | "event";
-  config: InvitationConfig;
-}): MetadataConfig {
-  const hosts = config.sections.hosts.hosts;
-
-  const primaryName =
-    hosts[0]?.firstName || hosts[0]?.fullName || slug;
-  const secondaryName =
-    hosts[1]?.firstName || hosts[1]?.fullName || "";
-
-  const namePart =
-    purpose === "marriage" && secondaryName
-      ? `${primaryName} & ${secondaryName}`
-      : primaryName;
-
-  let title = "Invitation";
-  let description = "";
-  if (purpose === "marriage") {
-    title = `The Wedding of ${namePart}`;
-    description = `You are invited to the wedding of ${namePart}.`;
-  } else if (purpose === "birthday") {
-    title = `Birthday Invitation - ${namePart}`;
-    description = `You are invited to celebrate the birthday of ${namePart}.`;
-  } else {
-    title = `Event Invitation - ${namePart}`;
-    description = "You are invited to our event.";
-  }
-
-  const canonicalUrl = `${SITE_ORIGIN}/${slug}`;
-
-  const baseOg = config.metadata?.openGraph ?? {
-    title,
-    description,
-    url: canonicalUrl,
-    siteName: "Activid Web Invitation",
-    images: [],
-    locale: "id_ID",
-    type: "website",
-  };
-
-  const coverImage =
-    config.sections?.hero?.coverImage ||
-    baseOg.images?.[0]?.url ||
-    config.metadata?.twitter?.images?.[0] ||
-    "";
-
-  const openGraphImages = coverImage
-    ? [
-        {
-          url: coverImage,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ]
-    : baseOg.images ?? [];
-
-  const openGraph = {
-    ...baseOg,
-    title,
-    description,
-    url: canonicalUrl,
-    siteName: baseOg.siteName || "Activid Web Invitation",
-    locale: baseOg.locale || "id_ID",
-    type: baseOg.type || "website",
-    images: openGraphImages,
-  };
-
-  const baseTwitter = config.metadata?.twitter ?? {
-    card: "summary_large_image",
-    title,
-    description,
-    images: [],
-  };
-
-  const twitterImages = coverImage ? [coverImage] : baseTwitter.images ?? [];
-
-  const twitter = {
-    ...baseTwitter,
-    card: baseTwitter.card || "summary_large_image",
-    title,
-    description,
-    images: twitterImages,
-  };
-
-  return {
-    title,
-    description,
-    openGraph,
-    twitter,
-  };
 }
 
 function readPurpose(formData: FormData): "marriage" | "birthday" | "event" {
@@ -595,10 +499,11 @@ export async function registerInvitation(
       templateId,
       purpose,
       theme: config.theme,
-      metadata: generateMetadata({
-        slug: candidateSlug,
+      metadata: buildInvitationStoredMetadata(candidateSlug, {
+        ...config,
+        id: candidateSlug,
+        templateId,
         purpose,
-        config,
       }),
       music: {
         title: config.music.title,
@@ -665,6 +570,10 @@ export async function registerInvitation(
         });
     } catch {}
   }
+
+  try {
+    await revalidateInvitationConfig(finalSlug);
+  } catch {}
 
   const invitationUrl = `${SITE_ORIGIN}/${finalSlug}`;
   return {
@@ -879,10 +788,13 @@ export async function updateInvitation(
         templateId,
         purpose,
         theme: config.theme,
-        metadata: generateMetadata({
-          slug: existingSlug,
+        metadata: buildInvitationStoredMetadata(existingSlug, {
+          ...config,
+          id: existingSlug,
+          affiliateId: existingAffiliateId,
+          imagekitFolderKey,
+          templateId,
           purpose,
-          config,
         }),
         music: {
           title: config.music.title,
@@ -915,6 +827,10 @@ export async function updateInvitation(
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Failed to update invitation." };
   }
+
+  try {
+    await revalidateInvitationConfig(existingSlug);
+  } catch {}
 
   let affiliateName: string | undefined;
   if (
