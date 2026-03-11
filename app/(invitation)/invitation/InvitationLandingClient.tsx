@@ -70,7 +70,9 @@ export default function InvitationLandingClient({
   const openPreviewDialog = (template: TemplateListing) => {
     const themes = getInvitationTemplateThemes(template.templateId);
     const nextThemeId = selectedThemeByTemplateId[template.templateId] ?? themes[0]?.id ?? "";
+    const nextPurpose = template.templateId === "kids-birthday" ? "birthday" : "marriage";
     setPreviewThemeId(nextThemeId);
+    setPreviewPurpose(nextPurpose);
     setPreviewTemplate(template);
   };
 
@@ -665,37 +667,48 @@ export default function InvitationLandingClient({
             </div>
 
             <div className="mt-6 grid gap-6">
-              <div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
-                  Purpose
+              {previewTemplate.templateId === "kids-birthday" ? (
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                    Purpose
+                  </div>
+                  <div className="mt-3 inline-flex items-center rounded-2xl border border-pink-300/30 bg-pink-400/10 px-4 py-3 text-xs font-black uppercase tracking-wide text-pink-100">
+                    Ulang Tahun Anak
+                  </div>
                 </div>
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {(
-                    [
-                      { key: "marriage", label: "Pernikahan" },
-                      { key: "birthday", label: "Ulang Tahun" },
-                      { key: "event", label: "Acara" },
-                    ] as const
-                  ).map((opt) => {
-                    const isActive = previewPurpose === opt.key;
-                    return (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => setPreviewPurpose(opt.key)}
-                        className={
-                          "min-w-0 w-full rounded-2xl border px-2.5 py-2 text-xs font-black uppercase tracking-wide transition-colors whitespace-normal break-words text-center leading-tight " +
-                          (isActive
-                            ? "border-indigo-300/70 bg-white/5 text-white ring-4 ring-indigo-600/30"
-                            : "border-white/10 bg-white/0 text-white/80 hover:bg-white/5 hover:border-white/25")
-                        }
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
+              ) : (
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                    Purpose
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {(
+                      [
+                        { key: "marriage", label: "Pernikahan" },
+                        { key: "birthday", label: "Ulang Tahun" },
+                        { key: "event", label: "Acara" },
+                      ] as const
+                    ).map((opt) => {
+                      const isActive = previewPurpose === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setPreviewPurpose(opt.key)}
+                          className={
+                            "min-w-0 w-full rounded-2xl border px-2.5 py-2 text-xs font-black uppercase tracking-wide transition-colors whitespace-normal break-words text-center leading-tight " +
+                            (isActive
+                              ? "border-indigo-300/70 bg-white/5 text-white ring-4 ring-indigo-600/30"
+                              : "border-white/10 bg-white/0 text-white/80 hover:bg-white/5 hover:border-white/25")
+                          }
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
@@ -773,7 +786,9 @@ export default function InvitationLandingClient({
                   handleView(previewTemplate.id);
                   const url = `/invitation/${previewTemplate.id}?theme=${encodeURIComponent(
                     previewThemeId,
-                  )}&purpose=${encodeURIComponent(previewPurpose)}`;
+                  )}&purpose=${encodeURIComponent(
+                    previewTemplate.templateId === "kids-birthday" ? "birthday" : previewPurpose,
+                  )}`;
                   window.open(url, "_blank", "noopener,noreferrer");
                   setPreviewTemplate(null);
                 }}

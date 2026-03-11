@@ -1,0 +1,344 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Timestamp } from "firebase/firestore";
+import { motion } from "framer-motion";
+import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
+import { formatRelativeToNow } from "@/lib/date-time";
+import { normalizeInvitationGuestName } from "@/lib/utils";
+import { useOverlayAssets } from "./overlays";
+
+interface Wish {
+  id: string;
+  name: string;
+  nameKey?: string;
+  message: string;
+  createdAt: Timestamp;
+  invitationId: string;
+}
+
+interface WishApiWish {
+  id: string;
+  invitationId: string;
+  name: string;
+  nameKey?: string;
+  message: string;
+  createdAt: number | null;
+}
+
+interface WishesProps {
+  invitationId: string;
+  heading: string;
+  placeholder: string;
+  thankYouMessage: string;
+  isReady?: boolean;
+}
+
+export function Wishes({
+  invitationId,
+  heading,
+  placeholder,
+  thankYouMessage,
+  isReady = true,
+}: WishesProps) {
+  const overlayAssets = useOverlayAssets();
+  const searchParams = useSearchParams();
+  const inviteeName = normalizeInvitationGuestName(searchParams.get("to"));
+
+  const [wishes, setWishes] = useState<Wish[]>([]);
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasPosted, setHasPosted] = useState(false);
+  const [error, setError] = useState("");
+  const [existingWish, setExistingWish] = useState<Wish | null>(null);
+
+  const isDemo = useMemo(() => invitationId.endsWith("-demo"), [invitationId]);
+  const effectiveInviteeName = inviteeName ?? (isDemo ? "Demo Guest" : null);
+
+  const normalizeNameKey = (value: string) => {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  };
+
+  const toClientWish = (wish: WishApiWish): Wish => {
+    const createdAt =
+      typeof wish.createdAt === "number"
+        ? Timestamp.fromMillis(wish.createdAt)
+        : Timestamp.now();
+
+    return {
+      id: wish.id,
+      invitationId: wish.invitationId,
+      name: wish.name,
+      nameKey: wish.nameKey,
+      message: wish.message,
+      createdAt,
+    };
+  };
+
+  const inviteeNameKey = useMemo(() => {
+    if (!inviteeName) return null;
+    return normalizeNameKey(inviteeName);
+  }, [inviteeName]);
+
+  const demoSeedWishes = useMemo(() => {
+    if (!isDemo) return [] as Wish[];
+    const now = Date.now();
+    return [
+      {
+        id: `demo_${invitationId}_1`,
+        invitationId,
+        name: "Nadia",
+        message: "Happy birthday! Semoga pestanya seru banget dan penuh kejutan manis.",
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 16),
+      },
+      {
+        id: `demo_${invitationId}_2`,
+        invitationId,
+        name: "Rafa",
+        message: "Semoga sehat selalu, makin ceria, dan semua cita-citanya tercapai ya!",
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 2),
+      },
+      {
+        id: `demo_${invitationId}_3`,
+        invitationId,
+        name: "Caca",
+        message: "Selamat ulang tahun! Jangan lupa sisain kue dan waktunya buat main bareng ya!",
+        createdAt: Timestamp.fromMillis(now - 1000 * 60 * 60 * 8),
+      },
+    ];
+  }, [invitationId, isDemo]);
+
+  useEffect(() => {
+    if (!invitationId) return;
+
+    if (isDemo) {
+      setWishes(demoSeedWishes);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchWishes = async () => {
+      try {
+        const res = await fetch(
+          `/api/wishes?invitationId=${encodeURIComponent(invitationId)}`,
+          { signal: controller.signal },
+        );
+        if (!res.ok) throw new Error("failed");
+        const json = (await res.json()) as { wishes?: WishApiWish[] };
+        setWishes((json.wishes ?? []).map(toClientWish));
+      } catch (err) {
+        if ((err as { name?: string })?.name === "AbortError") return;
+      }
+    };
+
+    void fetchWishes();
+    return () => controller.abort();
+  }, [demoSeedWishes, invitationId, isDemo]);
+
+  useEffect(() => {
+    const checkExisting = async () => {
+      if (isDemo || !inviteeName || !inviteeNameKey) return;
+      try {
+        const res = await fetch(
+          `/api/wishes?invitationId=${encodeURIComponent(invitationId)}&nameKey=${encodeURIComponent(inviteeNameKey)}`,
+        );
+        if (!res.ok) return;
+        const json = (await res.json()) as { wish: WishApiWish | null };
+        if (json.wish) {
+          const wish = toClientWish(json.wish);
+          setExistingWish(wish);
+          setHasPosted(true);
+        }
+      } catch {
+        return;
+      }
+    };
+
+    void checkExisting();
+  }, [invitationId, inviteeName, inviteeNameKey, isDemo]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    if (isDemo) {
+      setIsSubmitting(true);
+      setError("");
+      try {
+        const next: Wish = {
+          id: `demo_post_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+          invitationId,
+          name: effectiveInviteeName ?? "Demo Guest",
+          message: message.trim(),
+          createdAt: Timestamp.now(),
+        };
+        setWishes((prev) => [next, ...prev]);
+        setMessage("");
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (!inviteeName || !inviteeNameKey) {
+      setError("Fitur ini hanya tersedia melalui link undangan pribadi.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      const nextData: Omit<Wish, "id"> = {
+        invitationId,
+        name: inviteeName,
+        nameKey: inviteeNameKey,
+        message: message.trim(),
+        createdAt: Timestamp.now(),
+      };
+
+      const res = await fetch("/api/wishes", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          invitationId,
+          name: inviteeName,
+          nameKey: inviteeNameKey,
+          message: message.trim(),
+        }),
+      });
+
+      if (res.status === 409) {
+        const json = (await res.json()) as { wish?: WishApiWish | null };
+        if (json.wish) setExistingWish(toClientWish(json.wish));
+        setHasPosted(true);
+        setError("Ucapan kamu sudah terkirim sebelumnya. Terima kasih ya!");
+        return;
+      }
+
+      if (!res.ok) throw new Error("failed");
+
+      const json = (await res.json()) as { wish?: WishApiWish | null };
+      setMessage("");
+      setExistingWish(json.wish ? toClientWish(json.wish) : { id: `local_${Date.now()}`, ...nextData });
+      setHasPosted(true);
+    } catch {
+      setError("Terjadi kendala. Coba lagi ya.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="relative overflow-hidden bg-wedding-bg px-4 py-20 text-wedding-dark">
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <motion.div
+          className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-48"
+          style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[520px]">
+        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+          <div className="text-center">
+            <p className="font-poppins text-[12px] uppercase tracking-[0.28em] text-wedding-accent-2">Birthday Messages</p>
+            <h2 className="mt-4 font-poppins-bold text-[40px] leading-none tracking-tight text-wedding-dark">
+              {heading}
+            </h2>
+          </div>
+        </RevealOnScroll>
+
+        <RevealOnScroll direction="up" distance={18} delay={0.16} width="100%" isReady={isReady}>
+          <div className="mt-10 rounded-[36px] border border-wedding-accent/14 bg-white/76 p-6 shadow-[0_22px_70px_rgba(63,19,91,0.10)] backdrop-blur-xl">
+            {!effectiveInviteeName ? (
+              <div className="text-center font-poppins text-[14px] leading-relaxed text-wedding-dark/72">
+                Untuk menulis ucapan, buka undangan ini dari link pribadi yang kamu terima.
+              </div>
+            ) : hasPosted && !isDemo ? (
+              <div className="text-center py-4">
+                <p className="font-poppins text-[11px] uppercase tracking-[0.28em] text-wedding-accent">{effectiveInviteeName}</p>
+                <h3 className="mt-4 font-poppins-bold text-[32px] leading-none tracking-tight text-wedding-dark">Thank You!</h3>
+                <p className="mt-4 font-poppins text-[14px] leading-relaxed text-wedding-dark/72">{thankYouMessage}</p>
+                {existingWish?.message ? (
+                  <p className="mt-4 rounded-[24px] bg-wedding-accent-2/10 px-4 py-4 font-poppins text-[14px] leading-relaxed text-wedding-dark/72 whitespace-pre-line">
+                    {existingWish.message}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="text-center">
+                  <p className="font-poppins text-[11px] uppercase tracking-[0.28em] text-wedding-accent">From</p>
+                  <p className="mt-2 font-poppins-bold text-[18px] text-wedding-dark">{effectiveInviteeName}</p>
+                </div>
+
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="min-h-[140px] w-full rounded-[28px] border border-wedding-accent/14 bg-white/78 px-4 py-4 font-poppins text-[14px] text-wedding-dark outline-none transition focus:ring-2 focus:ring-wedding-accent-2/24 placeholder:text-wedding-dark/35"
+                  placeholder={placeholder}
+                  disabled={isSubmitting}
+                />
+
+                {error ? (
+                  <p className="text-center font-poppins text-[12px] text-wedding-accent">{error}</p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !message.trim()}
+                  className="w-full rounded-full bg-wedding-accent px-6 py-3 font-poppins-bold text-[12px] uppercase tracking-[0.24em] text-wedding-on-accent shadow-[0_16px_40px_color-mix(in_srgb,var(--invitation-accent)_24%,transparent)] transition hover:bg-wedding-accent/88 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSubmitting ? "Mengirim ..." : "Kirim Ucapan"}
+                </button>
+              </form>
+            )}
+          </div>
+        </RevealOnScroll>
+
+        <div className="mt-10 space-y-4">
+          {wishes.length === 0 ? (
+            <RevealOnScroll direction="up" distance={18} delay={0.22} width="100%" isReady={isReady}>
+              <div className="rounded-[30px] border border-wedding-accent/14 bg-white/70 px-6 py-7 text-center font-poppins text-[14px] text-wedding-dark/70 backdrop-blur-xl">
+                Jadi yang pertama mengirim doa dan ucapan seru di sini.
+              </div>
+            </RevealOnScroll>
+          ) : (
+            wishes.map((wish, idx) => (
+              <RevealOnScroll
+                key={wish.id}
+                direction="up"
+                distance={18}
+                delay={0.22 + Math.min(idx, 8) * 0.06}
+                width="100%"
+                isReady={isReady}
+              >
+                <div className="rounded-[30px] border border-wedding-accent/12 bg-white/72 px-6 py-5 shadow-[0_18px_55px_rgba(63,19,91,0.08)] backdrop-blur-xl">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-poppins text-[11px] uppercase tracking-[0.28em] text-wedding-accent">{wish.name}</p>
+                      <p className="mt-2 font-poppins text-[10px] uppercase tracking-[0.22em] text-wedding-dark/45">
+                        {wish.createdAt ? formatRelativeToNow(wish.createdAt) || "Baru saja" : "Baru saja"}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-4 font-poppins text-[14px] leading-relaxed text-wedding-dark/72 whitespace-pre-line">
+                    {wish.message}
+                  </p>
+                </div>
+              </RevealOnScroll>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -1712,7 +1712,8 @@ export function RegisterInvitationForm({
   const [musicError, setMusicError] = useState<string | null>(null);
   const [musicCopied, setMusicCopied] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const initialPurpose = initialConfig.purpose;
+  const initialPurpose =
+    initialTemplateId === "kids-birthday" ? "birthday" : initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(
     initialPurpose,
@@ -1921,6 +1922,10 @@ export function RegisterInvitationForm({
           }
         : prev.theme,
     }));
+
+    if (nextTemplateId === "kids-birthday" && purpose !== "birthday") {
+      handlePurposeChange("birthday");
+    }
   };
 
   const templateThemes = useMemo(
@@ -3001,6 +3006,7 @@ export function RegisterInvitationForm({
               name="purpose"
               className="rounded-xl border border-white/10 bg-[#0b0b16]/80 px-3 py-2 text-white outline-none focus:border-indigo-500/60 transition-colors"
               value={purpose}
+              disabled={templateId === "kids-birthday"}
               onChange={(e) =>
                 handlePurposeChange(
                   e.target.value as "marriage" | "birthday" | "event",

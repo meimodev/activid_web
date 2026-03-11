@@ -4,6 +4,7 @@ import { Saturn } from "@/components/templates/saturn";
 import { Mercury } from "@/components/templates/mercury";
 import { Pluto } from "@/components/templates/pluto";
 import { Amalthea } from "@/components/templates/amalthea";
+import { KidsBirthday } from "@/components/templates/kids-birthday";
 import { Venus } from "@/components/templates/venus";
 import { Jupiter } from "@/components/templates/jupiter";
 import { Neptune } from "@/components/templates/neptune";
@@ -27,6 +28,7 @@ const RESERVED_TEMPLATE_SLUGS = new Set([
     "mercury",
     "pluto",
     "amalthea",
+    "kids-birthday",
     "venus",
     "jupiter",
     "neptune",
@@ -108,6 +110,8 @@ function getTemplateLabel(templateId: string) {
             return "Pluto";
         case "amalthea":
             return "Amalthea";
+        case "kids-birthday":
+            return "Kids Birthday";
         default:
             return templateId;
     }
@@ -152,7 +156,10 @@ export async function generateMetadata(
 
     if (slug.endsWith("-demo")) {
         const templateId = slug.replace(/-demo$/, "");
-        const purpose = requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
+        const purpose =
+            templateId === "kids-birthday"
+                ? "birthday"
+                : requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
         requireDemoTheme(templateId, getSingleSearchParam(resolvedSearchParams, "theme"));
         const config = buildInvitationDemoConfig({ slug, templateId, purpose });
         const templateLabel = getTemplateLabel(templateId);
@@ -235,6 +242,7 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         if (templateId === "mercury") return <Mercury config={config} />;
         if (templateId === "pluto") return <Pluto config={config} />;
         if (templateId === "amalthea") return <Amalthea config={config} />;
+        if (templateId === "kids-birthday") return <KidsBirthday config={config} />;
         if (templateId === "venus") return <Venus config={config} />;
         if (templateId === "jupiter") return <Jupiter config={config} />;
         if (templateId === "neptune") return <Neptune config={config} />;
@@ -243,7 +251,10 @@ export default async function InvitationPage({ params, searchParams }: PageProps
 
     if (slug.endsWith("-demo")) {
         const demoTemplateId = slug.replace(/-demo$/, "");
-        const demoPurpose = requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
+        const demoPurpose =
+            demoTemplateId === "kids-birthday"
+                ? "birthday"
+                : requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
         const selectedTheme = requireDemoTheme(
             demoTemplateId,
             getSingleSearchParam(resolvedSearchParams, "theme"),

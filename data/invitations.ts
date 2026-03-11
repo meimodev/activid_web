@@ -761,6 +761,20 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
       },
     },
   },
+  "kids-birthday": {
+    templateId: "kids-birthday",
+    theme: {
+      mainColor: "#FFF7FB",
+      accentColor: "#EC4899",
+      accent2Color: "#60A5FA",
+      darkColor: "#7C3AED",
+    },
+    sections: {
+      hero: {
+        coverImage: DEMO_COVER_IMAGE_URL,
+      },
+    },
+  },
   jupiter: {
     templateId: "jupiter",
     theme: {
@@ -878,6 +892,11 @@ export const INVITATION_DEFAULTS: Record<string, InvitationConfig> = {
     slug: "amalthea-demo",
     templateId: "amalthea",
     purpose: "marriage",
+  }),
+  "kids-birthday-demo": buildInvitationDemoConfig({
+    slug: "kids-birthday-demo",
+    templateId: "kids-birthday",
+    purpose: "birthday",
   }),
   "jupiter-demo": buildInvitationDemoConfig({
     slug: "jupiter-demo",

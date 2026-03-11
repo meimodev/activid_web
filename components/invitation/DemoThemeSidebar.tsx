@@ -33,6 +33,7 @@ export function DemoThemeSidebar({
 }: DemoThemeSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const supportsMultiplePurposes = templateId !== "kids-birthday";
   const [internalThemeId, setInternalThemeId] = useState<string>(() => {
     if (!themes.length) return "";
 
@@ -160,7 +161,7 @@ export function DemoThemeSidebar({
             </button>
           </div>
 
-          {onPurposeChange && activePurpose ? (
+          {onPurposeChange && activePurpose && supportsMultiplePurposes ? (
             <div className="mt-3">
               <div className="text-[11px] font-semibold tracking-[0.14em] uppercase text-wedding-text-light">
                 Purpose

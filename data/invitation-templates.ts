@@ -21,6 +21,7 @@ const JUPITER_TEMPLATE_LISTING_VIDEO =
   "https://www.dropbox.com/scl/fi/vbgby2wd7no73093qxpi9/cover-jupiter.mp4?rlkey=5zsk6843oadwlb1sbjs15d4c3&st=3sg4lz86&raw=1";
 const AMALTHEA_TEMPLATE_LISTING_VIDEO =
   "https://www.dropbox.com/scl/fi/r178zucgwqxapqyqw6ajp/cover-amalthea.mp4?rlkey=1sop6kyp39jx2iq6vqjg3k080&st=ye89deab&raw=1";
+const KIDS_BIRTHDAY_TEMPLATE_LISTING_VIDEO = AMALTHEA_TEMPLATE_LISTING_VIDEO;
 const PLUTO_TEMPLATE_LISTING_VIDEO =
   "https://www.dropbox.com/scl/fi/wwq0rwtfkie9euynabrya/cover-pluto.mp4?rlkey=545p3ztpjqdkuhuoj68eh2wye&st=qnx0fsuj&raw=1";
 const MERCURY_TEMPLATE_LISTING_VIDEO =
@@ -156,10 +157,28 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
     {
       id: "mist-blue",
       title: "Mist Blue",
-      mainColor: "#F6FBFF",
+      mainColor: "#E7F5FF",
       accentColor: "#2B6CB0",
-      accent2Color: "#38BDF8",
-      darkColor: "#0B1B2A",
+      accent2Color: "#7DD3FC",
+      darkColor: "#123B63",
+    },
+  ],
+  "kids-birthday": [
+    {
+      id: "cotton-candy",
+      title: "Cotton Candy",
+      mainColor: "#FFF7FB",
+      accentColor: "#EC4899",
+      accent2Color: "#60A5FA",
+      darkColor: "#7C3AED",
+    },
+    {
+      id: "sunny-sprinkle",
+      title: "Sunny Sprinkle",
+      mainColor: "#FFFBEA",
+      accentColor: "#F59E0B",
+      accent2Color: "#22C55E",
+      darkColor: "#1E3A8A",
     },
   ],
   jupiter: [
@@ -247,6 +266,15 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     title: "Amalthea",
     video: AMALTHEA_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Sky Blue"],
+    priceOriginal: "450.000",
+    priceDiscount: "120.000",
+  },
+  {
+    id: "kids-birthday-demo",
+    templateId: "kids-birthday",
+    title: "Kids Birthday",
+    video: KIDS_BIRTHDAY_TEMPLATE_LISTING_VIDEO,
+    tags: ["Birthday", "Pastel"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
   },
