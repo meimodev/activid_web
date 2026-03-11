@@ -261,7 +261,7 @@ export function Wishes({
       <div className="relative z-10 mx-auto max-w-[520px]">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
           <div className="text-center pt-8">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] rotate-2">Birthday Messages</p>
+            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] rotate-2">Pesan Ulang Tahun</p>
             <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
               {heading}
             </h2>
@@ -281,7 +281,7 @@ export function Wishes({
             ) : hasPosted && !isDemo ? (
               <div className="text-center py-4">
                 <p className="font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-wedding-accent">{effectiveInviteeName}</p>
-                <h3 className="mt-4 font-black text-[38px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">Thank You!</h3>
+                <h3 className="mt-4 font-black text-[38px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">Terima Kasih!</h3>
                 <p className="mt-5 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 bg-black/5 p-4 rounded-2xl border border-black/5">{thankYouMessage}</p>
                 {existingWish?.message ? (
                   <p className="mt-5 rounded-[24px] bg-wedding-accent-2/10 px-5 py-5 font-poppins text-[15px] leading-relaxed text-wedding-dark/80 whitespace-pre-line border-2 border-wedding-accent-2/20">
@@ -292,7 +292,7 @@ export function Wishes({
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="text-center bg-black/5 p-4 rounded-3xl border border-black/5">
-                  <p className="font-poppins-bold text-[12px] uppercase tracking-[0.2em] text-wedding-accent">From</p>
+                  <p className="font-poppins-bold text-[12px] uppercase tracking-[0.2em] text-wedding-accent">Dari</p>
                   <p className="mt-2 font-black text-[22px] text-wedding-dark">{effectiveInviteeName}</p>
                 </div>
 

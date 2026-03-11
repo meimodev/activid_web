@@ -32,7 +32,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
   const celebrant = hosts[0];
   const celebrantName = celebrant?.shortName || celebrant?.firstName || "Birthday Star";
   const displayGuest = guestName?.trim() || "Teman Hebat";
-  const displaySubtitle = subtitle?.trim() || "Birthday Party";
+  const displaySubtitle = subtitle?.trim() || "Pesta Ulang Tahun";
   const displayRole = celebrant?.role?.trim() || "Birthday Star";
 
   const containerVariants = {
@@ -231,7 +231,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
                 <p
                   className="inline-flex items-center justify-center rounded-full bg-wedding-accent px-5 py-2 font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-white shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] rotate-[-2deg]"
                 >
-                  You&apos;re Invited!
+                  Kamu Diundang!
                 </p>
               </motion.div>
 
@@ -289,7 +289,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <div className="relative rounded-[24px] border-4 border-white bg-[linear-gradient(135deg,var(--invitation-bg),white)] px-5 py-4 text-center shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)]">
-                  <p className="font-poppins-bold text-[12px] uppercase tracking-widest text-wedding-accent-2">Special for</p>
+                  <p className="font-poppins-bold text-[12px] uppercase tracking-widest text-wedding-accent-2">Spesial Untuk</p>
                   <p className="mt-1 font-black text-[24px] leading-tight text-wedding-dark">{displayGuest}</p>
                 </div>
               </motion.div>
@@ -302,7 +302,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName }: H
                   animate={isOpening ? { y: -8, opacity: 0, scale: 0.9 } : { y: [0, -6, 0], scale: [1, 1.02, 1] }}
                   transition={isOpening ? { duration: 0.5, ease: revealEase } : { duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  Let&apos;s Party!
+                  Buka Undangan
                 </motion.button>
               </motion.div>
             </motion.div>

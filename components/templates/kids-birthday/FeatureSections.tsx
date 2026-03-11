@@ -101,7 +101,7 @@ export function QuoteSection({ quote, isReady = true }: QuoteSectionProps) {
           animate={{ rotate: [-1, 1, -1] }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         >
-          <p className="font-poppins-bold text-[13px] uppercase tracking-widest text-wedding-accent-2 bg-wedding-accent-2/10 inline-block px-4 py-1.5 rounded-full border-2 border-wedding-accent-2/20 rotate-2">Make a Wish</p>
+          <p className="font-poppins-bold text-[13px] uppercase tracking-widest text-wedding-accent-2 bg-wedding-accent-2/10 inline-block px-4 py-1.5 rounded-full border-2 border-wedding-accent-2/20 rotate-2">Harapan Terbaik</p>
           <blockquote className="mt-6 font-black text-[30px] leading-tight tracking-tight text-wedding-dark [text-shadow:1px_1px_0_white,2px_2px_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)]">
             {quote.text}
           </blockquote>
@@ -157,8 +157,8 @@ export function HostSection({ hosts, isReady = true }: HostSectionProps) {
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
-            <p className="relative font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-white/80 inline-block px-5 py-1.5 rounded-full border-2 border-wedding-accent/20 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-2">Our Birthday Star</p>
-            <h2 className="relative mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">Party Crew</h2>
+            <p className="relative font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-white/80 inline-block px-5 py-1.5 rounded-full border-2 border-wedding-accent/20 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-2">Bintang Ulang Tahun</p>
+            <h2 className="relative mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">Kru Pesta</h2>
             
             <motion.div
               animate={{ rotate: [1, -1, 1] }}
@@ -172,9 +172,9 @@ export function HostSection({ hosts, isReady = true }: HostSectionProps) {
         </RevealOnScroll>
 
         <div className="mt-10 space-y-8">
-          <HostCard host={primary} label="Birthday Star" delay={0.16} isReady={isReady} frameUrl={overlayAssets.frame} />
+          <HostCard host={primary} label="Bintang Ulang Tahun" delay={0.16} isReady={isReady} frameUrl={overlayAssets.frame} />
           {hasSecondary ? (
-            <HostCard host={secondary} label="Special Guest" delay={0.24} isReady={isReady} frameUrl={overlayAssets.frame} />
+            <HostCard host={secondary} label="Tamu Spesial" delay={0.24} isReady={isReady} frameUrl={overlayAssets.frame} />
           ) : null}
         </div>
       </div>
@@ -205,9 +205,9 @@ export function EventSection({ events, heading, isReady = true }: EventSectionPr
       <div className="relative z-10 mx-auto max-w-[520px]">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
           <div className="text-center pt-8">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/20 inline-block px-5 py-1.5 rounded-full border-2 border-white/30 backdrop-blur-sm rotate-2">Party Details</p>
+            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/20 inline-block px-5 py-1.5 rounded-full border-2 border-white/30 backdrop-blur-sm rotate-2">Detail Pesta</p>
             <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">
-              {heading?.trim() || "Event Details"}
+              {heading?.trim() || "Detail Acara"}
             </h2>
           </div>
         </RevealOnScroll>

@@ -46,7 +46,7 @@ export function TitleSection({
   }, [galleryPhotos]);
 
   const celebrantName = hosts[0]?.firstName || hosts[0]?.shortName || "Birthday Star";
-  const displayHeading = heading?.trim() || "Time To Party";
+  const displayHeading = heading?.trim() || "Waktunya Pesta";
 
   const calendarHref = useMemo(() => {
     const dt = parseInvitationDateTime(countdownTarget);
@@ -179,7 +179,7 @@ export function TitleSection({
               whileTap={{ scale: 0.95, y: 4, boxShadow: "0 0px 0 0 color-mix(in_srgb,var(--invitation-accent-2)_40%,transparent)" }}
               className="mt-10 inline-flex items-center justify-center rounded-full bg-wedding-accent-2 px-10 py-4 font-poppins-bold text-[14px] uppercase tracking-widest text-white shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_50%,transparent)] transition-all"
             >
-              Save The Party
+              Simpan Tanggal
             </motion.a>
           </motion.div>
         </RevealOnScroll>

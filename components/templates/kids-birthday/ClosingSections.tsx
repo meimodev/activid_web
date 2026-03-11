@@ -66,9 +66,9 @@ export function StorySection({ stories, heading, fallbackImageUrl, isReady = tru
       <div className="relative z-10 mx-auto max-w-[520px]">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
           <div className="text-center pt-10">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent-2/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)] rotate-1">Party Notes</p>
+            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent-2/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)] rotate-1">Cerita Pesta</p>
             <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">
-              {heading?.trim() || "Party Notes"}
+              {heading?.trim() || "Catatan Pesta"}
             </h2>
           </div>
         </RevealOnScroll>
@@ -154,9 +154,9 @@ export function GallerySection({ photos, heading, isReady = true }: GallerySecti
       <div className="relative z-10 mx-auto max-w-[520px]">
         <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
           <div className="text-center pt-8">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-1">Memory Lane</p>
+            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-1">Kenangan Indah</p>
             <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
-              {heading?.trim() || "Gallery"}
+              {heading?.trim() || "Galeri"}
             </h2>
           </div>
         </RevealOnScroll>
@@ -216,8 +216,8 @@ export function GratitudeSection({ hosts, message, isReady = true }: GratitudeSe
             animate={{ rotate: [-1, 1, -1] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/30 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 rotate-2">Thank You</p>
-            <h2 className="mt-6 font-black text-[40px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">See You at the Party!</h2>
+            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/30 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 rotate-2">Terima Kasih</p>
+            <h2 className="mt-6 font-black text-[40px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">Sampai Jumpa di Pesta!</h2>
             <p className="mt-6 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 whitespace-pre-line bg-black/5 p-5 rounded-3xl border border-black/5">
               {message?.trim() || "Terima kasih sudah meluangkan waktu untuk hadir dan berbagi kebahagiaan di hari spesial ini."}
             </p>
@@ -253,13 +253,13 @@ export function FooterSection({ hosts, message, isReady = true }: FooterSectionP
       <div className="relative z-10 mx-auto max-w-[520px] text-center">
         <RevealOnScroll direction="up" width="100%" delay={0.12} isReady={isReady}>
           <div className="inline-flex items-center rounded-2xl bg-white/10 px-6 py-2 font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-white border-2 border-white/20 shadow-[0_4px_0_0_color-mix(in_srgb,black_20%,transparent)] -rotate-2">
-            {names || "Birthday Crew"}
+            {names || "Kru Ulang Tahun"}
           </div>
         </RevealOnScroll>
 
         <RevealOnScroll direction="up" width="100%" delay={0.24} isReady={isReady}>
           <h3 className="mt-10 font-black text-[54px] leading-none tracking-tight text-white [text-shadow:3px_3px_0_color-mix(in_srgb,var(--invitation-accent)_80%,transparent)] rotate-1">
-            Party Time!
+            Waktunya Pesta!
           </h3>
           <p className="mt-6 font-poppins font-medium text-[16px] leading-relaxed text-white/90 whitespace-pre-line max-w-[280px] mx-auto bg-black/20 p-4 rounded-3xl border border-white/10">
             {message?.trim() || "Sampai jumpa dan jangan lupa bawa senyuman terbaikmu!"}
