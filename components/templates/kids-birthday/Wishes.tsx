@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Timestamp } from "firebase/firestore";
 import { motion } from "framer-motion";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { formatRelativeToNow } from "@/lib/date-time";
 import { normalizeInvitationGuestName } from "@/lib/utils";
 import { useOverlayAssets } from "./overlays";
@@ -40,7 +39,6 @@ export function Wishes({
   heading,
   placeholder,
   thankYouMessage,
-  isReady = true,
 }: WishesProps) {
   const overlayAssets = useOverlayAssets();
   const searchParams = useSearchParams();
@@ -259,18 +257,35 @@ export function Wishes({
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+        <motion.div
+          className="relative w-full"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <div className="text-center pt-8">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] rotate-2">Pesan Ulang Tahun</p>
-            <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
-              {heading}
-            </h2>
+            <motion.div variants={popVariants}>
+              <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] rotate-2">Pesan Ulang Tahun</p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
+                {heading}
+              </h2>
+            </motion.div>
           </div>
-        </RevealOnScroll>
+        </motion.div>
 
-        <RevealOnScroll direction="up" distance={18} delay={0.16} width="100%" isReady={isReady}>
+        <motion.div
+          className="relative w-full mt-12"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <motion.div 
-            className="mt-12 rounded-[48px] border-4 border-white bg-white/80 p-6 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
+            variants={itemVariants}
+            className="rounded-[48px] border-4 border-white bg-white/80 p-6 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
             animate={{ rotate: [1, -1, 1] }}
             transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -318,44 +333,53 @@ export function Wishes({
               </form>
             )}
           </motion.div>
-        </RevealOnScroll>
+        </motion.div>
 
         <div className="mt-12 space-y-5">
           {wishes.length === 0 ? (
-            <RevealOnScroll direction="up" distance={18} delay={0.22} width="100%" isReady={isReady}>
-              <div className="rounded-[36px] border-4 border-white bg-white/80 px-6 py-8 text-center font-poppins font-medium text-[15px] text-wedding-dark/70 backdrop-blur-xl shadow-[0_12px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)]">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              <motion.div variants={itemVariants} className="rounded-[36px] border-4 border-white bg-white/80 px-6 py-8 text-center font-poppins font-medium text-[15px] text-wedding-dark/70 backdrop-blur-xl shadow-[0_12px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)]">
                 Jadi yang pertama mengirim doa dan ucapan seru di sini.
-              </div>
-            </RevealOnScroll>
+              </motion.div>
+            </motion.div>
           ) : (
-            wishes.map((wish, idx) => (
-              <RevealOnScroll
-                key={wish.id}
-                direction="up"
-                distance={18}
-                delay={0.22 + Math.min(idx, 8) * 0.06}
-                width="100%"
-                isReady={isReady}
-              >
-                <motion.div 
-                  className="relative rounded-[36px] border-4 border-white bg-white/90 px-6 py-6 shadow-[0_12px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)] backdrop-blur-xl"
-                  animate={{ rotate: (idx % 2 === 0 ? [1, -1, 1] : [-1, 1, -1]) }}
-                  transition={{ duration: 8 + idx, repeat: Infinity, ease: "easeInOut" }}
+            <motion.div
+              className="relative w-full space-y-5"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+            >
+              {wishes.map((wish, idx) => (
+                <motion.div
+                  key={wish.id}
+                  variants={itemVariants}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-3 py-1 rounded-lg border border-wedding-accent/20">{wish.name}</p>
-                      <p className="mt-3 font-poppins-bold text-[11px] uppercase tracking-[0.2em] text-wedding-dark/40">
-                        {wish.createdAt ? formatRelativeToNow(wish.createdAt) || "Baru saja" : "Baru saja"}
-                      </p>
+                  <motion.div 
+                    className="relative rounded-[36px] border-4 border-white bg-white/90 px-6 py-6 shadow-[0_12px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)] backdrop-blur-xl"
+                    animate={{ rotate: (idx % 2 === 0 ? [1, -1, 1] : [-1, 1, -1]) }}
+                    transition={{ duration: 8 + idx, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-3 py-1 rounded-lg border border-wedding-accent/20">{wish.name}</p>
+                        <p className="mt-3 font-poppins-bold text-[11px] uppercase tracking-[0.2em] text-wedding-dark/40">
+                          {wish.createdAt ? formatRelativeToNow(wish.createdAt) || "Baru saja" : "Baru saja"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <p className="mt-4 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 whitespace-pre-line">
-                    {wish.message}
-                  </p>
+                    <p className="mt-4 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 whitespace-pre-line">
+                      {wish.message}
+                    </p>
+                  </motion.div>
                 </motion.div>
-              </RevealOnScroll>
-            ))
+              ))}
+            </motion.div>
           )}
         </div>
       </div>

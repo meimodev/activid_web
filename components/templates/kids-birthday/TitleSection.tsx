@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
 import type { InvitationConfig } from "@/types/invitation";
 import { useOverlayAssets } from "./overlays";
@@ -22,7 +21,6 @@ interface TitleSectionProps {
 export function TitleSection({
   hosts,
   date,
-  heading,
   countdownTarget,
   galleryPhotos,
   showCountdown = true,
@@ -46,7 +44,51 @@ export function TitleSection({
   }, [galleryPhotos]);
 
   const celebrantName = hosts[0]?.firstName || hosts[0]?.shortName || "Birthday Star";
-  const displayHeading = heading?.trim() || "Waktunya Pesta";
+  const displayHeading = "Waktunya Pesta";
+  const popVariants = {
+    hidden: { opacity: 0, y: 50, scale: 0.3 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { 
+        type: "spring",
+        damping: 10,
+        stiffness: 150,
+      },
+    },
+  } as const;
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.8, rotate: -5 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotate: 0,
+      transition: { 
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+  } as const;
+
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 15,
+        stiffness: 100,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
+  } as const;
 
   const calendarHref = useMemo(() => {
     const dt = parseInvitationDateTime(countdownTarget);
@@ -117,24 +159,38 @@ export function TitleSection({
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[520px] flex-col items-center justify-end px-4 pb-14 pt-28 text-center">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%">
+        <motion.div
+          className="relative w-full"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <motion.div
             className="relative rounded-[48px] border-4 border-white bg-white/80 px-6 pt-9 pb-10 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_30%,transparent),0_30px_80px_rgba(63,19,91,0.14)] backdrop-blur-xl"
             animate={{ rotate: [1, -1, 1] }}
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           >
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-4 py-1 rounded-full border-2 border-wedding-accent/20 -rotate-2">
-              {displayHeading}
-            </p>
-            <h2 className="mt-6 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
-              {celebrantName}
-            </h2>
-            <div className="mt-5 inline-flex items-center justify-center rounded-2xl bg-wedding-dark px-5 py-2 text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_60%,transparent)] rotate-1">
-              <span className="font-poppins-bold text-[13px] uppercase tracking-widest">{date}</span>
-            </div>
+            <motion.div variants={popVariants}>
+              <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-4 py-1 rounded-full border-2 border-wedding-accent/20 -rotate-2">
+                {displayHeading}
+              </p>
+            </motion.div>
+            
+            <motion.div variants={popVariants}>
+              <h2 className="mt-6 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
+                {celebrantName}
+              </h2>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <div className="mt-5 inline-flex items-center justify-center rounded-2xl bg-wedding-dark px-5 py-2 text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_60%,transparent)] rotate-1">
+                <span className="font-poppins-bold text-[13px] uppercase tracking-widest">{date}</span>
+              </div>
+            </motion.div>
 
             {showCountdown ? (
-              <div className="mt-10 grid grid-cols-2 gap-4">
+              <motion.div variants={itemVariants} className="mt-10 grid grid-cols-2 gap-4">
                 {(
                   [
                     { label: "Hari", value: timeLeft.days },
@@ -145,18 +201,12 @@ export function TitleSection({
                 ).map((item, idx) => (
                   <motion.div
                     key={item.label}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0, rotate: (idx % 2 === 0 ? [-2, 2, -2] : [2, -2, 2]) }}
-                    transition={{
-                      opacity: { duration: 0.6, delay: 0.22 + idx * 0.06, ease: "easeOut" },
-                      y: { duration: 0.6, delay: 0.22 + idx * 0.06, ease: "easeOut" },
-                      rotate: { duration: 5 + idx, repeat: Infinity, ease: "easeInOut" }
-                    }}
+                    variants={popVariants}
                     className="relative rounded-[32px] border-4 border-white bg-[linear-gradient(180deg,white,color-mix(in_srgb,var(--invitation-bg)_40%,white))] px-3 py-5 shadow-[0_12px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_30%,transparent)]"
                   >
                     <motion.div
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: idx * 0.15 }}
+                      animate={{ rotate: (idx % 2 === 0 ? [-2, 2, -2] : [2, -2, 2]) }}
+                      transition={{ duration: 5 + idx, repeat: Infinity, ease: "easeInOut" }}
                     >
                       <div className="font-black text-[38px] leading-none text-wedding-dark [text-shadow:2px_2px_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)]">
                         {String(item.value).padStart(2, "0")}
@@ -167,22 +217,24 @@ export function TitleSection({
                     </motion.div>
                   </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : null}
 
-            <motion.a
-              href={calendarHref}
-              target="_blank"
-              rel="noreferrer"
-              animate={{ scale: [1, 1.05, 1], rotate: [2, -2, 2] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              whileTap={{ scale: 0.95, y: 4, boxShadow: "0 0px 0 0 color-mix(in_srgb,var(--invitation-accent-2)_40%,transparent)" }}
-              className="mt-10 inline-flex items-center justify-center rounded-full bg-wedding-accent-2 px-10 py-4 font-poppins-bold text-[14px] uppercase tracking-widest text-white shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_50%,transparent)] transition-all"
-            >
-              Simpan Tanggal
-            </motion.a>
+            <motion.div variants={itemVariants}>
+              <motion.a
+                href={calendarHref}
+                target="_blank"
+                rel="noreferrer"
+                animate={{ scale: [1, 1.05, 1], rotate: [2, -2, 2] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                whileTap={{ scale: 0.95, y: 4, boxShadow: "0 0px 0 0 color-mix(in_srgb,var(--invitation-accent-2)_40%,transparent)" }}
+                className="mt-10 inline-flex items-center justify-center rounded-full bg-wedding-accent-2 px-10 py-4 font-poppins-bold text-[14px] uppercase tracking-widest text-white shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_50%,transparent)] transition-all"
+              >
+                Simpan Tanggal
+              </motion.a>
+            </motion.div>
           </motion.div>
-        </RevealOnScroll>
+        </motion.div>
       </div>
     </section>
   );

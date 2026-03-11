@@ -173,12 +173,12 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       darkColor: "#7C3AED",
     },
     {
-      id: "sunny-sprinkle",
-      title: "Sunny Sprinkle",
-      mainColor: "#FFFBEA",
-      accentColor: "#F59E0B",
-      accent2Color: "#22C55E",
-      darkColor: "#1E3A8A",
+      id: "ocean-explorer",
+      title: "Ocean Explorer",
+      mainColor: "#F0F9FF",
+      accentColor: "#0369A1",
+      accent2Color: "#F59E0B",
+      darkColor: "#0C4A6E",
     },
   ],
   jupiter: [

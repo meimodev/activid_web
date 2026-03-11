@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { formatInvitationDateLong, formatInvitationTime } from "@/lib/date-utils";
 import type { InvitationConfig } from "@/types/invitation";
 import { useOverlayAssets } from "./overlays";
@@ -28,24 +27,70 @@ interface EventSectionProps {
   isReady?: boolean;
 }
 
+const popVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.3 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { 
+      type: "spring",
+      damping: 10,
+      stiffness: 150,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.8, rotate: -5 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    transition: { 
+      type: "spring",
+      damping: 12,
+      stiffness: 100,
+    },
+  },
+} as const;
+
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 15,
+      stiffness: 100,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+} as const;
+
 function HostCard({
   host,
   label,
-  delay,
-  isReady,
   frameUrl,
 }: {
   host: Hosts[number];
   label: string;
-  delay: number;
-  isReady?: boolean;
   frameUrl: string;
 }) {
   if (!host) return null;
 
   return (
-    <RevealOnScroll direction="up" distance={18} delay={delay} width="100%" isReady={isReady}>
-      <div className="relative overflow-hidden rounded-[40px] border-4 border-white bg-white/90 p-5 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent),0_30px_70px_rgba(61,23,92,0.14)] backdrop-blur-xl transition-transform duration-500">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+    >
+      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-[40px] border-4 border-white bg-white/90 p-5 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent),0_30px_70px_rgba(61,23,92,0.14)] backdrop-blur-xl transition-transform duration-500">
         <motion.div 
           className="relative mx-auto h-[260px] w-[260px]"
           animate={{ rotate: [-2, 2, -2] }}
@@ -85,36 +130,45 @@ function HostCard({
             </p>
           ) : null}
         </div>
-      </div>
-    </RevealOnScroll>
+      </motion.div>
+    </motion.div>
   );
 }
 
-export function QuoteSection({ quote, isReady = true }: QuoteSectionProps) {
+export function QuoteSection({ quote }: QuoteSectionProps) {
   if (!quote?.text?.trim()) return null;
 
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 pt-6 pb-4 text-wedding-dark">
-      <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+      >
         <motion.div 
+          variants={itemVariants}
           className="mx-auto max-w-[520px] rounded-[48px] border-4 border-white bg-[linear-gradient(180deg,white,rgba(255,255,255,0.85))] px-7 py-10 text-center shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent),0_30px_60px_rgba(63,19,91,0.10)] backdrop-blur-xl"
-          animate={{ rotate: [-1, 1, -1] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         >
-          <p className="font-poppins-bold text-[13px] uppercase tracking-widest text-wedding-accent-2 bg-wedding-accent-2/10 inline-block px-4 py-1.5 rounded-full border-2 border-wedding-accent-2/20 rotate-2">Harapan Terbaik</p>
-          <blockquote className="mt-6 font-black text-[30px] leading-tight tracking-tight text-wedding-dark [text-shadow:1px_1px_0_white,2px_2px_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)]">
-            {quote.text}
-          </blockquote>
-          {quote.author?.trim() ? (
-            <p className="mt-3 font-poppins text-[13px] text-wedding-dark/60">{quote.author}</p>
-          ) : null}
+          <motion.div
+            animate={{ rotate: [-1, 1, -1] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <p className="font-poppins-bold text-[13px] uppercase tracking-widest text-wedding-accent-2 bg-wedding-accent-2/10 inline-block px-4 py-1.5 rounded-full border-2 border-wedding-accent-2/20 rotate-2">Harapan Terbaik</p>
+            <blockquote className="mt-6 font-black text-[30px] leading-tight tracking-tight text-wedding-dark [text-shadow:1px_1px_0_white,2px_2px_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)]">
+              {quote.text}
+            </blockquote>
+            {quote.author?.trim() ? (
+              <p className="mt-3 font-poppins text-[13px] text-wedding-dark/60">{quote.author}</p>
+            ) : null}
+          </motion.div>
         </motion.div>
-      </RevealOnScroll>
+      </motion.div>
     </section>
   );
 }
 
-export function HostSection({ hosts, isReady = true }: HostSectionProps) {
+export function HostSection({ hosts }: HostSectionProps) {
   const overlayAssets = useOverlayAssets();
   const primary = hosts[0];
   const secondary = hosts[1];
@@ -149,7 +203,12 @@ export function HostSection({ hosts, isReady = true }: HostSectionProps) {
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <div className="text-center relative">
             <motion.div
               className="absolute -top-10 left-1/2 h-[120px] w-[240px] -translate-x-1/2 bg-contain bg-top bg-no-repeat opacity-40 mix-blend-multiply"
@@ -157,24 +216,30 @@ export function HostSection({ hosts, isReady = true }: HostSectionProps) {
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
-            <p className="relative font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-white/80 inline-block px-5 py-1.5 rounded-full border-2 border-wedding-accent/20 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-2">Bintang Ulang Tahun</p>
-            <h2 className="relative mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">Kru Pesta</h2>
+            <motion.div variants={popVariants}>
+              <p className="relative font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-wedding-accent bg-white/80 inline-block px-5 py-1.5 rounded-full border-2 border-wedding-accent/20 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-2">Bintang Ulang Tahun</p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <h2 className="relative mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">Kru Pesta</h2>
+            </motion.div>
             
-            <motion.div
-              animate={{ rotate: [1, -1, 1] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <p className="relative mt-6 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 bg-white/60 px-6 py-4 rounded-3xl border-2 border-white backdrop-blur-sm">
-                Yuk datang dan rayakan hari spesial ini dengan penuh tawa, warna, dan kebahagiaan.
-              </p>
+            <motion.div variants={itemVariants}>
+              <motion.div
+                animate={{ rotate: [1, -1, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <p className="relative mt-6 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 bg-white/60 px-6 py-4 rounded-3xl border-2 border-white backdrop-blur-sm">
+                  Yuk datang dan rayakan hari spesial ini dengan penuh tawa, warna, dan kebahagiaan.
+                </p>
+              </motion.div>
             </motion.div>
           </div>
-        </RevealOnScroll>
+        </motion.div>
 
         <div className="mt-10 space-y-8">
-          <HostCard host={primary} label="Bintang Ulang Tahun" delay={0.16} isReady={isReady} frameUrl={overlayAssets.frame} />
+          <HostCard host={primary} label="Bintang Ulang Tahun" frameUrl={overlayAssets.frame} />
           {hasSecondary ? (
-            <HostCard host={secondary} label="Tamu Spesial" delay={0.24} isReady={isReady} frameUrl={overlayAssets.frame} />
+            <HostCard host={secondary} label="Tamu Spesial" frameUrl={overlayAssets.frame} />
           ) : null}
         </div>
       </div>
@@ -182,7 +247,7 @@ export function HostSection({ hosts, isReady = true }: HostSectionProps) {
   );
 }
 
-export function EventSection({ events, heading, isReady = true }: EventSectionProps) {
+export function EventSection({ events, heading }: EventSectionProps) {
   const overlayAssets = useOverlayAssets();
 
   return (
@@ -203,52 +268,65 @@ export function EventSection({ events, heading, isReady = true }: EventSectionPr
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <div className="text-center pt-8">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/20 inline-block px-5 py-1.5 rounded-full border-2 border-white/30 backdrop-blur-sm rotate-2">Detail Pesta</p>
-            <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">
-              {heading?.trim() || "Detail Acara"}
-            </h2>
+            <motion.div variants={popVariants}>
+              <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/20 inline-block px-5 py-1.5 rounded-full border-2 border-white/30 backdrop-blur-sm rotate-2">Detail Pesta</p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">
+                {heading?.trim() || "Detail Acara"}
+              </h2>
+            </motion.div>
           </div>
-        </RevealOnScroll>
+        </motion.div>
 
         <div className="mt-12 space-y-6">
           {events.map((event, index) => (
-            <RevealOnScroll
+            <motion.div
               key={`${event.title}-${index}`}
-              direction="up"
-              distance={18}
-              delay={0.16 + index * 0.08}
-              width="100%"
-              isReady={isReady}
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
             >
               <motion.div 
+                variants={itemVariants}
                 className="relative overflow-hidden rounded-[40px] border-4 border-white bg-white/90 px-6 py-8 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut", delay: index * 0.5 }}
               >
-                <div className="absolute top-0 right-0 h-16 w-16 bg-wedding-accent-2/10 rounded-bl-full"></div>
-                <div className="absolute bottom-0 left-0 h-20 w-20 bg-wedding-accent/10 rounded-tr-full"></div>
-                
-                <p className="relative font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-4 py-1.5 rounded-full border-2 border-wedding-accent/20 -rotate-1">{event.title}</p>
-                <h3 className="relative mt-5 font-black text-[32px] leading-none tracking-tight text-wedding-dark [text-shadow:1px_1px_0_white,2px_2px_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)]">
-                  {formatInvitationDateLong(event.date)}
-                </h3>
-                <div className="relative mt-4 inline-flex items-center justify-center rounded-xl bg-wedding-dark px-4 py-2 text-white shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-dark)_60%,transparent)] rotate-1">
-                  <span className="font-poppins-bold text-[14px] tracking-widest">{formatInvitationTime(event.date)}</span>
-                </div>
-                <p className="relative mt-6 font-black text-[22px] text-wedding-dark leading-tight">{event.venue}</p>
-                <p className="relative mt-3 font-poppins font-medium text-[14px] leading-relaxed text-wedding-dark/70 bg-black/5 p-4 rounded-2xl border border-black/5">{event.address}</p>
-                <a
-                  href={event.mapUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="relative mt-8 inline-flex w-full items-center justify-center rounded-full bg-wedding-accent px-8 py-4 font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] transition-all active:scale-[0.98] active:translate-y-[2px] active:shadow-[0_2px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)]"
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut", delay: index * 0.5 }}
                 >
-                  Lihat Lokasi
-                </a>
+                  <div className="absolute top-0 right-0 h-16 w-16 bg-wedding-accent-2/10 rounded-bl-full"></div>
+                  <div className="absolute bottom-0 left-0 h-20 w-20 bg-wedding-accent/10 rounded-tr-full"></div>
+                  
+                  <p className="relative font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-wedding-accent bg-wedding-accent/10 inline-block px-4 py-1.5 rounded-full border-2 border-wedding-accent/20 -rotate-1">{event.title}</p>
+                  <h3 className="relative mt-5 font-black text-[32px] leading-none tracking-tight text-wedding-dark [text-shadow:1px_1px_0_white,2px_2px_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)]">
+                    {formatInvitationDateLong(event.date)}
+                  </h3>
+                  <div className="relative mt-4 inline-flex items-center justify-center rounded-xl bg-wedding-dark px-4 py-2 text-white shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-dark)_60%,transparent)] rotate-1">
+                    <span className="font-poppins-bold text-[14px] tracking-widest">{formatInvitationTime(event.date)}</span>
+                  </div>
+                  <p className="relative mt-6 font-black text-[22px] text-wedding-dark leading-tight">{event.venue}</p>
+                  <p className="relative mt-3 font-poppins font-medium text-[14px] leading-relaxed text-wedding-dark/70 bg-black/5 p-4 rounded-2xl border border-black/5">{event.address}</p>
+                  <motion.a
+                    href={event.mapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="relative mt-8 inline-flex w-full items-center justify-center rounded-full bg-wedding-accent px-8 py-4 font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] transition-all"
+                    whileTap={{ scale: 0.98, y: 2, boxShadow: "0 2px 0 0 color-mix(in_srgb,var(--invitation-dark)_20%,transparent)" }}
+                  >
+                    Lihat Lokasi
+                  </motion.a>
+                </motion.div>
               </motion.div>
-            </RevealOnScroll>
+            </motion.div>
           ))}
         </div>
       </div>

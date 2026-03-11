@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { formatInvitationMonthYear } from "@/lib/date-utils";
 import type { InvitationConfig, StoryItem } from "@/types/invitation";
 import { useOverlayAssets } from "./overlays";
@@ -34,7 +33,52 @@ interface FooterSectionProps {
   isReady?: boolean;
 }
 
-export function StorySection({ stories, heading, fallbackImageUrl, isReady = true }: StorySectionProps) {
+const popVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.3 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { 
+      type: "spring",
+      damping: 10,
+      stiffness: 150,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.8, rotate: -5 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    transition: { 
+      type: "spring",
+      damping: 12,
+      stiffness: 100,
+    },
+  },
+} as const;
+
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      damping: 15,
+      stiffness: 100,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+} as const;
+
+export function StorySection({ stories, heading, fallbackImageUrl }: StorySectionProps) {
   const overlayAssets = useOverlayAssets();
   const heroImageUrl = stories?.[0]?.imageUrl || fallbackImageUrl;
 
@@ -64,18 +108,35 @@ export function StorySection({ stories, heading, fallbackImageUrl, isReady = tru
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+        <motion.div
+          className="relative w-full"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <div className="text-center pt-10">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent-2/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)] rotate-1">Cerita Pesta</p>
-            <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">
-              {heading?.trim() || "Catatan Pesta"}
-            </h2>
+            <motion.div variants={popVariants}>
+              <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent-2/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent)] rotate-1">Cerita Pesta</p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">
+                {heading?.trim() || "Catatan Pesta"}
+              </h2>
+            </motion.div>
           </div>
-        </RevealOnScroll>
+        </motion.div>
 
-        <RevealOnScroll direction="up" distance={18} delay={0.16} width="100%" isReady={isReady}>
+        <motion.div
+          className="relative w-full mt-12"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <motion.div 
-            className="mt-12 overflow-hidden rounded-[48px] border-4 border-white bg-white/80 p-5 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
+            variants={itemVariants}
+            className="overflow-hidden rounded-[48px] border-4 border-white bg-white/80 p-5 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
             animate={{ rotate: [1, -1, 1] }}
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -88,15 +149,17 @@ export function StorySection({ stories, heading, fallbackImageUrl, isReady = tru
             </div>
             ) : null}
 
-            <div className="mt-8 space-y-6">
+            <motion.div 
+              className="mt-8 space-y-6"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+            >
               {stories.map((story, idx) => (
-                <RevealOnScroll
+                <motion.div
                   key={`${story.description}-${idx}`}
-                  direction="up"
-                  distance={16}
-                  delay={0.22 + idx * 0.08}
-                  width="100%"
-                  isReady={isReady}
+                  variants={itemVariants}
                 >
                   <motion.div 
                     className="relative rounded-[32px] border-4 border-white bg-[linear-gradient(135deg,var(--invitation-bg),white)] px-6 py-5 shadow-[0_8px_0_0_color-mix(in_srgb,var(--invitation-dark)_10%,transparent)]"
@@ -110,17 +173,17 @@ export function StorySection({ stories, heading, fallbackImageUrl, isReady = tru
                       {story.description}
                     </p>
                   </motion.div>
-                </RevealOnScroll>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
-        </RevealOnScroll>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-export function GallerySection({ photos, heading, isReady = true }: GallerySectionProps) {
+export function GallerySection({ photos, heading }: GallerySectionProps) {
   const overlayAssets = useOverlayAssets();
   const displayPhotos = useMemo(() => photos.filter(Boolean).slice(0, 8), [photos]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -152,18 +215,35 @@ export function GallerySection({ photos, heading, isReady = true }: GallerySecti
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+        <motion.div
+          className="relative w-full"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <div className="text-center pt-8">
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-1">Kenangan Indah</p>
-            <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
-              {heading?.trim() || "Galeri"}
-            </h2>
+            <motion.div variants={popVariants}>
+              <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-accent/80 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 shadow-[0_4px_0_0_color-mix(in_srgb,var(--invitation-accent)_20%,transparent)] -rotate-1">Kenangan Indah</p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <h2 className="mt-5 font-black text-[46px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent-2)]">
+                {heading?.trim() || "Galeri"}
+              </h2>
+            </motion.div>
           </div>
-        </RevealOnScroll>
+        </motion.div>
 
-        <RevealOnScroll direction="up" distance={18} delay={0.16} width="100%" isReady={isReady}>
+        <motion.div
+          className="relative w-full mt-12"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <motion.div 
-            className="mt-12 rounded-[48px] border-4 border-white bg-white/80 p-5 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
+            variants={itemVariants}
+            className="rounded-[48px] border-4 border-white bg-white/80 p-5 shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent),0_30px_70px_rgba(63,19,91,0.14)] backdrop-blur-xl"
             animate={{ rotate: [-1, 1, -1] }}
             transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
           >
@@ -198,40 +278,54 @@ export function GallerySection({ photos, heading, isReady = true }: GallerySecti
               })}
             </div>
           </motion.div>
-        </RevealOnScroll>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-export function GratitudeSection({ hosts, message, isReady = true }: GratitudeSectionProps) {
+export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
   const displayName = hosts[0]?.firstName || hosts[0]?.shortName || "Birthday Star";
 
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 py-18 text-wedding-dark">
       <div className="mx-auto max-w-[520px]">
-        <RevealOnScroll direction="up" distance={18} delay={0.08} width="100%" isReady={isReady}>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
           <motion.div 
+            variants={itemVariants}
             className="rounded-[48px] border-4 border-white bg-[linear-gradient(180deg,white,rgba(255,255,255,0.85))] px-7 py-12 text-center shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-dark)_15%,transparent),0_30px_70px_rgba(63,19,91,0.10)] backdrop-blur-xl"
             animate={{ rotate: [-1, 1, -1] }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           >
-            <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/30 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 rotate-2">Terima Kasih</p>
-            <h2 className="mt-6 font-black text-[40px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">Sampai Jumpa di Pesta!</h2>
-            <p className="mt-6 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 whitespace-pre-line bg-black/5 p-5 rounded-3xl border border-black/5">
-              {message?.trim() || "Terima kasih sudah meluangkan waktu untuk hadir dan berbagi kebahagiaan di hari spesial ini."}
-            </p>
-            <div className="mt-8 inline-flex items-center justify-center rounded-2xl bg-wedding-accent-2 px-6 py-3 text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] rotate-1">
-              <p className="font-black text-[22px] tracking-wide">{displayName}</p>
-            </div>
+            <motion.div variants={popVariants}>
+              <p className="font-poppins-bold text-[14px] uppercase tracking-[0.2em] text-white bg-wedding-dark/30 inline-block px-5 py-1.5 rounded-full border-2 border-white/40 rotate-2">Terima Kasih</p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <h2 className="mt-6 font-black text-[40px] leading-none tracking-tight text-wedding-dark [text-shadow:2px_2px_0_white,4px_4px_0_var(--invitation-accent)]">Sampai Jumpa di Pesta!</h2>
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <p className="mt-6 font-poppins font-medium text-[15px] leading-relaxed text-wedding-dark/80 whitespace-pre-line bg-black/5 p-5 rounded-3xl border border-black/5">
+                {message?.trim() || "Terima kasih sudah meluangkan waktu untuk hadir dan berbagi kebahagiaan di hari spesial ini."}
+              </p>
+            </motion.div>
+            <motion.div variants={popVariants}>
+              <div className="mt-8 inline-flex items-center justify-center rounded-2xl bg-wedding-accent-2 px-6 py-3 text-white shadow-[0_6px_0_0_color-mix(in_srgb,var(--invitation-dark)_20%,transparent)] rotate-1">
+                <p className="font-black text-[22px] tracking-wide">{displayName}</p>
+              </div>
+            </motion.div>
           </motion.div>
-        </RevealOnScroll>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-export function FooterSection({ hosts, message, isReady = true }: FooterSectionProps) {
+export function FooterSection({ hosts, message }: FooterSectionProps) {
   const overlayAssets = useOverlayAssets();
   const names = hosts
     .map((host) => host?.firstName || host?.shortName || "")
@@ -250,23 +344,29 @@ export function FooterSection({ hosts, message, isReady = true }: FooterSectionP
         />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[520px] text-center">
-        <RevealOnScroll direction="up" width="100%" delay={0.12} isReady={isReady}>
+      <motion.div
+        className="relative z-10 mx-auto max-w-[520px] text-center"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+      >
+        <motion.div variants={popVariants}>
           <div className="inline-flex items-center rounded-2xl bg-white/10 px-6 py-2 font-poppins-bold text-[13px] uppercase tracking-[0.2em] text-white border-2 border-white/20 shadow-[0_4px_0_0_color-mix(in_srgb,black_20%,transparent)] -rotate-2">
             {names || "Kru Ulang Tahun"}
           </div>
-        </RevealOnScroll>
+        </motion.div>
 
-        <RevealOnScroll direction="up" width="100%" delay={0.24} isReady={isReady}>
+        <motion.div variants={itemVariants}>
           <h3 className="mt-10 font-black text-[54px] leading-none tracking-tight text-white [text-shadow:3px_3px_0_color-mix(in_srgb,var(--invitation-accent)_80%,transparent)] rotate-1">
             Waktunya Pesta!
           </h3>
           <p className="mt-6 font-poppins font-medium text-[16px] leading-relaxed text-white/90 whitespace-pre-line max-w-[280px] mx-auto bg-black/20 p-4 rounded-3xl border border-white/10">
             {message?.trim() || "Sampai jumpa dan jangan lupa bawa senyuman terbaikmu!"}
           </p>
-        </RevealOnScroll>
+        </motion.div>
 
-        <RevealOnScroll direction="up" width="100%" delay={0.36} isReady={isReady}>
+        <motion.div variants={popVariants}>
           <motion.a
             href="https://invitation.activid.id"
             target="_blank"
@@ -277,8 +377,8 @@ export function FooterSection({ hosts, message, isReady = true }: FooterSectionP
           >
             Kembali ke Undangan
           </motion.a>
-        </RevealOnScroll>
-      </div>
+        </motion.div>
+      </motion.div>
     </footer>
   );
 }
