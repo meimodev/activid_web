@@ -252,25 +252,36 @@ export function Hero({
         }
       />
 
-      <div className="relative z-10 mx-auto flex h-full w-full items-center justify-center px-4 py-6">
-        <div className="relative w-full max-w-[520px]">
-          {isOceanExplorer && (
-            <motion.div
-              className="absolute -inset-x-8 top-10 bottom-10 z-0 bg-contain bg-center bg-no-repeat opacity-90 pointer-events-none"
-              style={{ backgroundImage: `url(${KIDS_BIRTHDAY_OVERLAY_ASSETS.boysHeroSides})` }}
-              animate={
-                isOpening
-                  ? { opacity: 0, scale: 1.1 }
-                  : { y: [0, -8, 0], scale: [1, 1.02, 1] }
-              }
-              transition={
-                isOpening
-                  ? { duration: 0.5 }
-                  : { duration: 8, repeat: Infinity, ease: "easeInOut" }
-              }
-            />
-          )}
+      {isOceanExplorer && (
+        <motion.div
+          className="absolute left-0 right-0 -top-10 -bottom-40 z-20 bg-contain  bg-no-repeat opacity-90 pointer-events-none rotate-180"
+          style={{
+            backgroundImage: `url(${KIDS_BIRTHDAY_OVERLAY_ASSETS.boysHeroSides})`,
+          }}
+          animate={isOpening ? { opacity: 0 } : { y: [0, -60, 0] }}
+          transition={
+            isOpening ? { duration: 0.5 } : { duration: 20, repeat: Infinity }
+          }
+        />
+      )}
 
+
+      {isOceanExplorer && (
+        <motion.div
+          className="absolute left-0 right-0 -top-10 -bottom-40 z-20 bg-contain  bg-no-repeat opacity-90 pointer-events-none"
+          style={{
+            backgroundImage: `url(${KIDS_BIRTHDAY_OVERLAY_ASSETS.boysHeroSides})`,
+          }}
+          animate={isOpening ? { opacity: 0 } : { y: [0, -60, 0] }}
+          transition={
+            isOpening ? { duration: 0.5 } : { duration: 20, repeat: Infinity }
+          }
+        />
+      )}
+
+      
+      <div className="relative z-10 mx-auto flex h-full w-full items-center justify-center px-4 py-6 ">
+        <div className="relative w-full max-w-[520px]">
           <motion.div
             className="relative z-10 w-full rounded-[48px] border-4 border-white bg-white/60 px-6 py-10 text-center shadow-[0_20px_0_0_color-mix(in_srgb,var(--invitation-accent-2)_20%,transparent),0_30px_60px_rgba(61,23,92,0.12)] backdrop-blur-md"
             variants={containerVariants}
@@ -338,8 +349,10 @@ export function Hero({
 
                   <motion.div
                     aria-hidden
-                    className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url(${isOceanExplorer ? KIDS_BIRTHDAY_OVERLAY_ASSETS.boysHeroFrameDecoration : overlayAssets.frame})` }}
+                    className="absolute inset-8 -translate-x-20 translate-y-20 bg-contain  bg-no-repeat"
+                    style={{
+                      backgroundImage: `url(${isOceanExplorer ? KIDS_BIRTHDAY_OVERLAY_ASSETS.boysHeroFrameDecoration : overlayAssets.frame})`,
+                    }}
                     animate={
                       isOpening
                         ? { opacity: 0, y: -20, rotate: 8 }
