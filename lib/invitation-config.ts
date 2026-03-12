@@ -187,7 +187,7 @@ export function buildInvitationStoredMetadata(
 
 export async function revalidateInvitationConfig(slug: string): Promise<void> {
   await Promise.all([
-    revalidateTag(getInvitationConfigTag(slug)),
+    revalidateTag(getInvitationConfigTag(slug), "max"),
     revalidatePath(`/invitation/${slug}`),
   ]);
 }
