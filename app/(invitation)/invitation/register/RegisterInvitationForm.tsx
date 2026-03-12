@@ -1726,6 +1726,7 @@ export function RegisterInvitationForm({
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(
     initialPurpose,
   );
+  const effectivePurpose = templateId === "kids-birthday" ? "birthday" : purpose;
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
     id: isEditMode ? (existingSlug ?? initialConfig.id) : initialConfig.id,
