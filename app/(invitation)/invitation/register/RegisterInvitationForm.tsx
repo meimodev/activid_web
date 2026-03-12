@@ -2677,6 +2677,7 @@ export function RegisterInvitationForm({
       ) : null}
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="templateId" value={templateId} />
+      <input type="hidden" name="purpose" value={effectivePurpose} />
       <input type="hidden" name="password" value={password} />
       <input type="hidden" name="configJson" value={configJson} />
       {requiresAffiliateAcknowledgement ? (
@@ -3020,9 +3021,8 @@ export function RegisterInvitationForm({
               Tipe Undangan
             </span>
             <select
-              name="purpose"
               className="rounded-xl border border-white/10 bg-[#0b0b16]/80 px-3 py-2 text-white outline-none focus:border-indigo-500/60 transition-colors"
-              value={purpose}
+              value={effectivePurpose}
               disabled={templateId === "kids-birthday"}
               onChange={(e) =>
                 handlePurposeChange(
