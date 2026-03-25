@@ -15,16 +15,12 @@ export default function BboldActionLink({ href, label, tone = "default" }: Bbold
       href={href}
       target="_blank"
       rel="noreferrer"
-      className={`my-1 block w-full rounded-xl p-3 transition-transform duration-200 hover:scale-[0.99] ${className}`}
+      className={`my-1 text-center block w-full rounded-xl p-3 transition-transform duration-200 hover:scale-[0.99] ${className}`}
     >
-      <div className="flex items-center justify-between gap-4 px-2">
-        <span className="text-sm uppercase tracking-[0.3em] text-neutral-400" style={{ fontFamily: "var(--font-bbold-body)" }}>
-          Visit
-        </span>
-        <span className="text-lg" style={{ fontFamily: "var(--font-bbold-display)" }}>
+        
+        <span className="text-lg text-center" style={{ fontFamily: "var(--font-bbold-display)" }}>
           {label}
         </span>
-      </div>
     </a>
   );
 }
