@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function shuffleImages(images: string[]): string[] {
   const next = [...images];
@@ -11,38 +12,102 @@ function shuffleImages(images: string[]): string[] {
   return next;
 }
 
+function toPositiveModulo(value: number, length: number): number {
+  return ((value % length) + length) % length;
+}
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction >= 0 ? "100%" : "-100%",
+    scale: 1.015,
+  }),
+  center: {
+    x: 0,
+    scale: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction >= 0 ? "-100%" : "100%",
+    scale: 1.015,
+  }),
+};
+
 export default function ProductShowcase({ images }: { images: string[] }) {
-  const [index, setIndex] = useState(0);
   const orderedImages = useMemo(() => shuffleImages(images), [images]);
-  const safeIndex = orderedImages.length > 0 ? index % orderedImages.length : 0;
+  const [[page, direction], setPage] = useState<[number, number]>([0, 1]);
+  const draggedRef = useRef(false);
+
+  const paginate = useCallback(
+    (nextDirection: number) => {
+      if (orderedImages.length <= 1) return;
+      setPage(([currentPage]) => [currentPage + nextDirection, nextDirection]);
+    },
+    [orderedImages.length],
+  );
 
   useEffect(() => {
     if (orderedImages.length <= 1) return;
     const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % orderedImages.length);
+      paginate(1);
     }, 2600);
     return () => window.clearInterval(timer);
-  }, [orderedImages]);
+  }, [orderedImages.length, paginate]);
 
+  const safeIndex = useMemo(
+    () => (orderedImages.length > 0 ? toPositiveModulo(page, orderedImages.length) : 0),
+    [orderedImages.length, page],
+  );
   const image = useMemo(() => orderedImages[safeIndex] ?? orderedImages[0] ?? "", [orderedImages, safeIndex]);
 
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      draggedRef.current = true;
+      const { offset, velocity } = info;
+
+      if (offset.x <= -60 || velocity.x <= -500) {
+        paginate(1);
+        return;
+      }
+
+      if (offset.x >= 60 || velocity.x >= 500) {
+        paginate(-1);
+      }
+    },
+    [paginate],
+  );
+
   return (
-    <div className="relative h-[22rem] overflow-hidden rounded-[2rem] bg-[#4b5563] shadow-2xl">
-      <div
-        className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-700"
-        style={{ backgroundImage: `url(${image})` }}
-      />
-      <div className="absolute inset-x-0 bottom-4 flex flex-wrap justify-center gap-2 px-4">
-        {orderedImages.slice(0, 10).map((_, dotIndex) => (
-          <button
-            key={`${dotIndex}-${orderedImages[dotIndex]}`}
-            type="button"
-            aria-label={`Show image ${dotIndex + 1}`}
-            onClick={() => setIndex(dotIndex)}
-            className={`h-2.5 rounded-full transition-all ${dotIndex === safeIndex ? "w-8 bg-white" : "w-2.5 bg-white/45"}`}
-          />
-        ))}
-      </div>
+    <div
+      className="relative h-[22rem] overflow-hidden rounded-[2rem] bg-[#4b5563] shadow-2xl"
+      onClick={() => {
+        if (draggedRef.current) {
+          draggedRef.current = false;
+        }
+      }}
+    >
+      <AnimatePresence custom={direction} initial={false}>
+        <motion.div
+          key={`product-showcase-${page}`}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.82, ease: "easeInOut" }}
+          drag={orderedImages.length > 1 ? "x" : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.9}
+          onPointerDownCapture={() => {
+            draggedRef.current = false;
+          }}
+          onDragStart={() => {
+            draggedRef.current = true;
+          }}
+          onDragEnd={handleDragEnd}
+          className="absolute inset-0 touch-pan-y bg-contain bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${image})` }}
+        />
+      </AnimatePresence>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-black/10" />
     </div>
   );
 }

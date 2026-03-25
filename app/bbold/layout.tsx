@@ -3,14 +3,18 @@ import localFont from "next/font/local";
 import { BBOLD_META } from "./data";
 
 const bboldDisplay = localFont({
-  src: "../../public/fonts/brown-sugar.ttf",
+  src: "../../public/fonts/lemon-milk-bold.otf",
   variable: "--font-bbold-display",
+  weight: "700",
+  style: "normal",
   display: "swap",
 });
 
 const bboldBody = localFont({
   src: "../../public/fonts/poppins-regular.ttf",
   variable: "--font-bbold-body",
+  weight: "700",
+  style: "normal",
   display: "swap",
 });
 
