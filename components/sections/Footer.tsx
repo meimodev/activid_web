@@ -157,6 +157,13 @@ export function Footer({ className = '' }: FooterProps) {
               {footer.legal.privacy.label}
             </Link>
             <Link
+              href={footer.legal.accountDeletion.href}
+              onClick={() => trackFooter.legalLinkClick('accountDeletion')}
+              className="hover:text-[#F8EFDE] transition-colors duration-200"
+            >
+              {footer.legal.accountDeletion.label}
+            </Link>
+            <Link
               href={footer.legal.terms.href}
               onClick={() => trackFooter.legalLinkClick('terms')}
               className="hover:text-[#F8EFDE] transition-colors duration-200"

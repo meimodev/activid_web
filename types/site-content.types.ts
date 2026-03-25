@@ -65,6 +65,7 @@ export interface FooterContent {
   socials: Record<string, string>;
   legal: {
     privacy: { label: string; href: string };
+    accountDeletion: { label: string; href: string };
     terms: { label: string; href: string };
     copyright: string;
   };

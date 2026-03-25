@@ -247,7 +247,7 @@ export const trackFooter = {
   /**
    * Track privacy/terms link clicks
    */
-  legalLinkClick: (linkType: 'privacy' | 'terms') => {
+  legalLinkClick: (linkType: 'privacy' | 'accountDeletion' | 'terms') => {
     trackEvent('footer_legal_click', {
       link_type: linkType,
       event_category: 'Footer',

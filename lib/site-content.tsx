@@ -173,6 +173,7 @@ export const siteContent: SiteContent = {
     },
     legal: {
       privacy: { label: 'Privacy', href: '/privacy' },
+      accountDeletion: { label: 'Account Deletion', href: '/account-deletion' },
       terms: { label: 'Terms', href: '/terms' },
       copyright: 'All rights reserved.',
     },
