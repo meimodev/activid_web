@@ -1,5 +1,6 @@
 import AutoGallery from "./_components/AutoGallery";
 import BboldLogo from "./_components/BboldLogo";
+import BboldFooter from "./_components/BboldFooter";
 import { landingSections } from "./data";
 
 function getGalleryDelay(sectionIndex: number, groupIndex: number, isLastSection: boolean): number {
@@ -40,6 +41,8 @@ export default function BboldPage() {
               ))}
             </div>
           ))}
+
+          <BboldFooter />
         </div>
       </div>
     </main>

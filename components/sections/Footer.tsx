@@ -11,7 +11,7 @@ export interface FooterProps {
 }
 
 export function Footer({ className = '' }: FooterProps) {
-  const { footer, navigation } = siteContent;
+  const { footer, navigation, services } = siteContent;
   const currentYear = DateTime.now().year;
 
 
@@ -44,14 +44,16 @@ export function Footer({ className = '' }: FooterProps) {
             </motion.div>
           </div>
 
-          {/* Navigation & Office Info */}
-          <div className="lg:col-span-6 grid grid-cols-2 gap-6 lg:gap-8">
-            {/* Sitemap Navigation */}
+          {/* Sitemap, Services & Office Info */}
+          <div className="lg:col-span-6 grid grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+
+            {/* Sitemap */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              className='col-span-6 md:col-span-1'
             >
               <h4 className="text-xs uppercase tracking-wider text-[#F8EFDE] mb-4 font-bold font-sans">
                 Sitemap
@@ -100,12 +102,41 @@ export function Footer({ className = '' }: FooterProps) {
               </ul>
             </motion.div>
 
+            {/* Services */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className='col-span-6 md:col-span-1'
+            >
+              <h4 className="text-xs uppercase tracking-wider text-[#F8EFDE] mb-4 font-bold font-sans">
+                Services
+              </h4>
+              <ul className="space-y-2">
+                {services.items.map((service) => (
+                  <li key={service.buttonLink}>
+
+                    <Link
+                      href={service.buttonLink}
+                      onClick={() => trackFooter.navLinkClick(service.title)}
+                      className="text-sm text-white/70 hover:text-[#F8EFDE] transition-colors duration-200 font-sans block w-fit"
+                    >
+                      {service.title}
+                    </Link>
+
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
             {/* Office Locations */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
+              className='col-span-12 md:col-span-1 text-center md:text-left'
             >
               <h4 className="text-xs uppercase tracking-wider text-[#F8EFDE] mb-4 font-bold font-sans">
                 Office

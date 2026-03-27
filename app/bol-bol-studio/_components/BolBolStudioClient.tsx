@@ -12,6 +12,7 @@ import HomeView from "./HomeView";
 import PackageView from "./PackageView";
 import Strip from "./Strip";
 import TimeView from "./TimeView";
+import BolBolFooter from "./BolBolFooter";
 import { formatLongDate, formatTime } from "../date";
 import {
   BB_FIRESTORE,
@@ -128,7 +129,7 @@ export default function BolBolStudioClient({
     <main className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center text-stone-100">
       <div className="relative w-full border border-gray-700 bg-blue-800">
         {showStepHeader ? (
-          <div className="sticky top-0 z-20 border-b border-white/10 bg-gradient-to-b from-blue-900 to-blue-800 px-4 pb-4 pt-3 text-white">
+          <div className="sticky top-0 z-20 border-b border-white/10 bg-linear-to-b from-blue-900 to-blue-800 px-4 pb-4 pt-3 text-white">
             <div className="flex items-center justify-between gap-3">
               <button
                 type="button"
@@ -189,7 +190,7 @@ export default function BolBolStudioClient({
         <div className="overflow-hidden">
           <div className="flex transition-transform duration-500" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
             {slides.map((slide, index) => (
-              <div key={index} className="w-full flex-shrink-0">
+              <div key={index} className="w-full shrink-0">
                 {slide}
               </div>
             ))}
@@ -205,6 +206,8 @@ export default function BolBolStudioClient({
           [ADMIN] Add Booking
         </button>
       ) : null}
+
+      <BolBolFooter />
      
       <BookingDialog
         packages={studioInfo.packages}
