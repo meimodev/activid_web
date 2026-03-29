@@ -31,17 +31,10 @@
     var(--invitation-bg-alt);
 }
 
-.invitation-scale-stage {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  overflow-x: hidden;
-}
-
 .invitation-mobile-frame {
   position: relative;
-  width: var(--invitation-mobile-max-width);
-  max-width: none;
+  width: 100%;
+  max-width: var(--invitation-mobile-max-width);
   min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: visible;

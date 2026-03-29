@@ -7,7 +7,6 @@ import { Amalthea } from "@/components/templates/amalthea";
 import { Venus } from "@/components/templates/venus";
 import { Jupiter } from "@/components/templates/jupiter";
 import { Neptune } from "@/components/templates/neptune";
-import { InvitationScaleWrapper } from "@/components/invitation/InvitationScaleWrapper";
 import { DemoThemeSidebar } from "@/components/invitation/DemoThemeSidebar";
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
@@ -98,26 +97,15 @@ function withInvitationChrome(
     theme: InvitationConfig["theme"] | undefined,
     children: ReactNode,
 ) {
-    const isScaleToFitDisabled = templateId === "venus" || templateId === "amalthea";
     const themeStyle = getInvitationThemeStyle(templateId, theme);
 
     return (
         <div className="invitation-mobile-shell" style={themeStyle as CSSProperties}>
-            {isScaleToFitDisabled ? (
-                <div className="invitation-mobile-frame fluid-layout">
-                    <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-accent selection:text-white">
-                        {children}
-                    </div>
+            <div className="invitation-mobile-frame">
+                <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-accent selection:text-white">
+                    {children}
                 </div>
-            ) : (
-                <InvitationScaleWrapper>
-                    <div className="invitation-mobile-frame">
-                        <div className="font-body antialiased bg-wedding-bg text-wedding-text min-h-screen selection:bg-wedding-accent selection:text-white">
-                            {children}
-                        </div>
-                    </div>
-                </InvitationScaleWrapper>
-            )}
+            </div>
         </div>
     );
 }

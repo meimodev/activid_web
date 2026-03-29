@@ -100,7 +100,7 @@ export function Pluto({ config }: PlutoProps) {
   }, [isDemo, weddingDate.display]);
 
   return (
-    <main className="relative h-screen overflow-x-hidden bg-wedding-bg text-wedding-text">
+    <main className="relative min-h-[100dvh] overflow-x-hidden bg-wedding-bg text-wedding-text">
       <BackgroundSlideshow
         photos={derivedPhotos}
         className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-10"
