@@ -77,7 +77,7 @@ export default function ProductShowcase({ images }: { images: string[] }) {
 
   return (
     <div
-      className="relative h-[22rem] overflow-hidden rounded-[2rem] bg-[#4b5563] shadow-2xl"
+      className="relative h-88 overflow-hidden rounded-4xl bg-[#4b5563] shadow-2xl"
       onClick={() => {
         if (draggedRef.current) {
           draggedRef.current = false;
@@ -92,7 +92,7 @@ export default function ProductShowcase({ images }: { images: string[] }) {
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.82, ease: "easeInOut" }}
+          transition={{ duration: 1.1, ease: [0.25, 1, 0.5, 1] }}
           drag={orderedImages.length > 1 ? "x" : false}
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.9}
@@ -107,7 +107,7 @@ export default function ProductShowcase({ images }: { images: string[] }) {
           style={{ backgroundImage: `url(${image})` }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-black/10" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-black/10" />
     </div>
   );
 }

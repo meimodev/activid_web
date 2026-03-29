@@ -25,6 +25,19 @@ export type ProductOfferGroup = {
   items: string[];
 };
 
+export type MapLocation = {
+  label: string;
+  href: string;
+};
+
+export const BBOLD_LOCATIONS: MapLocation[] = [
+  {
+    label: "Tondano",
+    href: "https://maps.app.goo.gl/ijT9vVTp9cp36hS18",
+  },
+  { label: "Manado", href: "https://maps.app.goo.gl/3B3PYc1UGcpDL4KW8" },
+];
+
 export type ProductDetail = {
   id: BboldProductId;
   displayName: string;
@@ -36,7 +49,7 @@ export type ProductDetail = {
   footerNote?: string;
   links: {
     whatsApp: string;
-    map: string;
+    mapLocations: MapLocation[];
     tokopedia?: string;
     shopee?: string;
   };
@@ -63,8 +76,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_1_8.jpg?updatedAt=1753773285267",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_1_9.jpg?updatedAt=1753773285671",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_1_10.jpg?updatedAt=1753773285755",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_1_11.jpg?updatedAt=1753773286562"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_1_11.jpg?updatedAt=1753773286562",
+    ],
   },
   {
     label: "B2",
@@ -80,8 +93,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_2_7.jpg?updatedAt=1753773298990",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_2_8.jpg?updatedAt=1753773288669",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_2_9.jpg?updatedAt=1753773286586",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_2_10.jpg?updatedAt=1753773292097"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_2_10.jpg?updatedAt=1753773292097",
+    ],
   },
   {
     label: "B2",
@@ -97,8 +110,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_3_7.jpg?updatedAt=1753773309290",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_3_8.jpg?updatedAt=1753773281997",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_3_9.jpg?updatedAt=1753773279189",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_3_10.jpg?updatedAt=1753773285253"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_3_10.jpg?updatedAt=1753773285253",
+    ],
   },
   {
     label: "B2",
@@ -113,8 +126,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_4_7.jpg?updatedAt=1753773292095",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_4_8.jpg?updatedAt=1753773291833",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_4_9.jpg?updatedAt=1753773291840",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_4_10.jpg?updatedAt=1753773302392"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_4_10.jpg?updatedAt=1753773302392",
+    ],
   },
   {
     label: "B2",
@@ -129,8 +142,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_5_6.jpg?updatedAt=1753773298980",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_5_7.jpg?updatedAt=1753773298991",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_5_8.jpg?updatedAt=1753773286155",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_5_9.jpg?updatedAt=1753773286377"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B2%20POTRAIT/b2_part_5_9.jpg?updatedAt=1753773286377",
+    ],
   },
   {
     label: "B4",
@@ -150,8 +163,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_1.jpg?updatedAt=1753773278565",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_2.jpg?updatedAt=1753773279312",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_3.jpg?updatedAt=1753773278861",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_4.jpg?updatedAt=1753773272882"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_4.jpg?updatedAt=1753773272882",
+    ],
   },
   {
     label: "B4",
@@ -175,8 +188,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_2_15.jpg?updatedAt=1753773264116",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_5.jpg?updatedAt=1753773275165",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_6.jpg?updatedAt=1753773271944",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_7.jpg?updatedAt=1753773272238"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/B4/b4_part_3_7.jpg?updatedAt=1753773272238",
+    ],
   },
   {
     label: "C",
@@ -197,8 +210,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_14.jpg?updatedAt=1753773324704",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_16.jpg?updatedAt=1753773324923",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_17.jpg?updatedAt=1753773324532",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_18.jpg?updatedAt=1753773325406"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_18.jpg?updatedAt=1753773325406",
+    ],
   },
   {
     label: "Lanyard",
@@ -219,9 +232,9 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard%20Key%20Chain/Landyard_KC_1_1.jpg?updatedAt=1753773242483",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard%20Key%20Chain/Landyard_KC_1_2.jpg?updatedAt=1753773242444",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard%20Key%20Chain/Landyard_KC_1_3.jpg?updatedAt=1753773242650",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard%20Key%20Chain/Landyard_KC_1_4.jpg?updatedAt=1753773242530"
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard%20Key%20Chain/Landyard_KC_1_4.jpg?updatedAt=1753773242530",
     ],
-    labelWidthClassName: "w-[10rem] h-12"
+    labelWidthClassName: "w-[10rem] h-12",
   },
   {
     label: "Pin",
@@ -240,8 +253,8 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_10.jpg?updatedAt=1753773246002",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_11.jpg?updatedAt=1753773246100",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_12.jpg?updatedAt=1753773247274",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_13.jpg?updatedAt=1753773246227"
-    ]
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_13.jpg?updatedAt=1753773246227",
+    ],
   },
   {
     label: "Pin",
@@ -262,9 +275,9 @@ export const pictureData: GalleryGroup[] = [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_25.jpg?updatedAt=1753773253759",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_26.jpg?updatedAt=1753773257957",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_27.jpg?updatedAt=1753773259117",
-      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_28.jpg?updatedAt=1753773253494"
-    ]
-  }
+      "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Pin/Pin_1_28.jpg?updatedAt=1753773253494",
+    ],
+  },
 ];
 
 export const availablePictures: GalleryGroup = {
@@ -274,40 +287,40 @@ export const availablePictures: GalleryGroup = {
   images: [
     "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Order/order_1_1.jpg?updatedAt=1753773242647",
     "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Order/order_1_3.jpg?updatedAt=1753773242503",
-    "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Order/order_1_4.jpg?updatedAt=1753773242414"
-  ]
+    "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Order/order_1_4.jpg?updatedAt=1753773242414",
+  ],
 };
 
 export const landingSections: LandingSection[] = [
   {
     heightClassName: "h-[22rem]",
-    groups: [pictureData[7]]
+    groups: [pictureData[7]],
   },
   {
     heightClassName: "h-[13rem]",
-    groups: [pictureData[9], pictureData[10]]
+    groups: [pictureData[9], pictureData[10]],
   },
   {
     heightClassName: "h-[22rem]",
-    groups: [pictureData[8]]
+    groups: [pictureData[8]],
   },
   {
     heightClassName: "h-[13rem]",
-    groups: [pictureData[2], pictureData[3]]
+    groups: [pictureData[2], pictureData[3]],
   },
   {
     heightClassName: "h-[22rem]",
-    groups: [pictureData[4]]
+    groups: [pictureData[4]],
   },
   {
     heightClassName: "h-[13rem]",
-    groups: [pictureData[5], pictureData[1]]
+    groups: [pictureData[5], pictureData[1]],
   },
   {
     heightClassName: "h-screen",
     containerClassName: "px-2",
-    groups: [availablePictures]
-  }
+    groups: [availablePictures],
+  },
 ];
 
 export const productDetails: Record<BboldProductId, ProductDetail> = {
@@ -319,20 +332,23 @@ export const productDetails: Record<BboldProductId, ProductDetail> = {
       ...pictureData[1].images,
       ...pictureData[2].images,
       ...pictureData[3].images,
-      ...pictureData[4].images
+      ...pictureData[4].images,
     ],
     introLines: ["Harga HomeDecor / Custom Gifts", "Photo, Poster, Quotes"],
     priceBlocks: [{ label: "Size B2 ( 22.5cm x 30cm )", price: "Rp 95.000" }],
     notes: [
       "Penambahan tulisan, memakan 🍜 waktu ⏰ 1 - 2 hari",
-      "Waktu pekerjaan terhitung setelah design di konfirmasi"
+      "Waktu pekerjaan terhitung setelah design di konfirmasi",
     ],
     links: {
-      whatsApp: "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-B2",
-      map: "https://www.google.com/maps/place/BBOLD.MMXX+TONDANO/@1.3033844,124.9084929,17z/data=!3m1!4b1!4m5!3m4!1s0x328715e2e5de6b81:0x4965ac475ae18d7c!8m2!3d1.3033865!4d124.9106838",
-      tokopedia: "https://www.tokopedia.com/bbold/bbold-dekorasi-dinding-size-b2-22-5cm-x-30cm-x-2cm",
-      shopee: "https://shopee.co.id/BBOLD-Dekorasi-Dinding-Size-B2-(30cm-x-22.5cm-x-2cm)-i.14752641.3385608954?sp_atk=2726d202-be04-42dd-b01b-3767a6f015cf&xptdk=2726d202-be04-42dd-b01b-3767a6f015cf"
-    }
+      whatsApp:
+        "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-B2",
+      mapLocations: BBOLD_LOCATIONS,
+      tokopedia:
+        "https://www.tokopedia.com/bbold/bbold-dekorasi-dinding-size-b2-22-5cm-x-30cm-x-2cm",
+      shopee:
+        "https://shopee.co.id/BBOLD-Dekorasi-Dinding-Size-B2-(30cm-x-22.5cm-x-2cm)-i.14752641.3385608954?sp_atk=2726d202-be04-42dd-b01b-3767a6f015cf&xptdk=2726d202-be04-42dd-b01b-3767a6f015cf",
+    },
   },
   b4: {
     id: "b4",
@@ -342,14 +358,17 @@ export const productDetails: Record<BboldProductId, ProductDetail> = {
     priceBlocks: [{ label: "Size B4 ( 30cm x 45cm )", price: "Rp 190.000" }],
     notes: [
       "Penambahan tulisan, memakan 🍜 waktu ⏰ 1 - 2 hari",
-      "Waktu pekerjaan terhitung setelah design di konfirmasi"
+      "Waktu pekerjaan terhitung setelah design di konfirmasi",
     ],
     links: {
-      whatsApp: "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-B4",
-      map: "https://www.google.com/maps/place/BBOLD.MMXX+TONDANO/@1.3033844,124.9084929,17z/data=!3m1!4b1!4m5!3m4!1s0x328715e2e5de6b81:0x4965ac475ae18d7c!8m2!3d1.3033865!4d124.9106838",
-      tokopedia: "https://www.tokopedia.com/bbold/bbold-dekorasi-dinding-size-b4-30cm-x-45cm-x-2cm-photo-tulisan",
-      shopee: "https://shopee.co.id/BBOLD-I-Dekorasi-Dinding-Size-B4-(45cm-x-30cm-x-2cm)-PHOTO-ONLY-i.14752641.8667438025?sp_atk=3429f840-16e3-46c3-ad22-1914f6b99ae8&xptdk=3429f840-16e3-46c3-ad22-1914f6b99ae8"
-    }
+      whatsApp:
+        "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-B4",
+      mapLocations: BBOLD_LOCATIONS,
+      tokopedia:
+        "https://www.tokopedia.com/bbold/bbold-dekorasi-dinding-size-b4-30cm-x-45cm-x-2cm-photo-tulisan",
+      shopee:
+        "https://shopee.co.id/BBOLD-I-Dekorasi-Dinding-Size-B4-(45cm-x-30cm-x-2cm)-PHOTO-ONLY-i.14752641.8667438025?sp_atk=3429f840-16e3-46c3-ad22-1914f6b99ae8&xptdk=3429f840-16e3-46c3-ad22-1914f6b99ae8",
+    },
   },
   c: {
     id: "c",
@@ -358,16 +377,17 @@ export const productDetails: Record<BboldProductId, ProductDetail> = {
     introLines: ["Harga HomeDecor / Custom Gifts", "Photo, Poster, Quotes"],
     priceBlocks: [
       { label: "Size C1 ( 70cm x 47cm )", price: "Rp 370.000" },
-      { label: "Size C2 ( 91cm x 42cm )", price: "Rp 440.000" }
+      { label: "Size C2 ( 91cm x 42cm )", price: "Rp 440.000" },
     ],
     notes: [
       "Waktu pekerjaan size C, memakan 🍜 waktu ⏰ 2 - 3 hari",
-      "Waktu pekerjaan terhitung setelah design terkonfirmasi"
+      "Waktu pekerjaan terhitung setelah design terkonfirmasi",
     ],
     links: {
-      whatsApp: "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-SIZE-C",
-      map: "https://www.google.com/maps/place/BBOLD.MMXX+TONDANO/@1.3033844,124.9084929,17z/data=!3m1!4b1!4m5!3m4!1s0x328715e2e5de6b81:0x4965ac475ae18d7c!8m2!3d1.3033865!4d124.9106838"
-    }
+      whatsApp:
+        "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-SIZE-C",
+      mapLocations: BBOLD_LOCATIONS,
+    },
   },
   lanyard: {
     id: "lanyard",
@@ -376,26 +396,47 @@ export const productDetails: Record<BboldProductId, ProductDetail> = {
     offerGroups: [
       {
         title: "Lanyard Sablon 2 Sisi (2cm x 85cm)",
-        items: ["Rp 27.000 1 - 20pcs", "Rp 25.000 21 - 60pcs", "Rp 22.000 61 - 150pcs", "> 150pcs (Nego) 😁"]
+        items: [
+          "Rp 27.000 1 - 20pcs",
+          "Rp 25.000 21 - 60pcs",
+          "Rp 22.000 61 - 150pcs",
+          "> 150pcs (Nego) 😁",
+        ],
       },
       {
         title: "Tali Masker Sablon 2 sisi (2cm x 66cm)",
-        items: ["Rp 21.000 1 - 20pcs", "Rp 19.000 21 - 60pcs", "Rp 16.000 61 - 150pcs", "> 150pcs (Nego) 😁"]
+        items: [
+          "Rp 21.000 1 - 20pcs",
+          "Rp 19.000 21 - 60pcs",
+          "Rp 16.000 61 - 150pcs",
+          "> 150pcs (Nego) 😁",
+        ],
       },
       {
         title: "ID Card PVC (2 sisi) (5.4cm x 8.5cm)",
-        items: ["Rp 18.000 1 - 20pcs", "Rp 17.000 21 - 60pcs", "Rp 15.000 61 - 150pcs", "> 150pcs (Nego) 😁"]
+        items: [
+          "Rp 18.000 1 - 20pcs",
+          "Rp 17.000 21 - 60pcs",
+          "Rp 15.000 61 - 150pcs",
+          "> 150pcs (Nego) 😁",
+        ],
       },
       {
         title: "ID Card PVC (1 sisi) (5.4cm x 8.5cm)",
-        items: ["Rp 15.000 1 - 20pcs", "Rp 14.000 21 - 600pcs", "Rp 12.500 61 - 150pcs", "> 150pcs (Nego) 😁"]
-      }
+        items: [
+          "Rp 15.000 1 - 20pcs",
+          "Rp 14.000 21 - 600pcs",
+          "Rp 12.500 61 - 150pcs",
+          "> 150pcs (Nego) 😁",
+        ],
+      },
     ],
     footerNote: "GRATIS DESIGN 🖥️ 🖱️ 😍 😍",
     links: {
-      whatsApp: "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-LANYARD",
-      map: "https://www.google.com/maps/place/BBOLD.MMXX+TONDANO/@1.3033844,124.9084929,17z/data=!3m1!4b1!4m5!3m4!1s0x328715e2e5de6b81:0x4965ac475ae18d7c!8m2!3d1.3033865!4d124.9106838"
-    }
+      whatsApp:
+        "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-LANYARD",
+      mapLocations: BBOLD_LOCATIONS,
+    },
   },
   pin: {
     id: "pin",
@@ -404,23 +445,39 @@ export const productDetails: Record<BboldProductId, ProductDetail> = {
     offerGroups: [
       {
         title: "PIN GANTUNGAN KECIL diameter 44",
-        items: ["Rp 6.500 1 - 20pcs", "Rp 6.000 1 - 100pcs", "Rp 5.000 100pcs - 200pcs", "> 200pcs (Nego) 😁"]
+        items: [
+          "Rp 6.500 1 - 20pcs",
+          "Rp 6.000 1 - 100pcs",
+          "Rp 5.000 100pcs - 200pcs",
+          "> 200pcs (Nego) 😁",
+        ],
       },
       {
         title: "PIN PENETI KECIL diameter 44",
-        items: ["Rp 6.000 1 - 20pcs", "Rp 5.000 1 - 100pcs", "Rp 4.000 100pcs - 200pcs", "> 200pcs (Nego) 😁"]
+        items: [
+          "Rp 6.000 1 - 20pcs",
+          "Rp 5.000 1 - 100pcs",
+          "Rp 4.000 100pcs - 200pcs",
+          "> 200pcs (Nego) 😁",
+        ],
       },
       {
         title: "PIN PENETI BESAR diameter 58",
-        items: ["Rp 7.500 1 - 20pcs", "Rp 6.500 1 - 100pcs", "Rp 5.500 100pcs - 200pcs", "> 500pcs (Nego) 😁"]
-      }
+        items: [
+          "Rp 7.500 1 - 20pcs",
+          "Rp 6.500 1 - 100pcs",
+          "Rp 5.500 100pcs - 200pcs",
+          "> 500pcs (Nego) 😁",
+        ],
+      },
     ],
     footerNote: "GRATIS DESIGN 🖥️ 🖱️ 😍 😍",
     links: {
-      whatsApp: "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-PIN",
-      map: "https://www.google.com/maps/place/BBOLD.MMXX+TONDANO/@1.3033844,124.9084929,17z/data=!3m1!4b1!4m5!3m4!1s0x328715e2e5de6b81:0x4965ac475ae18d7c!8m2!3d1.3033865!4d124.9106838"
-    }
-  }
+      whatsApp:
+        "https://api.whatsapp.com/send?phone=+6285756681077&text=ORDER-BBOLD-PIN",
+      mapLocations: BBOLD_LOCATIONS,
+    },
+  },
 };
 
 export function getBboldProduct(id: string): ProductDetail | undefined {

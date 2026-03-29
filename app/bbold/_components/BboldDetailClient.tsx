@@ -41,7 +41,7 @@ export default function BboldDetailClient({ product }: { product: ProductDetail 
       footer: product.footerNote ? nextOrder() : null,
       links: {
         whatsApp: nextOrder(),
-        map: nextOrder(),
+        mapLocations: product.links.mapLocations.map(() => nextOrder()),
         tokopedia: product.links.tokopedia ? nextOrder() : null,
         shopee: product.links.shopee ? nextOrder() : null,
       },
@@ -124,9 +124,29 @@ export default function BboldDetailClient({ product }: { product: ProductDetail 
             <RevealItem order={revealPlan.links.whatsApp}>
               <BboldActionLink href={product.links.whatsApp} label="Pesan" tone="highlight" />
             </RevealItem>
-            <RevealItem order={revealPlan.links.map}>
-              <BboldActionLink href={product.links.map} label="Kunjungi" />
-            </RevealItem>
+            {product.links.mapLocations.length > 0 ? (
+              <div className="my-1">
+
+                <div className="flex gap-2">
+                  {product.links.mapLocations.map((loc, i) => (
+                    <div key={loc.label} className="flex-1">
+                      <RevealItem order={revealPlan.links.mapLocations[i] ?? 0}>
+                        <a
+                          href={loc.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block w-full rounded-xl bg-neutral-900 p-3 text-center text-neutral-50 transition-transform duration-200 hover:scale-[0.99]"
+                        >
+                          <span className="text-lg" style={{ fontFamily: "var(--font-bbold-display)" }}>
+                            📍 Kunjungi - {loc.label}
+                          </span>
+                        </a>
+                      </RevealItem>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             {product.links.tokopedia ? (
               <RevealItem order={revealPlan.links.tokopedia ?? 0}>
                 <BboldActionLink href={product.links.tokopedia} label="Tokopedia" />

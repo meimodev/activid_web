@@ -9,6 +9,15 @@ function imageClassName(fit: ImageFit): string {
   return fit === "contain" ? "bg-contain bg-center bg-no-repeat" : "bg-cover bg-center";
 }
 
+function shuffleImages(images: string[]): string[] {
+  const next = [...images];
+  for (let index = next.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+  }
+  return next;
+}
+
 function toPositiveModulo(value: number, length: number): number {
   return ((value % length) + length) % length;
 }
@@ -40,7 +49,7 @@ export default function AutoGallery({
   className?: string;
 }) {
   const router = useRouter();
-  const images = group.images;
+  const images = useMemo(() => shuffleImages(group.images), [group.images]);
   const [[page, direction], setPage] = useState<[number, number]>([0, 1]);
   const [isRevealed, setIsRevealed] = useState(false);
   const draggedRef = useRef(false);
@@ -118,7 +127,7 @@ export default function AutoGallery({
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.82, ease: "easeInOut" }}
+          transition={{ duration: 1.1, ease: [0.25, 1, 0.5, 1] }}
           drag={images.length > 1 ? "x" : false}
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.9}
@@ -133,7 +142,7 @@ export default function AutoGallery({
           style={{ backgroundImage: `url(${slide})` }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-black/10" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-black/10" />
       <div className={`absolute left-4 top-4 z-10 flex items-center justify-center rounded-full bg-[#372f2d]/80 px-4 text-center shadow-lg backdrop-blur-sm ${labelClassName}`}>
         <span className="text-lg leading-none" style={{ fontFamily: "var(--font-bbold-display)" }}>{group.label}</span>
       </div>
