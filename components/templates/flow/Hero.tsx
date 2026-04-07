@@ -56,8 +56,8 @@ const itemVariants: Variants = {
 export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName, isOpen = false }: HeroProps) {
   const [isExiting, setIsExiting] = useState(false);
 
-  const primaryName = hosts[0]?.firstName ?? "";
-  const secondaryName = hosts[1]?.firstName ?? "";
+  const primaryName = hosts[0]?.shortName ?? "";
+  const secondaryName = hosts[1]?.shortName ?? "";
   const displayNames = secondaryName ? `${primaryName} & ${secondaryName}` : primaryName;
 
   const handleOpen = () => {

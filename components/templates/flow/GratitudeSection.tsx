@@ -20,7 +20,7 @@ export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
         <RevealOnScroll direction="down" width="100%">
           <div className="flex flex-col items-center mb-10">
             <DiamondAccent />
-            <h2 className="font-brittany-signature text-6xl text-gold-gradient mb-4 mt-4 leading-[1.08] py-1">
+            <h2 className="font-brittany-signature text-5xl text-gold-gradient mb-4 mt-4 leading-[1.08] py-1">
               Terima kasih
             </h2>
             <HeartDivider />

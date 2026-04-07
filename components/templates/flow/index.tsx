@@ -261,7 +261,7 @@ function SpaceFooter({
       <div className="relative z-10 px-4">
         <RevealOnScroll direction="up" delay={0.1} width="100%">
           <div>
-            <h2 className="font-brittany-signature text-5xl text-transparent bg-clip-text bg-linear-to-r from-wedding-accent-2-light via-wedding-on-dark to-wedding-accent-light mb-8 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_55%,transparent)] leading-[1.08] py-1">
+            <h2 className="font-brittany-signature text-5xl text-transparent bg-clip-text bg-linear-to-r from-wedding-accent-2-light via-wedding-on-dark to-wedding-accent-light mb-8 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_55%,transparent)] leading-[1.08] py-8">
               {displayNames}
             </h2>
 

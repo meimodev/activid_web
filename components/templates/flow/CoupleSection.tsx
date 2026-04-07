@@ -31,7 +31,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
             </RevealOnScroll>
 
             <RevealOnScroll delay={0.4} width="100%">
-              <h3 className="font-stoic text-6xl text-wedding-accent mb-2">{primary?.firstName ?? ""}</h3>
+              <h3 className="font-brittany-signature text-6xl text-wedding-accent mb-2">{primary?.shortName ?? ""}</h3>
               <p className="font-garet-book text-xl mb-4 text-wedding-dark">{primary?.fullName ?? ""}</p>
               <div className="w-12 h-px bg-wedding-accent mx-auto mb-4"></div>
             </RevealOnScroll>
@@ -63,7 +63,7 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
 
               <RevealOnScroll delay={0.4} width="100%">
                 <h3 className="font-brittany-signature text-6xl text-wedding-accent mb-2 leading-[1.1] py-1">
-                  {secondary.firstName}
+                  {secondary.shortName}
                 </h3>
                 <p className="font-garet-book text-xl mb-4 text-wedding-dark">{secondary.fullName}</p>
                 <div className="w-12 h-px bg-wedding-accent mx-auto mb-4"></div>
