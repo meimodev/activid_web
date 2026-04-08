@@ -14,17 +14,20 @@ interface QuoteSectionProps {
     author: string;
   };
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 interface HostSectionProps {
   hosts: Hosts;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 interface EventSectionProps {
   events: EventsConfig;
   heading: string;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 const popVariants = {
@@ -135,11 +138,29 @@ function HostCard({
   );
 }
 
-export function QuoteSection({ quote }: QuoteSectionProps) {
+export function QuoteSection({ quote, isSoccerArgentina }: QuoteSectionProps) {
+  const overlayAssets = useOverlayAssets();
   if (!quote?.text?.trim()) return null;
 
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 pt-6 pb-4 text-wedding-dark">
+      {isSoccerArgentina && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+          <motion.div
+            className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-60"
+            style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.img
+            src={overlayAssets.soccerBall}
+            alt=""
+            className="absolute -right-10 top-10 h-[100px] w-[100px] object-contain opacity-90"
+            animate={{ y: [0, -15, 0], rotate: [0, 360] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      )}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -168,7 +189,7 @@ export function QuoteSection({ quote }: QuoteSectionProps) {
   );
 }
 
-export function HostSection({ hosts }: HostSectionProps) {
+export function HostSection({ hosts, isSoccerArgentina }: HostSectionProps) {
   const overlayAssets = useOverlayAssets();
   const primary = hosts[0];
   const secondary = hosts[1];
@@ -182,24 +203,51 @@ export function HostSection({ hosts }: HostSectionProps) {
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 py-20 text-wedding-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60">
-        <motion.div
-          className="absolute -left-10 top-0 h-[360px] w-[360px] bg-contain bg-no-repeat mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
-          animate={{ rotate: [0, 90, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute -right-20 top-20 h-[300px] w-[220px] bg-contain bg-no-repeat opacity-80"
-          style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
-          animate={{ y: [0, -20, 0], rotate: [4, 0, 4] }}
-          transition={{ duration: 8.8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -left-10 bottom-0 h-[320px] w-[240px] bg-contain bg-no-repeat opacity-80"
-          style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
-          animate={{ y: [0, 16, 0], rotate: [-4, 0, -4] }}
-          transition={{ duration: 9.4, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {isSoccerArgentina ? (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-70"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, -30, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -right-10 top-20 h-[160px] w-[160px] object-contain opacity-90"
+              animate={{ y: [0, -20, 0], rotate: [0, 360] }}
+              transition={{ duration: 8.8, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -left-10 bottom-20 h-[140px] w-[140px] object-contain opacity-90"
+              animate={{ y: [0, 16, 0], rotate: [360, 0] }}
+              transition={{ duration: 9.4, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute -left-10 top-0 h-[360px] w-[360px] bg-contain bg-no-repeat mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+              animate={{ rotate: [0, 90, 0] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute -right-20 top-20 h-[300px] w-[220px] bg-contain bg-no-repeat opacity-80"
+              style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
+              animate={{ y: [0, -20, 0], rotate: [4, 0, 4] }}
+              transition={{ duration: 8.8, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute -left-10 bottom-0 h-[320px] w-[240px] bg-contain bg-no-repeat opacity-80"
+              style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
+              animate={{ y: [0, 16, 0], rotate: [-4, 0, -4] }}
+              transition={{ duration: 9.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
@@ -247,24 +295,50 @@ export function HostSection({ hosts }: HostSectionProps) {
   );
 }
 
-export function EventSection({ events, heading }: EventSectionProps) {
+export function EventSection({ events, heading, isSoccerArgentina }: EventSectionProps) {
   const overlayAssets = useOverlayAssets();
 
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent-2)_12%,var(--invitation-bg)),var(--invitation-bg))] px-4 py-20 text-wedding-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <motion.div
-          className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
-          animate={{ x: [0, -20, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute inset-x-0 bottom-0 h-[150px] bg-bottom bg-cover bg-no-repeat opacity-30"
-          style={{ backgroundImage: `url(${overlayAssets.clouds})` }}
-          animate={{ x: [0, 30, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {isSoccerArgentina ? (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-60"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, -30, 0] }}
+              transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-40"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})`, backgroundPosition: "150px 150px" }}
+              animate={{ y: [0, 30, 0] }}
+              transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute right-0 top-[20%] h-[120px] w-[120px] object-contain opacity-80"
+              animate={{ y: [0, 15, 0], rotate: [0, 360] }}
+              transition={{ duration: 7.5, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
+              animate={{ x: [0, -20, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute inset-x-0 bottom-0 h-[150px] bg-bottom bg-cover bg-no-repeat opacity-30"
+              style={{ backgroundImage: `url(${overlayAssets.clouds})` }}
+              animate={{ x: [0, 30, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">

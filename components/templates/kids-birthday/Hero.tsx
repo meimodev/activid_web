@@ -15,6 +15,7 @@ interface HeroProps {
   coverImage: string;
   guestName?: string;
   isOceanExplorer?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 const revealEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -27,6 +28,7 @@ export function Hero({
   coverImage,
   guestName,
   isOceanExplorer,
+  isSoccerArgentina,
 }: HeroProps) {
   const overlayAssets = useOverlayAssets();
   const [isOpening, setIsOpening] = useState(false);
@@ -152,105 +154,264 @@ export function Hero({
         }}
       />
 
-      <motion.div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[210px] bg-top bg-cover bg-no-repeat opacity-95"
-        style={{ backgroundImage: `url(${overlayAssets.clouds})` }}
-        animate={isOpening ? { opacity: 0, y: -24 } : { y: [0, 8, 0] }}
-        transition={
-          isOpening
-            ? { duration: 0.5 }
-            : { duration: 9.5, repeat: Infinity, ease: "easeInOut" }
-        }
-      />
+      {!isSoccerArgentina && (
+        <>
+          <motion.div
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-[210px] bg-top bg-cover bg-no-repeat opacity-95"
+            style={{ backgroundImage: `url(${overlayAssets.clouds})` }}
+            animate={isOpening ? { opacity: 0, y: -24 } : { y: [0, 8, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.5 }
+                : { duration: 9.5, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
 
-      <motion.div
-        aria-hidden
-        className="absolute -left-18 top-10 h-[320px] w-[240px] bg-contain bg-no-repeat opacity-90"
-        style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
-        animate={
-          isOpening
-            ? { x: -40, opacity: 0 }
-            : { y: [0, -16, 0], rotate: [-4, 0, -4] }
-        }
-        transition={
-          isOpening
-            ? { duration: 0.7, ease: revealEase }
-            : { duration: 8, repeat: Infinity, ease: "easeInOut" }
-        }
-      />
+          <motion.div
+            aria-hidden
+            className="absolute -left-18 top-10 h-[320px] w-[240px] bg-contain bg-no-repeat opacity-90"
+            style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
+            animate={
+              isOpening
+                ? { x: -40, opacity: 0 }
+                : { y: [0, -16, 0], rotate: [-4, 0, -4] }
+            }
+            transition={
+              isOpening
+                ? { duration: 0.7, ease: revealEase }
+                : { duration: 8, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
 
-      <motion.div
-        aria-hidden
-        className="absolute -right-18 top-16 h-[320px] w-[240px] scale-x-[-1] bg-contain bg-no-repeat opacity-90"
-        style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
-        animate={
-          isOpening
-            ? { x: 40, opacity: 0 }
-            : { y: [0, 18, 0], rotate: [4, 0, 4] }
-        }
-        transition={
-          isOpening
-            ? { duration: 0.7, ease: revealEase }
-            : { duration: 8.6, repeat: Infinity, ease: "easeInOut" }
-        }
-      />
+          <motion.div
+            aria-hidden
+            className="absolute -right-18 top-16 h-[320px] w-[240px] scale-x-[-1] bg-contain bg-no-repeat opacity-90"
+            style={{ backgroundImage: `url(${overlayAssets.balloons})` }}
+            animate={
+              isOpening
+                ? { x: 40, opacity: 0 }
+                : { y: [0, 18, 0], rotate: [4, 0, 4] }
+            }
+            transition={
+              isOpening
+                ? { duration: 0.7, ease: revealEase }
+                : { duration: 8.6, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
 
-      <motion.div
-        aria-hidden
-        className="absolute -top-8 left-1/2 h-[280px] w-[360px] -translate-x-1/2 bg-contain bg-top bg-no-repeat opacity-75"
-        style={{ backgroundImage: `url(${overlayAssets.rainbow})` }}
-        animate={isOpening ? { opacity: 0, y: -20 } : { scale: [1, 1.03, 1] }}
-        transition={
-          isOpening
-            ? { duration: 0.55, ease: revealEase }
-            : { duration: 7.4, repeat: Infinity, ease: "easeInOut" }
-        }
-      />
+          <motion.div
+            aria-hidden
+            className="absolute -top-8 left-1/2 h-[280px] w-[360px] -translate-x-1/2 bg-contain bg-top bg-no-repeat opacity-75"
+            style={{ backgroundImage: `url(${overlayAssets.rainbow})` }}
+            animate={isOpening ? { opacity: 0, y: -20 } : { scale: [1, 1.03, 1] }}
+            transition={
+              isOpening
+                ? { duration: 0.55, ease: revealEase }
+                : { duration: 7.4, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
 
-      <motion.div
-        aria-hidden
-        className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-80 mix-blend-multiply"
-        style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
-        animate={
-          isOpening ? { opacity: 0 } : { y: [0, -10, 0], rotate: [0, 2, -2, 0] }
-        }
-        transition={
-          isOpening
-            ? { duration: 0.45 }
-            : { duration: 15, repeat: Infinity, ease: "easeInOut" }
-        }
-      />
+          <motion.div
+            aria-hidden
+            className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-80 mix-blend-multiply"
+            style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
+            animate={
+              isOpening ? { opacity: 0 } : { y: [0, -10, 0], rotate: [0, 2, -2, 0] }
+            }
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 15, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+        </>
+      )}
 
-      <motion.div
-        aria-hidden
-        className="absolute -top-10 -right-10 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
-        style={{ backgroundImage: `url(${overlayAssets.stars})` }}
-        animate={
-          isOpening ? { opacity: 0, scale: 1.5 } : { rotate: [0, 90, 0] }
-        }
-        transition={
-          isOpening
-            ? { duration: 0.5 }
-            : { duration: 25, repeat: Infinity, ease: "linear" }
-        }
-      />
+      {isSoccerArgentina && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] overflow-hidden">
+          {/* Main Left Stripe Group */}
+          <motion.div
+            className="absolute left-0 top-0 bottom-0 w-[45px] opacity-95 shadow-[4px_0_12px_rgba(0,0,0,0.05)]"
+            style={{
+              background:
+                "linear-gradient(90deg, #74ACDF 0 33.33%, #ffffff 33.33% 66.66%, #74ACDF 66.66% 100%)",
+            }}
+            animate={isOpening ? { opacity: 0, x: -24 } : { x: [0, -2, 0], y: [0, -5, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 10, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+          <motion.div
+            className="absolute left-[55px] top-0 bottom-0 w-[12px] opacity-95"
+            style={{ background: "#F6B40E" }}
+            animate={isOpening ? { opacity: 0, x: -10 } : { x: [0, -1, 0], y: [0, -6, 0] }}
+            transition={{
+              duration: isOpening ? 0.45 : 9,
+              repeat: isOpening ? 0 : Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute left-[75px] top-0 bottom-0 w-[25px] opacity-90 shadow-[4px_0_8px_rgba(0,0,0,0.03)]"
+            style={{
+              background:
+                "linear-gradient(90deg, #74ACDF 0 33.33%, #ffffff 33.33% 66.66%, #74ACDF 66.66% 100%)",
+            }}
+            animate={isOpening ? { opacity: 0, x: -16 } : { x: [0, -2, 0], y: [0, -4, 0] }}
+            transition={{
+              duration: isOpening ? 0.45 : 11,
+              repeat: isOpening ? 0 : Infinity,
+              ease: "easeInOut",
+            }}
+          />
 
-      <motion.div
-        aria-hidden
-        className="absolute bottom-20 -right-16 h-[200px] w-[200px] bg-contain bg-no-repeat opacity-70"
-        style={{ backgroundImage: `url(${overlayAssets.partyHat})` }}
-        animate={
-          isOpening
-            ? { opacity: 0, x: 50, rotate: 20 }
-            : { y: [0, -15, 0], rotate: [-10, 5, -10] }
-        }
-        transition={
-          isOpening
-            ? { duration: 0.5 }
-            : { duration: 6, repeat: Infinity, ease: "easeInOut" }
-        }
-      />
+          {/* Main Right Stripe Group */}
+          <motion.div
+            className="absolute right-0 top-0 bottom-0 w-[45px] opacity-95 shadow-[-4px_0_12px_rgba(0,0,0,0.05)]"
+            style={{
+              background:
+                "linear-gradient(270deg, #74ACDF 0 33.33%, #ffffff 33.33% 66.66%, #74ACDF 66.66% 100%)",
+            }}
+            animate={isOpening ? { opacity: 0, x: 24 } : { x: [0, 2, 0], y: [0, 5, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 10.8, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+          <motion.div
+            className="absolute right-[55px] top-0 bottom-0 w-[12px] opacity-95"
+            style={{ background: "#F6B40E" }}
+            animate={isOpening ? { opacity: 0, x: 10 } : { x: [0, 1, 0], y: [0, 6, 0] }}
+            transition={{
+              duration: isOpening ? 0.45 : 9.5,
+              repeat: isOpening ? 0 : Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute right-[75px] top-0 bottom-0 w-[25px] opacity-90 shadow-[-4px_0_8px_rgba(0,0,0,0.03)]"
+            style={{
+              background:
+                "linear-gradient(270deg, #74ACDF 0 33.33%, #ffffff 33.33% 66.66%, #74ACDF 66.66% 100%)",
+            }}
+            animate={isOpening ? { opacity: 0, x: 16 } : { x: [0, 2, 0], y: [0, 4, 0] }}
+            transition={{
+              duration: isOpening ? 0.45 : 11.5,
+              repeat: isOpening ? 0 : Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* Background Sprinkles & Pitch */}
+          <motion.div
+            className="absolute inset-x-0 top-0 h-[220px] bg-repeat bg-size-[300px_300px] opacity-45"
+            style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+            animate={isOpening ? { opacity: 0 } : { y: [0, 10, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 12, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+          <motion.img
+            src={overlayAssets.pitchLines}
+            alt=""
+            className="absolute inset-x-0 bottom-0 h-[180px] w-full object-cover object-bottom opacity-70"
+            animate={isOpening ? { opacity: 0 } : { y: [0, -8, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 10, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+
+          {/* Sunburst Element */}
+          <motion.img
+            src={overlayAssets.afaSunburst}
+            alt=""
+            className="absolute -right-12 top-[6%] h-[260px] w-[260px] object-contain opacity-[0.85] mix-blend-multiply"
+            animate={isOpening ? { opacity: 0, x: 24 } : { rotate: [0, 360], scale: [1, 1.05, 1] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { rotate: { duration: 45, repeat: Infinity, ease: "linear" }, scale: { duration: 8, repeat: Infinity, ease: "easeInOut" } }
+            }
+          />
+
+          {/* Multiple Soccer Balls */}
+          <motion.img
+            src={overlayAssets.soccerBall}
+            alt=""
+            className="absolute -left-12 top-[12%] h-[180px] w-[180px] object-contain opacity-95"
+            animate={isOpening ? { opacity: 0, x: -30 } : { y: [0, -15, 0], rotate: [0, 15, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { y: { duration: 8, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 12, repeat: Infinity, ease: "easeInOut" } }
+            }
+          />
+          <motion.img
+            src={overlayAssets.soccerBall}
+            alt=""
+            className="absolute left-[10%] bottom-[8%] h-[100px] w-[100px] object-contain opacity-[0.85] drop-shadow-xl"
+            animate={isOpening ? { opacity: 0, y: 30 } : { y: [0, -8, 0], rotate: [0, -12, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }
+            }
+          />
+          <motion.img
+            src={overlayAssets.soccerBall}
+            alt=""
+            className="absolute right-[5%] bottom-[18%] h-[140px] w-[140px] object-contain opacity-90 drop-shadow-lg"
+            animate={isOpening ? { opacity: 0, y: 30 } : { y: [0, -12, 0], rotate: [0, 20, 0] }}
+            transition={
+              isOpening
+                ? { duration: 0.45 }
+                : { duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }
+            }
+          />
+        </div>
+      )}
+
+      {!isSoccerArgentina && (
+        <>
+          <motion.div
+            aria-hidden
+            className="absolute -top-10 -right-10 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
+            style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+            animate={
+              isOpening ? { opacity: 0, scale: 1.5 } : { rotate: [0, 90, 0] }
+            }
+            transition={
+              isOpening
+                ? { duration: 0.5 }
+                : { duration: 25, repeat: Infinity, ease: "linear" }
+            }
+          />
+
+          <motion.div
+            aria-hidden
+            className="absolute bottom-20 -right-16 h-[200px] w-[200px] bg-contain bg-no-repeat opacity-70"
+            style={{ backgroundImage: `url(${overlayAssets.partyHat})` }}
+            animate={
+              isOpening
+                ? { opacity: 0, x: 50, rotate: 20 }
+                : { y: [0, -15, 0], rotate: [-10, 5, -10] }
+            }
+            transition={
+              isOpening
+                ? { duration: 0.5 }
+                : { duration: 6, repeat: Infinity, ease: "easeInOut" }
+            }
+          />
+        </>
+      )}
 
       {isOceanExplorer && (
         <motion.div

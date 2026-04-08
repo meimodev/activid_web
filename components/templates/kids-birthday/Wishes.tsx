@@ -32,6 +32,7 @@ interface WishesProps {
   placeholder: string;
   thankYouMessage: string;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 const popVariants = {
@@ -84,6 +85,7 @@ export function Wishes({
   heading,
   placeholder,
   thankYouMessage,
+  isSoccerArgentina,
 }: WishesProps) {
   const overlayAssets = useOverlayAssets();
   const searchParams = useSearchParams();
@@ -281,24 +283,54 @@ export function Wishes({
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 py-20 text-wedding-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-70">
-        <motion.div
-          className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-48 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -left-20 top-20 h-[300px] w-[300px] bg-contain bg-no-repeat opacity-50 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
-          animate={{ rotate: [0, -90, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute right-0 top-10 h-[150px] w-[150px] bg-contain bg-no-repeat opacity-80"
-          style={{ backgroundImage: `url(${overlayAssets.cake})` }}
-          animate={{ y: [0, -10, 0], rotate: [-5, 5, -5] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {isSoccerArgentina ? (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent-2)_10%,var(--invitation-bg)),var(--invitation-bg))]"
+            />
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-80"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, 30, 0] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -right-10 top-20 h-[100px] w-[100px] object-contain opacity-80"
+              animate={{ y: [0, -15, 0], rotate: [0, 360] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -left-10 bottom-20 h-[140px] w-[140px] object-contain opacity-70"
+              animate={{ y: [0, 20, 0], rotate: [360, 0] }}
+              transition={{ duration: 9.5, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-48 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute -left-20 top-20 h-[300px] w-[300px] bg-contain bg-no-repeat opacity-50 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+              animate={{ rotate: [0, -90, 0] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute right-0 top-10 h-[150px] w-[150px] bg-contain bg-no-repeat opacity-80"
+              style={{ backgroundImage: `url(${overlayAssets.cake})` }}
+              animate={{ y: [0, -10, 0], rotate: [-5, 5, -5] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">

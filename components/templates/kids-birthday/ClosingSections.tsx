@@ -13,24 +13,28 @@ interface StorySectionProps {
   heading: string;
   fallbackImageUrl?: string;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 interface GallerySectionProps {
   photos: string[];
   heading: string;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 interface GratitudeSectionProps {
   hosts: Hosts;
   message?: string;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 interface FooterSectionProps {
   hosts: Hosts;
   message: string;
   isReady?: boolean;
+  isSoccerArgentina?: boolean;
 }
 
 const popVariants = {
@@ -78,7 +82,7 @@ const containerVariants = {
   },
 } as const;
 
-export function StorySection({ stories, heading, fallbackImageUrl }: StorySectionProps) {
+export function StorySection({ stories, heading, fallbackImageUrl, isSoccerArgentina }: StorySectionProps) {
   const overlayAssets = useOverlayAssets();
   const heroImageUrl = stories?.[0]?.imageUrl || fallbackImageUrl;
 
@@ -87,24 +91,44 @@ export function StorySection({ stories, heading, fallbackImageUrl }: StorySectio
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 py-20 text-wedding-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-70">
-        <motion.div
-          className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.bunting})` }}
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-45 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -right-20 bottom-10 h-[300px] w-[300px] bg-contain bg-no-repeat opacity-50 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
-          animate={{ rotate: [0, 90, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-        />
+        {isSoccerArgentina ? (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-60"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, -20, 0] }}
+              transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -right-10 bottom-10 h-[160px] w-[160px] object-contain opacity-80"
+              animate={{ y: [0, 15, 0], rotate: [0, 360] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.bunting})` }}
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute inset-0 bg-center bg-cover bg-no-repeat opacity-45 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.confetti})` }}
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute -right-20 bottom-10 h-[300px] w-[300px] bg-contain bg-no-repeat opacity-50 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+              animate={{ rotate: [0, 90, 0] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
@@ -183,7 +207,7 @@ export function StorySection({ stories, heading, fallbackImageUrl }: StorySectio
   );
 }
 
-export function GallerySection({ photos, heading }: GallerySectionProps) {
+export function GallerySection({ photos, heading, isSoccerArgentina }: GallerySectionProps) {
   const overlayAssets = useOverlayAssets();
   const displayPhotos = useMemo(() => photos.filter(Boolean).slice(0, 30), [photos]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -194,24 +218,51 @@ export function GallerySection({ photos, heading }: GallerySectionProps) {
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(180deg,var(--invitation-bg),color-mix(in_srgb,var(--invitation-accent-2)_10%,var(--invitation-bg)))] px-4 py-20 text-wedding-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60">
-        <motion.div
-          className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
-          animate={{ x: [0, 20, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute -left-10 top-40 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
-          animate={{ rotate: [0, -90, 0] }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute -right-20 top-[60%] h-[180px] w-[180px] bg-contain bg-no-repeat opacity-70"
-          style={{ backgroundImage: `url(${overlayAssets.partyHat})` }}
-          animate={{ y: [0, 15, 0], rotate: [-10, 10, -10] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {isSoccerArgentina ? (
+          <>
+            <motion.div
+              className="absolute inset-x-0 bottom-0 top-20 bg-repeat bg-size-[300px_300px] opacity-70"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, -30, 0] }}
+              transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.afaSunburst}
+              alt=""
+              className="absolute -left-10 top-40 h-[220px] w-[220px] object-contain opacity-50 mix-blend-multiply"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -right-10 top-[70%] h-[150px] w-[150px] object-contain opacity-80"
+              animate={{ y: [0, -20, 0], rotate: [360, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
+              animate={{ x: [0, 20, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute -left-10 top-40 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+              animate={{ rotate: [0, -90, 0] }}
+              transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute -right-20 top-[60%] h-[180px] w-[180px] bg-contain bg-no-repeat opacity-70"
+              style={{ backgroundImage: `url(${overlayAssets.partyHat})` }}
+              animate={{ y: [0, 15, 0], rotate: [-10, 10, -10] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
@@ -284,12 +335,29 @@ export function GallerySection({ photos, heading }: GallerySectionProps) {
   );
 }
 
-export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
+export function GratitudeSection({ hosts, message, isSoccerArgentina }: GratitudeSectionProps) {
   const displayName = hosts[0]?.firstName || hosts[0]?.shortName || "Birthday Star";
 
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 py-18 text-wedding-dark">
-      <div className="mx-auto max-w-[520px]">
+      {isSoccerArgentina && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-50">
+          <motion.div
+            className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-70"
+            style={{ backgroundImage: `url(${useOverlayAssets().soccerSprinkles})` }}
+            animate={{ y: [0, 20, 0] }}
+            transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.img
+            src={useOverlayAssets().soccerBall}
+            alt=""
+            className="absolute -left-10 top-[20%] h-[140px] w-[140px] object-contain opacity-80"
+            animate={{ y: [0, -15, 0], rotate: [0, 360] }}
+            transition={{ duration: 8.5, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      )}
+      <div className="mx-auto max-w-[520px] relative z-10">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -325,7 +393,7 @@ export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
   );
 }
 
-export function FooterSection({ hosts, message }: FooterSectionProps) {
+export function FooterSection({ hosts, message, isSoccerArgentina }: FooterSectionProps) {
   const overlayAssets = useOverlayAssets();
   const names = hosts
     .map((host) => host?.firstName || host?.shortName || "")
@@ -336,6 +404,21 @@ export function FooterSection({ hosts, message }: FooterSectionProps) {
     <footer className="relative overflow-hidden bg-wedding-dark px-4 pt-18 pb-12 text-wedding-on-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent)_12%,var(--invitation-dark)),var(--invitation-dark))]" />
+        {isSoccerArgentina && (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-30 mix-blend-overlay"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, -15, 0] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.pitchLines}
+              alt=""
+              className="absolute inset-x-0 bottom-0 h-40 w-full object-cover opacity-50"
+            />
+          </>
+        )}
         <motion.div
           className="absolute inset-x-0 top-0 h-[110px] bg-top bg-cover bg-no-repeat opacity-95"
           style={{ backgroundImage: `url(${overlayAssets.footerWave})` }}

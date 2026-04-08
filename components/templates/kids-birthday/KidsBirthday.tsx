@@ -114,6 +114,11 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
     return dt.setLocale(INVITATION_LOCALE).toFormat("dd . MM . yyyy");
   }, [dateInfo?.displayShort, isDemo]);
 
+  const accentColor = config.theme.accentColor.toLowerCase();
+  const darkColor = config.theme.darkColor?.toLowerCase() ?? "";
+  const isSoccerArgentina =
+    accentColor === "#1a6fc4" && darkColor === "#00205b";
+
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-wedding-bg text-wedding-text">
       <MusicPlayer shouldStart={isOpen} audioUrl={music.url} variant="fun" />
@@ -148,6 +153,9 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
               config.theme.mainColor.toLowerCase() === "#f0f9ff".toLowerCase() &&
               config.theme.accentColor.toLowerCase() === "#0369a1".toLowerCase()
             }
+            isSoccerArgentina={
+              accentColor === "#1a6fc4" && darkColor === "#00205b"
+            }
           />
         </motion.div>
       ) : null}
@@ -166,15 +174,16 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   countdownTarget={effectiveCountdownTarget}
                   galleryPhotos={effectiveGalleryPhotos}
                   showCountdown={sections.countdown.enabled}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
 
               {sections.quote.enabled ? (
-                <QuoteSection quote={sections.quote} isReady={isContentReady} />
+                <QuoteSection quote={sections.quote} isReady={isContentReady} isSoccerArgentina={isSoccerArgentina} />
               ) : null}
 
               {sections.hosts.enabled ? (
-                <HostSection hosts={effectiveHosts} isReady={isContentReady} />
+                <HostSection hosts={effectiveHosts} isReady={isContentReady} isSoccerArgentina={isSoccerArgentina} />
               ) : null}
 
               {sections.event.enabled ? (
@@ -182,6 +191,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   events={sections.event.events}
                   heading={sections.event.heading}
                   isReady={isContentReady}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
 
@@ -191,6 +201,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   heading={sections.story.heading}
                   fallbackImageUrl={effectiveGalleryPhotos[0]}
                   isReady={isContentReady}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
 
@@ -199,6 +210,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   photos={effectiveGalleryPhotos}
                   heading={sections.gallery.heading}
                   isReady={isContentReady}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
 
@@ -209,6 +221,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   description={sections.gift.description}
                   templateName={config.templateId}
                   eventDate={effectiveDateDisplay}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
 
@@ -226,6 +239,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                     placeholder={sections.wishes.placeholder}
                     thankYouMessage={sections.wishes.thankYouMessage}
                     isReady={isContentReady}
+                    isSoccerArgentina={isSoccerArgentina}
                   />
                 </Suspense>
               ) : null}
@@ -235,6 +249,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   hosts={effectiveHosts}
                   message={sections.gratitude.message}
                   isReady={isContentReady}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
 
@@ -243,6 +258,7 @@ export function KidsBirthday({ config }: KidsBirthdayProps) {
                   hosts={effectiveHosts}
                   message={sections.footer.message}
                   isReady={isContentReady}
+                  isSoccerArgentina={isSoccerArgentina}
                 />
               ) : null}
             </>

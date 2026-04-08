@@ -180,6 +180,14 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       accent2Color: "#F59E0B",
       darkColor: "#0C4A6E",
     },
+    {
+      id: "soccer-argentina",
+      title: "Soccer Argentina",
+      mainColor: "#EAF4FF",
+      accentColor: "#1A6FC4",
+      accent2Color: "#F5C400",
+      darkColor: "#00205B",
+    },
   ],
   jupiter: [
     {

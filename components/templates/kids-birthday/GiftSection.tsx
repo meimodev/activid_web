@@ -12,6 +12,7 @@ export interface GiftSectionProps {
   description: string;
   templateName: string;
   eventDate: string;
+  isSoccerArgentina?: boolean;
 }
 
 const popVariants = {
@@ -65,6 +66,7 @@ export function GiftSection({
   description,
   templateName,
   eventDate,
+  isSoccerArgentina,
 }: GiftSectionProps) {
   const overlayAssets = useOverlayAssets();
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -93,25 +95,48 @@ export function GiftSection({
   return (
     <section className="relative overflow-hidden bg-wedding-bg px-4 py-20 text-wedding-dark">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60">
-        <motion.div
-          className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
-          animate={{ x: [0, -20, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent-2)_10%,var(--invitation-bg)),var(--invitation-bg))]" />
-        <motion.div
-          className="absolute -right-10 top-40 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
-          style={{ backgroundImage: `url(${overlayAssets.stars})` }}
-          animate={{ rotate: [0, 90, 0] }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          className="absolute -left-10 bottom-10 h-[200px] w-[200px] bg-contain bg-no-repeat opacity-70"
-          style={{ backgroundImage: `url(${overlayAssets.giftBox})` }}
-          animate={{ y: [0, -15, 0], rotate: [-10, 5, -10] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {isSoccerArgentina ? (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent-2)_10%,var(--invitation-bg)),var(--invitation-bg))]"
+            />
+            <motion.div
+              className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-70"
+              style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
+              animate={{ y: [0, 20, 0] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.img
+              src={overlayAssets.soccerBall}
+              alt=""
+              className="absolute -right-10 top-40 h-[140px] w-[140px] object-contain opacity-80"
+              animate={{ y: [0, -15, 0], rotate: [0, 360] }}
+              transition={{ duration: 8.5, repeat: Infinity, ease: "linear" }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute inset-x-0 top-0 h-[100px] bg-top bg-cover bg-no-repeat opacity-100 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.zigzag})` }}
+              animate={{ x: [0, -20, 0] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--invitation-accent-2)_10%,var(--invitation-bg)),var(--invitation-bg))]" />
+            <motion.div
+              className="absolute -right-10 top-40 h-[280px] w-[280px] bg-contain bg-no-repeat opacity-60 mix-blend-multiply"
+              style={{ backgroundImage: `url(${overlayAssets.stars})` }}
+              animate={{ rotate: [0, 90, 0] }}
+              transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute -left-10 bottom-10 h-[200px] w-[200px] bg-contain bg-no-repeat opacity-70"
+              style={{ backgroundImage: `url(${overlayAssets.giftBox})` }}
+              animate={{ y: [0, -15, 0], rotate: [-10, 5, -10] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="relative z-10 mx-auto max-w-[520px]">
@@ -254,7 +279,7 @@ export function GiftSection({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={() => setIsGiftDialogOpen(false)}
-                    className="fixed inset-0 z-[130] bg-wedding-dark/60 backdrop-blur-sm flex items-center justify-center p-4"
+                    className="fixed inset-0 z-130 bg-wedding-dark/60 backdrop-blur-sm flex items-center justify-center p-4"
                   >
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9, y: 20, rotate: -2 }}

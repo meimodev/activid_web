@@ -17,6 +17,11 @@ type OverlayAssets = {
   partyHat: string;
   giftBox: string;
   cake: string;
+  soccerBall?: string;
+  afaSunburst?: string;
+  soccerSprinkles?: string;
+  pitchLines?: string;
+  soccerSideStrips?: string;
 };
 
 const EMPTY_OVERLAY_ASSETS: OverlayAssets = {
@@ -34,6 +39,55 @@ const EMPTY_OVERLAY_ASSETS: OverlayAssets = {
   partyHat: "",
   giftBox: "",
   cake: "",
+  soccerBall: "",
+  afaSunburst: "",
+  soccerSprinkles: "",
+  pitchLines: "",
+  soccerSideStrips: "",
+};
+
+const generateSunburst = () => {
+  const rays = Array.from({ length: 16 })
+    .map((_, i) => {
+      const rot = i * 22.5;
+      return i % 2 === 0
+        ? `<polygon points="47,30 50,2 53,30" transform="rotate(${rot} 50 50)" />`
+        : `<path d="M47,30 Q40,15 50,2 Q60,15 53,30 Z" transform="rotate(${rot} 50 50)" />`;
+    })
+    .join("");
+
+  return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <g fill='#F6B40E' stroke='#D35400' stroke-width='0.75' stroke-linejoin='round'>
+      ${rays}
+      <circle cx='50' cy='50' r='20' />
+      <g fill='none' stroke='#D35400' stroke-width='1.5' stroke-linecap='round'>
+        <path d='M42 45 Q45 42 48 45' />
+        <path d='M52 45 Q55 42 58 45' />
+        <path d='M44 53 Q50 58 56 53' />
+      </g>
+      <circle cx='45' cy='48' r='1.5' fill='#D35400' stroke='none' />
+      <circle cx='55' cy='48' r='1.5' fill='#D35400' stroke='none' />
+    </g>
+  </svg>`;
+};
+
+const generateSoccerBall = () => {
+  return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <circle cx='50' cy='50' r='48' fill='#ffffff' stroke='#1a1a1a' stroke-width='3'/>
+    <g fill='#1a1a1a' stroke='#1a1a1a' stroke-width='2' stroke-linejoin='round'>
+      <polygon points='50,18 70,32 62,56 38,56 30,32'/>
+      <line x1='50' y1='18' x2='50' y2='2'/>
+      <line x1='70' y1='32' x2='93' y2='25'/>
+      <line x1='62' y1='56' x2='82' y2='80'/>
+      <line x1='38' y1='56' x2='18' y2='80'/>
+      <line x1='30' y1='32' x2='7' y2='25'/>
+      <polygon points='7,25 0,40 0,10'/>
+      <polygon points='93,25 100,40 100,10'/>
+      <polygon points='18,80 25,98 5,90'/>
+      <polygon points='82,80 95,90 75,98'/>
+      <polygon points='50,2 40,0 60,0'/>
+    </g>
+  </svg>`;
 };
 
 const svgToDataUri = (svg: string) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -220,6 +274,45 @@ function buildOverlayAssets({
         <path d='M80 10 Q75 15 80 25 Q85 15 80 10 Z' fill='${accent}' fill-opacity='0.9'/>
       </svg>
     `),
+    soccerBall: svgToDataUri(generateSoccerBall()),
+    afaSunburst: svgToDataUri(generateSunburst()),
+    soccerSprinkles: svgToDataUri(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>
+  <g fill='${accent}' opacity='0.3'>
+    <circle cx='50' cy='50' r='5'/>
+    <circle cx='150' cy='30' r='4'/>
+    <circle cx='250' cy='80' r='6'/>
+    <circle cx='80' cy='180' r='4'/>
+    <circle cx='220' cy='220' r='7'/>
+    <circle cx='120' cy='280' r='5'/>
+    <rect x='100' y='100' width='10' height='10' transform='rotate(45 105 105)' />
+    <rect x='200' y='150' width='8' height='8' transform='rotate(20 204 154)' />
+    <rect x='30' y='250' width='12' height='12' transform='rotate(60 36 256)' />
+  </g>
+</svg>`),
+    pitchLines: svgToDataUri(`<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200'>
+  <path d='M 0 100 L 400 100 M 200 0 L 200 200' stroke='white' stroke-opacity='0.4' stroke-width='4' fill='none' />
+  <circle cx='200' cy='100' r='40' stroke='white' stroke-opacity='0.4' stroke-width='4' fill='none' />
+</svg>`),
+    soccerSideStrips: svgToDataUri(`<svg xmlns='http://www.w3.org/2000/svg' width='220' height='900' viewBox='0 0 220 900'>
+  <defs>
+    <linearGradient id='strip' x1='0' y1='0' x2='1' y2='0'>
+      <stop offset='0%' stop-color='${accent}' stop-opacity='0.98' />
+      <stop offset='60%' stop-color='${bg}' stop-opacity='0.96' />
+      <stop offset='100%' stop-color='${accent2}' stop-opacity='0.88' />
+    </linearGradient>
+  </defs>
+  <path d='M0 0 H188 C158 92 154 168 184 250 C214 332 214 420 182 500 C152 578 152 666 184 746 C206 804 206 854 186 900 H0 Z' fill='url(#strip)'/>
+  <path d='M28 0 V900' stroke='white' stroke-opacity='0.95' stroke-width='18'/>
+  <path d='M68 0 V900' stroke='white' stroke-opacity='0.78' stroke-width='10'/>
+  <path d='M96 0 V900' stroke='${accent}' stroke-opacity='0.24' stroke-width='6'/>
+  <path d='M124 40 V860' stroke='${accent2}' stroke-opacity='0.45' stroke-width='8' stroke-dasharray='18 22'/>
+  <circle cx='142' cy='120' r='18' fill='${accent2}' fill-opacity='0.92'/>
+  <circle cx='142' cy='250' r='10' fill='white' fill-opacity='0.86'/>
+  <circle cx='142' cy='390' r='18' fill='${accent2}' fill-opacity='0.92'/>
+  <circle cx='142' cy='530' r='10' fill='white' fill-opacity='0.86'/>
+  <circle cx='142' cy='670' r='18' fill='${accent2}' fill-opacity='0.92'/>
+  <circle cx='142' cy='810' r='10' fill='white' fill-opacity='0.86'/>
+</svg>`),
   };
 }
 
