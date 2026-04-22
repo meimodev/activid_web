@@ -292,7 +292,7 @@ export const siteContent: SiteContent = {
         },
         {
           title: 'Universitas Klabat',
-          description: 'Kami mengabadikan momen-momen berharga di Universitas Gunung Klabat, mulai dari kemegahan acara wisuda hingga dinamika kehidupan kampus, menyajikannya dalam dokumentasi visual yang profesional dan penuh inspirasi bagi seluruh civitas akademika.',
+          description: 'Kami mengabadikan momen-momen berharga di Universitas Klabat, mulai dari kemegahan acara wisuda hingga dinamika kehidupan kampus, menyajikannya dalam dokumentasi visual yang profesional dan penuh inspirasi bagi seluruh civitas akademika.',
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/unklab.mp4',
         },
         {
