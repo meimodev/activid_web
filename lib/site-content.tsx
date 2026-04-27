@@ -331,8 +331,8 @@ export const siteContent: SiteContent = {
         ],
       },
       aiHighlight: {
-        badge: 'Powered by AI',
-        title: 'Shipped Faster with Claude Code',
+        badge: 'Artificial Intellegence Enabled',
+        title: 'Mengintegrasikan Claude Code bersama developer yang handal',
         description: 'Untuk mempercepat pengembangan dan memberikan hasil terbaik, kami memanfaatkan teknologi AI secara eksklusif menggunakan Anthropic Claude Code dengan model terbaru untuk memastikan kualitas dan konsistensi di setiap website dan aplikasi yang kami bangun.',
       },
       mockups: [
