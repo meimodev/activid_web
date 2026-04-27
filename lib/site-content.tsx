@@ -325,9 +325,15 @@ export const siteContent: SiteContent = {
         title: 'Website & App Development',
         projectTitle: 'Project\nWebsite & App\nDevelopment',
         description: [
-          'Activid akan merancang dan mengembangkan desain aplikasi yang fokus pada pengalaman pengguna, tampilan yang modern, serta alur yang efisien, menciptakan solusi digital yang fungsional, menarik, dan mudah digunakan di berbagai industri.',
-          'Kami memastikan setiap detail visual dan interaksi dalam aplikasi dirancang dengan tepat, agar terlihat profesional tetapi juga memberikan pengalaman yang nyaman dan intuitif bagi pengguna.',
+          'Bisnis yang kuat butuh fondasi digital yang lebih kuat.',
+          'Activid merancang dan membangun website serta aplikasi yang bukan sekadar terlihat bagus — tapi benar-benar bekerja untuk bisnis Anda. Setiap piksel, setiap alur, setiap interaksi kami rancang dengan presisi: tampilan modern, pengalaman pengguna yang intuitif, dan performa yang tak mengecewakan.',
+          'Dari industri apapun, kami hadir dengan satu misi — mengubah ide Anda menjadi solusi digital yang fungsional, profesional, dan siap bersaing.',
         ],
+      },
+      aiHighlight: {
+        badge: 'Powered by AI',
+        title: 'Shipped Faster with Claude Code',
+        description: 'Untuk mempercepat pengembangan dan memberikan hasil terbaik, kami memanfaatkan teknologi AI secara eksklusif menggunakan Anthropic Claude Code dengan model terbaru untuk memastikan kualitas dan konsistensi di setiap website dan aplikasi yang kami bangun.',
       },
       mockups: [
         'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_web_app_3-min.jpg',
@@ -337,6 +343,35 @@ export const siteContent: SiteContent = {
       techStack: {
         title: 'Our Tech Stack',
         description: 'We use the latest and most reliable technologies to build scalable and high-performance applications.',
+      },
+      caseStudies: {
+        title: '✦ Studi Kasus — Bisnis di Manado yang Butuh Website/App Custom',
+        items: [
+          {
+            title: '1. ⛪ Gereja',
+            description: 'Manado dikenal sebagai Kota Seribu Gereja. Platform digital memungkinkan gereja mengelola jadwal ibadah, live streaming, persembahan online, dan komunikasi jemaat — semuanya dalam satu sistem yang rapi.',
+          },
+          {
+            title: '2. 🏨 Hotel & Penginapan',
+            description: 'Manado adalah destinasi wisata bahari kelas dunia. Hotel dan guest house lokal bisa memiliki sistem reservasi sendiri tanpa bergantung penuh pada OTA, sekaligus menampilkan paket wisata dan promo langsung ke tamu.',
+          },
+          {
+            title: '3. ☕ Café & Restoran',
+            description: 'Industri kuliner Manado berkembang pesat. App atau website dengan fitur QR menu, reservasi meja, dan pre-order bisa meningkatkan pengalaman pelanggan dan efisiensi operasional secara nyata.',
+          },
+          {
+            title: '4. 🚚 Distributor',
+            description: 'Distributor sembako, minuman, dan produk lokal Manado butuh platform B2B untuk kelola order reseller, pantau stok, dan kirim invoice digital — menggantikan proses manual yang rawan kesalahan.',
+          },
+          {
+            title: '5. 👕 Laundry',
+            description: 'Bisnis laundry antar-jemput semakin diminati warga Manado. Dengan app sederhana, pelanggan bisa pesan pickup, pantau status cucian, dan bayar secara digital — jauh lebih profesional dari sekadar WhatsApp.',
+          },
+          {
+            title: '6. 🏥 Klinik & Layanan Kesehatan',
+            description: 'Klinik kecantikan dan dokter gigi di Manado bisa meningkatkan kepercayaan pasien lewat sistem booking online, notifikasi jadwal otomatis, dan rekam medis digital yang terorganisir.',
+          },
+        ],
       },
     },
     productPhotography: {

@@ -154,10 +154,28 @@ export interface VideoPodcastPageContent {
     thumbnails: VideoThumbnail[];
 }
 
+export interface CaseStudyItem {
+    title: string;
+    description: string;
+}
+
+export interface CaseStudiesContent {
+    title: string;
+    items: CaseStudyItem[];
+}
+
+export interface AiHighlightContent {
+    title: string;
+    description: string;
+    badge: string;
+}
+
 export interface WebsiteAppPageContent {
     header: ServicePageHeader;
     mockups: string[];
     techStack: TechStack;
+    caseStudies: CaseStudiesContent;
+    aiHighlight: AiHighlightContent;
 }
 
 export interface ProductPhotographyPageContent {

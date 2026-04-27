@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function WebsiteAppPage() {
-    const { header, mockups, techStack: techStackSection } = siteContent.servicePages.websiteApp;
+    const { header, mockups, techStack: techStackSection, caseStudies, aiHighlight } = siteContent.servicePages.websiteApp;
     const techStack = [
         {
             name: "Flutter",
@@ -166,8 +166,74 @@ export default function WebsiteAppPage() {
                     </div>
                 </div>
 
+                {/* AI Highlight Section */}
+                <div className="w-full max-w-6xl mx-auto mb-32 relative z-10">
+                    <div className="relative p-[1px] rounded-3xl bg-linear-to-b from-white/20 to-white/5 overflow-hidden group">
+                        <div className="absolute inset-0 bg-linear-to-br from-[#d4af37]/20 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        
+                        <div className="relative bg-[#0B0F19] rounded-[23px] p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 overflow-hidden">
+                            {/* Decorative background glow */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#d4af37]/10 blur-[100px] pointer-events-none" />
+                            
+                            {/* Claude Code Icon/Badge */}
+                            <div className="flex-shrink-0 w-24 h-24 lg:w-32 lg:h-32 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center relative shadow-[0_0_40px_rgba(212,175,55,0.1)] group-hover:shadow-[0_0_60px_rgba(212,175,55,0.2)] transition-shadow duration-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-12 h-12 lg:w-16 lg:h-16 text-[#F8EFDE]">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 9l3 3-3 3m5 0h3M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                                </svg>
+                                <div className="absolute -top-3 -right-3 text-[#d4af37]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 animate-pulse">
+                                        <path d="M12 2l2.4 7.6H22l-6.2 4.5 2.4 7.6L12 17l-6.2 4.7 2.4-7.6L2 9.6h7.6L12 2z" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 text-center lg:text-left space-y-4 relative z-10">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#d4af37]/10 border border-[#d4af37]/20 text-[#d4af37] text-sm font-semibold tracking-wider uppercase">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                                    </svg>
+                                    {aiHighlight.badge}
+                                </div>
+                                <h3 className="text-3xl lg:text-4xl font-bold text-white">
+                                    {aiHighlight.title}
+                                </h3>
+                                <p className="text-gray-400 text-lg leading-relaxed max-w-3xl">
+                                    {aiHighlight.description}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Case Studies Section */}
+                <div className="w-full mb-32 relative z-10">
+                    <div className="text-center mb-16 space-y-4">
+                        <h3 className="text-3xl lg:text-5xl font-black tracking-tight text-[#F8EFDE]">
+                            {caseStudies.title}
+                        </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {caseStudies.items.map((item, index) => (
+                            <div
+                                key={index}
+                                className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 flex flex-col gap-4 overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-linear-to-br from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
+                                <h4 className="text-2xl font-bold text-white group-hover:text-[#F8EFDE] transition-colors relative z-10">
+                                    {item.title}
+                                </h4>
+                                <p className="text-gray-400 leading-relaxed relative z-10">
+                                    {item.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Tech Stack Section */}
-                <div className="w-full">
+                <div className="w-full relative z-10">
                     <div className="text-center mb-16 space-y-4">
                         <h3 className="text-4xl lg:text-6xl font-black tracking-tight text-[#F8EFDE]">
                             {techStackSection.title}
