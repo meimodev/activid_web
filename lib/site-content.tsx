@@ -342,34 +342,34 @@ export const siteContent: SiteContent = {
       ],
       techStack: {
         title: 'Our Tech Stack',
-        description: 'We use the latest and most reliable technologies to build scalable and high-performance applications.',
+        description: 'Kami menggunakan teknologi termutakhir dan terpercaya untuk membangun website dan aplikasi yang handal dan berkinerja tinggi.',
       },
       caseStudies: {
-        title: '✦ Studi Kasus — Bisnis di Manado yang Butuh Website/App Custom',
+        title: '✦ Studi Kasus — Bisnis yang Butuh Website/App',
         items: [
           {
             title: '1. ⛪ Gereja',
-            description: 'Manado dikenal sebagai Kota Seribu Gereja. Platform digital memungkinkan gereja mengelola jadwal ibadah, live streaming, persembahan online, dan komunikasi jemaat — semuanya dalam satu sistem yang rapi.',
+            description: 'Platform digital memungkinkan gereja mengelola jadwal ibadah, live streaming, persembahan online, dan komunikasi jemaat — semuanya dalam satu sistem yang rapi.',
           },
           {
             title: '2. 🏨 Hotel & Penginapan',
-            description: 'Manado adalah destinasi wisata bahari kelas dunia. Hotel dan guest house lokal bisa memiliki sistem reservasi sendiri tanpa bergantung penuh pada OTA, sekaligus menampilkan paket wisata dan promo langsung ke tamu.',
+            description: 'Hotel dan guest house lokal bisa memiliki sistem reservasi sendiri tanpa bergantung penuh pada OTA, sekaligus menampilkan paket wisata dan promo langsung ke tamu.',
           },
           {
             title: '3. ☕ Café & Restoran',
-            description: 'Industri kuliner Manado berkembang pesat. App atau website dengan fitur QR menu, reservasi meja, dan pre-order bisa meningkatkan pengalaman pelanggan dan efisiensi operasional secara nyata.',
+            description: 'Industri kuliner lokal berkembang pesat. App atau website dengan fitur QR menu, reservasi meja, dan pre-order bisa meningkatkan pengalaman pelanggan dan efisiensi operasional secara nyata.',
           },
           {
             title: '4. 🚚 Distributor',
-            description: 'Distributor sembako, minuman, dan produk lokal Manado butuh platform B2B untuk kelola order reseller, pantau stok, dan kirim invoice digital — menggantikan proses manual yang rawan kesalahan.',
+            description: 'Distributor sembako, minuman, dan produk lokal butuh platform B2B untuk kelola order reseller, pantau stok, dan kirim invoice digital — menggantikan proses manual yang rawan kesalahan.',
           },
           {
             title: '5. 👕 Laundry',
-            description: 'Bisnis laundry antar-jemput semakin diminati warga Manado. Dengan app sederhana, pelanggan bisa pesan pickup, pantau status cucian, dan bayar secara digital — jauh lebih profesional dari sekadar WhatsApp.',
+            description: 'Dengan app sederhana, pelanggan bisa pesan pickup, pantau status cucian, dan bayar secara digital — jauh lebih profesional dari sekadar WhatsApp.',
           },
           {
             title: '6. 🏥 Klinik & Layanan Kesehatan',
-            description: 'Klinik kecantikan dan dokter gigi di Manado bisa meningkatkan kepercayaan pasien lewat sistem booking online, notifikasi jadwal otomatis, dan rekam medis digital yang terorganisir.',
+            description: 'Klinik kecantikan dan dokter gigi bisa meningkatkan kepercayaan pasien lewat sistem booking online, notifikasi jadwal otomatis, dan rekam medis digital yang terorganisir.',
           },
         ],
       },
