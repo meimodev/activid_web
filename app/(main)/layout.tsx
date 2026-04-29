@@ -24,7 +24,7 @@ export default function MainLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className={`${geistSans.variable} ${bricolageGrotesque.variable} antialiased font-sans text-foreground bg-background min-h-screen`}>
+        <div className={`dark ${geistSans.variable} ${bricolageGrotesque.variable} antialiased font-sans text-foreground bg-background min-h-screen`}>
             {/* Skip to main content link for keyboard navigation */}
             <a
                 href="#main-content"
