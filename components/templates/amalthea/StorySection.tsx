@@ -103,6 +103,7 @@ export function StorySection({
                           <img
                             src={heroImageUrl}
                             alt=""
+                            loading="lazy"
                             className="h-full w-full object-cover"
                           />
                           <div className="absolute inset-0 bg-linear-to-b from-wedding-dark/0 via-wedding-dark/0 to-wedding-dark/10" />

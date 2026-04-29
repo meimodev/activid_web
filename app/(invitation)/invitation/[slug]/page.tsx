@@ -1,17 +1,10 @@
 import { buildInvitationDemoConfig, DEMO_COVER_IMAGE_URL } from "@/data/invitations";
-import { Flow } from "@/components/templates/flow";
-import { Saturn } from "@/components/templates/saturn";
-import { Mercury } from "@/components/templates/mercury";
-import { Pluto } from "@/components/templates/pluto";
-import { Amalthea } from "@/components/templates/amalthea";
-import { KidsBirthday } from "@/components/templates/kids-birthday";
-import { Venus } from "@/components/templates/venus";
-import { Jupiter } from "@/components/templates/jupiter";
-import { Neptune } from "@/components/templates/neptune";
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import type { InvitationConfig } from "@/types/invitation";
 import { notFound } from "next/navigation";
+import dynamic from "next/dynamic";
+import { cache } from "react";
 import { getInvitationThemeStyle } from "@/lib/invitation-theme";
 import { getInvitationTemplateThemes } from "@/data/invitation-templates";
 import { InvitationDemoPlayground } from "@/components/invitation/InvitationDemoPlayground";
@@ -21,6 +14,16 @@ import {
     getInvitationConfig,
     InvitationConfigQuotaExceededError,
 } from "@/lib/invitation-config";
+
+const Flow = dynamic(() => import("@/components/templates/flow").then(m => ({ default: m.Flow })));
+const Saturn = dynamic(() => import("@/components/templates/saturn").then(m => ({ default: m.Saturn })));
+const Mercury = dynamic(() => import("@/components/templates/mercury").then(m => ({ default: m.Mercury })));
+const Pluto = dynamic(() => import("@/components/templates/pluto").then(m => ({ default: m.Pluto })));
+const Amalthea = dynamic(() => import("@/components/templates/amalthea").then(m => ({ default: m.Amalthea })));
+const KidsBirthday = dynamic(() => import("@/components/templates/kids-birthday").then(m => ({ default: m.KidsBirthday })));
+const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
+const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
+const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
 
 const SITE_ORIGIN = "https://activid.web.id";
 
@@ -35,6 +38,19 @@ const RESERVED_TEMPLATE_SLUGS = new Set([
     "jupiter",
     "neptune",
 ]);
+
+const getValidatedConfig = cache(async (slug: string): Promise<InvitationConfig | null> => {
+    try {
+        const config = await getInvitationConfig(slug);
+        if (!config) return null;
+        return requireInvitationConfig(config);
+    } catch (err) {
+        if (err instanceof InvitationConfigQuotaExceededError) {
+            throw err;
+        }
+        throw err;
+    }
+});
 
 type DemoPurpose = "marriage" | "birthday" | "event";
 
@@ -203,9 +219,11 @@ export async function generateMetadata(
         notFound();
     }
 
-    let config: InvitationConfig | null;
+    let validated: InvitationConfig;
     try {
-        config = await getInvitationConfig(slug);
+        const cfg = await getValidatedConfig(slug);
+        if (!cfg) notFound();
+        validated = cfg;
     } catch (err) {
         if (err instanceof InvitationConfigQuotaExceededError) {
             const title = "undangan digital activid";
@@ -238,11 +256,6 @@ export async function generateMetadata(
         throw err;
     }
 
-    if (!config) {
-        notFound();
-    }
-
-    const validated = requireInvitationConfig(config);
     const { title, description } = getInvitationMetadataText(validated, slug);
     const coverImage = getInvitationMetadataImage(validated);
 
@@ -328,9 +341,11 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         notFound();
     }
 
-    let config: InvitationConfig | null;
+    let validated: InvitationConfig;
     try {
-        config = await getInvitationConfig(slug);
+        const cfg = await getValidatedConfig(slug);
+        if (!cfg) notFound();
+        validated = cfg;
     } catch (err) {
         if (err instanceof InvitationConfigQuotaExceededError) {
             return withInvitationChrome(
@@ -350,11 +365,6 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         throw err;
     }
 
-    if (!config) {
-        notFound();
-    }
-
-    const validated = requireInvitationConfig(config);
     const templateId = validated.templateId;
 
     return withInvitationChrome(

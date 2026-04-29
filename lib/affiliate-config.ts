@@ -2,6 +2,7 @@ import "server-only";
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 
 export type InvitationAffiliateConfig = {
   id: string;
@@ -25,6 +26,10 @@ type LastGoodEntry = {
 const lastGoodById = new Map<string, LastGoodEntry>();
 const LAST_GOOD_TTL_MS = 60 * 60 * 1000;
 
+function getAffiliateTag(id: string): string {
+  return `affiliate-config:${id}`;
+}
+
 function isQuotaExceededError(err: unknown): boolean {
   if (!err || typeof err !== "object") return false;
 
@@ -45,15 +50,18 @@ async function getInvitationAffiliateCached(
       return { id: snap.id, ...(snap.data() as Omit<InvitationAffiliateConfig, "id">) };
     },
     ["getInvitationAffiliate", id],
-    { revalidate: 300 },
+    {
+      revalidate: 300,
+      tags: [getAffiliateTag(id)],
+    },
   );
 
   return cached();
 }
 
-export async function getInvitationAffiliate(
+export const getInvitationAffiliate = cache(async (
   id: string,
-): Promise<InvitationAffiliateConfig | null> {
+): Promise<InvitationAffiliateConfig | null> => {
   try {
     const config = await getInvitationAffiliateCached(id);
     if (config) {
@@ -73,7 +81,7 @@ export async function getInvitationAffiliate(
 
     throw err;
   }
-}
+});
 
 export function isAffiliateId(value: string): boolean {
   return /^[A-Z0-9]{12}$/.test(value);

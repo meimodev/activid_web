@@ -5,7 +5,7 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { siteContent } from '@/lib/site-content';
 import { trackContact } from '@/lib/analytics';
 
-type AccountApp = 'activid' | 'palakat';
+type AccountApp = 'activid' | 'palakat' | 'loit';
 
 type AccountOption = {
   id: AccountApp;
@@ -42,6 +42,21 @@ const ACCOUNT_OPTIONS: AccountOption[] = [
     ],
     impact: [
       'Access to the Palakat account will be revoked after the request is processed',
+      'Account data and related usage data will be reviewed for deletion according to applicable policies',
+      'The admin may request additional details if the account identity is unclear',
+    ],
+  },
+  {
+    id: 'loit',
+    label: 'Loit account',
+    description: 'Use this option if you want to request deletion of your Loit mobile-app account and the related user data.',
+    preparation: [
+      'Full name registered on Loit',
+      'Email, phone number, or username connected to the Loit account',
+      'Brief details so the admin can locate your account quickly',
+    ],
+    impact: [
+      'Access to the Loit account will be revoked after the request is processed',
       'Account data and related usage data will be reviewed for deletion according to applicable policies',
       'The admin may request additional details if the account identity is unclear',
     ],
@@ -157,7 +172,7 @@ export default function AccountDeletionClient() {
             Request <span className="bg-linear-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">Account Deletion</span> securely.
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-indigo-100/70 sm:text-lg">
-            Use this page to request deletion for either your Activid account or your Palakat account. Select the app,
+            Use this page to request deletion for your Activid, Palakat, or Loit account. Select the app,
             review the process, and send your request straight to the official Activid admin team via WhatsApp.
           </p>
         </motion.div>

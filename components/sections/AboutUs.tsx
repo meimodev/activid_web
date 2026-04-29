@@ -32,7 +32,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left Side - Image and Title */}
           <ScrollReveal direction="left" className="relative">
-            <div className="relative h-[500px] lg:h-[600px] rounded-2xl bg-linear-to-br from-[#3d2645] via-[#1a1d3a] to-[#6b2737]">
+            <div className="relative h-[500px] lg:h-[600px] rounded-2xl bg-linear-to-br from-[#3d2645] via-[#1a1d3a] to-[#6b2737] overflow-hidden">
               {/* Background Image */}
               <div className="absolute inset-0 opacity-60">
                 <Image
@@ -45,7 +45,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
               </div>
 
 
-              <div className="absolute -right-10 -top-14 bg-[#F8EFDE]  p-8 " >
+              <div className="absolute -right-10 -top-14 bg-[#F8EFDE]  p-8 pr-14 " >
 
                 {/* Large "About Us" Title */}
                 <motion.h2
@@ -53,7 +53,7 @@ export function AboutUs({ className = '' }: AboutUsProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-6xl md:text-7xl lg:text-8xl font-black text-[#1a1a3e] leading-none font-sans whitespace-pre-line"
+                  className="text-6xl md:text-7xl lg:text-8xl font-black text-[#1a1a3e] leading-none font-sans whitespace-pre-line pt-10"
                 >
                   {siteContent.aboutUs.title}
                 </motion.h2>

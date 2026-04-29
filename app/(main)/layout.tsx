@@ -12,12 +12,6 @@ const geistSans = localFont({
     display: "swap",
 });
 
-const geistMono = localFont({
-    src: "../../public/fonts/poppins-regular.ttf",
-    variable: "--font-geist-mono",
-    display: "swap",
-});
-
 const bricolageGrotesque = localFont({
     src: "../../public/fonts/garet-book.ttf",
     variable: "--font-bricolage",
@@ -30,7 +24,7 @@ export default function MainLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className={`${geistSans.variable} ${geistMono.variable} ${bricolageGrotesque.variable} antialiased font-sans text-foreground bg-background min-h-screen`}>
+        <div className={`${geistSans.variable} ${bricolageGrotesque.variable} antialiased font-sans text-foreground bg-background min-h-screen`}>
             {/* Skip to main content link for keyboard navigation */}
             <a
                 href="#main-content"

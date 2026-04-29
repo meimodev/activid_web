@@ -5,15 +5,17 @@ import type { InvitationConfig } from "@/types/invitation";
 import { buildInvitationDemoConfig, pickRandomDemoMusicUrl } from "@/data/invitations";
 import { getInvitationTemplateThemes } from "@/data/invitation-templates";
 import { DemoThemeSidebar } from "@/components/invitation/DemoThemeSidebar";
-import { Flow } from "@/components/templates/flow";
-import { Saturn } from "@/components/templates/saturn";
-import { Mercury } from "@/components/templates/mercury";
-import { Pluto } from "@/components/templates/pluto";
-import { Amalthea } from "@/components/templates/amalthea";
-import { KidsBirthday } from "@/components/templates/kids-birthday";
-import { Venus } from "@/components/templates/venus";
-import { Jupiter } from "@/components/templates/jupiter";
-import { Neptune } from "@/components/templates/neptune";
+import dynamic from "next/dynamic";
+
+const Flow = dynamic(() => import("@/components/templates/flow").then(m => ({ default: m.Flow })));
+const Saturn = dynamic(() => import("@/components/templates/saturn").then(m => ({ default: m.Saturn })));
+const Mercury = dynamic(() => import("@/components/templates/mercury").then(m => ({ default: m.Mercury })));
+const Pluto = dynamic(() => import("@/components/templates/pluto").then(m => ({ default: m.Pluto })));
+const Amalthea = dynamic(() => import("@/components/templates/amalthea").then(m => ({ default: m.Amalthea })));
+const KidsBirthday = dynamic(() => import("@/components/templates/kids-birthday").then(m => ({ default: m.KidsBirthday })));
+const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
+const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
+const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
 
 type DemoPurpose = InvitationConfig["purpose"];
 

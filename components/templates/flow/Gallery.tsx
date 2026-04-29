@@ -143,6 +143,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
               <img 
                 src={photo} 
                 alt={`Gallery photo ${i + 1}`} 
+                loading="lazy"
                 className="block w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               />
               <div className="absolute inset-0 bg-wedding-accent/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />

@@ -43,6 +43,7 @@ export interface TestimonialItem {
   author: string;
   role: string;
   company: string;
+  image?: string;
 }
 
 export interface TestimonialsContent {

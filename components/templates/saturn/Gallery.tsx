@@ -143,6 +143,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
                   <img
                     src={photo}
                     alt={`Memory ${index + 1}`}
+                    loading="lazy"
                     className="block w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-70 group-hover:opacity-100 pointer-events-none"
                   />
                   {/* Elegant Gradient Overlay */}

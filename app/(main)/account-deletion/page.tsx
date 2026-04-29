@@ -4,7 +4,7 @@ import AccountDeletionClient from './AccountDeletionClient';
 
 export const metadata: Metadata = {
   title: 'Account Deletion | Activid',
-  description: 'Request deletion of your Activid or Palakat account by contacting the Activid admin via WhatsApp.',
+  description: 'Request deletion of your Activid, Palakat, or Loit account by contacting the Activid admin via WhatsApp.',
 };
 
 export default function AccountDeletionPage() {
