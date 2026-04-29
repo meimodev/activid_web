@@ -795,8 +795,8 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
       },
     },
   },
-  "kids-space": {
-    templateId: "kids-space",
+  "comic-book": {
+    templateId: "comic-book",
     theme: {
       mainColor: "#0A1628",
       accentColor: "#3B82F6",

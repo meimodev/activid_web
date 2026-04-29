@@ -103,16 +103,21 @@ export function MusicPlayer({ shouldStart, audioUrl, variant = "default" }: Musi
                 onClick={togglePlay}
                 className={
                     isSpace
-                        ? `relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/20 text-white focus:outline-none`
+                        ? `relative flex h-12 w-12 items-center justify-center rounded-full text-white focus:outline-none ml-2 mb-2`
                         : isFun
                             ? `relative flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-[#FFB703] text-white shadow-[0_8px_0_0_#FB8500,0_15px_20px_rgba(0,0,0,0.2)] focus:outline-none`
                             : `flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/20 focus:outline-none`
                 }
                 style={isSpace ? {
-                    background: `radial-gradient(circle at 40% 40%, ${spaceColors.accent2}99, ${spaceColors.dark})`,
-                    boxShadow: `0 0 20px ${spaceColors.accent2}, 0 0 40px ${spaceColors.accent}`,
+                    backgroundColor: spaceColors.accent,
+                    boxShadow: "0 0 0 3px white, 0 0 0 7px black, 11px 11px 0 7px black",
+                    color: "white"
                 } : undefined}
-                whileTap={isFun ? { y: 6, boxShadow: "0 2px 0 0 #FB8500,0 5px 10px rgba(0,0,0,0.2)" } : undefined}
+                whileTap={
+                    isSpace ? { y: 4, x: 4, boxShadow: "0 0 0 3px white, 0 0 0 7px black, 7px 7px 0 7px black" }
+                    : isFun ? { y: 6, boxShadow: "0 2px 0 0 #FB8500,0 5px 10px rgba(0,0,0,0.2)" } 
+                    : undefined
+                }
                 animate={
                     isSpace && isPlaying
                         ? { scale: [1, 1.08, 1] }
@@ -131,18 +136,11 @@ export function MusicPlayer({ shouldStart, audioUrl, variant = "default" }: Musi
             >
                 {/* Orbital ring decoration for space variant */}
                 {isSpace && isPlaying && (
-                    <div className="pointer-events-none absolute inset-[-6px] -z-10">
+                    <div className="pointer-events-none absolute inset-[-18px] -z-10">
                         <motion.div
-                            className="absolute inset-0 rounded-full"
-                            style={{ border: `2px solid ${spaceColors.accent2}30` }}
+                            className="absolute inset-0 rounded-full border-[3px] border-black border-dashed"
                             animate={{ rotate: [0, 360] }}
                             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                        />
-                        <motion.div
-                            className="absolute inset-[-4px] rounded-full"
-                            style={{ border: `2px solid ${spaceColors.accent}20` }}
-                            animate={{ rotate: [360, 0] }}
-                            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
                         />
                     </div>
                 )}
@@ -156,7 +154,7 @@ export function MusicPlayer({ shouldStart, audioUrl, variant = "default" }: Musi
                             exit={{ scale: 0.5, opacity: 0 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <PauseIcon isFun={isFun} />
+                            <PauseIcon isFun={isFun} isSpace={isSpace} />
                         </motion.div>
                     ) : (
                         <motion.div
@@ -165,9 +163,9 @@ export function MusicPlayer({ shouldStart, audioUrl, variant = "default" }: Musi
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="ml-1"
+                            className={isSpace ? "ml-1.5" : "ml-1"}
                         >
-                            <PlayIcon isFun={isFun} />
+                            <PlayIcon isFun={isFun} isSpace={isSpace} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -253,26 +251,32 @@ export function MusicPlayer({ shouldStart, audioUrl, variant = "default" }: Musi
     return createPortal(player, document.body);
 }
 
-function PlayIcon({ isFun }: { isFun?: boolean }) {
+function PlayIcon({ isFun, isSpace }: { isFun?: boolean; isSpace?: boolean }) {
     return (
         <svg
-            width={isFun ? "18" : "14"}
-            height={isFun ? "18" : "14"}
+            width={isFun ? "18" : isSpace ? "20" : "14"}
+            height={isFun ? "18" : isSpace ? "20" : "14"}
             viewBox="0 0 24 24"
             fill="currentColor"
+            stroke={isSpace ? "black" : undefined}
+            strokeWidth={isSpace ? "2.5" : undefined}
+            strokeLinejoin="round"
         >
             <path d="M8 5v14l11-7z" />
         </svg>
     );
 }
 
-function PauseIcon({ isFun }: { isFun?: boolean }) {
+function PauseIcon({ isFun, isSpace }: { isFun?: boolean; isSpace?: boolean }) {
     return (
         <svg
-            width={isFun ? "18" : "18"}
-            height={isFun ? "18" : "14"}
+            width={isFun ? "18" : isSpace ? "20" : "18"}
+            height={isFun ? "18" : isSpace ? "20" : "14"}
             viewBox="0 0 24 24"
             fill="currentColor"
+            stroke={isSpace ? "black" : undefined}
+            strokeWidth={isSpace ? "2.5" : undefined}
+            strokeLinejoin="round"
         >
             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
         </svg>

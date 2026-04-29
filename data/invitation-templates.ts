@@ -225,7 +225,7 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       darkColor: "#0B0D17",
     },
   ],
-  "kids-space": [
+  "comic-book": [
     {
       id: "cosmic-commander",
       title: "Cosmic Commander",
@@ -348,11 +348,11 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     priceDiscount: "120.000",
   },
   {
-    id: "kids-space-demo",
-    templateId: "kids-space",
-    title: "Kids Space",
+    id: "comic-book-demo",
+    templateId: "comic-book",
+    title: "Comic Book",
     video: KIDS_BIRTHDAY_TEMPLATE_LISTING_VIDEO,
-    tags: ["Birthday", "Cosmic"],
+    tags: ["Birthday", "Cosmic", "Comic"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
   },

@@ -38,12 +38,13 @@ const KIDS_SPACE_DEMO_ASSETS = {
   galleryPhotos: DEMO_GALLERY_IMAGEKIT_URLS,
 } as const;
 
-interface KidsSpaceProps {
+interface ComicBookProps {
   config: InvitationConfig;
 }
 
-export function KidsSpace({ config }: KidsSpaceProps) {
+export function ComicBook({ config }: ComicBookProps) {
   const [isOpen, setIsOpen] = useState(() => !config.sections.hero.enabled);
+  const [isContentReady, setIsContentReady] = useState(() => !config.sections.hero.enabled);
   const searchParams = useSearchParams();
   const guestName = normalizeInvitationGuestName(searchParams.get("to"));
 
@@ -134,6 +135,9 @@ export function KidsSpace({ config }: KidsSpaceProps) {
             },
           }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          onAnimationComplete={() => {
+            if (isOpen) setIsContentReady(true);
+          }}
         >
           <Hero
             onOpen={() => {
@@ -151,114 +155,126 @@ export function KidsSpace({ config }: KidsSpaceProps) {
         </motion.div>
       ) : null}
 
-      <div className="relative z-10">
-        <div className={isOpen ? "" : "h-dvh overflow-hidden"}>
-          {sections.title.enabled ? (
-            <TitleSection
-              hosts={effectiveHosts}
-              date={effectiveDateDisplay}
-              heading={sections.title.heading}
-              countdownTarget={effectiveCountdownTarget}
-              galleryPhotos={effectiveGalleryPhotos}
-              showCountdown={sections.countdown.enabled}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
-          ) : null}
+      <div
+        className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}
+      >
+        <div className={isContentReady ? "" : "h-screen overflow-hidden"}>
+          {isContentReady ? (
+            <>
+              {sections.title.enabled ? (
+                <TitleSection
+                  hosts={effectiveHosts}
+                  date={effectiveDateDisplay}
+                  heading={sections.title.heading}
+                  countdownTarget={effectiveCountdownTarget}
+                  galleryPhotos={effectiveGalleryPhotos}
+                  showCountdown={sections.countdown.enabled}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
 
-          {sections.quote.enabled ? (
-            <QuoteSection quote={sections.quote}
-              isMarsMission={isMarsMission} isStarPrincess={isStarPrincess} isUnicornDreams={isUnicornDreams} />
-          ) : null}
+              {sections.quote.enabled ? (
+                <QuoteSection quote={sections.quote} isReady={isContentReady}
+                  isMarsMission={isMarsMission} isStarPrincess={isStarPrincess} isUnicornDreams={isUnicornDreams} />
+              ) : null}
 
-          {sections.hosts.enabled ? (
-            <HostSection hosts={effectiveHosts}
-              isMarsMission={isMarsMission} isStarPrincess={isStarPrincess} isUnicornDreams={isUnicornDreams} />
-          ) : null}
+              {sections.hosts.enabled ? (
+                <HostSection hosts={effectiveHosts} isReady={isContentReady}
+                  isMarsMission={isMarsMission} isStarPrincess={isStarPrincess} isUnicornDreams={isUnicornDreams} />
+              ) : null}
 
-          {sections.event.enabled ? (
-            <EventSection
-              events={sections.event.events}
-              heading={sections.event.heading}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
-          ) : null}
+              {sections.event.enabled ? (
+                <EventSection
+                  events={sections.event.events}
+                  heading={sections.event.heading}
+                  isReady={isContentReady}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
 
-          {sections.story.enabled ? (
-            <StorySection
-              stories={sections.story.stories}
-              heading={sections.story.heading}
-              fallbackImageUrl={effectiveGalleryPhotos[0]}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
-          ) : null}
+              {sections.story.enabled ? (
+                <StorySection
+                  stories={sections.story.stories}
+                  heading={sections.story.heading}
+                  fallbackImageUrl={effectiveGalleryPhotos[0]}
+                  isReady={isContentReady}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
 
-          {sections.gallery.enabled ? (
-            <GallerySection
-              photos={effectiveGalleryPhotos}
-              heading={sections.gallery.heading}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
-          ) : null}
+              {sections.gallery.enabled ? (
+                <GallerySection
+                  photos={effectiveGalleryPhotos}
+                  heading={sections.gallery.heading}
+                  isReady={isContentReady}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
 
-          {sections.gift.enabled ? (
-            <GiftSection
-              bankAccounts={sections.gift.bankAccounts}
-              heading={sections.gift.heading}
-              description={sections.gift.description}
-              templateName={config.templateId}
-              eventDate={effectiveDateDisplay}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
-          ) : null}
+              {sections.gift.enabled ? (
+                <GiftSection
+                  bankAccounts={sections.gift.bankAccounts}
+                  heading={sections.gift.heading}
+                  description={sections.gift.description}
+                  templateName={config.templateId}
+                  eventDate={effectiveDateDisplay}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
 
-          {sections.wishes.enabled ? (
-            <Suspense
-              fallback={
-                <div className="py-24 text-center font-garet-book text-white/30 italic">
-                  Loading wishes...
-                </div>
-              }
-            >
-              <Wishes
-                invitationId={config.id}
-                heading={sections.wishes.heading}
-                placeholder={sections.wishes.placeholder}
-                thankYouMessage={sections.wishes.thankYouMessage}
-                isMarsMission={isMarsMission}
-                isStarPrincess={isStarPrincess}
-                isUnicornDreams={isUnicornDreams}
-              />
-            </Suspense>
-          ) : null}
+              {sections.wishes.enabled ? (
+                <Suspense
+                  fallback={
+                    <div className="py-24 text-center font-garet-book text-white/30 italic">
+                      Loading wishes...
+                    </div>
+                  }
+                >
+                  <Wishes
+                    invitationId={config.id}
+                    heading={sections.wishes.heading}
+                    placeholder={sections.wishes.placeholder}
+                    thankYouMessage={sections.wishes.thankYouMessage}
+                    isReady={isContentReady}
+                    isMarsMission={isMarsMission}
+                    isStarPrincess={isStarPrincess}
+                    isUnicornDreams={isUnicornDreams}
+                  />
+                </Suspense>
+              ) : null}
 
-          {sections.gratitude.enabled ? (
-            <GratitudeSection
-              hosts={effectiveHosts}
-              message={sections.gratitude.message}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
-          ) : null}
+              {sections.gratitude.enabled ? (
+                <GratitudeSection
+                  hosts={effectiveHosts}
+                  message={sections.gratitude.message}
+                  isReady={isContentReady}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
 
-          {sections.footer.enabled ? (
-            <FooterSection
-              hosts={effectiveHosts}
-              message={sections.footer.message}
-              isMarsMission={isMarsMission}
-              isStarPrincess={isStarPrincess}
-              isUnicornDreams={isUnicornDreams}
-            />
+              {sections.footer.enabled ? (
+                <FooterSection
+                  hosts={effectiveHosts}
+                  message={sections.footer.message}
+                  isReady={isContentReady}
+                  isMarsMission={isMarsMission}
+                  isStarPrincess={isStarPrincess}
+                  isUnicornDreams={isUnicornDreams}
+                />
+              ) : null}
+            </>
           ) : null}
         </div>
       </div>
