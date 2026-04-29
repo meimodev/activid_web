@@ -1,0 +1,37 @@
+
+> activid_web@0.1.0 build /Users/edotanod/IdeaProjects/activid_web
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · optimizePackageImports
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 10.3s
+  Running TypeScript ...
+Failed to compile.
+
+./components/templates/kids-space/Hero.tsx:172:11
+Type error: Type '{ hidden: { opacity: number; y: number; scale: number; }; visible: { opacity: number; y: number; scale: number; transition: { type: string; damping: number; stiffness: number; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; scale: number; transition: { type: string; damping: number; stiffness: number; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; scale: number; transition: { type: string; damping: number; stiffness: number; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; scale: number; transition: { type: string; damping: number; stiffness: number; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ type: string; damping: number; stiffness: number; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ type: string; damping: number; stiffness: number; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ type: string; damping: number; stiffness: number; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'type' are incompatible.
+                    Type 'string' is not assignable to type 'AnimationGeneratorType | undefined'.
+
+[0m [90m 170 |[39m         [33m<[39m[33mmotion[39m[33m.[39mdiv
+ [90m 171 |[39m           className[33m=[39m[32m"w-full max-w-[340px] rounded-[48px] border-2 border-white/15 bg-white/[0.06] backdrop-blur-2xl p-8 relative overflow-hidden"[39m
+[31m[1m>[22m[39m[90m 172 |[39m           variants[33m=[39m{popVariants}
+ [90m     |[39m           [31m[1m^[22m[39m
+ [90m 173 |[39m         [33m>[39m
+ [90m 174 |[39m           [33m<[39m[33mdiv[39m
+ [90m 175 |[39m             className[33m=[39m[32m"absolute inset-0 opacity-15"[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

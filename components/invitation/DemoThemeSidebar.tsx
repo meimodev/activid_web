@@ -33,7 +33,7 @@ export function DemoThemeSidebar({
 }: DemoThemeSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
-  const supportsMultiplePurposes = templateId !== "kids-birthday";
+  const supportsMultiplePurposes = templateId !== "kids-birthday" && templateId !== "kids-space";
   const [internalThemeId, setInternalThemeId] = useState<string>(() => {
     if (!themes.length) return "";
 

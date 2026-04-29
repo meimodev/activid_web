@@ -19,8 +19,10 @@ const Flow = dynamic(() => import("@/components/templates/flow").then(m => ({ de
 const Saturn = dynamic(() => import("@/components/templates/saturn").then(m => ({ default: m.Saturn })));
 const Mercury = dynamic(() => import("@/components/templates/mercury").then(m => ({ default: m.Mercury })));
 const Pluto = dynamic(() => import("@/components/templates/pluto").then(m => ({ default: m.Pluto })));
+const Eden = dynamic(() => import("@/components/templates/eden").then(m => ({ default: m.Eden })));
 const Amalthea = dynamic(() => import("@/components/templates/amalthea").then(m => ({ default: m.Amalthea })));
 const KidsBirthday = dynamic(() => import("@/components/templates/kids-birthday").then(m => ({ default: m.KidsBirthday })));
+const KidsSpace = dynamic(() => import("@/components/templates/kids-space").then(m => ({ default: m.KidsSpace })));
 const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
 const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
 const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
@@ -32,8 +34,10 @@ const RESERVED_TEMPLATE_SLUGS = new Set([
     "saturn",
     "mercury",
     "pluto",
+    "eden",
     "amalthea",
     "kids-birthday",
+    "kids-space",
     "venus",
     "jupiter",
     "neptune",
@@ -126,10 +130,14 @@ function getTemplateLabel(templateId: string) {
             return "Mercury";
         case "pluto":
             return "Pluto";
+        case "eden":
+            return "Eden";
         case "amalthea":
             return "Amalthea";
         case "kids-birthday":
             return "Kids Birthday";
+        case "kids-space":
+            return "Kids Space";
         default:
             return templateId;
     }
@@ -175,7 +183,7 @@ export async function generateMetadata(
     if (slug.endsWith("-demo")) {
         const templateId = slug.replace(/-demo$/, "");
         const purpose =
-            templateId === "kids-birthday"
+            templateId === "kids-birthday" || templateId === "kids-space"
                 ? "birthday"
                 : requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
         requireDemoTheme(templateId, getSingleSearchParam(resolvedSearchParams, "theme"));
@@ -301,8 +309,10 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         if (templateId === "saturn") return <Saturn config={config} />;
         if (templateId === "mercury") return <Mercury config={config} />;
         if (templateId === "pluto") return <Pluto config={config} />;
+        if (templateId === "eden") return <Eden config={config} />;
         if (templateId === "amalthea") return <Amalthea config={config} />;
         if (templateId === "kids-birthday") return <KidsBirthday config={config} />;
+        if (templateId === "kids-space") return <KidsSpace config={config} />;
         if (templateId === "venus") return <Venus config={config} />;
         if (templateId === "jupiter") return <Jupiter config={config} />;
         if (templateId === "neptune") return <Neptune config={config} />;
@@ -312,7 +322,7 @@ export default async function InvitationPage({ params, searchParams }: PageProps
     if (slug.endsWith("-demo")) {
         const demoTemplateId = slug.replace(/-demo$/, "");
         const demoPurpose =
-            demoTemplateId === "kids-birthday"
+            demoTemplateId === "kids-birthday" || demoTemplateId === "kids-space"
                 ? "birthday"
                 : requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
         const selectedTheme = requireDemoTheme(

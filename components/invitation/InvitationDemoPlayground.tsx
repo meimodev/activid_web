@@ -11,8 +11,10 @@ const Flow = dynamic(() => import("@/components/templates/flow").then(m => ({ de
 const Saturn = dynamic(() => import("@/components/templates/saturn").then(m => ({ default: m.Saturn })));
 const Mercury = dynamic(() => import("@/components/templates/mercury").then(m => ({ default: m.Mercury })));
 const Pluto = dynamic(() => import("@/components/templates/pluto").then(m => ({ default: m.Pluto })));
+const Eden = dynamic(() => import("@/components/templates/eden").then(m => ({ default: m.Eden })));
 const Amalthea = dynamic(() => import("@/components/templates/amalthea").then(m => ({ default: m.Amalthea })));
 const KidsBirthday = dynamic(() => import("@/components/templates/kids-birthday").then(m => ({ default: m.KidsBirthday })));
+const KidsSpace = dynamic(() => import("@/components/templates/kids-space").then(m => ({ default: m.KidsSpace })));
 const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
 const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
 const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
@@ -33,7 +35,7 @@ export function InvitationDemoPlayground({
   initialThemeId,
 }: InvitationDemoPlaygroundProps) {
   const themes = useMemo(() => getInvitationTemplateThemes(templateId), [templateId]);
-  const isBirthdayOnlyTemplate = templateId === "kids-birthday";
+  const isBirthdayOnlyTemplate = templateId === "kids-birthday" || templateId === "kids-space";
 
   const [purpose, setPurpose] = useState<DemoPurpose>(initialPurpose);
   const [themeId, setThemeId] = useState<string>(initialThemeId);
@@ -95,8 +97,10 @@ export function InvitationDemoPlayground({
     if (templateId === "saturn") return <Saturn key={key} config={config} />;
     if (templateId === "mercury") return <Mercury key={key} config={config} />;
     if (templateId === "pluto") return <Pluto key={key} config={config} />;
+    if (templateId === "eden") return <Eden key={key} config={config} />;
     if (templateId === "amalthea") return <Amalthea key={key} config={config} />;
     if (templateId === "kids-birthday") return <KidsBirthday key={key} config={config} />;
+    if (templateId === "kids-space") return <KidsSpace key={key} config={config} />;
     if (templateId === "venus") return <Venus key={key} config={config} />;
     if (templateId === "jupiter") return <Jupiter key={key} config={config} />;
     if (templateId === "neptune") return <Neptune key={key} config={config} />;

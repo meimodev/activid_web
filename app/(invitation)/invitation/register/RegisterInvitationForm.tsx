@@ -1721,12 +1721,12 @@ export function RegisterInvitationForm({
   const [musicCopied, setMusicCopied] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const initialPurpose =
-    initialTemplateId === "kids-birthday" ? "birthday" : initialConfig.purpose;
+    initialTemplateId === "kids-birthday" || initialTemplateId === "kids-space" ? "birthday" : initialConfig.purpose;
   const imagekitEpochSecondsRef = useRef<number>(0);
   const [purpose, setPurpose] = useState<"marriage" | "birthday" | "event">(
     initialPurpose,
   );
-  const effectivePurpose = templateId === "kids-birthday" ? "birthday" : purpose;
+  const effectivePurpose = templateId === "kids-birthday" || templateId === "kids-space" ? "birthday" : purpose;
   const [config, setConfig] = useState<InvitationConfig>(() => ({
     ...initialConfig,
     id: isEditMode ? (existingSlug ?? initialConfig.id) : initialConfig.id,
@@ -1932,7 +1932,7 @@ export function RegisterInvitationForm({
         : prev.theme,
     }));
 
-    if (nextTemplateId === "kids-birthday" && purpose !== "birthday") {
+    if ((nextTemplateId === "kids-birthday" || nextTemplateId === "kids-space") && purpose !== "birthday") {
       handlePurposeChange("birthday");
     }
   };
@@ -3024,7 +3024,7 @@ export function RegisterInvitationForm({
             <select
               className="rounded-xl border border-white/10 bg-[#0b0b16]/80 px-3 py-2 text-white outline-none focus:border-indigo-500/60 transition-colors"
               value={effectivePurpose}
-              disabled={templateId === "kids-birthday"}
+              disabled={templateId === "kids-birthday" || templateId === "kids-space"}
               onChange={(e) =>
                 handlePurposeChange(
                   e.target.value as "marriage" | "birthday" | "event",

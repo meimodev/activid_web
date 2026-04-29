@@ -229,8 +229,8 @@ export default function InvitationLandingClient({
 
   const filteredTemplates = React.useMemo(() => {
     if (filterPurpose === "all") return templates;
-    if (filterPurpose === "birthday") return templates.filter(t => t.templateId === "kids-birthday");
-    return templates.filter(t => t.templateId !== "kids-birthday");
+    if (filterPurpose === "birthday") return templates.filter(t => t.templateId === "kids-birthday" || t.templateId === "kids-space");
+    return templates.filter(t => t.templateId !== "kids-birthday" && t.templateId !== "kids-space");
   }, [filterPurpose, templates]);
 
   React.useEffect(() => {
@@ -286,7 +286,7 @@ export default function InvitationLandingClient({
   const openPreviewDialog = (template: TemplateListing) => {
     const themes = getInvitationTemplateThemes(template.templateId);
     const nextThemeId = selectedThemeByTemplateId[template.templateId] ?? themes[0]?.id ?? "";
-    const nextPurpose = template.templateId === "kids-birthday" ? "birthday" : "marriage";
+    const nextPurpose = template.templateId === "kids-birthday" || template.templateId === "kids-space" ? "birthday" : "marriage";
     setPreviewThemeId(nextThemeId);
     setPreviewPurpose(nextPurpose);
     setPreviewTemplate(template);
@@ -884,7 +884,7 @@ export default function InvitationLandingClient({
             </div>
 
             <div className="mt-6 grid gap-6">
-              {previewTemplate.templateId === "kids-birthday" ? (
+              {previewTemplate.templateId === "kids-birthday" || previewTemplate.templateId === "kids-space" ? (
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
                     Purpose
@@ -1004,7 +1004,7 @@ export default function InvitationLandingClient({
                   const url = `/invitation/${previewTemplate.id}?theme=${encodeURIComponent(
                     previewThemeId,
                   )}&purpose=${encodeURIComponent(
-                    previewTemplate.templateId === "kids-birthday" ? "birthday" : previewPurpose,
+                    previewTemplate.templateId === "kids-birthday" || previewTemplate.templateId === "kids-space" ? "birthday" : previewPurpose,
                   )}`;
                   window.open(url, "_blank", "noopener,noreferrer");
                   setPreviewTemplate(null);

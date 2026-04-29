@@ -753,6 +753,20 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
       },
     },
   },
+  eden: {
+    templateId: "eden",
+    theme: {
+      mainColor: "#F4F7F2",
+      accentColor: "#4A6741",
+      accent2Color: "#C19A6B",
+      darkColor: "#1E291C",
+    },
+    sections: {
+      hero: {
+        coverImage: DEMO_COVER_IMAGE_URL,
+      },
+    },
+  },
   amalthea: {
     templateId: "amalthea",
     theme: {
@@ -774,6 +788,20 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
       accentColor: "#EC4899",
       accent2Color: "#60A5FA",
       darkColor: "#7C3AED",
+    },
+    sections: {
+      hero: {
+        coverImage: DEMO_COVER_IMAGE_URL,
+      },
+    },
+  },
+  "kids-space": {
+    templateId: "kids-space",
+    theme: {
+      mainColor: "#0A1628",
+      accentColor: "#3B82F6",
+      accent2Color: "#06B6D4",
+      darkColor: "#05101A",
     },
     sections: {
       hero: {
