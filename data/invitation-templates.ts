@@ -259,6 +259,24 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       darkColor: "#041014",
     },
   ],
+  royal: [
+    {
+      id: "aubergine-gold",
+      title: "Aubergine Gold",
+      mainColor: "#2b1a2e",
+      accentColor: "#c9a961",
+      accent2Color: "#f2e3d5",
+      darkColor: "#1d1020",
+    },
+    {
+      id: "cream-plum",
+      title: "Cream Plum",
+      mainColor: "#f2e3d5",
+      accentColor: "#5c2a4d",
+      accent2Color: "#c9a961",
+      darkColor: "#2b1a2e",
+    },
+  ],
 };
 
 export function getInvitationTemplateThemes(templateId: string): InvitationTemplateTheme[] {
@@ -362,6 +380,15 @@ export const INVITATION_TEMPLATE_LISTINGS: InvitationTemplateListing[] = [
     title: "Jupiter",
     video: JUPITER_TEMPLATE_LISTING_VIDEO,
     tags: ["Wedding", "Jupiter"],
+    priceOriginal: "450.000",
+    priceDiscount: "120.000",
+  },
+  {
+    id: "royal-demo",
+    templateId: "royal",
+    title: "Royal",
+    video: JUPITER_TEMPLATE_LISTING_VIDEO,
+    tags: ["Wedding", "Royal", "Art-Deco"],
     priceOriginal: "450.000",
     priceDiscount: "120.000",
   },

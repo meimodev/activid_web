@@ -18,6 +18,7 @@ const ComicBook = dynamic(() => import("@/components/templates/comic-book").then
 const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
 const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
 const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
+const Royal = dynamic(() => import("@/components/templates/royal").then(m => ({ default: m.Royal })));
 
 type DemoPurpose = InvitationConfig["purpose"];
 
@@ -104,6 +105,7 @@ export function InvitationDemoPlayground({
     if (templateId === "venus") return <Venus key={key} config={config} />;
     if (templateId === "jupiter") return <Jupiter key={key} config={config} />;
     if (templateId === "neptune") return <Neptune key={key} config={config} />;
+    if (templateId === "royal") return <Royal key={key} config={config} />;
 
     return <Flow key={key} config={config} />;
   }, [config, effectivePurpose, templateId]);

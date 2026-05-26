@@ -823,6 +823,20 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
       },
     },
   },
+  royal: {
+    templateId: "royal",
+    theme: {
+      mainColor: "#2b1a2e",
+      accentColor: "#c9a961",
+      accent2Color: "#f2e3d5",
+      darkColor: "#1d1020",
+    },
+    sections: {
+      hero: {
+        coverImage: DEMO_COVER_IMAGE_URL,
+      },
+    },
+  },
 };
 
 export function buildInvitationDemoConfig({

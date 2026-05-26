@@ -26,6 +26,7 @@ const ComicBook = dynamic(() => import("@/components/templates/comic-book").then
 const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
 const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
 const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
+const Royal = dynamic(() => import("@/components/templates/royal").then(m => ({ default: m.Royal })));
 
 const SITE_ORIGIN = "https://activid.web.id";
 
@@ -41,6 +42,7 @@ const RESERVED_TEMPLATE_SLUGS = new Set([
     "venus",
     "jupiter",
     "neptune",
+    "royal",
 ]);
 
 const getValidatedConfig = cache(async (slug: string): Promise<InvitationConfig | null> => {
@@ -316,6 +318,7 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         if (templateId === "venus") return <Venus config={config} />;
         if (templateId === "jupiter") return <Jupiter config={config} />;
         if (templateId === "neptune") return <Neptune config={config} />;
+        if (templateId === "royal") return <Royal config={config} />;
         notFound();
     };
 
