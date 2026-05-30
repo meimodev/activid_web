@@ -2,13 +2,13 @@
 
 import { Host } from "@/types/invitation";
 import {
-  VineBorder,
   GrandDivider,
   WreathSpinner,
   Crest,
   Flourish,
 } from "./graphics";
 import { Reveal } from "./graphics/reveal";
+import { VineVertical } from "@/components/assets/vine-vertical";
 
 interface HeroSectionProps {
   hosts: Host[];
@@ -28,14 +28,14 @@ export function HeroSection({ hosts, date, subtitle }: HeroSectionProps) {
     >
       {/* Side vines */}
       <div
-        className="absolute top-12 bottom-12 left-[-8px] w-11 opacity-45 pointer-events-none z-0"
+        className="absolute top-12 bottom-12 left-[-12px] w-12 opacity-45 pointer-events-none z-0"
       >
-        <VineBorder height={780} side="left" />
+        <VineVertical className="w-full h-full" />
       </div>
       <div
-        className="absolute top-12 bottom-12 right-[-8px] w-11 opacity-45 pointer-events-none z-0"
+        className="absolute top-12 bottom-12 right-[-12px] w-12 opacity-45 pointer-events-none z-0 scale-x-[-1]"
       >
-        <VineBorder height={780} side="right" />
+        <VineVertical className="w-full h-full" />
       </div>
 
       {/* Content column */}

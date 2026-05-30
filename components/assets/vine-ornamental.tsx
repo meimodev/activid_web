@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 
 const VW = 500;
 const VH = 140;
@@ -33,11 +32,8 @@ function pct(x: number, y: number) {
 }
 
 export function VineOrnamental({ className }: { className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-
   return (
-    <div ref={ref} className={className}>
+    <div className={className}>
       <motion.svg
         viewBox={`0 0 ${VW} ${VH}`}
         aria-hidden="true"
@@ -46,7 +42,8 @@ export function VineOrnamental({ className }: { className?: string }) {
         preserveAspectRatio="none"
         style={{ width: "100%", height: "100%", color: "var(--invitation-accent)" }}
         initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-10% 0px" }}
       >
         {/* Flourish + arches + parallels sway together */}
         <motion.g

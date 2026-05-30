@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 
 const VW = 200;
 const VH = 520;
@@ -39,11 +38,8 @@ function pct(x: number, y: number) {
 }
 
 export function VineVertical({ className }: { className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-
   return (
-    <div ref={ref} className={className}>
+    <div className={className}>
       <motion.svg
         viewBox={`0 0 ${VW} ${VH}`}
         aria-hidden="true"
@@ -52,7 +48,8 @@ export function VineVertical({ className }: { className?: string }) {
         preserveAspectRatio="xMidYMax meet"
         style={{ width: "100%", height: "100%", color: "var(--invitation-accent)" }}
         initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-10% 0px" }}
       >
         {/* Spine + shoots sway together */}
         <motion.g

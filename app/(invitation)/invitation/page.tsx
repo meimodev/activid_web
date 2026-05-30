@@ -6,6 +6,7 @@ import {
   isAffiliateId,
   normalizeWhatsappNumber,
 } from "@/lib/affiliate-config";
+import { getLatestGeneratedPreviews } from "./actions";
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -46,5 +47,13 @@ export default async function InvitationLandingPage({ searchParams }: PageProps)
     } catch {}
   }
 
-  return <InvitationLandingClient affiliateWhatsappNumber={affiliateWhatsappNumber} />;
+  // Fetch globally cached latest generated invitations per template ID (revalidated daily)
+  const previewMap = await getLatestGeneratedPreviews();
+
+  return (
+    <InvitationLandingClient
+      affiliateWhatsappNumber={affiliateWhatsappNumber}
+      previewMap={previewMap}
+    />
+  );
 }

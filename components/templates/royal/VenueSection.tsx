@@ -2,6 +2,7 @@
 
 import { SectionWrap } from "./SectionWrap";
 import { SectionHead } from "./Hero";
+import { Reveal } from "./graphics/reveal";
 
 interface VenueSectionProps {
   venue: string;
@@ -12,13 +13,16 @@ interface VenueSectionProps {
 export function VenueSection({ venue, address, mapUrl }: VenueSectionProps) {
   return (
     <SectionWrap id="venue">
-      <SectionHead
-        eyebrow="Find your way"
-        title="The"
-        em="venue"
-        sub="Both the ceremony and reception will take place at this beautiful location."
-      />
-      <div
+      <Reveal>
+        <SectionHead
+          eyebrow="Find your way"
+          title="The"
+          em="venue"
+          sub="Both the ceremony and reception will take place at this beautiful location."
+        />
+      </Reveal>
+      <Reveal delay={0.1}>
+        <div
         className="overflow-hidden relative"
         style={{
           background:
@@ -123,6 +127,7 @@ export function VenueSection({ venue, address, mapUrl }: VenueSectionProps) {
           )}
         </div>
       </div>
+      </Reveal>
     </SectionWrap>
   );
 }

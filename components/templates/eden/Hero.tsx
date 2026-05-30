@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { Host } from "@/types/invitation";
 import { EDEN_OVERLAY_ASSETS } from "./graphics/overlays";
 import { CornerLineTopLeft, CornerLineBottomRight, TwinLineDivider, SwoopingLineLeft, SwoopingLineRight, HairlineDivider, SideFadeRuleLeft, SideFadeRuleRight } from "./graphics/ornaments";
+import { GrowingSwayingFloral } from "./graphics/GrowingSwayingFloral";
 
 interface HeroProps {
   onOpen: () => void;
@@ -117,18 +118,42 @@ export function Hero({
             <div className="absolute inset-2 rounded-t-full rounded-b-[50px] border-[1px] border-wedding-accent/20 pointer-events-none" />
 
             {/* Rich botanical decorations */}
-            <div className="absolute -top-12 -left-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply">
-              <img src={EDEN_OVERLAY_ASSETS.leafSide} alt="" className="w-full h-full object-contain -rotate-12" />
-            </div>
-            <div className="absolute -top-8 -right-8 w-32 h-32 z-20 pointer-events-none opacity-80 mix-blend-multiply">
-              <img src={EDEN_OVERLAY_ASSETS.cornerFlower} alt="" className="w-full h-full object-contain rotate-90" />
-            </div>
-            <div className="absolute -bottom-16 -right-16 w-64 h-64 z-20 pointer-events-none opacity-90 mix-blend-multiply">
-              <img src={EDEN_OVERLAY_ASSETS.leafSide2} alt="" className="w-full h-full object-contain rotate-12 scale-x-[-1]" />
-            </div>
-            <div className="absolute -bottom-6 -left-6 w-32 h-32 z-20 pointer-events-none opacity-80 mix-blend-multiply">
-              <img src={EDEN_OVERLAY_ASSETS.cornerFlower} alt="" className="w-full h-full object-contain -rotate-90" />
-            </div>
+            <GrowingSwayingFloral
+              src={EDEN_OVERLAY_ASSETS.leafSide}
+              initialRotate={-12}
+              className="absolute -top-12 -left-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply"
+              growDelay={0.3}
+              swayDuration={7.2}
+              originX="10%"
+              originY="90%"
+            />
+            <GrowingSwayingFloral
+              src={EDEN_OVERLAY_ASSETS.cornerFlower}
+              initialRotate={90}
+              className="absolute -top-8 -right-8 w-32 h-32 z-20 pointer-events-none opacity-80 mix-blend-multiply"
+              growDelay={0.4}
+              swayDuration={6.0}
+              originX="90%"
+              originY="10%"
+            />
+            <GrowingSwayingFloral
+              src={EDEN_OVERLAY_ASSETS.leafSide2}
+              initialRotate={12}
+              className="absolute -bottom-16 -right-16 w-64 h-64 z-20 pointer-events-none opacity-90 mix-blend-multiply scale-x-[-1]"
+              growDelay={0.5}
+              swayDuration={8.4}
+              originX="90%"
+              originY="90%"
+            />
+            <GrowingSwayingFloral
+              src={EDEN_OVERLAY_ASSETS.cornerFlower}
+              initialRotate={-90}
+              className="absolute -bottom-6 -left-6 w-32 h-32 z-20 pointer-events-none opacity-80 mix-blend-multiply"
+              growDelay={0.6}
+              swayDuration={7.6}
+              originX="10%"
+              originY="90%"
+            />
 
             {/* Line graphic corners */}
             <div className="absolute -top-4 -left-4 z-10 pointer-events-none opacity-60">

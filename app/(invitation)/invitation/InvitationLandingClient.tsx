@@ -9,6 +9,7 @@ import {
   type InvitationTemplateListing,
 } from "@/data/invitation-templates";
 import { DateTime } from "luxon";
+import { getExampleInvitations } from "./actions";
 
 const DEFAULT_WHATSAPP_NUMBER = "62881080088816";
 
@@ -91,20 +92,116 @@ function TemplateCard({
   template,
   isVisible,
   isViewed,
-  hasVideo,
   visibleIndex,
   onPreview,
   onOrder,
+  previewMap = {},
 }: {
   template: InvitationTemplateListing;
   isVisible: boolean;
   isViewed: boolean;
-  hasVideo: boolean;
   visibleIndex: number;
   onPreview: (template: InvitationTemplateListing) => void;
   onOrder: (template: InvitationTemplateListing) => void;
+  previewMap?: Record<string, string[]>;
 }) {
-  const [isVideoLoaded, setIsVideoLoaded] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
+  const [isIntersecting, setIsIntersecting] = React.useState(false);
+  const [dimensions, setDimensions] = React.useState({ width: 375, height: 468, scale: 0.5 });
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [actualGeneratedSlug, setActualGeneratedSlug] = React.useState<string | undefined>(undefined);
+
+  // Pick a random generated slug on mount (inside useEffect to prevent React Hydration mismatch)
+  const slugsList = previewMap[template.templateId] || [];
+  React.useEffect(() => {
+    if (slugsList.length > 0) {
+      const randomIndex = Math.floor(Math.random() * slugsList.length);
+      setActualGeneratedSlug(slugsList[randomIndex]);
+    }
+  }, [slugsList]);
+
+  // IntersectionObserver to lazy-load the iframe only when card is close to viewport
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { rootMargin: "200px" } // trigger slightly before it enters the viewport
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // ResizeObserver to calculate dynamic scale coefficient to perfectly fit aspect ratio
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const containerWidth = rect.width || containerRef.current.clientWidth;
+        const containerHeight = rect.height || containerRef.current.clientHeight;
+        const iframeWidth = 375; // Standard mobile preview width
+        const iframeHeight = iframeWidth * (containerHeight / (containerWidth || 1) || 1.25);
+        const scale = containerWidth / iframeWidth;
+        setDimensions({ width: iframeWidth, height: iframeHeight, scale });
+      }
+    };
+
+    updateDimensions();
+
+    const observer = new ResizeObserver(updateDimensions);
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Auto-scrolling physics loop (runs on requestAnimationFrame, automatically paused when offscreen)
+  React.useEffect(() => {
+    if (!isIntersecting || !isLoaded || !iframeRef.current) return;
+
+    const iframe = iframeRef.current;
+    let frameId: number;
+    let scrollAmount = 0;
+    const scrollSpeed = 0.4; // smooth auto-scrolling speed
+
+    const runScroll = () => {
+      try {
+        const win = iframe.contentWindow;
+        const doc = iframe.contentDocument || win?.document;
+        if (win && doc) {
+          const maxScroll = doc.documentElement.scrollHeight - win.innerHeight;
+          if (maxScroll > 0) {
+            scrollAmount += scrollSpeed;
+            if (scrollAmount >= maxScroll) {
+              scrollAmount = 0; // seamless wrap around
+            }
+            win.scrollTo(0, scrollAmount);
+          }
+        }
+      } catch (err) {
+        // Safe cross-origin or transition fallback
+      }
+      frameId = requestAnimationFrame(runScroll);
+    };
+
+    frameId = requestAnimationFrame(runScroll);
+    return () => cancelAnimationFrame(frameId);
+  }, [isIntersecting, isLoaded]);
+
+  // Determine actual generated invitation preview or fall back to template demo layout
+  const firstTheme = getInvitationTemplateThemes(template.templateId)[0]?.id ?? "";
+  const defaultPurpose =
+    template.templateId === "kids-birthday" ||
+    template.templateId === "comic-book" ||
+    template.templateId === "arcade-retro"
+      ? "birthday"
+      : "marriage";
+
+  const iframeUrl = actualGeneratedSlug
+    ? `/invitation/${actualGeneratedSlug}`
+    : `/invitation/${template.id}?theme=${firstTheme}&purpose=${defaultPurpose}`;
 
   return (
     <motion.div
@@ -112,12 +209,13 @@ function TemplateCard({
       initial={{ opacity: 0, y: 30 }}
       whileInView={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ delay: Math.max(0, visibleIndex % 10) * 0.1, duration: 0.5 }}
-      viewport={{ once: hasVideo }}
+      viewport={{ once: true }}
       style={{ display: isVisible ? undefined : 'none' }}
-      className={`group relative rounded-xl sm:rounded-2xl overflow-hidden bg-[#0d0d1f] border transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(79,70,229,0.25)] hover:-translate-y-1 ${isViewed
-        ? "border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
-        : "border-white/5 hover:border-indigo-500/40"
-        }`}
+      className={`group relative rounded-xl sm:rounded-2xl overflow-hidden bg-[#0d0d1f] border transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(79,70,229,0.25)] hover:-translate-y-1 ${
+        isViewed
+          ? "border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
+          : "border-white/5 hover:border-indigo-500/40"
+      }`}
     >
       <div className="flex flex-col h-full w-full">
         <button
@@ -127,43 +225,53 @@ function TemplateCard({
             e.stopPropagation();
             onPreview(template);
           }}
-          className="aspect-square sm:aspect-[4/5] overflow-hidden relative text-left"
+          className="aspect-square sm:aspect-[4/5] overflow-hidden relative text-left w-full"
           aria-label={`Lihat template ${template.title}`}
         >
-          {/* Animated Loading State */}
-          <div 
-            className="absolute inset-0 flex items-center justify-center bg-[#0d0d1f] z-0 transition-opacity duration-500" 
-            style={{ opacity: isVideoLoaded ? 0 : 1, pointerEvents: "none" }}
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-400 rounded-full"
-            />
+          <div ref={containerRef} className="absolute inset-0 w-full h-full bg-[#05050d] z-0">
+            {/* Elegant shimmer & loading wheel while lazy-loading iframe */}
+            {(!isIntersecting || !isLoaded) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#0d0d1f] z-10 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite] bg-[length:200%_100%]" />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-400 rounded-full"
+                />
+              </div>
+            )}
+
+            {isIntersecting && (
+              <iframe
+                ref={iframeRef}
+                src={iframeUrl}
+                onLoad={() => setIsLoaded(true)}
+                style={{
+                  width: `${dimensions.width}px`,
+                  height: `${dimensions.height}px`,
+                  transform: `scale(${dimensions.scale})`,
+                  transformOrigin: "top left",
+                  opacity: isLoaded ? 1 : 0,
+                }}
+                className="border-0 pointer-events-none absolute top-0 left-0 transition-opacity duration-700"
+                loading="lazy"
+                scrolling="no"
+              />
+            )}
           </div>
 
-          <video
-            src={template.video}
-            onLoadedData={() => setIsVideoLoaded(true)}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-[#020205] via-transparent to-transparent opacity-60 transition-all" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#020205] via-transparent to-transparent opacity-60 transition-all z-10 pointer-events-none" />
 
           {/* Overlay Content */}
           {isViewed && (
-            <div className="absolute top-2 left-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-green-100 text-[9px] font-bold uppercase tracking-wider backdrop-blur-md">
+            <div className="absolute top-2 left-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 border border-green-500/30 text-green-100 text-[9px] font-bold uppercase tracking-wider backdrop-blur-md z-20 pointer-events-none">
               <span className="w-1 h-1 rounded-full bg-green-400" />
               Viewed
             </div>
           )}
         </button>
 
-        <div className="flex flex-col p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border-t border-white/5 gap-2">
+        <div className="flex flex-col p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border-t border-white/5 gap-2 relative z-20">
           <div className="flex items-center justify-between gap-2">
             <h3 className={`text-xs sm:text-sm font-bold tracking-tight truncate transition-colors ${isViewed ? "text-green-100/90" : "text-white group-hover:text-indigo-200"}`}>
               {template.title}
@@ -206,8 +314,10 @@ function TemplateCard({
 
 export default function InvitationLandingClient({
   affiliateWhatsappNumber,
+  previewMap = {},
 }: {
   affiliateWhatsappNumber?: string;
+  previewMap?: Record<string, string[]>;
 }) {
   // Demo Data as requested
   const templates = INVITATION_TEMPLATE_LISTINGS;
@@ -219,6 +329,28 @@ export default function InvitationLandingClient({
   >({});
 
   const [previewTemplate, setPreviewTemplate] = React.useState<TemplateListing | null>(null);
+  const [templateExamples, setTemplateExamples] = React.useState<Array<{ slug: string; title: string }>>([]);
+  const [examplesLoading, setExamplesLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!previewTemplate) {
+      setTemplateExamples([]);
+      return;
+    }
+
+    setExamplesLoading(true);
+    getExampleInvitations(previewTemplate.templateId)
+      .then((res) => {
+        setTemplateExamples(res || []);
+      })
+      .catch((e) => {
+        console.error("Failed to fetch template examples:", e);
+      })
+      .finally(() => {
+        setExamplesLoading(false);
+      });
+  }, [previewTemplate]);
+
   const [previewPurpose, setPreviewPurpose] = React.useState<"marriage" | "birthday" | "event">(
     "marriage",
   );
@@ -229,8 +361,8 @@ export default function InvitationLandingClient({
 
   const filteredTemplates = React.useMemo(() => {
     if (filterPurpose === "all") return templates;
-    if (filterPurpose === "birthday") return templates.filter(t => t.templateId === "kids-birthday" || t.templateId === "comic-book");
-    return templates.filter(t => t.templateId !== "kids-birthday" && t.templateId !== "comic-book");
+    if (filterPurpose === "birthday") return templates.filter(t => t.templateId === "kids-birthday" || t.templateId === "comic-book" || t.templateId === "arcade-retro");
+    return templates.filter(t => t.templateId !== "kids-birthday" && t.templateId !== "comic-book" && t.templateId !== "arcade-retro");
   }, [filterPurpose, templates]);
 
   React.useEffect(() => {
@@ -286,7 +418,7 @@ export default function InvitationLandingClient({
   const openPreviewDialog = (template: TemplateListing) => {
     const themes = getInvitationTemplateThemes(template.templateId);
     const nextThemeId = selectedThemeByTemplateId[template.templateId] ?? themes[0]?.id ?? "";
-    const nextPurpose = template.templateId === "kids-birthday" || template.templateId === "comic-book" ? "birthday" : "marriage";
+    const nextPurpose = template.templateId === "kids-birthday" || template.templateId === "comic-book" || template.templateId === "arcade-retro" ? "birthday" : "marriage";
     setPreviewThemeId(nextThemeId);
     setPreviewPurpose(nextPurpose);
     setPreviewTemplate(template);
@@ -460,7 +592,6 @@ export default function InvitationLandingClient({
             {templates.map((template) => {
               const isVisible = filteredTemplates.some(t => t.id === template.id);
               const isViewed = viewedTemplates.includes(template.id);
-              const hasVideo = Boolean(template.video);
               const visibleIndex = filteredTemplates.findIndex(t => t.id === template.id);
 
               return (
@@ -469,10 +600,10 @@ export default function InvitationLandingClient({
                   template={template}
                   isVisible={isVisible}
                   isViewed={isViewed}
-                  hasVideo={hasVideo}
                   visibleIndex={visibleIndex}
                   onPreview={openPreviewDialog}
                   onOrder={(t) => window.open(createWhatsAppUrl(`INV-${t.templateId}-order`), "_blank", "noopener,noreferrer")}
+                  previewMap={previewMap}
                 />
               );
             })}
@@ -884,7 +1015,7 @@ export default function InvitationLandingClient({
             </div>
 
             <div className="mt-6 grid gap-6">
-              {previewTemplate.templateId === "kids-birthday" || previewTemplate.templateId === "comic-book" ? (
+              {previewTemplate.templateId === "kids-birthday" || previewTemplate.templateId === "comic-book" || previewTemplate.templateId === "arcade-retro" ? (
                 <div>
                   <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
                     Purpose
@@ -985,6 +1116,55 @@ export default function InvitationLandingClient({
                   })}
                 </div>
               </div>
+
+              {/* Real-world Example Invitations List */}
+              {(examplesLoading || templateExamples.length > 0) && (
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-white/45">
+                    Contoh Undangan Nyata
+                  </div>
+                  {examplesLoading ? (
+                    <div className="mt-3 grid gap-2">
+                      {[1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="h-[62px] rounded-2xl border border-white/5 bg-white/[0.02] flex items-center justify-between px-4 animate-pulse"
+                        >
+                          <div className="space-y-2 w-1/2">
+                            <div className="h-3.5 bg-white/10 rounded-sm w-3/4" />
+                            <div className="h-2.5 bg-white/5 rounded-sm w-1/2" />
+                          </div>
+                          <div className="w-24 h-6 bg-white/10 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-3 grid gap-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                      {templateExamples.map((inv) => (
+                        <a
+                          key={inv.slug}
+                          href={`/invitation/${inv.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between gap-3 rounded-2xl border border-green-500/20 bg-green-500/5 hover:bg-green-500/10 hover:border-green-400/40 px-4 py-3 text-left transition-colors"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate text-xs font-black text-white">
+                              {inv.title}
+                            </span>
+                            <span className="mt-0.5 block truncate text-[10px] font-mono text-green-400/70">
+                              /{inv.slug}
+                            </span>
+                          </span>
+                          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-green-100 text-[9px] font-bold uppercase tracking-wider">
+                            Buka Undangan 🚀
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="mt-7 grid grid-cols-2 gap-3">
@@ -1004,7 +1184,7 @@ export default function InvitationLandingClient({
                   const url = `/invitation/${previewTemplate.id}?theme=${encodeURIComponent(
                     previewThemeId,
                   )}&purpose=${encodeURIComponent(
-                    previewTemplate.templateId === "kids-birthday" || previewTemplate.templateId === "comic-book" ? "birthday" : previewPurpose,
+                    previewTemplate.templateId === "kids-birthday" || previewTemplate.templateId === "comic-book" || previewTemplate.templateId === "arcade-retro" ? "birthday" : previewPurpose,
                   )}`;
                   window.open(url, "_blank", "noopener,noreferrer");
                   setPreviewTemplate(null);

@@ -7,6 +7,7 @@ import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import type { GiftSectionProps } from "./InfoSections.types";
 import { EDEN_OVERLAY_ASSETS } from "./graphics/overlays";
 import { CornerLineTopLeft, CornerLineBottomRight, TwinLineDivider, DottedDivider } from "./graphics/ornaments";
+import { GrowingSwayingFloral } from "./graphics/GrowingSwayingFloral";
 
 export function GiftSection({
   bankAccounts,
@@ -44,9 +45,15 @@ export function GiftSection({
         <div className="mx-auto w-full max-w-2xl">
           <RevealOnScroll direction="up" distance={20} delay={0.1}>
             <div className="text-center flex flex-col items-center">
-              <div className="w-24 h-12 mb-4 opacity-70 mix-blend-multiply">
-                <img src={EDEN_OVERLAY_ASSETS.dividerFlower} alt="" className="w-full h-full object-contain" />
-              </div>
+              <GrowingSwayingFloral
+                src={EDEN_OVERLAY_ASSETS.dividerFlower}
+                initialRotate={0}
+                className="w-24 h-12 mb-4 opacity-70 mix-blend-multiply"
+                growDelay={0.15}
+                swayDuration={6.5}
+                originX="50%"
+                originY="100%"
+              />
               <h2 className="font-display italic text-[48px] leading-none text-wedding-accent">
                 {heading}
               </h2>
@@ -101,9 +108,15 @@ export function GiftSection({
                       <CornerLineBottomRight />
                     </div>
                     <div className="relative overflow-hidden bg-wedding-bg rounded-[14px] h-full flex flex-col">
-                      <div className="absolute -bottom-10 -right-10 w-40 h-40 pointer-events-none opacity-50 mix-blend-multiply">
-                         <img src={EDEN_OVERLAY_ASSETS.cardFlower} alt="" className="w-full h-full object-cover" />
-                      </div>
+                      <GrowingSwayingFloral
+                        src={EDEN_OVERLAY_ASSETS.cardFlower}
+                        initialRotate={0}
+                        className="absolute -bottom-10 -right-10 w-40 h-40 pointer-events-none opacity-50 mix-blend-multiply"
+                        growDelay={0.2}
+                        swayDuration={7.2 + index * 0.9}
+                        originX="90%"
+                        originY="90%"
+                      />
                       
                       <div className="relative p-8 text-center flex-1 z-10">
                         <p className="text-[14px] tracking-[0.3em] uppercase text-wedding-accent/80 font-body font-bold">

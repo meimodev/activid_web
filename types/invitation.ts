@@ -30,6 +30,7 @@ export type InvitationDateTimeValue = InvitationDateTimeIso | InvitationDateTime
 export interface EventDetail {
     title: string;
     date: InvitationDateTimeValue;
+    endDate?: InvitationDateTimeValue;
     venue: string;
     address: string;
     mapUrl: string;
@@ -107,6 +108,7 @@ export interface QuoteSection extends SectionBase {
 export type CoupleSection = SectionBase;
 
 export interface HostsSection extends SectionBase {
+   heading?: string;
    hosts: Host[];
 }
 

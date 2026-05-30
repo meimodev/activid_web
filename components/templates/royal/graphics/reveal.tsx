@@ -1,7 +1,7 @@
 "use client";
 
-import { type ReactNode, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { type ReactNode } from "react";
+import { motion } from "framer-motion";
 
 const strokeVariants = {
   hidden: (custom: number) => ({
@@ -27,18 +27,16 @@ export function DrawReveal({
   delay = 0,
   className = "",
 }: DrawRevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-6% 0px" });
-
   if (typeof window === "undefined") {
     return <div className={className}>{children}</div>;
   }
 
   return (
-    <div ref={ref} className={className}>
+    <div className={className}>
       <motion.div
         initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-6% 0px" }}
         transition={{ delay }}
         style={{ display: "inherit" }}
         custom={length}
@@ -71,14 +69,12 @@ interface RevealProps {
 }
 
 export function Reveal({ children, delay = 0, className = "", style }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-6% 0px" });
-
   return (
-    <div ref={ref} className={className} style={style}>
+    <div className={className} style={style}>
       <motion.div
         initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-6% 0px" }}
         custom={delay}
         variants={revealVariants}
       >

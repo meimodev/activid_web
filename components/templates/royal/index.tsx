@@ -23,6 +23,7 @@ import { GratitudeSection } from "./GratitudeSection";
 import { FooterSection } from "./FooterSection";
 import { Petals } from "./graphics";
 import { MusicButton } from "./MusicButton";
+import { WishesSection } from "./WishesSection";
 
 interface RoyalProps {
   config: InvitationConfig;
@@ -161,7 +162,7 @@ export function Royal({ config }: RoyalProps) {
 
       {/* Content area */}
       <div
-        className={`relative z-10 transition-opacity duration-1000 ${isContentReady ? "opacity-100" : "opacity-0 absolute top-0 left-0 w-full"}`}
+        className={`relative z-10 ${isContentReady ? "" : "absolute top-0 left-0 w-full"}`}
       >
         <div className={isContentReady ? "" : "h-[100dvh] overflow-hidden"}>
           {isContentReady ? (
@@ -240,6 +241,16 @@ export function Royal({ config }: RoyalProps) {
                   description={config.sections.gift.description}
                   templateName={config.templateId}
                   eventDate={dateInfo?.display ?? ""}
+                />
+              ) : null}
+
+              {/* Wishes */}
+              {config.sections.wishes?.enabled ? (
+                <WishesSection
+                  invitationId={config.id}
+                  heading={config.sections.wishes.heading}
+                  placeholder={config.sections.wishes.placeholder}
+                  thankYouMessage={config.sections.wishes.thankYouMessage}
                 />
               ) : null}
 

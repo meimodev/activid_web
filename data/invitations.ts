@@ -809,6 +809,34 @@ const DEMO_TEMPLATE_OVERRIDES: Record<string, InvitationConfigOverrides> = {
       },
     },
   },
+  "arcade-retro": {
+    templateId: "arcade-retro",
+    theme: {
+      mainColor: "#0c061a",
+      accentColor: "#ff007f",
+      accent2Color: "#00f0ff",
+      darkColor: "#05020a",
+    },
+    sections: {
+      hero: {
+        coverImage: DEMO_COVER_IMAGE_URL,
+      },
+    },
+  },
+  candyland: {
+    templateId: "candyland",
+    theme: {
+      mainColor: "#FFF5F8",
+      accentColor: "#EC4899",
+      accent2Color: "#60A5FA",
+      darkColor: "#7C3AED",
+    },
+    sections: {
+      hero: {
+        coverImage: DEMO_COVER_IMAGE_URL,
+      },
+    },
+  },
   jupiter: {
     templateId: "jupiter",
     theme: {

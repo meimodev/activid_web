@@ -23,10 +23,12 @@ const Eden = dynamic(() => import("@/components/templates/eden").then(m => ({ de
 const Amalthea = dynamic(() => import("@/components/templates/amalthea").then(m => ({ default: m.Amalthea })));
 const KidsBirthday = dynamic(() => import("@/components/templates/kids-birthday").then(m => ({ default: m.KidsBirthday })));
 const ComicBook = dynamic(() => import("@/components/templates/comic-book").then(m => ({ default: m.ComicBook })));
+const ArcadeRetro = dynamic(() => import("@/components/templates/arcade-retro").then(m => ({ default: m.ArcadeRetro })));
 const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
 const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
 const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
 const Royal = dynamic(() => import("@/components/templates/royal").then(m => ({ default: m.Royal })));
+const Candyland = dynamic(() => import("@/components/templates/candyland").then(m => ({ default: m.Candyland })));
 
 const SITE_ORIGIN = "https://activid.web.id";
 
@@ -39,10 +41,12 @@ const RESERVED_TEMPLATE_SLUGS = new Set([
     "amalthea",
     "kids-birthday",
     "comic-book",
+    "arcade-retro",
     "venus",
     "jupiter",
     "neptune",
     "royal",
+    "candyland",
 ]);
 
 const getValidatedConfig = cache(async (slug: string): Promise<InvitationConfig | null> => {
@@ -140,6 +144,10 @@ function getTemplateLabel(templateId: string) {
             return "Kids Birthday";
         case "comic-book":
             return "Kids Space";
+        case "arcade-retro":
+            return "Arcade Retro";
+        case "candyland":
+            return "Candyland Kingdom";
         default:
             return templateId;
     }
@@ -185,7 +193,7 @@ export async function generateMetadata(
     if (slug.endsWith("-demo")) {
         const templateId = slug.replace(/-demo$/, "");
         const purpose =
-            templateId === "kids-birthday" || templateId === "comic-book"
+            templateId === "kids-birthday" || templateId === "comic-book" || templateId === "arcade-retro" || templateId === "candyland"
                 ? "birthday"
                 : requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
         requireDemoTheme(templateId, getSingleSearchParam(resolvedSearchParams, "theme"));
@@ -315,17 +323,19 @@ export default async function InvitationPage({ params, searchParams }: PageProps
         if (templateId === "amalthea") return <Amalthea config={config} />;
         if (templateId === "kids-birthday") return <KidsBirthday config={config} />;
         if (templateId === "comic-book") return <ComicBook config={config} />;
+        if (templateId === "arcade-retro") return <ArcadeRetro config={config} />;
         if (templateId === "venus") return <Venus config={config} />;
         if (templateId === "jupiter") return <Jupiter config={config} />;
         if (templateId === "neptune") return <Neptune config={config} />;
         if (templateId === "royal") return <Royal config={config} />;
+        if (templateId === "candyland") return <Candyland config={config} />;
         notFound();
     };
 
     if (slug.endsWith("-demo")) {
         const demoTemplateId = slug.replace(/-demo$/, "");
         const demoPurpose =
-            demoTemplateId === "kids-birthday" || demoTemplateId === "comic-book"
+            demoTemplateId === "kids-birthday" || demoTemplateId === "comic-book" || demoTemplateId === "arcade-retro" || demoTemplateId === "candyland"
                 ? "birthday"
                 : requireDemoPurpose(getSingleSearchParam(resolvedSearchParams, "purpose"));
         const selectedTheme = requireDemoTheme(

@@ -7,6 +7,7 @@ import type { TitleSectionProps } from "./InfoSections.types";
 import { getCountdownParts, parseInvitationDateTime } from "@/lib/date-time";
 import { EDEN_OVERLAY_ASSETS } from "./graphics/overlays";
 import { CornerLineTopLeft, CornerLineBottomRight, DiamondLine, SwoopingLineLeft, SwoopingLineRight, SectionEdgeBottom, BeadedLine } from "./graphics/ornaments";
+import { GrowingSwayingFloral } from "./graphics/GrowingSwayingFloral";
 
 function ChangingPhotoBg({ photos }: { photos: string[] }) {
   const pool = useMemo(() => (photos || []).filter(Boolean), [photos]);
@@ -130,12 +131,24 @@ export function TitleSection({
       <ChangingPhotoBg photos={galleryPhotos} />
 
       {/* Subtle rich background texture */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] pointer-events-none opacity-[0.03] mix-blend-multiply">
-         <img src={EDEN_OVERLAY_ASSETS.leafSide} alt="" className="w-full h-full object-cover rotate-180" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] pointer-events-none opacity-[0.03] mix-blend-multiply">
-         <img src={EDEN_OVERLAY_ASSETS.leafSide2} alt="" className="w-full h-full object-cover" />
-      </div>
+      <GrowingSwayingFloral
+        src={EDEN_OVERLAY_ASSETS.leafSide}
+        initialRotate={180}
+        className="absolute top-0 right-0 w-[240px] h-[240px] pointer-events-none opacity-[0.12] mix-blend-multiply"
+        growDelay={0.3}
+        swayDuration={8.5}
+        originX="90%"
+        originY="10%"
+      />
+      <GrowingSwayingFloral
+        src={EDEN_OVERLAY_ASSETS.leafSide2}
+        initialRotate={0}
+        className="absolute bottom-0 left-0 w-[280px] h-[280px] pointer-events-none opacity-[0.12] mix-blend-multiply"
+        growDelay={0.4}
+        swayDuration={9.0}
+        originX="10%"
+        originY="90%"
+      />
 
       <div className="mx-auto flex w-full max-w-[500px] flex-col items-center px-6 text-center z-10 relative">
         <RevealOnScroll direction="up" distance={20} delay={0.1}>

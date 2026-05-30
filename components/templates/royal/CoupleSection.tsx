@@ -5,6 +5,7 @@ import { SectionWrap } from "./SectionWrap";
 import { SectionHead } from "./Hero";
 import { Arch, PhotoPlaceholder, BloomStar } from "./graphics";
 import { Vine } from "@/components/assets/vine";
+import { Reveal } from "./graphics/reveal";
 
 function Person({
   role,
@@ -45,37 +46,45 @@ export function CoupleSection({ hosts }: CoupleSectionProps) {
 
   return (
     <SectionWrap id="couple">
-      <div className="relative">
-        <div className="absolute top-0 left-0 right-0 h-28 pointer-events-none z-0 overflow-hidden">
-          <Vine className="w-full h-full" />
+      <Reveal>
+        <div className="relative">
+          <div className="absolute top-0 left-0 right-0 h-28 pointer-events-none z-0 overflow-hidden">
+            <Vine className="w-full h-full" />
+          </div>
+          <SectionHead
+            eyebrow="With joyful hearts"
+            title="The"
+            em="couple"
+            sub="Together with their families, they ask for your blessing on this sacred day."
+          />
         </div>
-        <SectionHead
-          eyebrow="With joyful hearts"
-          title="The"
-          em="couple"
-          sub="Together with their families, they ask for your blessing on this sacred day."
-        />
-      </div>
+      </Reveal>
       <div className="flex flex-col gap-11">
         {bride && (
-          <Person
-            role="The Bride"
-            name={bride.fullName || bride.firstName}
-            parents={bride.parents}
-          />
+          <Reveal delay={0.1}>
+            <Person
+              role="The Bride"
+              name={bride.fullName || bride.firstName}
+              parents={bride.parents}
+            />
+          </Reveal>
         )}
-        <div className="text-center text-[var(--invitation-accent)] relative">
-          <div className="absolute inset-0 flex items-center justify-center opacity-55 pointer-events-none">
-            <BloomStar size={80} />
+        <Reveal delay={0.15}>
+          <div className="text-center text-[var(--invitation-accent)] relative">
+            <div className="absolute inset-0 flex items-center justify-center opacity-55 pointer-events-none">
+              <BloomStar size={80} />
+            </div>
+            <span className="font-[var(--font-royal-script)] text-[64px] relative">&amp;</span>
           </div>
-          <span className="font-[var(--font-royal-script)] text-[64px] relative">&amp;</span>
-        </div>
+        </Reveal>
         {groom && (
-          <Person
-            role="The Groom"
-            name={groom.fullName || groom.firstName}
-            parents={groom.parents}
-          />
+          <Reveal delay={0.2}>
+            <Person
+              role="The Groom"
+              name={groom.fullName || groom.firstName}
+              parents={groom.parents}
+            />
+          </Reveal>
         )}
       </div>
     </SectionWrap>

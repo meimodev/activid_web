@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BankAccount } from "@/types/invitation";
 import { SectionWrap } from "./SectionWrap";
 import { SectionHead } from "./Hero";
+import { Reveal } from "./graphics/reveal";
 
 interface GiftSectionProps {
   description?: string;
@@ -31,35 +32,38 @@ export function GiftSection({
 
   return (
     <SectionWrap id="gift">
-      <SectionHead
-        eyebrow="Your blessings are enough"
-        title="A token of"
-        em="love"
-        sub={
-          description ||
-          "If you wish to send a gift to brighten our new beginning, here is the way."
-        }
-      />
-      <div className="text-center">
-        {!open && (
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center justify-center gap-2.5 px-[26px] py-3.5 border border-[var(--invitation-accent)] text-[var(--invitation-accent)] font-[var(--font-royal-sans)] text-[11px] tracking-[0.32em] uppercase cursor-pointer relative overflow-hidden transition-colors duration-300 hover:text-[var(--invitation-bg)] group"
-          >
-            <span className="absolute inset-0 bg-[var(--invitation-accent)] translate-y-[101%] transition-transform duration-500 ease-out group-hover:translate-y-0" />
-            <span className="relative z-[1]">Reveal Gift Details</span>
-          </button>
-        )}
-      </div>
+      <Reveal>
+        <SectionHead
+          eyebrow="Your blessings are enough"
+          title="A token of"
+          em="love"
+          sub={
+            description ||
+            "If you wish to send a gift to brighten our new beginning, here is the way."
+          }
+        />
+      </Reveal>
+      <Reveal delay={0.1}>
+        <div className="text-center">
+          {!open && (
+            <button
+              onClick={() => setOpen(true)}
+              className="inline-flex items-center justify-center gap-2.5 px-[26px] py-3.5 border border-[var(--invitation-accent)] text-[var(--invitation-accent)] font-[var(--font-royal-sans)] text-[11px] tracking-[0.32em] uppercase cursor-pointer relative overflow-hidden transition-colors duration-300 hover:text-[var(--invitation-bg)] group"
+            >
+              <span className="absolute inset-0 bg-[var(--invitation-accent)] translate-y-[101%] transition-transform duration-500 ease-out group-hover:translate-y-0" />
+              <span className="relative z-[1]">Reveal Gift Details</span>
+            </button>
+          )}
+        </div>
 
-      <div
-        className="grid gap-3.5 transition-all duration-700 ease-out overflow-hidden"
-        style={{
-          maxHeight: open ? "600px" : "0px",
-          opacity: open ? 1 : 0,
-          marginTop: open ? "24px" : "0px",
-        }}
-      >
+        <div
+          className="grid gap-3.5 transition-all duration-700 ease-out overflow-hidden"
+          style={{
+            maxHeight: open ? "600px" : "0px",
+            opacity: open ? 1 : 0,
+            marginTop: open ? "24px" : "0px",
+          }}
+        >
         {bankAccounts.map((a, i) => (
           <div
             key={i}
@@ -99,6 +103,7 @@ export function GiftSection({
           </div>
         ))}
       </div>
+      </Reveal>
     </SectionWrap>
   );
 }

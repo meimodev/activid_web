@@ -15,10 +15,12 @@ const Eden = dynamic(() => import("@/components/templates/eden").then(m => ({ de
 const Amalthea = dynamic(() => import("@/components/templates/amalthea").then(m => ({ default: m.Amalthea })));
 const KidsBirthday = dynamic(() => import("@/components/templates/kids-birthday").then(m => ({ default: m.KidsBirthday })));
 const ComicBook = dynamic(() => import("@/components/templates/comic-book").then(m => ({ default: m.ComicBook })));
+const ArcadeRetro = dynamic(() => import("@/components/templates/arcade-retro").then(m => ({ default: m.ArcadeRetro })));
 const Venus = dynamic(() => import("@/components/templates/venus").then(m => ({ default: m.Venus })));
 const Jupiter = dynamic(() => import("@/components/templates/jupiter").then(m => ({ default: m.Jupiter })));
 const Neptune = dynamic(() => import("@/components/templates/neptune").then(m => ({ default: m.Neptune })));
 const Royal = dynamic(() => import("@/components/templates/royal").then(m => ({ default: m.Royal })));
+const Candyland = dynamic(() => import("@/components/templates/candyland").then(m => ({ default: m.Candyland })));
 
 type DemoPurpose = InvitationConfig["purpose"];
 
@@ -36,7 +38,7 @@ export function InvitationDemoPlayground({
   initialThemeId,
 }: InvitationDemoPlaygroundProps) {
   const themes = useMemo(() => getInvitationTemplateThemes(templateId), [templateId]);
-  const isBirthdayOnlyTemplate = templateId === "kids-birthday" || templateId === "comic-book";
+  const isBirthdayOnlyTemplate = templateId === "kids-birthday" || templateId === "comic-book" || templateId === "arcade-retro" || templateId === "candyland";
 
   const [purpose, setPurpose] = useState<DemoPurpose>(initialPurpose);
   const [themeId, setThemeId] = useState<string>(initialThemeId);
@@ -102,10 +104,12 @@ export function InvitationDemoPlayground({
     if (templateId === "amalthea") return <Amalthea key={key} config={config} />;
     if (templateId === "kids-birthday") return <KidsBirthday key={key} config={config} />;
     if (templateId === "comic-book") return <ComicBook key={key} config={config} />;
+    if (templateId === "arcade-retro") return <ArcadeRetro key={key} config={config} />;
     if (templateId === "venus") return <Venus key={key} config={config} />;
     if (templateId === "jupiter") return <Jupiter key={key} config={config} />;
     if (templateId === "neptune") return <Neptune key={key} config={config} />;
     if (templateId === "royal") return <Royal key={key} config={config} />;
+    if (templateId === "candyland") return <Candyland key={key} config={config} />;
 
     return <Flow key={key} config={config} />;
   }, [config, effectivePurpose, templateId]);

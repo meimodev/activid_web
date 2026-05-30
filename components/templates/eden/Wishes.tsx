@@ -20,6 +20,7 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import { EDEN_OVERLAY_ASSETS } from "./graphics/overlays";
 import { CornerLineTopLeft, CornerLineBottomRight, TwinLineDivider, ThinFrameRule } from "./graphics/ornaments";
+import { GrowingSwayingFloral } from "./graphics/GrowingSwayingFloral";
 
 interface Wish {
   id: string;
@@ -327,12 +328,24 @@ export function Wishes({
             </div>
 
             {/* Rich floral corners */}
-            <div className="absolute -top-12 -right-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply">
-              <img src={EDEN_OVERLAY_ASSETS.cornerFlower} alt="" className="w-full h-full object-contain rotate-90" />
-            </div>
-            <div className="absolute -bottom-12 -left-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply">
-              <img src={EDEN_OVERLAY_ASSETS.cornerFlower} alt="" className="w-full h-full object-contain -rotate-90" />
-            </div>
+            <GrowingSwayingFloral
+              src={EDEN_OVERLAY_ASSETS.cornerFlower}
+              initialRotate={90}
+              className="absolute -top-12 -right-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply"
+              growDelay={0.3}
+              swayDuration={6.5}
+              originX="90%"
+              originY="10%"
+            />
+            <GrowingSwayingFloral
+              src={EDEN_OVERLAY_ASSETS.cornerFlower}
+              initialRotate={-90}
+              className="absolute -bottom-12 -left-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply"
+              growDelay={0.4}
+              swayDuration={7.0}
+              originX="10%"
+              originY="90%"
+            />
 
             <div className="relative border-none bg-wedding-bg rounded-t-[60px] rounded-b-[12px] p-8 overflow-hidden z-10">
               <ThinFrameRule />
@@ -359,7 +372,7 @@ export function Wishes({
                 {existingWish?.message ? (
                   <div className="mt-8 pt-8 border-t border-wedding-accent/10">
                     <p className="text-[15px] text-wedding-accent/80 whitespace-pre-line font-body leading-relaxed italic">
-                      "{existingWish.message}"
+                      &quot;{existingWish.message}&quot;
                     </p>
                   </div>
                 ) : null}
@@ -445,7 +458,7 @@ export function Wishes({
                       </p>
                     </div>
                     <p className="text-[16px] text-wedding-accent/80 whitespace-pre-line font-body leading-relaxed italic">
-                      "{wish.message}"
+                      &quot;{wish.message}&quot;
                     </p>
                   </motion.div>
                 );

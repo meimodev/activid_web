@@ -283,7 +283,7 @@ export function QuoteSection({ quote, isReady }: QuoteSectionProps) {
               
               <motion.div variants={popVariants}>
                 <blockquote className="mt-8 font-black text-[32px] leading-tight tracking-tight text-white [text-shadow:-2px_-2px_0_black,2px_-2px_0_black,-2px_2px_0_black,2px_2px_0_black,5px_5px_0_var(--invitation-accent-2)]">
-                  "{quote.text}"
+                  &quot;{quote.text}&quot;
                 </blockquote>
               </motion.div>
               

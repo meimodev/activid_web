@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SectionWrap } from "./SectionWrap";
 import { SectionHead } from "./Hero";
 import { Crest } from "./graphics";
+import { Reveal } from "./graphics/reveal";
 
 interface RsvpSectionProps {
   description: string;
@@ -26,42 +27,47 @@ export function RsvpSection({ description, successMessage }: RsvpSectionProps) {
   if (step === "submitted") {
     return (
       <SectionWrap id="rsvp">
-        <div className="text-center">
-          <div className="flex justify-center">
-            <Crest size={120} initials="✓" idle />
+        <Reveal>
+          <div className="text-center">
+            <div className="flex justify-center">
+              <Crest size={120} initials="✓" idle />
+            </div>
+            <div className="font-[var(--font-royal-serif)] font-light text-[32px] mt-4">
+              Thank you,{" "}
+              <span className="font-[var(--font-royal-script)] text-[40px] shimmer-text">
+                {name.split(" ")[0]}
+              </span>
+            </div>
+            <div className="mt-3 font-[var(--font-royal-serif)] text-[15px] text-[var(--invitation-text-light)]">
+              {attend ? successMessage : "We'll miss you — your love still travels with us."}
+            </div>
+            <button
+              onClick={() => setStep("form")}
+              className="inline-flex items-center justify-center gap-2.5 px-[26px] py-3.5 mt-6 border text-[var(--invitation-text)] font-[var(--font-royal-sans)] text-[11px] tracking-[0.32em] uppercase"
+              style={{
+                borderColor: "color-mix(in srgb, var(--invitation-accent) 35%, transparent)",
+              }}
+            >
+              <span>Edit Response</span>
+            </button>
           </div>
-          <div className="font-[var(--font-royal-serif)] font-light text-[32px] mt-4">
-            Thank you,{" "}
-            <span className="font-[var(--font-royal-script)] text-[40px] shimmer-text">
-              {name.split(" ")[0]}
-            </span>
-          </div>
-          <div className="mt-3 font-[var(--font-royal-serif)] text-[15px] text-[var(--invitation-text-light)]">
-            {attend ? successMessage : "We'll miss you — your love still travels with us."}
-          </div>
-          <button
-            onClick={() => setStep("form")}
-            className="inline-flex items-center justify-center gap-2.5 px-[26px] py-3.5 mt-6 border text-[var(--invitation-text)] font-[var(--font-royal-sans)] text-[11px] tracking-[0.32em] uppercase"
-            style={{
-              borderColor: "color-mix(in srgb, var(--invitation-accent) 35%, transparent)",
-            }}
-          >
-            <span>Edit Response</span>
-          </button>
-        </div>
+        </Reveal>
       </SectionWrap>
     );
   }
 
   return (
     <SectionWrap id="rsvp">
-      <SectionHead
-        eyebrow="Kindly respond"
-        title="Will you"
-        em="join us?"
-        sub={description || "Please share your reply so we may prepare for your arrival."}
-      />
-      <form onSubmit={submit} className="grid gap-4.5">
+      <Reveal>
+        <SectionHead
+          eyebrow="Kindly respond"
+          title="Will you"
+          em="join us?"
+          sub={description || "Please share your reply so we may prepare for your arrival."}
+        />
+      </Reveal>
+      <Reveal delay={0.1}>
+        <form onSubmit={submit} className="grid gap-4.5">
         <label className="grid gap-2">
           <span className="font-[var(--font-royal-sans)] text-[9px] tracking-[0.18em] uppercase text-[var(--invitation-accent)]">
             Your full name
@@ -150,6 +156,7 @@ export function RsvpSection({ description, successMessage }: RsvpSectionProps) {
           <span className="relative z-[1]">Send My Reply</span>
         </button>
       </form>
+      </Reveal>
     </SectionWrap>
   );
 }

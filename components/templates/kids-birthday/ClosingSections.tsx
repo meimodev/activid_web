@@ -336,6 +336,7 @@ export function GallerySection({ photos, heading, isSoccerArgentina }: GallerySe
 }
 
 export function GratitudeSection({ hosts, message, isSoccerArgentina }: GratitudeSectionProps) {
+  const overlayAssets = useOverlayAssets();
   const displayName = hosts[0]?.firstName || hosts[0]?.shortName || "Birthday Star";
 
   return (
@@ -344,12 +345,12 @@ export function GratitudeSection({ hosts, message, isSoccerArgentina }: Gratitud
         <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-50">
           <motion.div
             className="absolute inset-0 bg-repeat bg-size-[300px_300px] opacity-70"
-            style={{ backgroundImage: `url(${useOverlayAssets().soccerSprinkles})` }}
+            style={{ backgroundImage: `url(${overlayAssets.soccerSprinkles})` }}
             animate={{ y: [0, 20, 0] }}
             transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.img
-            src={useOverlayAssets().soccerBall}
+            src={overlayAssets.soccerBall}
             alt=""
             className="absolute -left-10 top-[20%] h-[140px] w-[140px] object-contain opacity-80"
             animate={{ y: [0, -15, 0], rotate: [0, 360] }}

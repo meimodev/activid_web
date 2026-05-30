@@ -2,12 +2,27 @@
 
 import { useEffect, useRef } from "react";
 
-const COLORS = [
+const PETAL_COLORS = [
   "var(--invitation-accent)",
   "var(--invitation-accent-light)",
-  "var(--invitation-text)",
-  "var(--invitation-bg-alt)",
+  "#8a4f7d", // Plum
+  "#5c2b50", // Dark Plum
+  "#9d6b91", // Soft Lilac/Plum
   "var(--invitation-accent-2)",
+];
+
+const GOLD_COLORS = [
+  "var(--invitation-accent)",
+  "var(--invitation-accent-light)",
+  "#f3d99e", // Bright warm gold
+  "#e3c276", // Deep gold
+  "#ebd293", // Soft pale gold
+];
+
+const SPARKLE_COLORS = [
+  "#ffffff", // High white shine
+  "var(--invitation-accent-light)",
+  "#f2e3d5", // Off-white cream
 ];
 
 function usePetals(intensity: number) {
@@ -23,7 +38,22 @@ function usePetals(intensity: number) {
     function spawn() {
       if (!running || !layer) return;
 
-      const isPetal = Math.random() < 0.7;
+      const rand = Math.random();
+      let type: "petal" | "gold" | "sparkle" = "petal";
+      if (rand < 0.4) {
+        type = "petal";
+      } else if (rand < 0.8) {
+        type = "gold";
+      } else {
+        type = "sparkle";
+      }
+
+      const startX = Math.random() * window.innerWidth;
+      const drift = (Math.random() - 0.5) * 200;
+      const dur = 8 + Math.random() * 10;
+      const rot = Math.random() * 720 - 360;
+      const delay = Math.random() * 0.4;
+
       const el = document.createElement("div");
       el.style.cssText = `
         position: absolute;
@@ -32,28 +62,42 @@ function usePetals(intensity: number) {
         pointer-events: none;
       `;
 
-      const size = 6 + Math.random() * (isPetal ? 14 : 4);
-      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-      const startX = Math.random() * window.innerWidth;
-      const drift = (Math.random() - 0.5) * 200;
-      const dur = 8 + Math.random() * 10;
-      const rot = Math.random() * 720 - 360;
-      const delay = Math.random() * 0.4;
+      let size = 8;
+      let html = "";
+      let color = "";
 
-      if (isPetal) {
-        el.innerHTML = `
+      if (type === "petal") {
+        size = 8 + Math.random() * 12;
+        color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+        html = `
           <svg viewBox="0 0 20 20" width="${size}" height="${size}" style="display:block">
             <path d="M10 1 C 4 4, 2 12, 10 19 C 18 12, 16 4, 10 1 Z"
-                  fill="${color}" opacity="0.85"/>
-            <path d="M10 4 Q10 12 10 17" stroke="rgba(0,0,0,0.18)" stroke-width="0.5" fill="none"/>
+                  fill="${color}" opacity="0.8"/>
+            <path d="M10 4 Q10 12 10 17" stroke="rgba(0,0,0,0.15)" stroke-width="0.5" fill="none"/>
+          </svg>`;
+      } else if (type === "gold") {
+        size = 6 + Math.random() * 10;
+        color = GOLD_COLORS[Math.floor(Math.random() * GOLD_COLORS.length)];
+        const shapeIdx = Math.floor(Math.random() * 3);
+        const paths = [
+          "M3 2 Q 8 0 13 3 Q 16 7 14 12 Q 9 15 4 13 Q 0 9 3 2 Z",
+          "M2 5 Q 7 1 12 2 Q 15 6 13 11 Q 9 14 3 10 Q 0 7 2 5 Z",
+          "M4 1 Q 8 2 12 1 Q 14 6 13 11 Q 7 14 2 12 Q 1 7 4 1 Z"
+        ];
+        html = `
+          <svg viewBox="0 0 16 16" width="${size}" height="${size}" style="display:block">
+            <path d="${paths[shapeIdx]}" fill="${color}" opacity="0.85"/>
           </svg>`;
       } else {
-        el.innerHTML = `
-          <svg viewBox="0 0 12 12" width="${size * 1.6}" height="${size * 1.6}" style="display:block">
-            <path d="M6 0 L6.6 5.4 L12 6 L6.6 6.6 L6 12 L5.4 6.6 L0 6 L5.4 5.4 Z"
-                  fill="${color}" opacity="0.9"/>
+        size = 5 + Math.random() * 6;
+        color = SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)];
+        html = `
+          <svg viewBox="0 0 16 16" width="${size * 1.5}" height="${size * 1.5}" style="display:block">
+            <path d="M8 0 Q 8 6 14 8 Q 8 10 8 16 Q 8 10 2 8 Q 8 6 8 0 Z" fill="${color}" opacity="0.95"/>
           </svg>`;
       }
+
+      el.innerHTML = html;
 
       el.style.left = `${startX}px`;
       el.style.top = "-30px";

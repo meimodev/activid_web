@@ -6,6 +6,7 @@ import { SectionHead } from "./Hero";
 import { Sprig, RoseSm } from "./graphics";
 import { deriveInvitationPrimaryDateInfo } from "@/lib/date-time";
 import { VineOrnamental } from "@/components/assets/vine-ornamental";
+import { Reveal } from "./graphics/reveal";
 
 function EventCard({
   kind,
@@ -60,7 +61,7 @@ function Row({ label, value }: { label: string; value: string }) {
       <div className="font-[var(--font-royal-sans)] text-[9px] tracking-[0.18em] uppercase text-[var(--invitation-accent)]">
         {label}
       </div>
-      <div className="font-[var(--font-royal-serif)] text-sm text-[var(--invitation-text)]">
+      <div className="font-[var(--font-royal-serif)] text-sm text-[var(--invitation-text)] text-left">
         {value}
       </div>
     </div>
@@ -76,28 +77,34 @@ export function EventSection({ events }: EventSectionProps) {
 
   return (
     <SectionWrap id="events">
-      <div className="relative">
-        <div className="absolute top-0 left-0 right-0 h-32 pointer-events-none z-0 overflow-hidden opacity-40">
-          <VineOrnamental className="w-full h-full" />
+      <Reveal>
+        <div className="relative">
+          <div className="absolute top-0 left-0 right-0 h-32 pointer-events-none z-0 overflow-hidden opacity-40">
+            <VineOrnamental className="w-full h-full" />
+          </div>
+          <SectionHead eyebrow="The celebration" title="Event" em="details" />
         </div>
-        <SectionHead eyebrow="The celebration" title="Event" em="details" />
-      </div>
+      </Reveal>
       <div className="flex flex-col gap-6">
         {events.map((e, i) => {
           const dateInfo = deriveInvitationPrimaryDateInfo(e.date);
           return (
             <div key={i}>
-              <EventCard
-                kind={i === 0 ? "Ceremony" : events.length > 1 ? "Reception" : "Event"}
-                title={e.title || (i === 0 ? "The Vows" : "The Banquet")}
-                when={dateInfo?.display ?? ""}
-                where={e.venue}
-                address={e.address}
-              />
+              <Reveal delay={0.08 * i}>
+                <EventCard
+                  kind={i === 0 ? "Ceremony" : events.length > 1 ? "Reception" : "Event"}
+                  title={e.title || (i === 0 ? "The Vows" : "The Banquet")}
+                  when={dateInfo?.display ?? ""}
+                  where={e.venue}
+                  address={e.address}
+                />
+              </Reveal>
               {i < events.length - 1 && (
-                <div className="text-center text-[var(--invitation-accent)] mt-3">
-                  <RoseSm size={36} />
-                </div>
+                <Reveal delay={0.12}>
+                  <div className="text-center text-[var(--invitation-accent)] mt-3">
+                    <RoseSm size={36} />
+                  </div>
+                </Reveal>
               )}
             </div>
           );

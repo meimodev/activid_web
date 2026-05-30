@@ -4,17 +4,30 @@ import { RevealOnScroll } from "@/components/invitation/RevealOnScroll";
 import type { CoupleSectionProps } from "./InfoSections.types";
 import { EDEN_OVERLAY_ASSETS } from "./graphics/overlays";
 import { CornerLineTopLeft, CornerLineBottomRight, TwinLineDivider, HairlineDivider } from "./graphics/ornaments";
+import { GrowingSwayingFloral } from "./graphics/GrowingSwayingFloral";
 
 function FramedPhoto({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="relative mx-auto w-full max-w-[340px] p-4">
       {/* Rich floral layers */}
-      <div className="absolute -top-12 -left-12 w-40 h-40 z-20 pointer-events-none opacity-90 mix-blend-multiply">
-        <img src={EDEN_OVERLAY_ASSETS.frameFlower} alt="" className="w-full h-full object-contain -rotate-12" />
-      </div>
-      <div className="absolute -bottom-12 -right-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply">
-        <img src={EDEN_OVERLAY_ASSETS.frameFlower} alt="" className="w-full h-full object-contain rotate-[160deg] scale-x-[-1]" />
-      </div>
+      <GrowingSwayingFloral
+        src={EDEN_OVERLAY_ASSETS.frameFlower}
+        initialRotate={-12}
+        className="absolute -top-12 -left-12 w-40 h-40 z-20 pointer-events-none opacity-90 mix-blend-multiply"
+        growDelay={0.25}
+        swayDuration={6.8}
+        originX="20%"
+        originY="80%"
+      />
+      <GrowingSwayingFloral
+        src={EDEN_OVERLAY_ASSETS.frameFlower}
+        initialRotate={160}
+        className="absolute -bottom-12 -right-12 w-48 h-48 z-20 pointer-events-none opacity-90 mix-blend-multiply scale-x-[-1]"
+        growDelay={0.35}
+        swayDuration={7.8}
+        originX="80%"
+        originY="20%"
+      />
 
       {/* Line graphic corners */}
       <div className="absolute -top-2 -left-2 z-10 pointer-events-none opacity-50">

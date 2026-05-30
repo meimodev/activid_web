@@ -20,6 +20,8 @@ import {
   FooterSection,
 } from "./InfoSections";
 import { RoyalCrownDivider, OrnateFleurDivider, MandalaDivider, RegalBarDivider } from "./graphics/dividers";
+import { EDEN_OVERLAY_ASSETS } from "./graphics/overlays";
+import { GrowingSwayingFloral } from "./graphics/GrowingSwayingFloral";
 import { InvitationConfig } from "@/types/invitation";
 import { DateTime } from "luxon";
 import {
@@ -148,6 +150,44 @@ export function Eden({ config }: EdenProps) {
         <div className={isContentReady ? "" : "h-screen overflow-hidden"}>
           {isContentReady ? (
             <>
+              {/* Scattered background/margin florals dynamically growing and swaying */}
+              <GrowingSwayingFloral
+                src={EDEN_OVERLAY_ASSETS.leafSide}
+                initialRotate={30}
+                className="absolute left-[-45px] top-[26%] w-36 h-36 z-10 pointer-events-none opacity-80 mix-blend-multiply"
+                growDelay={0.25}
+                swayDuration={8.0}
+                originX="10%"
+                originY="50%"
+              />
+              <GrowingSwayingFloral
+                src={EDEN_OVERLAY_ASSETS.leafSide2}
+                initialRotate={-30}
+                className="absolute right-[-45px] top-[42%] w-40 h-40 z-10 pointer-events-none opacity-80 mix-blend-multiply scale-x-[-1]"
+                growDelay={0.35}
+                swayDuration={7.6}
+                originX="90%"
+                originY="50%"
+              />
+              <GrowingSwayingFloral
+                src={EDEN_OVERLAY_ASSETS.leafSide}
+                initialRotate={15}
+                className="absolute left-[-40px] top-[60%] w-36 h-36 z-10 pointer-events-none opacity-80 mix-blend-multiply"
+                growDelay={0.4}
+                swayDuration={8.8}
+                originX="10%"
+                originY="50%"
+              />
+              <GrowingSwayingFloral
+                src={EDEN_OVERLAY_ASSETS.leafSide2}
+                initialRotate={-40}
+                className="absolute right-[-40px] top-[76%] w-36 h-36 z-10 pointer-events-none opacity-80 mix-blend-multiply scale-x-[-1]"
+                growDelay={0.3}
+                swayDuration={8.2}
+                originX="90%"
+                originY="50%"
+              />
+
               {sections.title.enabled ? (
                 <TitleSection
                   hosts={effectiveHosts}

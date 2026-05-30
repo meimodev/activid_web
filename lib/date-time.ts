@@ -251,3 +251,11 @@ export function getCountdownParts(target: unknown): {
 
   return { days, hours, minutes, seconds };
 }
+
+export function formatTimeRange(start: unknown, end?: unknown): string {
+  const startTime = formatInvitationTime(start);
+  if (!end) return startTime;
+  const endTime = formatInvitationTime(end);
+  return `${startTime} - ${endTime}`;
+}
+

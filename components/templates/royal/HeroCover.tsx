@@ -195,7 +195,7 @@ export function HeroCover({ onOpen, hosts, date }: HeroCoverProps) {
             {/* Wax seal */}
             <motion.div
               ref={sealRef}
-              className="absolute z-[6] flex items-center justify-center rounded-full font-[var(--font-royal-script)] text-2xl"
+              className="absolute z-[6] flex items-center justify-center rounded-full font-[var(--font-royal-script)] text-2xl cursor-pointer"
               style={{
                 top: "22%",
                 left: "50%",
@@ -208,6 +208,13 @@ export function HeroCover({ onOpen, hosts, date }: HeroCoverProps) {
                   "0 6px 18px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(201,169,97,0.4), inset 0 -8px 18px rgba(0,0,0,0.4), inset 0 6px 12px rgba(255,255,255,0.08)",
                 transform: "translate(-50%, -50%)",
               }}
+              whileHover={state === "idle" ? {
+                scale: 1.12,
+                rotate: [0, -3, 3, -3, 0],
+                boxShadow: "0 10px 24px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(255,255,255,0.2), inset 0 -8px 18px rgba(0,0,0,0.4), inset 0 6px 12px rgba(255,255,255,0.12)"
+              } : undefined}
+              whileTap={state === "idle" ? { scale: 0.94 } : undefined}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
               animate={
                 state === "opening"
                   ? {
