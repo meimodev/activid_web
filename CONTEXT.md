@@ -8,6 +8,10 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Palakat** — A mobile application (iOS + Android) published under Activid.
 
+**Bol-bol Studio** — A self-photo-studio booking page (`/bol-bol-studio`), its own standalone brand world: independent theme, fonts, and layout, not part of the marketing site or invitation platform. Mobile-first; the booking flow is a multi-step (Tanggal → Jam → Paket → Latar → Konfirmasi → Selesai) single-page carousel that submits via WhatsApp.
+
+**Latar (Background)** — The studio backdrop the customer poses against, chosen as a required step between Paket and Konfirmasi. A fixed set of named backdrop options (e.g. white, peach, green, corner), each shown as a labelled photo thumbnail; selecting one advances the flow. The chosen Latar appears in the Konfirmasi order summary and in the WhatsApp message. Distinct from a Paket (a priced session) and an Add-on.
+
 **LOIT** — Full product name **LOIT — Shareable Finance Tracker**. A mobile application (iOS + Android) published under Activid. Always written uppercase. Collects: account identity (name/username) + contact (email/phone), camera + photos (uploaded and stored), and location. Backed by Supabase (auth, database, photo storage), Firebase (analytics + crash reporting), Firebase Cloud Messaging (push; device token collected), and Google Play Services / Maps (location).
 
 **Privacy Policy** — Site-wide legal page (`/privacy`) covering Activid, Palakat, and LOIT jointly.

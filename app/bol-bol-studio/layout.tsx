@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function BolBolStudioLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${studioDisplay.className} ${studioDisplay.variable} ${studioBody.variable} min-h-screen bg-[#372f2d] text-stone-100`}>
+    <div className={`${studioDisplay.className} ${studioDisplay.variable} ${studioBody.variable} min-h-screen bg-[#1A3CB8] text-stone-100`}>
       {children}
     </div>
   );

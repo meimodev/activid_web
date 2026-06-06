@@ -35,7 +35,7 @@ Each route group/top-level folder has its own `layout.tsx` with separate fonts a
 
 ### Invitation system
 
-- **Templates** live in `components/templates/`: `flow`, `saturn`, `mercury`, `pluto`, `amalthea`, `kids-birthday`, `venus`, `jupiter`, `neptune`
+- **Templates** live in `components/templates/`: `amalthea`, `arcade-retro`, `candyland`, `comic-book`, `eden`, `flow`, `jupiter`, `kids-birthday`, `mercury`, `neptune`, `pluto`, `royal`, `saturn`, `venus`
 - **Templates are lazy-loaded** via `next/dynamic` in `[slug]/page.tsx` and `InvitationDemoPlayground.tsx` — only the rendered template's module is bundled
 - **Template metadata** (listings, themes, video URLs) in `data/invitation-templates.ts`
 - **Demo seed data** in `data/invitations.ts` (912 lines, all demo configs per template)

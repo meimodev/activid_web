@@ -40,6 +40,24 @@ export type AddOn = {
   price: number;
 };
 
+export type StudioBackground = {
+  id: string;
+  name: string;
+  images: string[];
+};
+
+// Studio backdrops the customer poses against (the "Latar" step).
+// Hardcoded: physical studio walls change rarely and there is no admin UI for them.
+const BB_BACKGROUND_BASE = "https://ik.imagekit.io/geb6bfhmhx/bol-bol-studio";
+
+export const BB_BACKGROUNDS: StudioBackground[] = [
+  { id: "white", name: "Putih", images: [1, 2, 3, 4].map((n) => `${BB_BACKGROUND_BASE}/white-${n}.jpg`) },
+  { id: "peach", name: "Peach", images: [1, 2, 3, 4].map((n) => `${BB_BACKGROUND_BASE}/peach-${n}.jpg`) },
+  { id: "green", name: "Hijau", images: [1, 2, 3, 4].map((n) => `${BB_BACKGROUND_BASE}/green-${n}.jpg`) },
+  { id: "pink", name: "Merah Muda", images: [1, 2, 3, 4].map((n) => `${BB_BACKGROUND_BASE}/pink-${n}.jpg`) },
+  { id: "corner", name: "Corner", images: [1, 2, 3].map((n) => `${BB_BACKGROUND_BASE}/corner-${n}.jpg`) },
+];
+
 export type Account = {
   id?: string;
   phone?: string;
