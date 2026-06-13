@@ -1,7 +1,7 @@
 "use client";
 
 import { MotionConfig } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 /**
  * Wraps a template render for the Invitation Catalog's `?preview=1` iframes.
@@ -21,6 +21,24 @@ import type { ReactNode } from "react";
  * See ADR 0002.
  */
 export function PreviewFreeze({ children }: { children: ReactNode }) {
+    // Tell the catalog card (parent window) once this preview has actually
+    // painted, so the card reveals the iframe then instead of on the iframe's
+    // `onLoad` (which fires before the template has hydrated) — killing the
+    // blank-frame flash. Two rAFs wait for a committed paint. See ADR 0002.
+    useEffect(() => {
+        if (window.parent === window) return;
+        let raf2 = 0;
+        const raf1 = requestAnimationFrame(() => {
+            raf2 = requestAnimationFrame(() => {
+                window.parent.postMessage({ type: "invitation-preview-ready" }, "*");
+            });
+        });
+        return () => {
+            cancelAnimationFrame(raf1);
+            cancelAnimationFrame(raf2);
+        };
+    }, []);
+
     return (
         <MotionConfig reducedMotion="always">
             <style>{`

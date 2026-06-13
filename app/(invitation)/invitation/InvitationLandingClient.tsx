@@ -121,7 +121,13 @@ function TemplateCard({
 
   const [isIntersecting, setIsIntersecting] = React.useState(false);
   const [dimensions, setDimensions] = React.useState({ width: 375, height: 468, scale: 0.5 });
+  // `isLoaded` = the template inside the iframe has actually painted (driven by
+  // the in-iframe `invitation-preview-ready` postMessage, with an onLoad-based
+  // fallback). `isRevealed` = the fade-in crossfade has finished, after which
+  // the shimmer placeholder beneath the iframe can unmount.
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isRevealed, setIsRevealed] = React.useState(false);
+  const loadFallbackRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [actualGeneratedSlug, setActualGeneratedSlug] = React.useState<string | undefined>(undefined);
 
   // Only the cards closest to the viewport hold a live iframe (capped by the
@@ -186,13 +192,57 @@ function TemplateCard({
     }
   }, [isIntersecting, template.id, onRequestLive, onReleaseLive]);
 
-  // When the iframe is torn down (slot lost or scrolled away), reset the loaded
-  // state so the shimmer placeholder shows again on the next mount.
+  // When the iframe is torn down (slot lost or scrolled away), reset so the
+  // shimmer placeholder shows again on the next mount and any pending fallback
+  // reveal timer is cancelled.
   React.useEffect(() => {
     if (!shouldMount) {
       setIsLoaded(false);
+      if (loadFallbackRef.current) {
+        clearTimeout(loadFallbackRef.current);
+        loadFallbackRef.current = null;
+      }
     }
   }, [shouldMount]);
+
+  // Reveal only once the template inside the iframe has painted. The preview
+  // render posts `invitation-preview-ready` after its first paint; reacting to
+  // that (instead of the iframe's own `onLoad`, which fires before the
+  // next/dynamic template has hydrated) is what removes the blank-frame flash.
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (
+        event.source === iframeRef.current?.contentWindow &&
+        (event.data as { type?: string } | null)?.type === "invitation-preview-ready"
+      ) {
+        if (loadFallbackRef.current) {
+          clearTimeout(loadFallbackRef.current);
+          loadFallbackRef.current = null;
+        }
+        setIsLoaded(true);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
+
+  // Hold the placeholder beneath the iframe until the opacity crossfade has
+  // finished, so there is never a bare gap between placeholder and live frame.
+  React.useEffect(() => {
+    if (!isLoaded) {
+      setIsRevealed(false);
+      return;
+    }
+    const timer = setTimeout(() => setIsRevealed(true), 700);
+    return () => clearTimeout(timer);
+  }, [isLoaded]);
+
+  // Fallback reveal: live user slugs render without the preview-ready signal, so
+  // give the template a short window to hydrate after load, then reveal anyway.
+  const handleIframeLoad = React.useCallback(() => {
+    if (isLoaded) return;
+    loadFallbackRef.current = setTimeout(() => setIsLoaded(true), 600);
+  }, [isLoaded]);
 
   // Determine actual generated invitation preview or fall back to template demo layout
   const firstTheme = getInvitationTemplateThemes(template.templateId)[0]?.id ?? "";
@@ -241,8 +291,9 @@ function TemplateCard({
           aria-label={`Lihat template ${template.title}`}
         >
           <div ref={containerRef} className="absolute inset-0 w-full h-full bg-[#05050d] z-0">
-            {/* Elegant shimmer & loading wheel while lazy-loading iframe */}
-            {(!shouldMount || !isLoaded) && (
+            {/* Elegant shimmer & loading wheel; held beneath the iframe until
+                the load crossfade has finished (isRevealed) so no blank gap. */}
+            {(!shouldMount || !isRevealed) && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#0d0d1f] z-10 pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite] bg-[length:200%_100%]" />
                 <motion.div
@@ -257,15 +308,16 @@ function TemplateCard({
               <iframe
                 ref={iframeRef}
                 src={iframeUrl}
-                onLoad={() => setIsLoaded(true)}
+                onLoad={handleIframeLoad}
                 style={{
                   width: `${dimensions.width}px`,
                   height: `${dimensions.height}px`,
                   transform: `scale(${dimensions.scale})`,
                   transformOrigin: "top left",
                   opacity: isLoaded ? 1 : 0,
+                  backgroundColor: "#05050d",
                 }}
-                className="border-0 pointer-events-none absolute top-0 left-0 transition-opacity duration-700"
+                className="border-0 pointer-events-none absolute top-0 left-0 z-20 transition-opacity duration-700"
                 loading="lazy"
                 scrolling="no"
               />
