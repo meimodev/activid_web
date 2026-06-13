@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import {
   getInvitationTemplateThemes,
   INVITATION_TEMPLATE_LISTINGS,
@@ -12,6 +12,9 @@ import { DateTime } from "luxon";
 import { getExampleInvitations } from "./actions";
 
 const DEFAULT_WHATSAPP_NUMBER = "62881080088816";
+
+// Max number of cards allowed to hold a live preview iframe at once. See ADR 0002.
+const MAX_LIVE_PREVIEWS = 4;
 
 const invitationTestimonials = [
   {
@@ -92,17 +95,25 @@ function TemplateCard({
   template,
   isVisible,
   isViewed,
+  isLive,
+  scrollIdle,
   visibleIndex,
   onPreview,
   onOrder,
+  onRequestLive,
+  onReleaseLive,
   previewMap = {},
 }: {
   template: InvitationTemplateListing;
   isVisible: boolean;
   isViewed: boolean;
+  isLive: boolean;
+  scrollIdle: boolean;
   visibleIndex: number;
   onPreview: (template: InvitationTemplateListing) => void;
   onOrder: (template: InvitationTemplateListing) => void;
+  onRequestLive: (id: string) => void;
+  onReleaseLive: (id: string) => void;
   previewMap?: Record<string, string[]>;
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -112,6 +123,14 @@ function TemplateCard({
   const [dimensions, setDimensions] = React.useState({ width: 375, height: 468, scale: 0.5 });
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [actualGeneratedSlug, setActualGeneratedSlug] = React.useState<string | undefined>(undefined);
+
+  // Only the cards closest to the viewport hold a live iframe (capped by the
+  // parent). Everything else falls back to the placeholder. The initial mount
+  // is deferred until the page stops scrolling (`scrollIdle`) so booting a full
+  // invitation app in the iframe never blocks the main thread mid-scroll; once
+  // an iframe is loaded it stays mounted through subsequent scrolling (the
+  // `|| isLoaded` guard) to avoid teardown/reload churn. See ADR 0002.
+  const shouldMount = isIntersecting && isLive && (scrollIdle || isLoaded);
 
   // Pick a random generated slug on mount (inside useEffect to prevent React Hydration mismatch)
   const slugsList = previewMap[template.templateId] || [];
@@ -157,38 +176,23 @@ function TemplateCard({
     return () => observer.disconnect();
   }, []);
 
-  // Auto-scrolling physics loop (runs on requestAnimationFrame, automatically paused when offscreen)
+  // Request a live-iframe slot while on-screen; release it (unmounting the
+  // iframe) once scrolled away so live previews never accumulate. See ADR 0002.
   React.useEffect(() => {
-    if (!isIntersecting || !isLoaded || !iframeRef.current) return;
+    if (isIntersecting) {
+      onRequestLive(template.id);
+    } else {
+      onReleaseLive(template.id);
+    }
+  }, [isIntersecting, template.id, onRequestLive, onReleaseLive]);
 
-    const iframe = iframeRef.current;
-    let frameId: number;
-    let scrollAmount = 0;
-    const scrollSpeed = 0.4; // smooth auto-scrolling speed
-
-    const runScroll = () => {
-      try {
-        const win = iframe.contentWindow;
-        const doc = iframe.contentDocument || win?.document;
-        if (win && doc) {
-          const maxScroll = doc.documentElement.scrollHeight - win.innerHeight;
-          if (maxScroll > 0) {
-            scrollAmount += scrollSpeed;
-            if (scrollAmount >= maxScroll) {
-              scrollAmount = 0; // seamless wrap around
-            }
-            win.scrollTo(0, scrollAmount);
-          }
-        }
-      } catch (err) {
-        // Safe cross-origin or transition fallback
-      }
-      frameId = requestAnimationFrame(runScroll);
-    };
-
-    frameId = requestAnimationFrame(runScroll);
-    return () => cancelAnimationFrame(frameId);
-  }, [isIntersecting, isLoaded]);
+  // When the iframe is torn down (slot lost or scrolled away), reset the loaded
+  // state so the shimmer placeholder shows again on the next mount.
+  React.useEffect(() => {
+    if (!shouldMount) {
+      setIsLoaded(false);
+    }
+  }, [shouldMount]);
 
   // Determine actual generated invitation preview or fall back to template demo layout
   const firstTheme = getInvitationTemplateThemes(template.templateId)[0]?.id ?? "";
@@ -201,7 +205,7 @@ function TemplateCard({
 
   const iframeUrl = actualGeneratedSlug
     ? `/invitation/${actualGeneratedSlug}`
-    : `/invitation/${template.id}?theme=${firstTheme}&purpose=${defaultPurpose}`;
+    : `/invitation/${template.id}?theme=${firstTheme}&purpose=${defaultPurpose}&preview=1`;
 
   return (
     <motion.div
@@ -210,7 +214,15 @@ function TemplateCard({
       whileInView={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ delay: Math.max(0, visibleIndex % 10) * 0.1, duration: 0.5 }}
       viewport={{ once: true }}
-      style={{ display: isVisible ? undefined : 'none' }}
+      // content-visibility:auto lets the browser skip layout/paint/compositing
+      // for cards (and their preview iframes) that are off-screen, so only the
+      // 1-2 cards actually in view composite while scrolling. The intrinsic size
+      // keeps the scrollbar/grid stable for the skipped cards. See ADR 0002.
+      style={{
+        display: isVisible ? undefined : 'none',
+        contentVisibility: 'auto',
+        containIntrinsicSize: 'auto 420px',
+      } as React.CSSProperties}
       className={`group relative rounded-xl sm:rounded-2xl overflow-hidden bg-[#0d0d1f] border transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(79,70,229,0.25)] hover:-translate-y-1 ${
         isViewed
           ? "border-green-500/40 shadow-[0_0_15px_rgba(34,197,94,0.15)]"
@@ -230,7 +242,7 @@ function TemplateCard({
         >
           <div ref={containerRef} className="absolute inset-0 w-full h-full bg-[#05050d] z-0">
             {/* Elegant shimmer & loading wheel while lazy-loading iframe */}
-            {(!isIntersecting || !isLoaded) && (
+            {(!shouldMount || !isLoaded) && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#0d0d1f] z-10 pointer-events-none">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite] bg-[length:200%_100%]" />
                 <motion.div
@@ -241,7 +253,7 @@ function TemplateCard({
               </div>
             )}
 
-            {isIntersecting && (
+            {shouldMount && (
               <iframe
                 ref={iframeRef}
                 src={iframeUrl}
@@ -271,7 +283,7 @@ function TemplateCard({
           )}
         </button>
 
-        <div className="flex flex-col p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border-t border-white/5 gap-2 relative z-20">
+        <div className="flex flex-col p-2.5 sm:p-3 bg-black/40 max-sm:bg-black/70 backdrop-blur-md max-sm:backdrop-blur-none border-t border-white/5 gap-2 relative z-20">
           <div className="flex items-center justify-between gap-2">
             <h3 className={`text-xs sm:text-sm font-bold tracking-tight truncate transition-colors ${isViewed ? "text-green-100/90" : "text-white group-hover:text-indigo-200"}`}>
               {template.title}
@@ -407,6 +419,52 @@ export default function InvitationLandingClient({
     };
   }, [customConfirmOpen, previewTemplate, showHeroDialog]);
 
+  // Cap how many cards hold a live iframe at once. Cards request a slot when
+  // they enter the viewport and release it when they leave; once the cap is
+  // exceeded the oldest live preview (furthest behind the scroll) is evicted.
+  // See ADR 0002.
+  const [livePreviewIds, setLivePreviewIds] = React.useState<string[]>([]);
+
+  const requestLivePreview = React.useCallback((id: string) => {
+    setLivePreviewIds((prev) => {
+      if (prev.includes(id)) return prev;
+      const next = [...prev, id];
+      return next.length > MAX_LIVE_PREVIEWS
+        ? next.slice(next.length - MAX_LIVE_PREVIEWS)
+        : next;
+    });
+  }, []);
+
+  const releaseLivePreview = React.useCallback((id: string) => {
+    setLivePreviewIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : prev));
+  }, []);
+
+  // Track whether the page is actively scrolling. New iframes only mount once
+  // this settles, so a full invitation app never boots mid-scroll. State flips
+  // just twice per scroll burst (start + 150ms-after-stop) — guarded by a ref —
+  // to keep the listener cheap. See ADR 0002.
+  const [scrollIdle, setScrollIdle] = React.useState(true);
+  const scrollingRef = React.useRef(false);
+  React.useEffect(() => {
+    let idleTimer: ReturnType<typeof setTimeout>;
+    const handleScroll = () => {
+      if (!scrollingRef.current) {
+        scrollingRef.current = true;
+        setScrollIdle(false);
+      }
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        scrollingRef.current = false;
+        setScrollIdle(true);
+      }, 150);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(idleTimer);
+    };
+  }, []);
+
   const handleView = (id: string) => {
     if (!viewedTemplates.includes(id)) {
       const updated = [...viewedTemplates, id];
@@ -436,24 +494,18 @@ export default function InvitationLandingClient({
     "[INV] Halo activid 👋\n\nMau bikin undangan digital *custom* ✨\n\nProses custom itu lumayan detail (dan agak \"ribet\" juga 😅)\nKarena akan   mengikuti kebutuhan \ndari konsep besar sampai elemen yang kecil-kecil 🤍\n\nUntuk bisa mulai prosesnya pembuatan undangan *custom*, \nAkan dikenakan biaya buat booking slot & mulai diskusi konsep/moodboard senilai Rp. 200.000 sebagai Down Payment / Uang Muka dari Total harga undangan custom dimulai dari Rp500.000\n(tapi tergantung tingkat kompleksitasnya sesuai yang akan dibicarakan nanti).\n\nUang Muka yang sudah dibayar *TIDAK BISA DIKEMBALIKAN* 🙏🏻 apabila pelanggan membatalkan pemesanan undangan *custom* karena telah dihitung sebagai jasa konsultasi langsung ke tim developer 🙏🏻 \n\nSilahkan menunggu sebentar untuk konfirmasi lebih lanjut 😊";
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-[#020205] text-white selection:bg-indigo-500/30 overflow-x-hidden">
       {/* Deep Space Background Layer */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#1e1b4b_0%,#020205_60%)]" />
 
-        {/* Animated Nebulas */}
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] mix-blend-screen"
-        />
-        <motion.div
-          animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity, delay: 2 }}
-          className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] mix-blend-screen"
-        />
+        {/* Static Nebulas — large blurred surfaces are painted once, never
+            animated, to avoid per-frame re-rasterisation on mobile. See ADR 0002. */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] mix-blend-screen opacity-40" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] mix-blend-screen opacity-30" />
 
-        {/* Passing Meteor */}
+        {/* Passing Meteor (decorative; disabled under prefers-reduced-motion) */}
         <motion.div
           initial={{ left: "-10%", top: "10%" }}
           animate={{ left: "120%", top: "30%" }}
@@ -470,7 +522,7 @@ export default function InvitationLandingClient({
       {/* Content Layer */}
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Navbar */}
-        <nav className="flex items-center justify-between px-8 py-6 backdrop-blur-md bg-black/20 border-b border-white/5 sticky top-0 z-50 supports-backdrop-filter:bg-black/10">
+        <nav className="flex items-center justify-between px-8 py-6 backdrop-blur-md max-sm:backdrop-blur-none bg-black/20 max-sm:bg-[#05050d]/90 border-b border-white/5 sticky top-0 z-50 supports-backdrop-filter:bg-black/10">
           <div className="text-xl font-bold tracking-tighter flex items-center gap-2">
             <motion.div
               animate={{ rotate: 360 }}
@@ -543,7 +595,7 @@ export default function InvitationLandingClient({
 
         {/* Purpose Filter */}
         <div className="sticky top-[72px] z-40 py-4 px-4 flex justify-center w-full pointer-events-none">
-          <div className="flex flex-wrap justify-center items-center gap-1.5 p-1.5 rounded-3xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] pointer-events-auto max-w-3xl">
+          <div className="flex flex-wrap justify-center items-center gap-1.5 p-1.5 rounded-3xl bg-white/[0.03] max-sm:bg-[#0a0a17]/95 backdrop-blur-xl max-sm:backdrop-blur-none border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.3)] pointer-events-auto max-w-3xl">
             {([
               { key: "all", label: "Semua" },
               { key: "marriage", label: "Pernikahan" },
@@ -600,9 +652,13 @@ export default function InvitationLandingClient({
                   template={template}
                   isVisible={isVisible}
                   isViewed={isViewed}
+                  isLive={livePreviewIds.includes(template.id)}
+                  scrollIdle={scrollIdle}
                   visibleIndex={visibleIndex}
                   onPreview={openPreviewDialog}
                   onOrder={(t) => window.open(createWhatsAppUrl(`INV-${t.templateId}-order`), "_blank", "noopener,noreferrer")}
+                  onRequestLive={requestLivePreview}
+                  onReleaseLive={releaseLivePreview}
                   previewMap={previewMap}
                 />
               );
@@ -734,7 +790,7 @@ export default function InvitationLandingClient({
                   <button
                     type="button"
                     onClick={() => setOpen(!open)}
-                    className="group w-full text-left rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl p-5 sm:p-6 hover:bg-white/[0.04] hover:border-indigo-500/30 transition-all duration-300 hover:shadow-[0_0_20px_-10px_rgba(79,70,229,0.3)]"
+                    className="group w-full text-left rounded-2xl border border-white/5 bg-white/[0.02] max-sm:bg-white/[0.04] backdrop-blur-xl max-sm:backdrop-blur-none p-5 sm:p-6 hover:bg-white/[0.04] hover:border-indigo-500/30 transition-all duration-300 hover:shadow-[0_0_20px_-10px_rgba(79,70,229,0.3)]"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
@@ -791,7 +847,7 @@ export default function InvitationLandingClient({
               "noopener,noreferrer",
             );
           }}
-          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[70] inline-flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_0_40px_-12px_rgba(34,197,94,0.55)] hover:shadow-[0_0_55px_-12px_rgba(34,211,238,0.5)] transition-shadow"
+          className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[70] inline-flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/40 max-sm:bg-black/80 backdrop-blur-md max-sm:backdrop-blur-none border border-white/10 shadow-[0_0_40px_-12px_rgba(34,197,94,0.55)] hover:shadow-[0_0_55px_-12px_rgba(34,211,238,0.5)] transition-shadow"
           aria-label="Buka WhatsApp untuk konsultasi"
         >
           <span className="relative inline-flex items-center justify-center w-10 h-10 rounded-xl bg-linear-to-br from-green-400/20 via-emerald-400/10 to-cyan-400/15 border border-white/10">
@@ -817,25 +873,20 @@ export default function InvitationLandingClient({
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/30 backdrop-blur-md"
+            className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/30 max-sm:bg-black/60 backdrop-blur-md max-sm:backdrop-blur-none"
           >
-            <motion.div
+            {/* Static blurred accents — painted once, not animated. See ADR 0002. */}
+            <div
               aria-hidden
-              className="absolute -top-32 -right-24 w-[520px] h-[520px] rounded-full bg-indigo-600/15 blur-[110px] mix-blend-screen"
-              animate={{ scale: [1, 1.15, 1], opacity: [0.45, 0.7, 0.45] }}
-              transition={{ duration: 7, repeat: Infinity }}
+              className="absolute -top-32 -right-24 w-[520px] h-[520px] rounded-full bg-indigo-600/15 blur-[110px] mix-blend-screen opacity-60"
             />
-            <motion.div
+            <div
               aria-hidden
-              className="absolute -bottom-40 -left-20 w-[520px] h-[520px] rounded-full bg-cyan-500/10 blur-[120px] mix-blend-screen"
-              animate={{ scale: [1, 1.2, 1], opacity: [0.35, 0.6, 0.35] }}
-              transition={{ duration: 8, repeat: Infinity, delay: 1.2 }}
+              className="absolute -bottom-40 -left-20 w-[520px] h-[520px] rounded-full bg-cyan-500/10 blur-[120px] mix-blend-screen opacity-50"
             />
-            <motion.div
+            <div
               aria-hidden
               className="absolute inset-0 opacity-25"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 55, repeat: Infinity, ease: "linear" }}
               style={{
                 background:
                   "radial-gradient(circle at 20% 30%, rgba(99,102,241,0.18), transparent 55%), radial-gradient(circle at 80% 20%, rgba(34,211,238,0.16), transparent 50%), radial-gradient(circle at 50% 90%, rgba(168,85,247,0.14), transparent 55%)",
@@ -900,11 +951,9 @@ export default function InvitationLandingClient({
         {/* Footer */}
         <footer className="mt-auto border-t border-white/5 relative z-10">
           <div className="relative overflow-hidden">
-            <motion.div
+            <div
               aria-hidden
               className="absolute inset-0 opacity-30"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
               style={{
                 background:
                   "radial-gradient(circle at 10% 20%, rgba(79,70,229,0.18), transparent 55%), radial-gradient(circle at 90% 30%, rgba(34,211,238,0.14), transparent 50%), radial-gradient(circle at 50% 95%, rgba(168,85,247,0.12), transparent 55%)",
@@ -1384,8 +1433,6 @@ export default function InvitationLandingClient({
         ) : null}
       </AnimatePresence>
 
-      <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-150 contrast-200 mix-blend-overlay pointer-events-none z-50" />
-
       <style jsx global>{`
         @keyframes gradient {
           0% {
@@ -1406,7 +1453,14 @@ export default function InvitationLandingClient({
             background-position: -200% -200%;
           }
         }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-\\[shimmer_2s_infinite\\],
+          .animate-pulse {
+            animation: none !important;
+          }
+        }
       `}</style>
     </div>
+    </MotionConfig>
   );
 }

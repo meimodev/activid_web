@@ -8,6 +8,7 @@ import { cache } from "react";
 import { getInvitationThemeStyle } from "@/lib/invitation-theme";
 import { getInvitationTemplateThemes } from "@/data/invitation-templates";
 import { InvitationDemoPlayground } from "@/components/invitation/InvitationDemoPlayground";
+import { PreviewFreeze } from "@/components/invitation/PreviewFreeze";
 import {
     getInvitationMetadataImage,
     getInvitationMetadataText,
@@ -343,14 +344,36 @@ export default async function InvitationPage({ params, searchParams }: PageProps
             getSingleSearchParam(resolvedSearchParams, "theme"),
         );
 
+        const themeOverride = {
+            mainColor: selectedTheme.mainColor,
+            accentColor: selectedTheme.accentColor,
+            accent2Color: selectedTheme.accent2Color,
+            darkColor: selectedTheme.darkColor,
+        };
+
+        // Lightweight preview mode for the Invitation Catalog cards: render the
+        // bare template only — no Demo Playground sidebar, no music randomisation
+        // churn. Keeps each in-card iframe cheap. See ADR 0002.
+        const isPreview = getSingleSearchParam(resolvedSearchParams, "preview") === "1";
+        if (isPreview) {
+            const previewConfig: InvitationConfig = {
+                ...buildInvitationDemoConfig({
+                    slug,
+                    templateId: demoTemplateId,
+                    purpose: demoPurpose,
+                }),
+                theme: themeOverride,
+            };
+            return withInvitationChrome(
+                demoTemplateId,
+                themeOverride,
+                <PreviewFreeze>{renderTemplate(demoTemplateId, previewConfig)}</PreviewFreeze>,
+            );
+        }
+
         return withInvitationChrome(
             demoTemplateId,
-            {
-                mainColor: selectedTheme.mainColor,
-                accentColor: selectedTheme.accentColor,
-                accent2Color: selectedTheme.accent2Color,
-                darkColor: selectedTheme.darkColor,
-            },
+            themeOverride,
             <InvitationDemoPlayground
                 slug={slug}
                 templateId={demoTemplateId}

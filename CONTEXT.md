@@ -19,3 +19,7 @@ Canonical language for this codebase. Definitions only; no implementation detail
 **LOIT Privacy Policy** — App-specific privacy policy (`/privacy-loit`) scoped to LOIT alone, authored for Google Play Data Safety compliance. Standalone URL pasted into Play Console; not linked from the site footer. Distinct from the joint **Privacy Policy**.
 
 **Account Deletion** — The user-facing data/account deletion flow (`/account-deletion`), via WhatsApp + email to the Activid admin. The deletion path that **LOIT Privacy Policy** points to.
+
+**Invitation Catalog** — The invitation landing page (`/invitation`): a grid of template cards, each showing a small live preview of the rendered template, with filtering by purpose, a preview dialog, testimonials, and FAQ. The shopper-facing entry to the invitation platform. Distinct from a rendered **Invitation** (a single `/invitation/{slug}` page) and from the **Demo Playground** (the theme/purpose switcher shown on `*-demo` slugs).
+
+**Preview Mode** — A lightweight render of an invitation template intended for embedding inside a Catalog card: the bare template only, without the Demo Playground sidebar, music, or auto-scroll. Optimized for being one of several simultaneous on-page previews rather than a standalone, interactive invitation.
