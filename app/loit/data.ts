@@ -4,7 +4,8 @@
  * Swap PLAY_STORE_URL for the real Google Play listing link when available.
  */
 
-export const PLAY_STORE_URL = "#";
+export const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=id.activid.loit";
 
 export const NAV_LINKS = [
   { label: "Fitur", href: "#fitur" },

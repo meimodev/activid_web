@@ -56,6 +56,8 @@ export function DownloadCta({
   return (
     <Link
       href={PLAY_STORE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
       className={`group inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-full bg-[var(--loit-mint-500)] font-semibold text-[var(--loit-petrol-900)] transition-all duration-300 [transition-timing-function:var(--loit-ease-out-expo)] hover:-translate-y-0.5 hover:bg-[var(--loit-mint-400)] hover:[box-shadow:var(--loit-glow)] active:scale-[0.97] active:duration-100 ${pad} ${className}`}
     >
       <PlayGlyph />
