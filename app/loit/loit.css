@@ -1,0 +1,104 @@
+/*
+ * LOIT landing page tokens + base, scoped to `.loit-root` so they never
+ * leak into the agency / invitation products. No edits to globals.css.
+ * Tailwind utilities consume these via arbitrary values, e.g.
+ * `bg-[var(--loit-petrol-800)]`.
+ */
+
+.loit-root {
+  /* Petrol canvas */
+  --loit-petrol-900: #082b2a;
+  --loit-petrol-800: #0c3b3a;
+  --loit-petrol-700: #114b49;
+  --loit-petrol-600: #1a615c;
+
+  /* Mint accent (used sparingly) */
+  --loit-mint-500: #2fe89b;
+  --loit-mint-400: #5cefb2;
+  --loit-mint-200: #b6f7dc;
+
+  /* Text */
+  --loit-paper: #eaf7f2;
+  /* Lightened from spec #A3C7C0 to clear WCAG AA (≥4.5:1) on petrol-800. */
+  --loit-mist: #b4d3cd;
+
+  /* Signature glow */
+  --loit-glow: 0 0 40px rgba(47, 232, 155, 0.25);
+
+  /* Easing — confident deceleration, no bounce. */
+  --loit-ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --loit-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  background-color: var(--loit-petrol-800);
+  color: var(--loit-paper);
+  font-family: var(--font-loit-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.loit-root *,
+.loit-root *::before,
+.loit-root *::after {
+  scroll-behavior: smooth;
+}
+
+/* Visible mint focus ring on every interactive element. */
+.loit-root a:focus-visible,
+.loit-root button:focus-visible {
+  outline: 2px solid var(--loit-mint-500);
+  outline-offset: 3px;
+  border-radius: 9999px;
+}
+
+.loit-display {
+  font-family: var(--font-loit-display), system-ui, sans-serif;
+}
+
+.loit-num {
+  font-family: var(--font-loit-num), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.loit-cta-glow {
+  box-shadow: var(--loit-glow);
+}
+
+/* Gentle downward bob inviting the scroll on the hero secondary CTA. */
+@keyframes loit-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+.loit-bob {
+  animation: loit-bob 1.8s var(--loit-ease-out-quint) infinite;
+}
+
+/* Slow breathing glow on the recommended pricing tier — mint energy, scarce. */
+@keyframes loit-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px var(--loit-mint-500), 0 0 24px rgba(47, 232, 155, 0.16);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--loit-mint-500), 0 0 44px rgba(47, 232, 155, 0.3);
+  }
+}
+.loit-pulse {
+  animation: loit-pulse 3.6s ease-in-out infinite;
+}
+
+/* Disable transforms + sticky sequence when the user prefers reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .loit-root *,
+  .loit-root *::before,
+  .loit-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
