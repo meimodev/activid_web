@@ -1,0 +1,88 @@
+/* SatSet landing — ported verbatim from the design (SatSet Landing.dc.html).
+   Keyframes, scrollbar hiding, and responsive rules live here; everything else
+   is inline-styled inside SatsetLanding.tsx to match the source 1:1. */
+
+.satset-root *,
+.satset-root *::before,
+.satset-root *::after {
+  box-sizing: border-box;
+}
+
+.satset-root {
+  background: #17130f;
+}
+
+.satset-root .scrl::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@keyframes satset-floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+@keyframes satset-floatY2 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes satset-clocheLift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-176px); }
+}
+@keyframes satset-phoneRise {
+  0% { transform: translateY(50px); opacity: 0; }
+  55% { opacity: 1; }
+  100% { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes satset-glowPulse {
+  0%, 100% { opacity: .5; transform: scale(1); }
+  50% { opacity: .82; transform: scale(1.05); }
+}
+@keyframes satset-chipMove {
+  0%, 10% { transform: translate(0, 0); opacity: 0; }
+  16% { opacity: 1; }
+  48% { transform: translate(132px, 74px); }
+  84% { transform: translate(132px, 74px); opacity: 1; }
+  100% { transform: translate(132px, 74px); opacity: 0; }
+}
+@keyframes satset-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .2; }
+}
+@keyframes satset-sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+
+@media (max-width: 1100px) {
+  .satset-root .scrl { scroll-snap-type: none !important; }
+  .satset-root .nav-links { display: none !important; }
+  .satset-root .side-dots { display: none !important; }
+  .satset-root nav { padding: 16px 22px !important; }
+  .satset-root .snap-sec { min-height: auto !important; }
+  .satset-root .hero { flex-direction: column !important; justify-content: center !important; text-align: center; padding: 118px 22px 72px !important; min-height: 100vh !important; }
+  .satset-root .hero-copy { max-width: 620px !important; flex: none !important; align-items: center; display: flex; flex-direction: column; }
+  .satset-root .hero-copy p { margin-left: auto !important; margin-right: auto !important; }
+  .satset-root .hero-meta { justify-content: center !important; flex-wrap: wrap; }
+  .satset-root .hero-art { min-width: 0 !important; flex: none !important; width: 100% !important; margin-top: 10px; }
+  .satset-root .hero-art svg { max-width: 78vw !important; }
+  .satset-root .feat-grid { grid-template-columns: 1fr 1fr !important; margin-top: 34px !important; }
+  .satset-root .floor { flex-direction: column !important; align-items: flex-start !important; padding: 110px 22px 84px !important; gap: 22px; }
+  .satset-root .floor-copy { flex: none !important; max-width: 620px !important; width: 100%; }
+  .satset-root .floor-art { width: 100% !important; height: 380px !important; flex: none !important; }
+  .satset-root .diorama { transform: scale(.64) !important; }
+  .satset-root .reports { padding: 110px 22px 0 !important; }
+  .satset-root .reports-row { gap: 36px !important; }
+  .satset-root .cta-band { padding: 30px 26px !important; flex-direction: column !important; align-items: flex-start !important; text-align: left; }
+}
+
+@media (max-width: 560px) {
+  .satset-root .feat-grid { grid-template-columns: 1fr !important; }
+  .satset-root .hero-h1 { font-size: 40px !important; line-height: 1.05 !important; }
+  .satset-root .hero-meta { flex-direction: column !important; gap: 9px !important; align-items: center; }
+  .satset-root .floor-art { height: 310px !important; }
+  .satset-root .diorama { transform: scale(.5) !important; }
+  .satset-root .dash-card { width: 100% !important; max-width: 380px; }
+  .satset-root footer { flex-direction: column !important; align-items: flex-start !important; text-align: left; }
+}
