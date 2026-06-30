@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { AnimatedGradientBackground } from '@/components/ui';
 import AccountDeletionClient from './AccountDeletionClient';
 
@@ -17,7 +18,9 @@ export default function AccountDeletionPage() {
       <div className="fixed inset-0 -z-10 bg-[url('https://ik.imagekit.io/geb6bfhmhx/activid%20web/stars-bg.png')] opacity-20 mix-blend-screen pointer-events-none" style={{ backgroundSize: '400px' }} />
 
       <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative z-10">
-        <AccountDeletionClient />
+        <Suspense fallback={<div className="text-center text-indigo-300 py-20 font-semibold tracking-wide">Loading deletion settings...</div>}>
+          <AccountDeletionClient />
+        </Suspense>
       </div>
     </main>
   );
