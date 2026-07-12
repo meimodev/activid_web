@@ -1,0 +1,402 @@
+"use client";
+
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { getKenanganLutPreset, type KenanganLutId } from "@/data/kenangan-luts";
+import {
+  createKenanganGl,
+  drawKenanganFrame,
+  ensureKenanganLut,
+  type KenanganGlState,
+} from "@/lib/kenangan-lut-webgl";
+
+const GUEST_SESSION_STORAGE_KEY = "kk_guest_session";
+const WATERMARK_TEXT = "K E N A N G A N K I T A";
+
+type Phase = "idle" | "starting" | "live" | "countdown" | "review" | "sending" | "done";
+type Facing = "environment" | "user";
+
+function getGuestSessionId(): string {
+  let id = localStorage.getItem(GUEST_SESSION_STORAGE_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(GUEST_SESSION_STORAGE_KEY, id);
+  }
+  return id;
+}
+
+function canvasToJpeg(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
+}
+
+function drawWatermark(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+  const pad = Math.round(width * 0.035);
+  const size = Math.max(14, Math.round(width * 0.02));
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.font = `${size}px serif`;
+  ctx.fillStyle = "rgba(247, 242, 234, 0.82)";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(WATERMARK_TEXT, width - pad, height - pad);
+}
+
+export default function CaptureClient({
+  slug,
+  lutIds,
+}: {
+  slug: string;
+  lutIds: KenanganLutId[];
+}) {
+  const token = useSearchParams().get("t");
+  const presets = lutIds.map(getKenanganLutPreset);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const glRef = useRef<KenanganGlState | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  // The blob that gets uploaded: UNGRADED frame + watermark. The LUT is never
+  // baked into the original — lutId travels as metadata and is re-applied
+  // (WebGL on feed thumbs, sharp at publish) so full-res re-grades stay clean.
+  const uploadBlobRef = useRef<Blob | null>(null);
+
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [count, setCount] = useState(3);
+  const [lutId, setLutId] = useState<KenanganLutId>(lutIds[0] ?? "natural");
+  const [facing, setFacing] = useState<Facing>("environment");
+  const [reviewUrl, setReviewUrl] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Render loop: create GL lazily, keep LUT in sync, draw video every frame.
+  useEffect(() => {
+    if (phase !== "live" && phase !== "countdown") return;
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    if (!canvas || !video) return;
+
+    let state = glRef.current;
+    if (!state) {
+      state = createKenanganGl(canvas);
+      if (!state) {
+        setErrorMsg("Perangkat ini tidak mendukung pratinjau kamera (WebGL).");
+        setPhase("idle");
+        return;
+      }
+      glRef.current = state;
+    }
+    ensureKenanganLut(state, lutId);
+
+    const mirror = facing === "user";
+    let raf = 0;
+    const loop = () => {
+      if (video.readyState >= 2 && video.videoWidth > 0) {
+        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+        }
+        drawKenanganFrame(state, video, mirror);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [phase, facing, lutId]);
+
+  // Countdown: 3-2-1 then capture.
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    if (count <= 0) {
+      void capture();
+      return;
+    }
+    const id = setTimeout(() => setCount((c) => c - 1), 800);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, count]);
+
+  // Stop the camera on unmount.
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  async function startCamera(mode: Facing) {
+    setPhase("starting");
+    setErrorMsg("");
+    // getUserMedia is undefined outside a secure context (HTTP on a LAN IP).
+    // Guard up front so the message names the real cause instead of blaming permissions.
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setErrorMsg("Kamera butuh koneksi aman. Buka halaman ini lewat HTTPS lalu coba lagi.");
+      setPhase("idle");
+      return;
+    }
+    try {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        // ideal 1920: default capture resolution is the #1 silent quality killer
+        video: { facingMode: mode, width: { ideal: 1920 } },
+      });
+      streamRef.current = stream;
+      const video = videoRef.current;
+      if (!video) return;
+      video.srcObject = stream;
+      await video.play();
+      setPhase("live");
+    } catch (err) {
+      const name = err instanceof DOMException ? err.name : "";
+      if (name === "NotAllowedError") {
+        setErrorMsg("Akses kamera ditolak. Izinkan kamera di pengaturan browser lalu coba lagi.");
+      } else if (name === "NotFoundError" || name === "OverconstrainedError") {
+        setErrorMsg("Kamera tidak ditemukan di perangkat ini.");
+      } else if (name === "NotReadableError") {
+        setErrorMsg("Kamera sedang dipakai aplikasi lain. Tutup aplikasi itu lalu coba lagi.");
+      } else {
+        setErrorMsg("Kamera tidak dapat diakses. Coba lagi.");
+      }
+      setPhase("idle");
+    }
+  }
+
+  function flipCamera() {
+    const next: Facing = facing === "environment" ? "user" : "environment";
+    setFacing(next);
+    void startCamera(next);
+  }
+
+  function startCountdown() {
+    setCount(3);
+    setPhase("countdown");
+  }
+
+  async function capture() {
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    const state = glRef.current;
+    if (!canvas || !video || !state) return;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const mirror = facing === "user";
+    drawKenanganFrame(state, video, mirror);
+
+    // Review image: graded preview + watermark — exactly what will be published.
+    const graded = document.createElement("canvas");
+    graded.width = width;
+    graded.height = height;
+    const gradedCtx = graded.getContext("2d");
+    if (!gradedCtx) return;
+    gradedCtx.drawImage(canvas, 0, 0);
+    drawWatermark(gradedCtx, width, height);
+
+    // Upload image: ungraded frame + watermark, mirrored to match the preview.
+    const raw = document.createElement("canvas");
+    raw.width = width;
+    raw.height = height;
+    const rawCtx = raw.getContext("2d");
+    if (!rawCtx) return;
+    if (mirror) {
+      rawCtx.translate(width, 0);
+      rawCtx.scale(-1, 1);
+    }
+    rawCtx.drawImage(video, 0, 0, width, height);
+    drawWatermark(rawCtx, width, height);
+
+    const [gradedBlob, rawBlob] = await Promise.all([canvasToJpeg(graded), canvasToJpeg(raw)]);
+    if (!gradedBlob || !rawBlob) {
+      setErrorMsg("Gagal memproses foto. Coba lagi.");
+      setPhase("live");
+      return;
+    }
+    uploadBlobRef.current = rawBlob;
+    if (reviewUrl) URL.revokeObjectURL(reviewUrl);
+    setReviewUrl(URL.createObjectURL(gradedBlob));
+    setPhase("review");
+  }
+
+  function retake() {
+    if (reviewUrl) URL.revokeObjectURL(reviewUrl);
+    setReviewUrl(null);
+    uploadBlobRef.current = null;
+    setErrorMsg("");
+    setPhase("live");
+  }
+
+  async function kirim() {
+    const blob = uploadBlobRef.current;
+    if (!blob || !token) return;
+    setPhase("sending");
+    setErrorMsg("");
+    try {
+      const guestSessionId = getGuestSessionId();
+
+      const authRes = await fetch("/api/kenangan/upload-auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, guestSessionId }),
+      });
+      if (!authRes.ok) throw new Error("auth");
+      const auth = await authRes.json();
+
+      const form = new FormData();
+      form.append("file", blob, auth.fileName);
+      form.append("fileName", auth.fileName);
+      form.append("folder", auth.folder);
+      form.append("useUniqueFileName", "false");
+      form.append("token", auth.token);
+      form.append("expire", String(auth.expire));
+      form.append("signature", auth.signature);
+      form.append("publicKey", auth.publicKey);
+      const upRes = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+        method: "POST",
+        body: form,
+      });
+      if (!upRes.ok) throw new Error("upload");
+      const uploaded = await upRes.json();
+
+      const commitRes = await fetch("/api/kenangan/photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token,
+          guestSessionId,
+          photoId: auth.photoId,
+          lutId,
+          width: uploaded.width ?? canvasRef.current?.width ?? 0,
+          height: uploaded.height ?? canvasRef.current?.height ?? 0,
+        }),
+      });
+      if (!commitRes.ok) throw new Error("commit");
+      setPhase("done");
+    } catch {
+      setErrorMsg("Gagal mengirim foto. Periksa koneksi lalu coba lagi.");
+      setPhase("review");
+    }
+  }
+
+  const tokenQuery = token ? `?t=${encodeURIComponent(token)}` : "";
+
+  if (!token) {
+    return (
+      <main className="kk-capture">
+        <div className="kk-capture-stage">
+          <div className="kk-capture-start">
+            <p className="kk-capture-hint">
+              Tautan tidak valid. Silakan pindai ulang kode QR di lokasi acara.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="kk-capture">
+      <div className="kk-capture-stage">
+        <video ref={videoRef} playsInline muted autoPlay hidden />
+        <canvas ref={canvasRef} style={{ display: phase === "idle" || phase === "starting" ? "none" : "block" }} />
+
+        {reviewUrl && (phase === "review" || phase === "sending" || phase === "done") ? (
+          <img
+            src={reviewUrl}
+            alt="Pratinjau foto"
+            style={{ position: "absolute", inset: 0, margin: "auto" }}
+          />
+        ) : null}
+
+        {phase === "idle" || phase === "starting" ? (
+          <div className="kk-capture-start">
+            <p className="kk-brand">Kita</p>
+            <p className="kk-capture-hint">
+              Ambil foto langsung dari browser — tanpa aplikasi. Foto kamu akan
+              tampil di galeri bersama acara ini.
+            </p>
+            <button
+              type="button"
+              className="kk-btn kk-btn-primary"
+              onClick={() => startCamera(facing)}
+              disabled={phase === "starting"}
+            >
+              {phase === "starting" ? "Menyiapkan kamera…" : "Mulai Kamera"}
+            </button>
+            {errorMsg ? <p className="kk-capture-hint">{errorMsg}</p> : null}
+          </div>
+        ) : null}
+
+        {phase === "countdown" && count > 0 ? (
+          <div className="kk-countdown">{count}</div>
+        ) : null}
+
+        {phase === "done" ? (
+          <div className="kk-capture-start" style={{ background: "rgba(26, 23, 20, 0.75)" }}>
+            <p className="kk-display" style={{ fontSize: 28 }}>Foto terkirim!</p>
+            <p className="kk-capture-hint">Foto kamu sudah tampil di galeri langsung.</p>
+          </div>
+        ) : null}
+      </div>
+
+      {phase === "live" || phase === "countdown" ? (
+        <>
+          <div className="kk-lut-row">
+            {presets.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                className="kk-lut-chip"
+                data-active={preset.id === lutId}
+                onClick={() => setLutId(preset.id)}
+              >
+                {preset.name}
+              </button>
+            ))}
+          </div>
+          <div className="kk-capture-controls">
+            <div className="kk-capture-side">
+              <Link href={`/kenangan/e/${slug}/feed${tokenQuery}`} className="kk-icon-btn" aria-label="Lihat galeri">
+                ▦
+              </Link>
+            </div>
+            <button
+              type="button"
+              className="kk-shutter"
+              aria-label="Ambil foto"
+              onClick={startCountdown}
+              disabled={phase === "countdown"}
+            />
+            <div className="kk-capture-side">
+              <button type="button" className="kk-icon-btn" aria-label="Balik kamera" onClick={flipCamera}>
+                ⟳
+              </button>
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      {phase === "review" || phase === "sending" ? (
+        <>
+          {errorMsg ? <p className="kk-status-msg" style={{ color: "#e2b6a5" }}>{errorMsg}</p> : null}
+          <div className="kk-review-actions">
+            <button type="button" className="kk-btn kk-btn-dark-ghost" onClick={retake} disabled={phase === "sending"}>
+              Ulangi
+            </button>
+            <button type="button" className="kk-btn kk-btn-primary" onClick={kirim} disabled={phase === "sending"}>
+              {phase === "sending" ? "Mengirim…" : "Kirim"}
+            </button>
+          </div>
+        </>
+      ) : null}
+
+      {phase === "done" ? (
+        <div className="kk-review-actions">
+          <button type="button" className="kk-btn kk-btn-dark-ghost" onClick={retake}>
+            Foto Lagi
+          </button>
+          <Link href={`/kenangan/e/${slug}/feed${tokenQuery}`} className="kk-btn kk-btn-primary">
+            Lihat Galeri
+          </Link>
+        </div>
+      ) : null}
+    </main>
+  );
+}

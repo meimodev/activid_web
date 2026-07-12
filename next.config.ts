@@ -7,6 +7,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Let a cloudflared tunnel host reach dev assets/HMR for real-device testing (dev-only).
+  allowedDevOrigins: ["*.trycloudflare.com"],
   experimental: {
     optimizePackageImports: ["framer-motion", "luxon", "firebase/firestore"],
   },
