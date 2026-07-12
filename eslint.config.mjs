@@ -16,6 +16,7 @@ const eslintConfig = defineConfig([
   {
     files: [
       "app/(invitation)/**/*.{ts,tsx}",
+      "app/(kenangan)/**/*.{ts,tsx}",
       "components/templates/**/*.{ts,tsx}",
     ],
     rules: {

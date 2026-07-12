@@ -1,0 +1,455 @@
+/* KenanganKita — scoped design tokens & shell styles.
+   Never leak into globals.css or other route groups. */
+
+.kk-root {
+  --kk-paper: #f7f2ea;
+  --kk-cream: #f0e8da;
+  --kk-sand: #e4d9c6;
+  --kk-ink: #2c2822;
+  --kk-muted: #8b8276;
+  --kk-bronze: #a98a5c;
+  --kk-dark: #1a1714;
+
+  font-family: var(--kk-font-ui), system-ui, sans-serif;
+  background: var(--kk-paper);
+  color: var(--kk-ink);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.kk-display {
+  font-family: var(--kk-font-display), serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- shell ---------- */
+
+.kk-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.kk-brand {
+  font-family: var(--kk-font-display), serif;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--kk-bronze);
+  text-align: center;
+}
+
+/* ---------- buttons ---------- */
+
+.kk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 14px;
+  padding: 15px 24px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  touch-action: manipulation;
+}
+
+.kk-btn:active {
+  transform: scale(0.98);
+}
+
+.kk-btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.kk-btn-primary {
+  background: var(--kk-bronze);
+  color: var(--kk-paper);
+}
+
+.kk-btn-ghost {
+  background: transparent;
+  color: var(--kk-ink);
+  box-shadow: inset 0 0 0 1.5px var(--kk-sand);
+}
+
+.kk-btn-dark-ghost {
+  background: rgba(247, 242, 234, 0.1);
+  color: var(--kk-paper);
+}
+
+/* ---------- landing ---------- */
+
+.kk-landing-cover {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 20px;
+  background: var(--kk-cream);
+}
+
+.kk-landing-title {
+  font-family: var(--kk-font-display), serif;
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 20px 0 6px;
+}
+
+.kk-landing-date {
+  color: var(--kk-muted);
+  font-size: 15px;
+}
+
+.kk-landing-note {
+  margin-top: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--kk-muted);
+}
+
+.kk-landing-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.kk-card {
+  background: var(--kk-cream);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+/* ---------- capture (dark screen — candlelit receptions) ---------- */
+
+.kk-capture {
+  background: var(--kk-dark);
+  color: var(--kk-paper);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+}
+
+.kk-capture-stage {
+  position: relative;
+  flex: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.kk-capture-stage canvas,
+.kk-capture-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.kk-countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--kk-font-display), serif;
+  font-size: 120px;
+  color: var(--kk-paper);
+  background: rgba(26, 23, 20, 0.35);
+  pointer-events: none;
+}
+
+.kk-lut-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 14px 0 4px;
+}
+
+.kk-lut-chip {
+  border: 1.5px solid rgba(247, 242, 234, 0.25);
+  background: transparent;
+  color: var(--kk-paper);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.kk-lut-chip[data-active="true"] {
+  border-color: var(--kk-bronze);
+  background: var(--kk-bronze);
+}
+
+.kk-capture-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 8px 0;
+}
+
+.kk-shutter {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 4px solid var(--kk-bronze);
+  background: var(--kk-paper);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.kk-shutter:active {
+  transform: scale(0.92);
+}
+
+.kk-capture-side {
+  width: 74px;
+  display: flex;
+  justify-content: center;
+}
+
+.kk-icon-btn {
+  background: rgba(247, 242, 234, 0.1);
+  border: none;
+  color: var(--kk-paper);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kk-capture-start {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+}
+
+.kk-capture-hint {
+  color: rgba(247, 242, 234, 0.7);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.kk-review-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.kk-review-actions .kk-btn {
+  flex: 1;
+}
+
+/* ---------- feed ---------- */
+
+.kk-feed-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 16px;
+}
+
+.kk-feed-title {
+  font-family: var(--kk-font-display), serif;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.kk-feed-count {
+  color: var(--kk-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.kk-feed-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.kk-feed-item {
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--kk-cream);
+  /* ponytail: content-visibility + lazy imgs instead of a JS windowing lib;
+     DOM only grows as the user paginates. Add real virtualization if scroll
+     perf degrades past ~1000 loaded photos. */
+  content-visibility: auto;
+  contain-intrinsic-size: 200px 260px;
+}
+
+.kk-feed-item img,
+.kk-feed-item canvas {
+  width: 100%;
+  display: block;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.kk-feed-empty {
+  text-align: center;
+  color: var(--kk-muted);
+  padding: 64px 24px;
+  line-height: 1.6;
+}
+
+.kk-feed-fab {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 8px 24px rgba(44, 40, 34, 0.25);
+  z-index: 10;
+}
+
+/* ---------- host ---------- */
+
+.kk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.kk-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--kk-muted);
+}
+
+.kk-input {
+  border: 1.5px solid var(--kk-sand);
+  border-radius: 12px;
+  background: var(--kk-paper);
+  color: var(--kk-ink);
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 15px;
+  width: 100%;
+}
+
+.kk-input:focus {
+  outline: 2px solid var(--kk-bronze);
+  outline-offset: 1px;
+}
+
+.kk-form-error {
+  color: #a2513a;
+  font-size: 13px;
+}
+
+.kk-form-ok {
+  color: #5c7a4e;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.kk-section-title {
+  font-family: var(--kk-font-display), serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.kk-link-btn {
+  background: none;
+  border: none;
+  color: var(--kk-bronze);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.kk-event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--kk-cream);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.kk-badge {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--kk-sand);
+  color: var(--kk-ink);
+  white-space: nowrap;
+}
+
+.kk-badge[data-status="live"] {
+  background: var(--kk-bronze);
+  color: var(--kk-paper);
+}
+
+.kk-badge[data-status="published"] {
+  background: var(--kk-ink);
+  color: var(--kk-paper);
+}
+
+.kk-host-photo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.kk-feed-item[data-dim="true"] img {
+  opacity: 0.35;
+}
+
+.kk-download-link {
+  display: block;
+  text-align: center;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--kk-bronze);
+  text-decoration: none;
+}
+
+.kk-status-msg {
+  text-align: center;
+  color: var(--kk-muted);
+  font-size: 14px;
+  padding: 10px 0;
+}

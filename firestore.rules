@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isStr(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+    function optStr(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+    function freshCreatedAt(data) {
+      return 'createdAt' in data && data.createdAt is timestamp;
+    }
+
+    // --- KenanganKita -------------------------------------------------------
+    // Guests subscribe to the photo stream directly with the client SDK.
+    // Reads scoped to live/published events; ALL writes go through API routes
+    // using the admin SDK, which bypasses these rules.
+    match /kenanganEvents/{eventId}/photos/{photoId} {
+      allow read: if get(/databases/$(database)/documents/kenanganEvents/$(eventId)).data.status in ['live', 'published'];
+      allow write: if false;
+    }
+
+    // --- Invitation platform ------------------------------------------------
+    // Invitation configs are public-by-link (the whole invitation renders at a
+    // public URL). Client reads one doc by exact id; list/enumeration stays
+    // denied. Writes are admin-SDK only.
+    match /invitations/{invitationId} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+
+    // Guest wishes. 5 templates create directly via a client transaction
+    // (doc id "{invitationId}_{nameKey}"); the other 4 write through
+    // /api/wishes (admin SDK). Feed is read per-invitation with a client
+    // listener, so reads are open. Create-only + shape-validated; no client
+    // update/delete (a posted wish is immutable, and the transaction already
+    // blocks overwrites).
+    match /wishes/{wishId} {
+      allow read: if true;
+      allow create: if isStr(request.resource.data.invitationId, 200)
+        && isStr(request.resource.data.name, 200)
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 5000
+        && optStr(request.resource.data, 'nameKey', 300)
+        && freshCreatedAt(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // RSVP submissions. All templates create via addDoc; some read back their
+    // own submission with a client query. Create-only + shape-validated.
+    match /rsvps/{rsvpId} {
+      allow read: if true;
+      allow create: if isStr(request.resource.data.invitationId, 200)
+        && isStr(request.resource.data.name, 200)
+        && freshCreatedAt(request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // --- Bol-bol Studio bookings -------------------------------------------
+    // Booking flow: client addDoc (create) then setDoc(..., {merge:true}) to
+    // stamp the generated id + numeric start/end/booking_timestamp. No client
+    // read (availability is loaded server-side). Both writes are the same
+    // anonymous guest, so create + update are allowed; delete denied.
+    //
+    // SECURITY NOTE: with no auth, update:if-true lets any client patch any
+    // existing booking doc. This matches the pre-2026 open ruleset. To close
+    // it, fold the two client writes into one create (drop the setDoc merge)
+    // and flip update to `if false`.
+    match /bb_bookings/{bookingId} {
+      allow read, delete: if false;
+      allow create: if isStr(request.resource.data.name, 200)
+        && request.resource.data.size() <= 40;
+      allow update: if request.resource.data.size() <= 40;
+    }
+
+    // Everything else is server-only (admin SDK) and stays denied.
+  }
+}

@@ -28,16 +28,68 @@ function tryAffiliateRewrite(
   return null;
 }
 
+function handleKenangan(
+  request: NextRequest,
+  isKenanganSubdomain: boolean,
+): NextResponse {
+  const pathname = request.nextUrl.pathname;
+
+  // Feature flag: unset -> rewrite to a non-existent path -> 404
+  if (process.env.KENANGAN_ENABLED !== 'true') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/kenangan-disabled';
+    return NextResponse.rewrite(url);
+  }
+
+  if (!isKenanganSubdomain) {
+    return NextResponse.next();
+  }
+
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/static') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
+  // If already /kenangan, don't rewrite
+  if (pathname.startsWith('/kenangan')) {
+    return NextResponse.next();
+  }
+
+  // kenangan.activid.id/host/... -> /kenangan/host/...
+  // kenangan.activid.id/{slug}[/capture|/feed|/gallery] -> /kenangan/e/{slug}...
+  // Clone keeps the query string (guest token ?t=...) intact.
+  const url = request.nextUrl.clone();
+  url.pathname = pathname.startsWith('/host')
+    ? `/kenangan${pathname}`
+    : `/kenangan/e${pathname}`;
+  return NextResponse.rewrite(url);
+}
+
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
 
   const isInvitationSubdomain = hostname.startsWith('invitation.');
   const isInvitationPath = pathname.startsWith('/invitation');
+  const isKenanganSubdomain = hostname.startsWith('kenangan.');
+  const isKenanganPath = pathname.startsWith('/kenangan');
 
-  // Early exit: not an invitation subdomain and not an invitation path
-  if (!isInvitationSubdomain && !isInvitationPath) {
+  // Early exit: neither an invitation nor a kenangan surface
+  if (
+    !isInvitationSubdomain &&
+    !isInvitationPath &&
+    !isKenanganSubdomain &&
+    !isKenanganPath
+  ) {
     return NextResponse.next();
+  }
+
+  if (isKenanganSubdomain || isKenanganPath) {
+    return handleKenangan(request, isKenanganSubdomain);
   }
 
   if (isInvitationPath) {
