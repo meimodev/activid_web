@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { kenanganThumbUrl } from "@/types/kenangan";
+import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 
 type HostMode = "live" | "curate";
 
@@ -91,6 +92,10 @@ export default function HostPhotosClient({
         </button>
       </div>
       {errorMsg ? <p className="kk-form-error">{errorMsg}</p> : null}
+
+      {photos.length === 0 && loading ? (
+        <KkProgress className="kk-load-progress" />
+      ) : null}
 
       {photos.length === 0 && !loading ? (
         <p className="kk-status-msg">Belum ada foto.</p>

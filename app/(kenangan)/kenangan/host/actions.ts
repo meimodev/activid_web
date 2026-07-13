@@ -57,7 +57,7 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
   const eventDate = String(formData.get("eventDate") ?? "").trim();
 
   if (!name || name.length > 120 || !SLUG_REGEX.test(slug) || !DATE_REGEX.test(eventDate)) {
-    redirect("/kenangan/host/events?error=invalid");
+    redirect("/kenangan/host/events?tab=create&error=invalid");
   }
 
   const db = getAdminDb();
@@ -66,7 +66,7 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
     .where("slug", "==", slug)
     .limit(1)
     .get();
-  if (!existing.empty) redirect("/kenangan/host/events?error=slug");
+  if (!existing.empty) redirect("/kenangan/host/events?tab=create&error=slug");
 
   const ref = await db.collection("kenanganEvents").add({
     slug,

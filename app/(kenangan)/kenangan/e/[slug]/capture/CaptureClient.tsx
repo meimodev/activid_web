@@ -10,6 +10,7 @@ import {
   ensureKenanganLut,
   type KenanganGlState,
 } from "@/lib/kenangan-lut-webgl";
+import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 
 const GUEST_SESSION_STORAGE_KEY = "kk_guest_session";
 const WATERMARK_TEXT = "K E N A N G A N K I T A";
@@ -67,6 +68,10 @@ export default function CaptureClient({
   const [reviewUrl, setReviewUrl] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [sendMsg, setSendMsg] = useState("Mengirim…");
+  // Upload-leg byte progress: 0-100 while bytes ship to imagekit, null on the
+  // quick auth/commit legs (bar falls back to indeterminate there).
+  const [uploadPct, setUploadPct] = useState<number | null>(null);
 
   // Render loop: create GL lazily, keep LUT in sync, draw video every frame.
   useEffect(() => {
@@ -181,6 +186,32 @@ export default function CaptureClient({
     setPhase("countdown");
   }
 
+  // Shutter: tap = shoot now, hold = 3-2-1 timer (group selfies). A tap while
+  // the countdown runs aborts it. pressTimer distinguishes tap from hold;
+  // longPressed suppresses the capture on the release that follows a hold.
+  const pressTimer = useRef<number | null>(null);
+  const longPressed = useRef(false);
+  function onShutterDown() {
+    if (phase === "countdown") {
+      setPhase("live");
+      setCount(3);
+      return;
+    }
+    longPressed.current = false;
+    pressTimer.current = window.setTimeout(() => {
+      longPressed.current = true;
+      startCountdown();
+    }, 350);
+  }
+  function onShutterUp() {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+    if (longPressed.current) return;
+    if (phase === "live") void capture();
+  }
+
   async function capture() {
     const canvas = canvasRef.current;
     const video = videoRef.current;
@@ -240,6 +271,8 @@ export default function CaptureClient({
     if (!blob || !token) return;
     setPhase("sending");
     setErrorMsg("");
+    setUploadPct(null);
+    setSendMsg("Menyiapkan…");
     try {
       const guestSessionId = getGuestSessionId();
 
@@ -260,13 +293,36 @@ export default function CaptureClient({
       form.append("expire", String(auth.expire));
       form.append("signature", auth.signature);
       form.append("publicKey", auth.publicKey);
-      const upRes = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-        method: "POST",
-        body: form,
+      // The one slow leg on venue wifi. XHR (not fetch) so upload.onprogress
+      // drives a real % bar; 45s timeout so a stalled upload surfaces a retry
+      // instead of an infinite spinner.
+      setSendMsg("Mengunggah foto…");
+      setUploadPct(0);
+      const uploaded = await new Promise<{ width?: number; height?: number }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "https://upload.imagekit.io/api/v1/files/upload");
+        xhr.timeout = 45000;
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadPct(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              resolve(JSON.parse(xhr.responseText));
+            } catch {
+              reject(new Error("upload"));
+            }
+          } else {
+            reject(new Error("upload"));
+          }
+        };
+        xhr.onerror = () => reject(new Error("upload"));
+        xhr.ontimeout = () => reject(new Error("upload"));
+        xhr.send(form);
       });
-      if (!upRes.ok) throw new Error("upload");
-      const uploaded = await upRes.json();
 
+      setUploadPct(null);
+      setSendMsg("Menyimpan…");
       const commitRes = await fetch("/api/kenangan/photos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -341,7 +397,7 @@ export default function CaptureClient({
         ) : null}
 
         {phase === "countdown" && count > 0 ? (
-          <div className="kk-countdown" key={count}>{count}</div>
+          <div className="kk-countdown" key={count} role="status" aria-live="assertive">{count}</div>
         ) : null}
 
         {phase === "done" ? (
@@ -382,6 +438,9 @@ export default function CaptureClient({
               </button>
             ))}
           </div>
+          <p className="kk-capture-tip">
+            {phase === "countdown" ? "Ketuk untuk batal" : "Ketuk untuk foto · tahan untuk timer"}
+          </p>
           <div className="kk-capture-controls">
             <div className="kk-capture-side">
               <Link href={`/kenangan/e/${slug}/feed${tokenQuery}`} className="kk-icon-btn" aria-label="Lihat galeri">
@@ -397,9 +456,15 @@ export default function CaptureClient({
             <button
               type="button"
               className="kk-shutter"
-              aria-label="Ambil foto"
-              onClick={startCountdown}
-              disabled={phase === "countdown"}
+              aria-label="Ambil foto — ketuk untuk foto, tahan untuk timer"
+              onPointerDown={onShutterDown}
+              onPointerUp={onShutterUp}
+              onPointerLeave={() => {
+                if (pressTimer.current) {
+                  clearTimeout(pressTimer.current);
+                  pressTimer.current = null;
+                }
+              }}
             />
             <div className="kk-capture-side">
               <button type="button" className="kk-icon-btn" aria-label="Balik kamera" onClick={flipCamera}>
@@ -428,13 +493,16 @@ export default function CaptureClient({
 
       {phase === "review" || phase === "sending" ? (
         <>
-          {errorMsg ? <p className="kk-status-msg" style={{ color: "#e2b6a5" }}>{errorMsg}</p> : null}
+          {errorMsg ? <p className="kk-status-msg" style={{ color: "var(--kk-error-on-dark)" }}>{errorMsg}</p> : null}
+          {phase === "sending" ? (
+            <KkProgress value={uploadPct ?? undefined} className="kk-send-progress" />
+          ) : null}
           <div className="kk-review-actions">
             <button type="button" className="kk-btn kk-btn-dark-ghost" onClick={retake} disabled={phase === "sending"}>
               Ulangi
             </button>
             <button type="button" className="kk-btn kk-btn-primary" onClick={kirim} disabled={phase === "sending"}>
-              {phase === "sending" ? "Mengirim…" : "Kirim"}
+              {phase === "sending" ? sendMsg : "Kirim"}
             </button>
           </div>
         </>

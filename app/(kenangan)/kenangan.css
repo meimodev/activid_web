@@ -9,6 +9,19 @@
   --kk-muted: #8b8276;
   --kk-bronze: #a98a5c;
   --kk-dark: #1a1714;
+  --kk-error: #a2513a;
+  --kk-error-on-dark: #e2b6a5;
+  --kk-ok: #5c7a4e;
+
+  /* Spacing scale — every gap/margin picks from here, never a raw px.
+     Rhythm comes from choosing different steps, not inventing values. */
+  --kk-space-1: 4px;
+  --kk-space-2: 8px;
+  --kk-space-3: 12px;
+  --kk-space-4: 16px;
+  --kk-space-5: 24px;
+  --kk-space-6: 32px;
+  --kk-space-7: 48px;
 
   /* Motion — decelerating curves only (no bounce/elastic). */
   --kk-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -153,6 +166,22 @@
   outline-offset: -2px;
 }
 
+/* Task-screen section rhythm. Consecutive cards/sections breathe from one
+   token instead of a per-JSX marginTop, so stacked host cards read as an even
+   column. (Animation selectors below still match — no wrappers introduced.) */
+.kk-page > .kk-card + .kk-card,
+.kk-page > section + section,
+.kk-page > .kk-card + section,
+.kk-page > section + .kk-card {
+  margin-top: var(--kk-space-4);
+}
+
+/* Deliberate louder break — parts the "run the event" cards from the
+   "configure the event" settings below them. Rhythm, not monotony. */
+.kk-page > .kk-section-break {
+  margin-top: var(--kk-space-6);
+}
+
 /* ---------- capture (dark screen — candlelit receptions) ---------- */
 
 .kk-capture {
@@ -266,11 +295,19 @@
   background: var(--kk-bronze);
 }
 
+.kk-capture-tip {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: rgba(247, 242, 234, 0.55);
+  padding: 8px 0 0;
+}
+
 .kk-capture-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 8px 0;
+  padding: 8px 8px 0;
 }
 
 .kk-shutter {
@@ -345,6 +382,52 @@
 @keyframes kk-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ---------- progress bar (shared: KkProgress) ---------- */
+
+.kk-progress {
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(139, 130, 118, 0.25); /* --kk-muted @ 25% */
+  overflow: hidden;
+}
+
+.kk-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--kk-bronze);
+  transition: width 0.18s var(--kk-ease);
+}
+
+.kk-progress-indeterminate .kk-progress-fill {
+  width: 40%;
+  transition: none;
+  animation: kk-progress-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes kk-progress-slide {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+.kk-send-progress {
+  margin-top: 4px;
+}
+
+.kk-load-progress {
+  margin: 16px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kk-progress-indeterminate .kk-progress-fill {
+    animation-duration: 2.2s;
   }
 }
 
@@ -604,13 +687,19 @@
   outline-offset: 1px;
 }
 
+.kk-input[readonly] {
+  background: var(--kk-sand);
+  color: var(--kk-muted);
+  cursor: default;
+}
+
 .kk-form-error {
-  color: #a2513a;
+  color: var(--kk-error);
   font-size: 13px;
 }
 
 .kk-form-ok {
-  color: #5c7a4e;
+  color: var(--kk-ok);
   font-size: 13px;
   padding: 8px 0;
 }
@@ -636,12 +725,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--kk-space-3);
   background: var(--kk-cream);
   border-radius: 14px;
   padding: 14px 16px;
   text-decoration: none;
   color: inherit;
+}
+
+/* Two-line row label: name over slug/date, tight, ellipsised, no <br> hack. */
+.kk-event-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kk-event-row-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .kk-badge {
@@ -1189,6 +1292,117 @@
     transform: translateY(-3px);
     box-shadow: 0 16px 40px -22px rgba(44, 40, 34, 0.5);
   }
+}
+
+/* ---- screen transitions ---- */
+
+/* Route enter: every (kenangan) navigation fades + rises via template.tsx.
+   No fill-mode: the transform must NOT linger, or it becomes a containing
+   block and re-anchors the console's fixed navbar. */
+.kk-route-enter {
+  animation: kk-route-in 0.22s var(--kk-ease);
+}
+@keyframes kk-route-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tab content: directional slide + fade on Dashboard <-> Create switch. */
+.kk-tab-view {
+  animation: kk-tab-in 0.22s var(--kk-ease) both;
+}
+.kk-tab-view[data-dir="left"]  { --kk-tab-from: -16px; }
+.kk-tab-view[data-dir="right"] { --kk-tab-from: 16px; }
+@keyframes kk-tab-in {
+  from { opacity: 0; transform: translateX(var(--kk-tab-from, 16px)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- host console: mobile-app shell with bottom navbar ---- */
+
+.kk-console-root {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content area; padded to clear the fixed navbar (72px + safe area). */
+.kk-console {
+  flex: 1;
+  padding: 24px 20px calc(88px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+.kk-console .kk-feed-title {
+  margin-bottom: var(--kk-space-5);
+}
+
+.kk-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kk-space-3);
+}
+
+.kk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--kk-space-4);
+  margin-top: var(--kk-space-6);
+  text-align: center;
+}
+
+.kk-navbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: var(--kk-paper);
+  border-top: 1px solid var(--kk-sand);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 10;
+}
+
+.kk-nav-form {
+  flex: 1;
+  display: flex;
+}
+
+.kk-nav-item {
+  flex: 1;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--kk-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  transition: color 0.2s var(--kk-ease);
+}
+
+.kk-nav-item[data-active="true"] {
+  color: var(--kk-bronze);
+}
+
+.kk-nav-item:active {
+  color: var(--kk-ink);
+}
+
+.kk-nav-icon {
+  width: 22px;
+  height: 22px;
 }
 
 /* ---- accessibility: honor reduced-motion everywhere ---- */

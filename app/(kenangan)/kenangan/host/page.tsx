@@ -11,7 +11,7 @@ export default async function KenanganHostLoginPage() {
 
   return (
     <main className="kk-page" style={{ justifyContent: "center" }}>
-      <p className="kk-brand">Kita</p>
+      <p className="kk-brand">KenanganKita</p>
       <h1 className="kk-landing-title" style={{ textAlign: "center" }}>
         Masuk Host
       </h1>

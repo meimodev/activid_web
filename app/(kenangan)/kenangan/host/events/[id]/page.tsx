@@ -112,10 +112,14 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
     .plus({ hours: 48 });
   const tokenValid = tokenExpiry.isValid && tokenExpiry > DateTime.now();
   let guestUrl = "";
+  // Same link without the signed-token query — the readable form shown to the
+  // host. The full tokenized guestUrl lives behind Copy / the QR image.
+  let guestDisplayUrl = "";
   let qrDataUrl = "";
   if (tokenValid) {
     const token = await createKenanganGuestToken(event.id, tokenExpiry.toJSDate());
     guestUrl = await buildGuestUrl(event.slug, token);
+    guestDisplayUrl = guestUrl.replace(/\?.*$/, "");
     qrDataUrl = await QRCode.toDataURL(guestUrl, {
       margin: 1,
       width: 480,
@@ -183,15 +187,12 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         </div>
       </section>
 
-      <section
-        className={`kk-card${event.status === "live" ? " kk-card-primary" : ""}`}
-        style={{ marginTop: 16 }}
-      >
+      <section className={`kk-card${event.status === "live" ? " kk-card-primary" : ""}`}>
         <h2 className="kk-section-title">Kode QR Tamu</h2>
         {tokenValid ? (
           <div style={{ textAlign: "center" }}>
             <img src={qrDataUrl} alt="Kode QR tamu" style={{ width: 240, borderRadius: 12 }} />
-            <input className="kk-input" readOnly value={guestUrl} style={{ marginTop: 12 }} />
+            <input className="kk-input" readOnly value={guestDisplayUrl} style={{ marginTop: 12 }} />
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 12 }}>
               <CopyButton value={guestUrl} />
               <a href={qrDataUrl} download={`qr-${event.slug}.png`} className="kk-btn kk-btn-ghost">
@@ -212,7 +213,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
       </section>
 
       {event.status === "live" ? (
-        <section className="kk-card" style={{ marginTop: 16 }}>
+        <section className="kk-card">
           <h2 className="kk-section-title">Moderasi Foto</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Sembunyikan foto yang tidak pantas — foto langsung hilang dari galeri tamu.
@@ -222,7 +223,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
       ) : null}
 
       {event.status === "closed" ? (
-        <section className="kk-card kk-card-primary" style={{ marginTop: 16 }}>
+        <section className="kk-card kk-card-primary">
           <h2 className="kk-section-title">Kurasi Foto Terbaik</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Pilih foto-foto terbaik untuk galeri kenangan. Hanya foto terpilih yang
@@ -234,7 +235,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
       ) : null}
 
       {event.status !== "published" ? (
-        <section className="kk-card" style={{ marginTop: 16 }}>
+        <section className="kk-card">
           <h2 className="kk-section-title">Galeri Kenangan AI</h2>
           {event.enhancementPurchased ? (
             <p className="kk-landing-note" style={{ marginTop: 4 }}>
@@ -283,7 +284,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
       ) : null}
 
       {event.status === "published" ? (
-        <section className="kk-card" style={{ marginTop: 16 }}>
+        <section className="kk-card">
           <h2 className="kk-section-title">Galeri Terpublikasi</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Galeri kenangan sudah tayang dan dapat dibagikan ke para tamu.
@@ -294,7 +295,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         </section>
       ) : null}
 
-      <section className="kk-card" style={{ marginTop: 16 }}>
+      <section className="kk-card kk-section-break">
         <h2 className="kk-section-title">Pengaturan Acara</h2>
         <form action={kenanganUpdateEvent} className="kk-form">
           <input type="hidden" name="eventId" value={event.id} />

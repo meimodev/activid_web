@@ -19,6 +19,7 @@ import { kenanganFullUrl, kenanganThumbUrl, type KenanganDownloadMode } from "@/
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
 import Lightbox from "./Lightbox";
+import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 
 // No `where("status" == ...)` clause: equality + orderBy would demand a
 // composite Firestore index. Order by createdAt only, filter status in code.
@@ -172,7 +173,7 @@ export default function FeedClient({
 
   return (
     <main className="kk-page" style={{ paddingBottom: 110 }}>
-      <p className="kk-brand">Kita</p>
+      <p className="kk-brand">KenanganKita</p>
       <header className="kk-feed-header" style={{ marginTop: 20 }}>
         <h1 className="kk-feed-title">{eventName}</h1>
         <span className="kk-feed-count">{photos.length} foto</span>
@@ -180,18 +181,29 @@ export default function FeedClient({
 
       {failed ? (
         <div className="kk-feed-empty">
-          <p>Galeri tidak dapat dimuat. Muat ulang halaman ini.</p>
+          <p>Galeri tidak dapat dimuat.</p>
+          <button
+            type="button"
+            className="kk-btn kk-btn-ghost"
+            style={{ marginTop: 16 }}
+            onClick={() => location.reload()}
+          >
+            Muat Ulang
+          </button>
         </div>
       ) : !ready ? (
-        <div className="kk-feed-grid" aria-hidden>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="kk-feed-item kk-skeleton" />
-          ))}
-        </div>
+        <>
+          <KkProgress className="kk-load-progress" />
+          <div className="kk-feed-grid" aria-hidden>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="kk-feed-item kk-skeleton" />
+            ))}
+          </div>
+        </>
       ) : photos.length === 0 ? (
         <div className="kk-feed-empty">
           <p>Belum ada foto.</p>
-          <p>Jadilah yang pertama mengabadikan momen malam ini!</p>
+          <p>Jadilah yang pertama mengabadikan momennya!</p>
         </div>
       ) : (
         <div className="kk-feed-grid">

@@ -45,7 +45,7 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
 
   return (
     <main className="kk-page">
-      <p className="kk-brand">Kita</p>
+      <p className="kk-brand">KenanganKita</p>
 
       <div style={{ marginTop: 24 }}>
         {event.coverUrl ? (

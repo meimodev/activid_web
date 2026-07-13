@@ -6,6 +6,8 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **KenanganKita** — Event photo platform (`/kenangan`). Guests join an **Event** via a link/QR (no app, no account), snap photos into a shared live feed; after the event the **Host** can buy an AI-enhanced, colour-graded final gallery. Guest-facing and host-facing copy is Bahasa Indonesia.
 
+**Event Link (Tautan Acara)** — The guest-facing address that identifies an Event and forms the URL a Guest scans or opens to reach its **Guest Landing**. Auto-derived from the Event's name with an appended uniqueness marker, not chosen or typed by the **Host** — the Host sees it as a read-only preview while creating the Event. Stable for the Event's life; printed on the Event QR.
+
 **Live Feed** — The shared, real-time gallery of Guest photos shown while an Event is Live. Guest-facing label "Galeri Langsung". The screen a scanning Guest is taken to during the Event; Guests both view it and shoot into it. Distinct from the **Memory Gallery**.
 
 **Memory Gallery** — The curated final gallery the Host publishes after the Event has ended. Guest-facing label "Galeri Kenangan". A hand-picked, AI-enhanced subset — not the raw Live Feed. The screen a Guest reaches once the Event is Published.
@@ -16,7 +18,9 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Host Account** — A Google identity (Firebase Auth) that owns Events. One account may own many Events; each Event has exactly one owner. Self-serve: any Google account can sign in and create Events.
 
-**KenanganKita Landing** — The public marketing entry page at `/kenangan`: a warm, celebratory pitch aimed at prospective **Hosts**, ending in a single sign-in call-to-action that links to `/kenangan/host`. The only KenanganKita surface a **Guest** never reaches by design (Guests arrive only via event links). Distinct from the host login page (`/kenangan/host`) and the host dashboard (`/kenangan/host/events`).
+**KenanganKita Landing** — The public marketing entry page at `/kenangan`: a warm, celebratory pitch aimed at prospective **Hosts**, ending in a single sign-in call-to-action that links to `/kenangan/host`. The only KenanganKita surface a **Guest** never reaches by design (Guests arrive only via event links). Distinct from the host login page (`/kenangan/host`) and the **Host Console** (`/kenangan/host/events`).
+
+**Host Console** — The signed-in **Host**'s home at `/kenangan/host/events`: a mobile-app-style shell with a bottom navbar. Two tab views — **Dashboard** (the list of every Event the Host Account owns; admins see all) and **Create** (the new-Event form) — plus a **Logout** action (confirm, then end session). An individual Event opens as a pushed detail screen outside the Console (its own route, back button, no navbar). Distinct from the host login page, which is pre-auth and has no navbar.
 
 **Admin** — Privileged ops role, not a normal Host. Identified by an email allowlist (not a code). Can see all Events and confirm manual payments that unlock the paid enhanced gallery. Powers a Host lacks.
 
