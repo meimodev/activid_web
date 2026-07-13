@@ -55,3 +55,6 @@ next-env.d.ts
 # loose screenshots
 /kenangan-host-events.png
 
+
+# CodeGraph index (local, rebuildable)
+.codegraph/
