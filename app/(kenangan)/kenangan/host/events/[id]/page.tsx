@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { DateTime } from "luxon";
 import QRCode from "qrcode";
 import { getKenanganEventById } from "@/lib/kenangan-event";
-import { getKenanganHostSession } from "@/lib/kenangan-host-session";
+import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
 import { createKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { KENANGAN_THEMES } from "@/data/kenangan-themes";
 import { getAdminDb } from "@/lib/firebase-admin";
@@ -18,6 +18,7 @@ import {
   kenanganSetEventStatus,
   kenanganUpdateEvent,
 } from "../../actions";
+import ConfirmSubmit from "../../ConfirmSubmit";
 import CopyButton from "./CopyButton";
 import HostPhotosClient from "./HostPhotosClient";
 import PublishButton from "./PublishButton";
@@ -89,10 +90,10 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
     searchParams,
   ]);
   if (!session) redirect("/kenangan/host");
-  if (!session.isAdmin && session.subject !== id) redirect("/kenangan/host");
 
   const event = await getKenanganEventById(id);
   if (!event) notFound();
+  if (!canAccessEvent(session, event.ownerUid)) redirect("/kenangan/host/events");
 
   // Latest enhancement order for this event (no orderBy: avoids an index).
   const ordersSnap = await getAdminDb()
@@ -132,9 +133,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
             </Link>
           ) : null}
           <h1 className="kk-feed-title">{event.name}</h1>
-          <p className="kk-feed-count">
-            /{event.slug} · kode akses {event.hostAccessCode}
-          </p>
+          <p className="kk-feed-count">/{event.slug}</p>
         </div>
         <form action={kenanganHostLogout}>
           <button type="submit" className="kk-link-btn">Keluar</button>
@@ -158,16 +157,22 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
             <form action={kenanganSetEventStatus}>
               <input type="hidden" name="eventId" value={event.id} />
               <input type="hidden" name="status" value="live" />
-              <button type="submit" className="kk-btn kk-btn-primary">
+              <ConfirmSubmit pendingLabel="Menyimpan…">
                 {event.status === "draft" ? "Mulai Terima Foto" : "Buka Kembali"}
-              </button>
+              </ConfirmSubmit>
             </form>
           ) : null}
           {event.status === "live" ? (
             <form action={kenanganSetEventStatus}>
               <input type="hidden" name="eventId" value={event.id} />
               <input type="hidden" name="status" value="closed" />
-              <button type="submit" className="kk-btn kk-btn-ghost">Tutup Acara</button>
+              <ConfirmSubmit
+                className="kk-btn kk-btn-ghost"
+                confirm="Tutup acara? Tamu tidak bisa lagi menambah foto ke galeri langsung."
+                pendingLabel="Menutup…"
+              >
+                Tutup Acara
+              </ConfirmSubmit>
             </form>
           ) : null}
           {event.status === "live" ? (
@@ -178,7 +183,10 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         </div>
       </section>
 
-      <section className="kk-card" style={{ marginTop: 16 }}>
+      <section
+        className={`kk-card${event.status === "live" ? " kk-card-primary" : ""}`}
+        style={{ marginTop: 16 }}
+      >
         <h2 className="kk-section-title">Kode QR Tamu</h2>
         {tokenValid ? (
           <div style={{ textAlign: "center" }}>
@@ -214,7 +222,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
       ) : null}
 
       {event.status === "closed" ? (
-        <section className="kk-card" style={{ marginTop: 16 }}>
+        <section className="kk-card kk-card-primary" style={{ marginTop: 16 }}>
           <h2 className="kk-section-title">Kurasi Foto Terbaik</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Pilih foto-foto terbaik untuk galeri kenangan. Hanya foto terpilih yang
@@ -243,9 +251,12 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
               {session.isAdmin ? (
                 <form action={kenanganConfirmOrder} style={{ marginTop: 12 }}>
                   <input type="hidden" name="orderId" value={order.id} />
-                  <button type="submit" className="kk-btn kk-btn-primary">
+                  <ConfirmSubmit
+                    confirm={`Konfirmasi pembayaran Rp ${order.amountIdr.toLocaleString("id-ID")}? Peningkatan AI akan aktif untuk acara ini.`}
+                    pendingLabel="Mengkonfirmasi…"
+                  >
                     Konfirmasi Pembayaran (Admin)
-                  </button>
+                  </ConfirmSubmit>
                 </form>
               ) : null}
             </>
@@ -259,9 +270,12 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
               </p>
               <form action={kenanganRequestEnhancement} style={{ marginTop: 12 }}>
                 <input type="hidden" name="eventId" value={event.id} />
-                <button type="submit" className="kk-btn kk-btn-primary">
+                <ConfirmSubmit
+                  confirm={`Ajukan peningkatan AI paket ${tier.name} seharga Rp ${tier.priceIdr.toLocaleString("id-ID")}? Pesanan dibuat sekarang, tapi kamu baru ditagih setelah admin konfirmasi pembayaran.`}
+                  pendingLabel="Mengajukan…"
+                >
                   Ajukan Peningkatan AI
-                </button>
+                </ConfirmSubmit>
               </form>
             </>
           )}
@@ -294,7 +308,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           <select id="themeId" name="themeId" className="kk-input" defaultValue={event.themeId}>
             {KENANGAN_THEMES.map((theme) => (
               <option key={theme.id} value={theme.id}>
-                {theme.name} ({theme.lutIds.join(", ")})
+                {theme.name}
               </option>
             ))}
           </select>
@@ -311,7 +325,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
             <option value="after_publish">Setelah galeri dipublikasikan</option>
             <option value="instant_share">Langsung saat acara</option>
           </select>
-          <button type="submit" className="kk-btn kk-btn-primary">Simpan</button>
+          <ConfirmSubmit pendingLabel="Menyimpan…">Simpan</ConfirmSubmit>
         </form>
       </section>
     </main>

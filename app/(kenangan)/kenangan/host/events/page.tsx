@@ -5,6 +5,7 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import { getKenanganHostSession } from "@/lib/kenangan-host-session";
 import type { KenanganEvent } from "@/types/kenangan";
 import { kenanganCreateEvent, kenanganHostLogout } from "../actions";
+import ConfirmSubmit from "../ConfirmSubmit";
 
 export const metadata: Metadata = { title: "Daftar Acara" };
 
@@ -15,6 +16,11 @@ const STATUS_LABELS: Record<string, string> = {
   published: "Terpublikasi",
 };
 
+function createdAtMillis(event: KenanganEvent): number {
+  const ts = event.createdAt as { toMillis?: () => number } | undefined;
+  return ts?.toMillis?.() ?? 0;
+}
+
 export default async function KenanganHostEventsPage({
   searchParams,
 }: {
@@ -22,14 +28,17 @@ export default async function KenanganHostEventsPage({
 }) {
   const [session, { error }] = await Promise.all([getKenanganHostSession(), searchParams]);
   if (!session) redirect("/kenangan/host");
-  if (!session.isAdmin) redirect(`/kenangan/host/events/${session.subject}`);
 
-  const snap = await getAdminDb()
-    .collection("kenanganEvents")
-    .orderBy("createdAt", "desc")
-    .limit(100)
-    .get();
+  const col = getAdminDb().collection("kenanganEvents");
+  // Admin sees every event (indexed orderBy). A host sees only their own; we
+  // sort in code to avoid a composite (ownerUid + createdAt) index.
+  const snap = session.isAdmin
+    ? await col.orderBy("createdAt", "desc").limit(100).get()
+    : await col.where("ownerUid", "==", session.uid).limit(100).get();
   const events = snap.docs.map((doc) => ({ id: doc.id, ...(doc.data() as KenanganEvent) }));
+  if (!session.isAdmin) {
+    events.sort((a, b) => createdAtMillis(b) - createdAtMillis(a));
+  }
 
   return (
     <main className="kk-page" style={{ maxWidth: 640 }}>
@@ -45,7 +54,7 @@ export default async function KenanganHostEventsPage({
         <form action={kenanganCreateEvent} className="kk-form">
           <label className="kk-label" htmlFor="name">Nama Acara</label>
           <input id="name" name="name" className="kk-input" required maxLength={120} />
-          <label className="kk-label" htmlFor="slug">Slug (URL)</label>
+          <label className="kk-label" htmlFor="slug">Tautan acara</label>
           <input
             id="slug"
             name="slug"
@@ -54,6 +63,9 @@ export default async function KenanganHostEventsPage({
             pattern="[a-z0-9\-]{3,40}"
             placeholder="mis. nikah-rani-bima"
           />
+          <p className="kk-field-hint">
+            Huruf kecil, angka, dan tanda hubung. Jadi bagian alamat galeri tamu.
+          </p>
           <label className="kk-label" htmlFor="eventDate">Tanggal Acara</label>
           <input id="eventDate" name="eventDate" type="date" className="kk-input" required />
           {error === "invalid" ? (
@@ -62,7 +74,7 @@ export default async function KenanganHostEventsPage({
           {error === "slug" ? (
             <p className="kk-form-error">Slug sudah dipakai acara lain.</p>
           ) : null}
-          <button type="submit" className="kk-btn kk-btn-primary">Buat Acara</button>
+          <ConfirmSubmit pendingLabel="Membuat…">Buat Acara</ConfirmSubmit>
         </form>
       </section>
 
@@ -76,7 +88,7 @@ export default async function KenanganHostEventsPage({
                 <strong>{event.name}</strong>
                 <br />
                 <span className="kk-feed-count">
-                  /{event.slug} · {event.eventDate} · kode {event.hostAccessCode}
+                  /{event.slug} · {event.eventDate}
                 </span>
               </span>
               <span className="kk-badge" data-status={event.status}>

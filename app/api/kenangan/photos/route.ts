@@ -6,7 +6,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled } from "@/lib/kenangan-event";
 import { verifyKenanganGuestToken } from "@/lib/kenangan-guest-token";
-import { getKenanganHostSession } from "@/lib/kenangan-host-session";
+import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
 import { isKenanganLutId } from "@/data/kenangan-luts";
 
 const GUEST_SESSION_ID_REGEX = /^[A-Za-z0-9_-]{10,64}$/;
@@ -15,7 +15,10 @@ const HOST_PAGE_SIZE = 60;
 
 async function requireHostAccess(eventId: string): Promise<NextResponse | null> {
   const session = await getKenanganHostSession();
-  if (!session || (!session.isAdmin && session.subject !== eventId)) {
+  // One extra doc read per poll to resolve the owner; cheap and keeps authz
+  // in one place rather than trusting the client's eventId alone.
+  const snap = await getAdminDb().collection("kenanganEvents").doc(eventId).get();
+  if (!canAccessEvent(session, snap.data()?.ownerUid as string | undefined)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   return null;

@@ -10,6 +10,10 @@
   --kk-bronze: #a98a5c;
   --kk-dark: #1a1714;
 
+  /* Motion — decelerating curves only (no bounce/elastic). */
+  --kk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --kk-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
   font-family: var(--kk-font-ui), system-ui, sans-serif;
   background: var(--kk-paper);
   color: var(--kk-ink);
@@ -59,12 +63,24 @@
   cursor: pointer;
   text-decoration: none;
   text-align: center;
-  transition: opacity 0.15s ease, transform 0.1s ease;
+  transition: opacity 0.15s ease, transform 0.12s var(--kk-ease),
+    box-shadow 0.2s var(--kk-ease);
   touch-action: manipulation;
 }
 
 .kk-btn:active {
   transform: scale(0.98);
+}
+
+/* Lift on pointer devices only — touch keeps the press-scale above. */
+@media (hover: hover) {
+  .kk-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -8px rgba(169, 138, 92, 0.6);
+  }
+  .kk-btn-ghost:hover {
+    box-shadow: inset 0 0 0 1.5px var(--kk-bronze);
+  }
 }
 
 .kk-btn:disabled {
@@ -131,12 +147,22 @@
   padding: 20px;
 }
 
+/* The card holding the action that matters for the event's current state. */
+.kk-card-primary {
+  outline: 2px solid var(--kk-bronze);
+  outline-offset: -2px;
+}
+
 /* ---------- capture (dark screen — candlelit receptions) ---------- */
 
 .kk-capture {
   background: var(--kk-dark);
   color: var(--kk-paper);
-  min-height: 100dvh;
+  /* height (not min-height) + overflow:hidden locks the shot screen to the
+     visible viewport so controls never scroll under the browser bar. dvh
+     tracks the address bar as it shows/hides. Stage flexes to fill the rest. */
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   max-width: 480px;
@@ -176,6 +202,38 @@
   color: var(--kk-paper);
   background: rgba(26, 23, 20, 0.35);
   pointer-events: none;
+  /* Re-runs each tick because CaptureClient keys the node on `count`. */
+  animation: kk-count 0.5s var(--kk-ease) both;
+}
+
+/* White frame flash the instant the shutter fires. */
+.kk-flash {
+  position: absolute;
+  inset: 0;
+  background: var(--kk-paper);
+  pointer-events: none;
+  z-index: 5;
+  animation: kk-flash 0.45s var(--kk-ease-expo) forwards;
+}
+
+@keyframes kk-count {
+  from {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes kk-flash {
+  from {
+    opacity: 0.85;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .kk-lut-row {
@@ -195,6 +253,12 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s var(--kk-ease), border-color 0.2s var(--kk-ease),
+    color 0.2s var(--kk-ease), transform 0.12s var(--kk-ease);
+}
+
+.kk-lut-chip:active {
+  transform: scale(0.94);
 }
 
 .kk-lut-chip[data-active="true"] {
@@ -226,7 +290,9 @@
 .kk-capture-side {
   width: 74px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
 .kk-icon-btn {
@@ -241,6 +307,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.kk-icon-label {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: rgba(247, 242, 234, 0.65);
 }
 
 .kk-capture-start {
@@ -259,6 +331,21 @@
   color: rgba(247, 242, 234, 0.7);
   font-size: 14px;
   line-height: 1.6;
+}
+
+.kk-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(247, 242, 234, 0.2);
+  border-top-color: rgba(247, 242, 234, 0.85);
+  animation: kk-spin 0.8s linear infinite;
+}
+
+@keyframes kk-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .kk-review-actions {
@@ -316,6 +403,16 @@
   display: block;
   aspect-ratio: 3 / 4;
   object-fit: cover;
+  transition: opacity 0.25s var(--kk-ease);
+}
+
+.kk-feed-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
 }
 
 .kk-feed-empty {
@@ -325,6 +422,118 @@
   line-height: 1.6;
 }
 
+/* Placeholder tiles shown while the first live-feed snapshot loads. */
+.kk-skeleton {
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(
+    100deg,
+    var(--kk-cream) 30%,
+    var(--kk-sand) 50%,
+    var(--kk-cream) 70%
+  );
+  background-size: 200% 100%;
+  animation: kk-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes kk-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- lightbox ---------- */
+
+.kk-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 18, 15, 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.kk-lightbox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(14px + env(safe-area-inset-top)) 18px 14px;
+  color: #f4efe6;
+}
+
+.kk-lightbox-count {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+
+.kk-lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kk-lightbox-action {
+  appearance: none;
+  border: 1px solid rgba(244, 239, 230, 0.35);
+  background: transparent;
+  color: #f4efe6;
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.kk-lightbox-action:active {
+  background: rgba(244, 239, 230, 0.15);
+}
+
+.kk-lightbox-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+}
+
+.kk-lightbox-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: pan-y;
+}
+
+.kk-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.kk-lightbox-spinner {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(244, 239, 230, 0.25);
+  border-top-color: #f4efe6;
+  animation: kk-spin 0.8s linear infinite;
+}
+
 .kk-feed-fab {
   position: fixed;
   bottom: calc(20px + env(safe-area-inset-bottom));
@@ -332,6 +541,29 @@
   transform: translateX(-50%);
   box-shadow: 0 8px 24px rgba(44, 40, 34, 0.25);
   z-index: 10;
+  animation: kk-fab-in 0.5s var(--kk-ease) 0.15s both;
+}
+
+/* translateX centering must survive the button's press/hover transforms. */
+.kk-feed-fab:active {
+  transform: translateX(-50%) scale(0.98);
+}
+
+@media (hover: hover) {
+  .kk-feed-fab:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
+}
+
+@keyframes kk-fab-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* ---------- host ---------- */
@@ -347,6 +579,13 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--kk-muted);
+}
+
+.kk-field-hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--kk-muted);
+  margin: -4px 0 4px;
 }
 
 .kk-input {
@@ -440,11 +679,16 @@
 .kk-download-link {
   display: block;
   text-align: center;
-  padding: 8px;
+  padding: 11px 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--kk-bronze);
+  background: color-mix(in srgb, var(--kk-bronze) 12%, transparent);
   text-decoration: none;
+}
+
+.kk-download-link:active {
+  background: color-mix(in srgb, var(--kk-bronze) 20%, transparent);
 }
 
 .kk-status-msg {
@@ -452,4 +696,508 @@
   color: var(--kk-muted);
   font-size: 14px;
   padding: 10px 0;
+}
+
+/* ---------- marketing landing (/kenangan) ----------
+   Only page that breaks the 480px mobile shell; responsive to desktop. */
+
+.kkm {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px calc(48px + env(safe-area-inset-bottom));
+}
+
+.kkm-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.kkm-logo {
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.kkm-nav-cta {
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+/* hero */
+.kkm-hero {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  padding: 24px 0 56px;
+}
+
+.kkm-eyebrow {
+  text-align: left;
+  margin-bottom: 14px;
+}
+
+.kkm-title {
+  font-size: 40px;
+  line-height: 1.08;
+  margin: 0 0 18px;
+}
+
+.kkm-lead {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--kk-muted);
+  max-width: 46ch;
+}
+
+.kkm-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.kkm-hero-note {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--kk-muted);
+}
+
+.kkm-hero-art {
+  position: relative;
+}
+
+.kkm-hero-img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 24px;
+  background: var(--kk-cream);
+  box-shadow: 0 24px 60px -24px rgba(44, 40, 34, 0.4);
+}
+
+/* sections */
+.kkm-section {
+  padding: 40px 0;
+}
+
+.kkm-h2 {
+  font-size: 28px;
+  line-height: 1.15;
+  margin: 0 0 8px;
+}
+
+.kkm-sub {
+  color: var(--kk-muted);
+  font-size: 15px;
+  margin: 0 0 24px;
+  max-width: 52ch;
+}
+
+.kkm-h2 + .kkm-grid,
+.kkm-h2 + .kkm-features,
+.kkm-h2 + .kkm-steps {
+  margin-top: 24px;
+}
+
+.kkm-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+/* Features: asymmetric bento. The lead benefit gets a bronze panel that
+   spans the column of smaller cards on desktop; a flat grid on mobile. */
+.kkm-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.kkm-feature-lead {
+  background: var(--kk-bronze);
+  color: var(--kk-paper);
+}
+
+.kkm-feature-lead .kkm-feature-title {
+  font-size: 22px;
+}
+
+.kkm-feature-lead .kkm-feature-body {
+  color: rgba(247, 242, 234, 0.85);
+}
+
+.kkm-feature-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.kkm-feature-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--kk-muted);
+  margin: 0;
+}
+
+/* steps */
+.kkm-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.kkm-step-n {
+  display: block;
+  font-size: 30px;
+  color: var(--kk-bronze);
+  margin-bottom: 8px;
+}
+
+/* pricing */
+.kkm-price {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.kkm-price-featured {
+  outline: 2px solid var(--kk-bronze);
+}
+
+.kkm-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--kk-paper);
+  background: var(--kk-bronze);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.kkm-price-name {
+  font-size: 20px;
+  margin: 0;
+}
+
+.kkm-price-amount {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+
+.kkm-price-cta {
+  margin-top: 14px;
+  width: 100%;
+}
+
+/* faq */
+.kkm-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kkm-faq-item {
+  padding: 0;
+  overflow: hidden;
+}
+
+.kkm-faq-q {
+  cursor: pointer;
+  list-style: none;
+  padding: 18px 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.kkm-faq-q::-webkit-details-marker {
+  display: none;
+}
+
+.kkm-faq-q::after {
+  content: "+";
+  float: right;
+  color: var(--kk-bronze);
+  font-weight: 400;
+}
+
+.kkm-faq-item[open] .kkm-faq-q::after {
+  content: "\2212";
+}
+
+.kkm-faq-item .kkm-feature-body {
+  padding: 0 20px 18px;
+}
+
+/* closing cta */
+.kkm-cta {
+  text-align: center;
+  background: var(--kk-cream);
+  border-radius: 24px;
+  padding: 48px 24px;
+  margin: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.kkm-cta .kk-btn {
+  margin-top: 16px;
+}
+
+/* footer */
+.kkm-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  padding-top: 32px;
+  border-top: 1px solid var(--kk-sand);
+  font-size: 14px;
+}
+
+.kkm-footer-muted {
+  color: var(--kk-muted);
+}
+
+/* desktop */
+@media (min-width: 720px) {
+  .kkm-hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    padding: 48px 0 72px;
+  }
+  .kkm-title {
+    font-size: 52px;
+  }
+  .kkm-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kkm-features {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: stretch;
+  }
+  .kkm-feature-lead {
+    grid-row: 1 / span 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 32px;
+  }
+  .kkm-feature-lead .kkm-feature-title {
+    font-size: 28px;
+  }
+  .kkm-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .kkm-pricing {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+  .kkm-h2 {
+    font-size: 32px;
+  }
+}
+
+/* ======================================================================
+   Motion
+   Entrances run once on mount. Feed/gallery tiles use content-visibility,
+   so they must NOT carry replay-on-scroll keyframes — their fade lives in
+   GradedThumb (fires once when the grade paints). Everything here is gated
+   behind prefers-reduced-motion at the bottom.
+   ====================================================================== */
+
+@keyframes kk-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- guest / host task surfaces (.kk-page shell) ---- */
+
+/* Cards and rows drift up on load; scoped to .kk-page so marketing cards
+   (which share .kk-card) keep their own scroll-reveal instead. */
+.kk-page > .kk-card,
+.kk-page > section {
+  animation: kk-rise 0.5s var(--kk-ease) both;
+}
+
+.kk-page > section:nth-of-type(2) {
+  animation-delay: 0.06s;
+}
+.kk-page > section:nth-of-type(3) {
+  animation-delay: 0.12s;
+}
+.kk-page > section:nth-of-type(4) {
+  animation-delay: 0.18s;
+}
+
+.kk-landing-cover,
+.kk-landing-title,
+.kk-landing-date {
+  animation: kk-rise 0.55s var(--kk-ease) both;
+}
+.kk-landing-title {
+  animation-delay: 0.05s;
+}
+.kk-landing-date {
+  animation-delay: 0.1s;
+}
+
+/* Event rows stagger, but only the first screenful — a deep list must not
+   leave lower rows blank behind long delays. */
+.kk-event-row {
+  animation: kk-rise 0.45s var(--kk-ease) both;
+  transition: background 0.18s var(--kk-ease), transform 0.12s var(--kk-ease);
+}
+.kk-event-row:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.kk-event-row:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.kk-event-row:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.kk-event-row:nth-child(4) {
+  animation-delay: 0.17s;
+}
+.kk-event-row:nth-child(5) {
+  animation-delay: 0.22s;
+}
+.kk-event-row:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) {
+  .kk-event-row:hover {
+    background: var(--kk-sand);
+  }
+}
+
+/* Save confirmation slips in rather than snapping. */
+.kk-form-ok {
+  animation: kk-rise 0.4s var(--kk-ease) both;
+}
+
+/* ---- graded thumbnails: fade in once, as the LUT paints ---- */
+.kk-thumb {
+  opacity: 0;
+  transition: opacity 0.5s var(--kk-ease);
+}
+.kk-thumb[data-ready="true"] {
+  opacity: 1;
+}
+
+/* ---- capture: review image + success checkmark ---- */
+.kk-review-img {
+  animation: kk-rise 0.35s var(--kk-ease) both;
+}
+
+.kk-check {
+  width: 72px;
+  height: 72px;
+  color: var(--kk-bronze);
+}
+.kk-check circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: kk-draw 0.5s var(--kk-ease) forwards;
+}
+.kk-check path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: kk-draw 0.3s var(--kk-ease) 0.4s forwards;
+}
+@keyframes kk-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---- marketing landing (.kkm shell) ---- */
+
+/* Hero is above the fold: choreograph it on load. */
+.kkm-eyebrow,
+.kkm-title,
+.kkm-lead,
+.kkm-hero-actions,
+.kkm-hero-note,
+.kkm-hero-art {
+  animation: kk-rise 0.6s var(--kk-ease) both;
+}
+.kkm-title {
+  animation-delay: 0.07s;
+}
+.kkm-lead {
+  animation-delay: 0.14s;
+}
+.kkm-hero-actions {
+  animation-delay: 0.21s;
+}
+.kkm-hero-note {
+  animation-delay: 0.28s;
+}
+.kkm-hero-art {
+  animation-delay: 0.12s;
+}
+
+/* Below-the-fold sections reveal on scroll — scroll-timeline only, so
+   browsers without support just render them normally (never hidden). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .kkm-section,
+    .kkm-cta {
+      animation: kk-reveal linear both;
+      animation-timeline: view();
+      /* entry-phase only: completes as the section scrolls in from the
+         viewport bottom, so a short last section can't stay stuck hidden
+         (which cover/exit ranges risk when the page can't scroll further). */
+      animation-range: entry 5% entry 60%;
+    }
+  }
+}
+@keyframes kk-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.kkm-feature,
+.kkm-price,
+.kkm-step {
+  transition: transform 0.2s var(--kk-ease), box-shadow 0.2s var(--kk-ease);
+}
+@media (hover: hover) {
+  .kkm-feature:hover,
+  .kkm-price:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px -22px rgba(44, 40, 34, 0.5);
+  }
+}
+
+/* ---- accessibility: honor reduced-motion everywhere ---- */
+@media (prefers-reduced-motion: reduce) {
+  .kk-root *,
+  .kk-root *::before,
+  .kk-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

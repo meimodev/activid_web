@@ -1,17 +1,14 @@
 "use server";
 
-import { customAlphabet } from "nanoid";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
 import {
-  KENANGAN_ADMIN_SUBJECT,
-  createKenanganHostSessionCookieValue,
+  canAccessEvent,
   getKenanganHostSession,
   getKenanganHostSessionCookieName,
-  getKenanganHostSessionCookieOptions,
   type KenanganHostSession,
 } from "@/lib/kenangan-host-session";
 import { KENANGAN_DEFAULT_THEME_ID, isKenanganThemeId } from "@/data/kenangan-themes";
@@ -19,55 +16,33 @@ import { KENANGAN_TIERS, getKenanganTier } from "@/types/kenangan";
 
 const SLUG_REGEX = /^[a-z0-9-]{3,40}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const accessCodeAlphabet = customAlphabet("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", 12);
 
 function ensureEnabled(): void {
   if (!isKenanganEnabled()) notFound();
 }
 
-async function requireSession(eventId?: string): Promise<KenanganHostSession> {
+async function requireSession(): Promise<KenanganHostSession> {
   const session = await getKenanganHostSession();
   if (!session) redirect("/kenangan/host");
-  if (eventId && !session.isAdmin && session.subject !== eventId) {
-    redirect("/kenangan/host");
-  }
   return session;
 }
 
-export async function kenanganHostLogin(formData: FormData): Promise<void> {
-  ensureEnabled();
-  const code = String(formData.get("accessCode") ?? "").trim();
-  if (!code) redirect("/kenangan/host?error=1");
-
-  let subject: string | null = null;
-  const adminCode = process.env.KENANGAN_ADMIN_ACCESS_CODE;
-  if (adminCode && code === adminCode) {
-    subject = KENANGAN_ADMIN_SUBJECT;
-  } else {
-    const snap = await getAdminDb()
-      .collection("kenanganEvents")
-      .where("hostAccessCode", "==", code.toUpperCase())
-      .limit(1)
-      .get();
-    if (!snap.empty) subject = snap.docs[0].id;
+/** Fetch an event ref+data, authorize the session against its owner, or redirect. */
+async function requireOwnedEvent(session: KenanganHostSession, eventId: string) {
+  const ref = getAdminDb().collection("kenanganEvents").doc(eventId);
+  const snap = await ref.get();
+  if (!snap.exists) redirect("/kenangan/host/events");
+  const data = snap.data()!;
+  if (!canAccessEvent(session, data.ownerUid as string | undefined)) {
+    redirect("/kenangan/host/events");
   }
-  if (!subject) redirect("/kenangan/host?error=1");
-
-  const store = await cookies();
-  store.set(
-    getKenanganHostSessionCookieName(),
-    createKenanganHostSessionCookieValue(subject),
-    getKenanganHostSessionCookieOptions(),
-  );
-  redirect(
-    subject === KENANGAN_ADMIN_SUBJECT
-      ? "/kenangan/host/events"
-      : `/kenangan/host/events/${subject}`,
-  );
+  return { ref, data };
 }
 
 export async function kenanganHostLogout(): Promise<void> {
   ensureEnabled();
+  // Session cookie is cleared here; sign-out of the Firebase client happens
+  // in the browser (best-effort) but the server cookie is the source of truth.
   const store = await cookies();
   store.delete(getKenanganHostSessionCookieName());
   redirect("/kenangan/host");
@@ -76,7 +51,6 @@ export async function kenanganHostLogout(): Promise<void> {
 export async function kenanganCreateEvent(formData: FormData): Promise<void> {
   ensureEnabled();
   const session = await requireSession();
-  if (!session.isAdmin) redirect("/kenangan/host");
 
   const name = String(formData.get("name") ?? "").trim();
   const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
@@ -97,6 +71,7 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
   const ref = await db.collection("kenanganEvents").add({
     slug,
     name,
+    ownerUid: session.uid,
     eventDate,
     coverUrl: "",
     tier: "standard",
@@ -104,7 +79,6 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
     themeId: KENANGAN_DEFAULT_THEME_ID,
     downloadMode: "after_publish",
     status: "draft",
-    hostAccessCode: accessCodeAlphabet(),
     enhancementPurchased: false,
     createdAt: FieldValue.serverTimestamp(),
   });
@@ -114,8 +88,8 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
 
 export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
   ensureEnabled();
+  const session = await requireSession();
   const eventId = String(formData.get("eventId") ?? "");
-  await requireSession(eventId);
 
   const name = String(formData.get("name") ?? "").trim();
   const eventDate = String(formData.get("eventDate") ?? "").trim();
@@ -137,10 +111,7 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
     redirect(`${back}?error=invalid`);
   }
 
-  const db = getAdminDb();
-  const ref = db.collection("kenanganEvents").doc(eventId);
-  const snap = await ref.get();
-  if (!snap.exists) redirect("/kenangan/host/events");
+  const { ref, data } = await requireOwnedEvent(session, eventId);
 
   await ref.update({
     name,
@@ -151,44 +122,39 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
     tier,
     guestCap: getKenanganTier(tier).guestCap,
   });
-  await revalidateKenanganEvent(snap.data()?.slug as string);
+  await revalidateKenanganEvent(data.slug as string);
   redirect(`${back}?saved=1`);
 }
 
 export async function kenanganSetEventStatus(formData: FormData): Promise<void> {
   ensureEnabled();
+  const session = await requireSession();
   const eventId = String(formData.get("eventId") ?? "");
   const status = String(formData.get("status") ?? "");
-  await requireSession(eventId);
 
   // "published" goes through the publish flow, never this action.
   if (!["draft", "live", "closed"].includes(status)) {
     redirect(`/kenangan/host/events/${eventId}?error=invalid`);
   }
 
-  const db = getAdminDb();
-  const ref = db.collection("kenanganEvents").doc(eventId);
-  const snap = await ref.get();
-  if (!snap.exists) redirect("/kenangan/host/events");
-  if (snap.data()?.status === "published") {
+  const { ref, data } = await requireOwnedEvent(session, eventId);
+  if (data.status === "published") {
     redirect(`/kenangan/host/events/${eventId}?error=published`);
   }
 
   await ref.update({ status });
-  await revalidateKenanganEvent(snap.data()?.slug as string);
+  await revalidateKenanganEvent(data.slug as string);
   redirect(`/kenangan/host/events/${eventId}?saved=1`);
 }
 
 /** Host requests the paid AI-enhanced gallery: creates a pending order. */
 export async function kenanganRequestEnhancement(formData: FormData): Promise<void> {
   ensureEnabled();
+  const session = await requireSession();
   const eventId = String(formData.get("eventId") ?? "");
-  await requireSession(eventId);
 
   const db = getAdminDb();
-  const eventSnap = await db.collection("kenanganEvents").doc(eventId).get();
-  if (!eventSnap.exists) redirect("/kenangan/host/events");
-  const event = eventSnap.data()!;
+  const { data: event } = await requireOwnedEvent(session, eventId);
   if (event.enhancementPurchased) {
     redirect(`/kenangan/host/events/${eventId}?saved=1`);
   }

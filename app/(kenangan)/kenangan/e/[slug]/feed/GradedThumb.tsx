@@ -14,13 +14,26 @@ export default function GradedThumb({
   src,
   lutId,
   alt,
+  className,
+  onReady,
 }: {
   src: string;
   lutId: KenanganLutId;
   alt: string;
+  className?: string;
+  // Fires once the graded canvas (or fallback img) has painted. Lets the
+  // lightbox drop its spinner. Optional — the feed grid ignores it.
+  onReady?: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [fallback, setFallback] = useState(false);
+  // Drives the fade-in: the tile paints transparent, then eases to opaque once
+  // the grade (or fallback img) has actually rendered. Set once; stays set.
+  const [ready, setReady] = useState(false);
+  const onReadyRef = useRef(onReady);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +51,10 @@ export default function GradedThumb({
         }
       }
       if (!ok) setFallback(true);
+      else {
+        setReady(true);
+        onReadyRef.current?.();
+      }
     };
     image.onerror = () => {
       if (!cancelled) setFallback(true);
@@ -48,8 +65,25 @@ export default function GradedThumb({
     };
   }, [src, lutId]);
 
+  const cls = ["kk-thumb", className].filter(Boolean).join(" ");
+
   if (fallback) {
-    return <img src={src} alt={alt} loading="lazy" decoding="async" />;
+    return (
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        className={cls}
+        data-ready={ready}
+        onLoad={() => {
+          setReady(true);
+          onReadyRef.current?.();
+        }}
+      />
+    );
   }
-  return <canvas ref={canvasRef} role="img" aria-label={alt} />;
+  return (
+    <canvas ref={canvasRef} role="img" aria-label={alt} className={cls} data-ready={ready} />
+  );
 }

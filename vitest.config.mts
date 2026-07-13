@@ -14,6 +14,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+      // server-only throws outside RSC bundling; stub it so server modules
+      // (which are still plain JS) can be unit-tested in node/jsdom.
+      'server-only': path.resolve(__dirname, './test/stubs/server-only.ts'),
     },
   },
 });

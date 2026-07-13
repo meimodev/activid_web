@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   collection,
   getDocs,
@@ -18,6 +18,7 @@ import { db } from "@/lib/firebase";
 import { kenanganFullUrl, kenanganThumbUrl, type KenanganDownloadMode } from "@/types/kenangan";
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
+import Lightbox from "./Lightbox";
 
 // No `where("status" == ...)` clause: equality + orderBy would demand a
 // composite Firestore index. Order by createdAt only, filter status in code.
@@ -27,6 +28,9 @@ const PAGE_SIZE = 30;
 interface FeedPhoto {
   id: string;
   src: string;
+  // Full-res, inline-renderable (no attachment header) — graded in the lightbox.
+  displaySrc: string;
+  // Full-res download (ik-attachment forces save of the clean original).
   fullSrc: string;
   lutId: KenanganLutId;
   createdAtMs: number;
@@ -40,6 +44,7 @@ function toFeedPhoto(id: string, data: DocumentData): FeedPhoto | null {
   return {
     id,
     src: kenanganThumbUrl(originalPath),
+    displaySrc: kenanganFullUrl(originalPath),
     fullSrc: `${kenanganFullUrl(originalPath)}?ik-attachment=true`,
     lutId: isKenanganLutId(data.lutId) ? data.lutId : "natural",
     createdAtMs: createdAt ? createdAt.toMillis() : Date.now(),
@@ -63,6 +68,9 @@ export default function FeedClient({
   const [ready, setReady] = useState(false);
   const [exhausted, setExhausted] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
+  // Stable so the lightbox's history-entry effect doesn't re-push on re-render.
+  const closeLightbox = useCallback(() => setOpenId(null), []);
 
   const pendingRef = useRef<Map<string, FeedPhoto | null>>(new Map());
   const rafRef = useRef(0);
@@ -174,9 +182,13 @@ export default function FeedClient({
         <div className="kk-feed-empty">
           <p>Galeri tidak dapat dimuat. Muat ulang halaman ini.</p>
         </div>
-      ) : null}
-
-      {ready && photos.length === 0 ? (
+      ) : !ready ? (
+        <div className="kk-feed-grid" aria-hidden>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="kk-feed-item kk-skeleton" />
+          ))}
+        </div>
+      ) : photos.length === 0 ? (
         <div className="kk-feed-empty">
           <p>Belum ada foto.</p>
           <p>Jadilah yang pertama mengabadikan momen malam ini!</p>
@@ -185,19 +197,29 @@ export default function FeedClient({
         <div className="kk-feed-grid">
           {photos.map((photo) => (
             <figure key={photo.id} className="kk-feed-item">
-              {canDownload ? (
-                <a href={photo.fullSrc} target="_blank" rel="noreferrer">
-                  <GradedThumb src={photo.src} lutId={photo.lutId} alt="Foto tamu" />
-                </a>
-              ) : (
+              {/* Tap opens the lightbox in both modes; download lives inside it. */}
+              <button
+                type="button"
+                className="kk-feed-open"
+                onClick={() => setOpenId(photo.id)}
+                aria-label="Perbesar foto"
+              >
                 <GradedThumb src={photo.src} lutId={photo.lutId} alt="Foto tamu" />
-              )}
+              </button>
             </figure>
           ))}
         </div>
       )}
 
       {!exhausted ? <div ref={sentinelRef} style={{ height: 1 }} /> : null}
+
+      <Lightbox
+        photos={photos}
+        openId={openId}
+        onOpenId={setOpenId}
+        onClose={closeLightbox}
+        canDownload={canDownload}
+      />
 
       {token ? (
         <Link href={`/kenangan/e/${slug}/capture${tokenQuery}`} className="kk-btn kk-btn-primary kk-feed-fab">

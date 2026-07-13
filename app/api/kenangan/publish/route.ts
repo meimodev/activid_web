@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
-import { getKenanganHostSession } from "@/lib/kenangan-host-session";
+import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
 import {
   gradeAndStoreKenanganPhoto,
   kenanganOriginalUrl,
@@ -72,9 +72,6 @@ export async function POST(request: NextRequest) {
   }
 
   const session = await getKenanganHostSession();
-  if (!session || (!session.isAdmin && session.subject !== eventId)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const db = getAdminDb();
   const eventRef = db.collection("kenanganEvents").doc(eventId);
@@ -83,6 +80,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Acara tidak ditemukan." }, { status: 404 });
   }
   const event = eventSnap.data()!;
+  if (!canAccessEvent(session, event.ownerUid as string | undefined)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   if (event.status !== "closed") {
     return NextResponse.json(
       { error: "Tutup acara terlebih dahulu sebelum mempublikasikan galeri." },

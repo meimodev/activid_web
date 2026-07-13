@@ -60,11 +60,12 @@ export default function CaptureClient({
   // (WebGL on feed thumbs, sharp at publish) so full-res re-grades stay clean.
   const uploadBlobRef = useRef<Blob | null>(null);
 
-  const [phase, setPhase] = useState<Phase>("idle");
+  const [phase, setPhase] = useState<Phase>("starting");
   const [count, setCount] = useState(3);
   const [lutId, setLutId] = useState<KenanganLutId>(lutIds[0] ?? "natural");
   const [facing, setFacing] = useState<Facing>("environment");
   const [reviewUrl, setReviewUrl] = useState<string | null>(null);
+  const [flash, setFlash] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   // Render loop: create GL lazily, keep LUT in sync, draw video every frame.
@@ -119,6 +120,16 @@ export default function CaptureClient({
     return () => {
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
+  }, []);
+
+  // Auto-start on mount — no "Mulai Kamera" gate. The permission prompt fires
+  // immediately; ref guard stops StrictMode's double-invoke from double-calling.
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    void startCamera(facing);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function startCamera(mode: Facing) {
@@ -176,6 +187,7 @@ export default function CaptureClient({
     const state = glRef.current;
     if (!canvas || !video || !state) return;
 
+    setFlash(true);
     const width = canvas.width;
     const height = canvas.height;
     const mirror = facing === "user";
@@ -301,36 +313,55 @@ export default function CaptureClient({
           <img
             src={reviewUrl}
             alt="Pratinjau foto"
+            className="kk-review-img"
             style={{ position: "absolute", inset: 0, margin: "auto" }}
           />
         ) : null}
 
-        {phase === "idle" || phase === "starting" ? (
+        {flash ? <div className="kk-flash" onAnimationEnd={() => setFlash(false)} /> : null}
+
+        {phase === "starting" ? (
           <div className="kk-capture-start">
-            <p className="kk-brand">Kita</p>
-            <p className="kk-capture-hint">
-              Ambil foto langsung dari browser — tanpa aplikasi. Foto kamu akan
-              tampil di galeri bersama acara ini.
-            </p>
+            <div className="kk-spinner" aria-hidden />
+            <p className="kk-capture-hint">Menyiapkan kamera…</p>
+          </div>
+        ) : null}
+
+        {phase === "idle" ? (
+          <div className="kk-capture-start">
+            <p className="kk-capture-hint">{errorMsg || "Kamera tidak dapat diakses."}</p>
             <button
               type="button"
               className="kk-btn kk-btn-primary"
               onClick={() => startCamera(facing)}
-              disabled={phase === "starting"}
             >
-              {phase === "starting" ? "Menyiapkan kamera…" : "Mulai Kamera"}
+              Coba Lagi
             </button>
-            {errorMsg ? <p className="kk-capture-hint">{errorMsg}</p> : null}
           </div>
         ) : null}
 
         {phase === "countdown" && count > 0 ? (
-          <div className="kk-countdown">{count}</div>
+          <div className="kk-countdown" key={count}>{count}</div>
         ) : null}
 
         {phase === "done" ? (
           <div className="kk-capture-start" style={{ background: "rgba(26, 23, 20, 0.75)" }}>
-            <p className="kk-display" style={{ fontSize: 28 }}>Foto terkirim!</p>
+            <svg
+              className="kk-check"
+              viewBox="0 0 52 52"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <circle cx="26" cy="26" r="24" />
+              <path d="M15 27l7 7 15-15" />
+            </svg>
+            <p className="kk-display" style={{ fontSize: 28, animation: "kk-rise 0.4s var(--kk-ease) 0.5s both" }}>
+              Foto terkirim!
+            </p>
             <p className="kk-capture-hint">Foto kamu sudah tampil di galeri langsung.</p>
           </div>
         ) : null}
@@ -354,8 +385,14 @@ export default function CaptureClient({
           <div className="kk-capture-controls">
             <div className="kk-capture-side">
               <Link href={`/kenangan/e/${slug}/feed${tokenQuery}`} className="kk-icon-btn" aria-label="Lihat galeri">
-                ▦
+                <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" />
+                </svg>
               </Link>
+              <span className="kk-icon-label">Galeri</span>
             </div>
             <button
               type="button"
@@ -366,8 +403,24 @@ export default function CaptureClient({
             />
             <div className="kk-capture-side">
               <button type="button" className="kk-icon-btn" aria-label="Balik kamera" onClick={flipCamera}>
-                ⟳
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                  <path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                  <path d="M3 21v-5h5" />
+                </svg>
               </button>
+              <span className="kk-icon-label">Balik</span>
             </div>
           </div>
         </>

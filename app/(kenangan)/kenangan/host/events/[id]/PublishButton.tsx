@@ -9,6 +9,9 @@ export default function PublishButton({ eventId }: { eventId: string }) {
   const [errorMsg, setErrorMsg] = useState("");
 
   async function publish() {
+    if (!window.confirm("Publikasikan galeri kenangan? Setelah tayang, status acara tidak bisa diubah lagi.")) {
+      return;
+    }
     setBusy(true);
     setErrorMsg("");
     try {

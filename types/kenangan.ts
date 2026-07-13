@@ -28,6 +28,8 @@ export type KenanganDownloadMode = "after_publish" | "instant_share";
 export interface KenanganEvent {
   slug: string;
   name: string;
+  /** Firebase Auth uid of the host account that owns this event. */
+  ownerUid: string;
   /** ISO date string, e.g. "2026-08-01" */
   eventDate: string;
   coverUrl?: string;
@@ -36,10 +38,18 @@ export interface KenanganEvent {
   themeId?: string;
   downloadMode: KenanganDownloadMode;
   status: KenanganEventStatus;
-  hostAccessCode: string;
   enhancementPurchased: boolean;
   publishedAt?: unknown;
   createdAt?: unknown;
+}
+
+/** A host account (Google identity), keyed by Firebase Auth uid. */
+export interface KenanganHost {
+  email: string | null;
+  name?: string | null;
+  photoUrl?: string | null;
+  createdAt?: unknown;
+  lastLoginAt?: unknown;
 }
 
 export type KenanganPhotoStatus = "live" | "hidden" | "keeper" | "enhanced" | "failed";

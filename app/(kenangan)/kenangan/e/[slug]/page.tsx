@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { DateTime } from "luxon";
 import { getKenanganEventBySlug } from "@/lib/kenangan-event";
 import { verifyKenanganGuestToken } from "@/lib/kenangan-guest-token";
@@ -34,6 +33,16 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
   const authorized = claims?.eventId === event.id;
   const tokenQuery = t ? `?t=${encodeURIComponent(t)}` : "";
 
+  // The landing is a router, not a destination: a scanning Guest is sent
+  // straight to the gallery for the Event's current state. Only the dead-end
+  // states (closed, bad token) render here. See CONTEXT.md "Guest Landing".
+  if (authorized && event.status === "live") {
+    redirect(`/kenangan/e/${slug}/feed${tokenQuery}`);
+  }
+  if (event.status === "published") {
+    redirect(`/kenangan/e/${slug}/gallery`);
+  }
+
   return (
     <main className="kk-page">
       <p className="kk-brand">Kita</p>
@@ -46,25 +55,11 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
         <p className="kk-landing-date">{formatEventDate(event.eventDate)}</p>
       </div>
 
-      {authorized && event.status === "live" ? (
-        <>
-          <div className="kk-landing-actions">
-            <Link href={`/kenangan/e/${slug}/capture${tokenQuery}`} className="kk-btn kk-btn-primary">
-              Ambil Foto
-            </Link>
-            <Link href={`/kenangan/e/${slug}/feed${tokenQuery}`} className="kk-btn kk-btn-ghost">
-              Lihat Galeri Langsung
-            </Link>
-          </div>
-          <p className="kk-landing-note">
-            Foto yang kamu ambil langsung tampil di galeri bersama. Setelah acara
-            selesai, tuan rumah akan mengkurasi galeri kenangan terbaik.
-          </p>
-        </>
-      ) : null}
-
       {authorized && event.status === "closed" ? (
         <div className="kk-card" style={{ marginTop: 28 }}>
+          <p className="kk-section-title" style={{ marginBottom: 8 }}>
+            Terima kasih sudah hadir.
+          </p>
           <p style={{ lineHeight: 1.6 }}>
             Acara telah selesai. Galeri kenangan sedang dikurasi oleh tuan rumah —
             nantikan hasilnya di sini.
@@ -72,15 +67,7 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
         </div>
       ) : null}
 
-      {event.status === "published" ? (
-        <div className="kk-landing-actions">
-          <Link href={`/kenangan/e/${slug}/gallery`} className="kk-btn kk-btn-primary">
-            Lihat Galeri Kenangan
-          </Link>
-        </div>
-      ) : null}
-
-      {!authorized && event.status !== "published" ? (
+      {!authorized ? (
         <div className="kk-card" style={{ marginTop: 28 }}>
           <p style={{ lineHeight: 1.6 }}>
             Tautan ini tidak valid atau sudah kedaluwarsa. Silakan pindai ulang kode
