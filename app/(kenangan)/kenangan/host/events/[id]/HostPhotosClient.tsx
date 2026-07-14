@@ -4,23 +4,57 @@ import { useEffect, useState } from "react";
 import { kenanganThumbUrl } from "@/types/kenangan";
 import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 import KkSpinner from "@/app/(kenangan)/kenangan/KkSpinner";
+import HostPhotoLightbox from "./HostPhotoLightbox";
 
-type HostMode = "live" | "curate";
+export type HostMode = "live" | "curate";
 
-interface HostPhoto {
+export interface HostPhoto {
   id: string;
   status: "live" | "hidden" | "keeper" | "enhanced" | "failed";
   originalPath: string;
   createdAtMs: number;
 }
 
-const STATUS_LABELS: Record<string, string> = {
+export const STATUS_LABELS: Record<string, string> = {
   live: "Tampil",
   hidden: "Disembunyikan",
   keeper: "Terpilih",
   enhanced: "Ditingkatkan",
   failed: "Gagal",
 };
+
+// Inline SVGs (feather-style), shared by the grid bar and the lightbox so the
+// hide/keeper affordances read identically in both. star-filled paints; the
+// rest are stroked outlines.
+const ICON_PATHS: Record<string, string[]> = {
+  eye: ["M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z", "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"],
+  "eye-off": [
+    "M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24",
+    "M1 1l22 22",
+    "M6.61 6.61A18.5 18.5 0 0 0 1 12s4 8 11 8a9.12 9.12 0 0 0 5.39-1.61",
+  ],
+  star: ["M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2Z"],
+  "star-filled": ["M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2Z"],
+};
+
+export function HostPhotoIcon({ name }: { name: keyof typeof ICON_PATHS }) {
+  return (
+    <svg
+      className="kk-photo-icon"
+      viewBox="0 0 24 24"
+      fill={name === "star-filled" ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {ICON_PATHS[name].map((d) => (
+        <path key={d} d={d} />
+      ))}
+    </svg>
+  );
+}
 
 export default function HostPhotosClient({
   eventId,
@@ -36,6 +70,7 @@ export default function HostPhotosClient({
   // button spins (both share `loading`).
   const [loadingMore, setLoadingMore] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   async function load(reset: boolean) {
     setLoading(true);
@@ -114,34 +149,51 @@ export default function HostPhotosClient({
         <p className="kk-status-msg">Belum ada foto.</p>
       ) : (
         <div className="kk-feed-grid" style={{ marginTop: 10 }}>
-          {photos.map((photo) => (
-            <figure key={photo.id} className="kk-feed-item" data-dim={photo.status === "hidden"}>
-              <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
-              <figcaption className="kk-host-photo-bar">
-                <span className="kk-badge" data-status={photo.status === "keeper" ? "live" : undefined}>
-                  {STATUS_LABELS[photo.status] ?? photo.status}
-                </span>
-                <span style={{ display: "flex", gap: 6 }}>
-                  {mode === "curate" && photo.status !== "hidden" ? (
+          {photos.map((photo) => {
+            const isHidden = photo.status === "hidden";
+            const canKeeper = mode === "curate" && !isHidden;
+            const isKeeper = photo.status === "keeper";
+            return (
+              <figure key={photo.id} className="kk-feed-item" data-dim={isHidden}>
+                <button
+                  type="button"
+                  className="kk-feed-open"
+                  onClick={() => setOpenId(photo.id)}
+                  aria-label="Buka foto"
+                >
+                  {/* Status pill on the photo — curation only, and only when it
+                      isn't the resting "Tampil" state (would be noise on every tile). */}
+                  {mode === "curate" && photo.status !== "live" ? (
+                    <span className="kk-photo-status" data-status={photo.status}>
+                      {STATUS_LABELS[photo.status] ?? photo.status}
+                    </span>
+                  ) : null}
+                  <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
+                </button>
+                <figcaption className="kk-host-photo-bar">
+                  {canKeeper ? (
                     <button
                       type="button"
-                      className="kk-link-btn"
-                      onClick={() => setStatus(photo, photo.status === "keeper" ? "live" : "keeper")}
+                      className="kk-photo-btn"
+                      data-on={isKeeper}
+                      onClick={() => setStatus(photo, isKeeper ? "live" : "keeper")}
+                      aria-label={isKeeper ? "Batal pilih" : "Pilih"}
                     >
-                      {photo.status === "keeper" ? "Batal" : "Pilih"}
+                      <HostPhotoIcon name={isKeeper ? "star-filled" : "star"} />
                     </button>
                   ) : null}
                   <button
                     type="button"
-                    className="kk-link-btn"
-                    onClick={() => setStatus(photo, photo.status === "hidden" ? "live" : "hidden")}
+                    className="kk-photo-btn"
+                    onClick={() => setStatus(photo, isHidden ? "live" : "hidden")}
+                    aria-label={isHidden ? "Tampilkan" : "Sembunyikan"}
                   >
-                    {photo.status === "hidden" ? "Tampilkan" : "Sembunyikan"}
+                    <HostPhotoIcon name={isHidden ? "eye" : "eye-off"} />
                   </button>
-                </span>
-              </figcaption>
-            </figure>
-          ))}
+                </figcaption>
+              </figure>
+            );
+          })}
         </div>
       )}
 
@@ -159,6 +211,15 @@ export default function HostPhotosClient({
           </button>
         </div>
       ) : null}
+
+      <HostPhotoLightbox
+        photos={photos}
+        openId={openId}
+        onOpenId={setOpenId}
+        onClose={() => setOpenId(null)}
+        mode={mode}
+        onSetStatus={setStatus}
+      />
     </div>
   );
 }

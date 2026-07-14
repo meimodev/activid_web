@@ -16,6 +16,12 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Live Feed** — The shared, real-time gallery of Guest photos shown while an Event is Live. Guest-facing label "Galeri Langsung". The screen a scanning Guest is taken to during the Event; Guests both view it and shoot into it. Distinct from the **Memory Gallery**.
 
+**Photo Moderation (Moderasi Foto)** — The Host task, available while an Event is **Live**, of hiding unwanted Guest photos so they vanish from the **Live Feed**. Only two outcomes: a photo is shown or hidden. Distinct from **Photo Curation**, which happens later and picks winners rather than removing offenders. Host-facing only.
+
+**Photo Curation (Kurasi Foto)** — The Host task, available once an Event is **Closed**, of marking the best Guest photos as **Keepers** for the **Memory Gallery**. A photo can also still be hidden here. The step that feeds Publishing and the optional AI enhancement. Distinct from **Photo Moderation**.
+
+**Keeper (Terpilih)** — A Guest photo the Host has marked, during **Photo Curation**, to include in the published **Memory Gallery**. Only Keepers reach the Memory Gallery (and are AI-enhanced if enhancement is purchased); non-Keepers stay in the raw **Live Feed** history but never publish. A photo is either a Keeper or not; hiding a photo clears its eligibility.
+
 **Memory Gallery** — The curated final gallery the Host publishes after the Event has ended. Guest-facing label "Galeri Kenangan". A hand-picked, AI-enhanced subset — not the raw Live Feed. The screen a Guest reaches once the Event is Published.
 
 **Guest Landing** — The token-gated entry point a Guest reaches by scanning the Event QR. Not a destination in itself: it authorizes the Guest and forwards them to the right screen for the Event's current state — the **Live Feed** while the Event runs, the **Memory Gallery** once it is Published. An invalid or missing token stops here with a re-scan prompt.

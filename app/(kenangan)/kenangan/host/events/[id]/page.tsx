@@ -132,6 +132,64 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
     });
   }
 
+  // AI enhancement upsell. Rendered at the TOP of Kelola once the Event is
+  // Closed (curation time — the natural "enhance my picks" moment), accented
+  // while unpurchased; otherwise it sits lower in its default slot so it never
+  // buries the live moderation grid.
+  const aiAtTop = event.status === "closed";
+  const aiSection =
+    event.status !== "published" ? (
+      <section className={`kk-card${!event.enhancementPurchased && aiAtTop ? " kk-card-primary" : ""}`}>
+        <h2 className="kk-section-title">Galeri Kenangan AI</h2>
+        {event.enhancementPurchased ? (
+          <p className="kk-landing-note" style={{ marginTop: 4 }}>
+            Peningkatan kualitas AI sudah aktif. Foto terpilih akan ditingkatkan
+            saat galeri dipublikasikan.
+          </p>
+        ) : order?.status === "pending" ? (
+          <>
+            <p className="kk-landing-note" style={{ marginTop: 4 }}>
+              Pesanan senilai Rp {order.amountIdr.toLocaleString("id-ID")} menunggu
+              konfirmasi pembayaran dari admin. Selesaikan pembayaran via transfer
+              lalu konfirmasi melalui WhatsApp.
+            </p>
+            <WhatsAppButton
+              text={`Halo admin, konfirmasi pembayaran peningkatan AI Rp ${order.amountIdr.toLocaleString("id-ID")} untuk acara "${event.name}" (/${event.slug}).`}
+            />
+            {session.isAdmin ? (
+              <form action={kenanganConfirmOrder} style={{ marginTop: 12 }}>
+                <input type="hidden" name="orderId" value={order.id} />
+                <ConfirmSubmit
+                  confirm={`Konfirmasi pembayaran Rp ${order.amountIdr.toLocaleString("id-ID")}? Peningkatan AI akan aktif untuk acara ini.`}
+                  pendingLabel="Mengkonfirmasi…"
+                >
+                  Konfirmasi Pembayaran (Admin)
+                </ConfirmSubmit>
+              </form>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <p className="kk-landing-note" style={{ marginTop: 4 }}>
+              Tingkatkan foto terpilih dengan AI (ketajaman, pencahayaan, wajah)
+              sebelum galeri dipublikasikan. Paket {tier.name} (≤{tier.guestCap} tamu):
+              Rp {tier.priceIdr.toLocaleString("id-ID")} per acara. Pembayaran manual
+              via transfer — admin akan mengkonfirmasi.
+            </p>
+            <form action={kenanganRequestEnhancement} style={{ marginTop: 12 }}>
+              <input type="hidden" name="eventId" value={event.id} />
+              <ConfirmSubmit
+                confirm={`Ajukan peningkatan AI paket ${tier.name} seharga Rp ${tier.priceIdr.toLocaleString("id-ID")}? Pesanan dibuat sekarang, tapi kamu baru ditagih setelah admin konfirmasi pembayaran.`}
+                pendingLabel="Mengajukan…"
+              >
+                Ajukan Peningkatan AI
+              </ConfirmSubmit>
+            </form>
+          </>
+        )}
+      </section>
+    ) : null;
+
   return (
     <main className="kk-page" style={{ maxWidth: 640 }}>
       <header className="kk-event-head">
@@ -264,6 +322,8 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         }
         kelola={
           <>
+      {aiAtTop ? aiSection : null}
+
       {event.status === "live" ? (
         <section className="kk-card">
           <h2 className="kk-section-title">Moderasi Foto</h2>
@@ -286,57 +346,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         </section>
       ) : null}
 
-      {event.status !== "published" ? (
-        <section className="kk-card">
-          <h2 className="kk-section-title">Galeri Kenangan AI</h2>
-          {event.enhancementPurchased ? (
-            <p className="kk-landing-note" style={{ marginTop: 4 }}>
-              Peningkatan kualitas AI sudah aktif. Foto terpilih akan ditingkatkan
-              saat galeri dipublikasikan.
-            </p>
-          ) : order?.status === "pending" ? (
-            <>
-              <p className="kk-landing-note" style={{ marginTop: 4 }}>
-                Pesanan senilai Rp {order.amountIdr.toLocaleString("id-ID")} menunggu
-                konfirmasi pembayaran dari admin. Selesaikan pembayaran via transfer
-                lalu konfirmasi melalui WhatsApp.
-              </p>
-              <WhatsAppButton
-                text={`Halo admin, konfirmasi pembayaran peningkatan AI Rp ${order.amountIdr.toLocaleString("id-ID")} untuk acara "${event.name}" (/${event.slug}).`}
-              />
-              {session.isAdmin ? (
-                <form action={kenanganConfirmOrder} style={{ marginTop: 12 }}>
-                  <input type="hidden" name="orderId" value={order.id} />
-                  <ConfirmSubmit
-                    confirm={`Konfirmasi pembayaran Rp ${order.amountIdr.toLocaleString("id-ID")}? Peningkatan AI akan aktif untuk acara ini.`}
-                    pendingLabel="Mengkonfirmasi…"
-                  >
-                    Konfirmasi Pembayaran (Admin)
-                  </ConfirmSubmit>
-                </form>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <p className="kk-landing-note" style={{ marginTop: 4 }}>
-                Tingkatkan foto terpilih dengan AI (ketajaman, pencahayaan, wajah)
-                sebelum galeri dipublikasikan. Paket {tier.name} (≤{tier.guestCap} tamu):
-                Rp {tier.priceIdr.toLocaleString("id-ID")} per acara. Pembayaran manual
-                via transfer — admin akan mengkonfirmasi.
-              </p>
-              <form action={kenanganRequestEnhancement} style={{ marginTop: 12 }}>
-                <input type="hidden" name="eventId" value={event.id} />
-                <ConfirmSubmit
-                  confirm={`Ajukan peningkatan AI paket ${tier.name} seharga Rp ${tier.priceIdr.toLocaleString("id-ID")}? Pesanan dibuat sekarang, tapi kamu baru ditagih setelah admin konfirmasi pembayaran.`}
-                  pendingLabel="Mengajukan…"
-                >
-                  Ajukan Peningkatan AI
-                </ConfirmSubmit>
-              </form>
-            </>
-          )}
-        </section>
-      ) : null}
+      {!aiAtTop ? aiSection : null}
 
       {event.status === "published" ? (
         <section className="kk-card">

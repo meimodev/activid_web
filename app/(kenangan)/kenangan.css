@@ -507,6 +507,7 @@
 }
 
 .kk-feed-item {
+  position: relative;
   border-radius: 14px;
   overflow: hidden;
   background: var(--kk-cream);
@@ -527,6 +528,7 @@
 }
 
 .kk-feed-open {
+  position: relative;
   display: block;
   width: 100%;
   padding: 0;
@@ -807,13 +809,96 @@
 .kk-host-photo-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 6px;
-  padding: 8px 10px;
+  padding: 6px 8px;
+}
+
+/* Icon-only action buttons — replace the old wide text buttons so two fit
+   without crowding the tile. */
+.kk-photo-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--kk-ink) 14%, transparent);
+  border-radius: 999px;
+  background: var(--kk-paper);
+  color: var(--kk-ink);
+  cursor: pointer;
+}
+
+.kk-photo-btn:active {
+  background: color-mix(in srgb, var(--kk-ink) 8%, transparent);
+}
+
+/* Keeper "on" state — filled star reads as selected. */
+.kk-photo-btn[data-on="true"] {
+  border-color: var(--kk-bronze);
+  color: var(--kk-bronze);
+  background: color-mix(in srgb, var(--kk-bronze) 14%, transparent);
+}
+
+.kk-photo-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Status pill overlaid top-left on the thumb (and reused in the lightbox). */
+.kk-photo-status {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--kk-paper);
+  background: color-mix(in srgb, var(--kk-ink) 78%, transparent);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.kk-photo-status[data-status="keeper"] {
+  background: var(--kk-bronze);
+}
+
+.kk-photo-status[data-status="failed"] {
+  background: #b23b3b;
 }
 
 .kk-feed-item[data-dim="true"] img {
   opacity: 0.35;
+}
+
+/* Lightbox action buttons pair icon + label; keeper "on" gets the bronze tint. */
+.kk-lightbox-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kk-lightbox-action[data-on="true"] {
+  border-color: var(--kk-bronze);
+  color: var(--kk-bronze);
+}
+
+.kk-lightbox-action .kk-photo-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.kk-lightbox-slide {
+  position: relative;
+}
+
+.kk-lightbox-img[data-dim="true"] {
+  opacity: 0.45;
 }
 
 .kk-download-link {
