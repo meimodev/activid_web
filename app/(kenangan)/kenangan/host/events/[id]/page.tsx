@@ -10,18 +10,20 @@ import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-sess
 import { createKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { KENANGAN_THEMES } from "@/data/kenangan-themes";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { KENANGAN_TIERS, getKenanganTier, type KenanganOrder } from "@/types/kenangan";
+import { KENANGAN_TIERS, getKenanganTier, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
 import {
   kenanganConfirmOrder,
-  kenanganHostLogout,
   kenanganRequestEnhancement,
   kenanganSetEventStatus,
   kenanganUpdateEvent,
 } from "../../actions";
 import ConfirmSubmit from "../../ConfirmSubmit";
 import CopyButton from "./CopyButton";
+import EventTabs from "./EventTabs";
 import HostPhotosClient from "./HostPhotosClient";
+import KenanganCoverPicker from "./KenanganCoverPicker";
 import PublishButton from "./PublishButton";
+import WhatsAppButton from "./WhatsAppButton";
 
 export const metadata: Metadata = { title: "Kelola Acara" };
 
@@ -95,15 +97,18 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
   if (!event) notFound();
   if (!canAccessEvent(session, event.ownerUid)) redirect("/kenangan/host/events");
 
-  // Latest enhancement order for this event (no orderBy: avoids an index).
+  // Paket + enhancement orders share this collection (no orderBy: avoids an
+  // index). Split by kind. See ADR-0005.
   const ordersSnap = await getAdminDb()
     .collection("kenanganOrders")
     .where("eventId", "==", id)
     .get();
-  const order = ordersSnap.docs
+  const activeOrders = ordersSnap.docs
     .map((doc) => ({ id: doc.id, ...(doc.data() as KenanganOrder) }))
-    .filter((o) => ["pending", "confirmed"].includes(o.status))
-    .at(0);
+    .filter((o) => ["pending", "confirmed"].includes(o.status));
+  const order = activeOrders.find((o) => kenanganOrderKind(o) === "enhancement");
+  const paketOrder = activeOrders.find((o) => kenanganOrderKind(o) === "paket");
+  const paketPaid = paketOrder?.status === "confirmed";
   const tier = getKenanganTier(event.tier);
 
   // Guest QR: signed token, expiry = event date + 48h (Asia/Jakarta).
@@ -129,35 +134,23 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
 
   return (
     <main className="kk-page" style={{ maxWidth: 640 }}>
-      <div className="kk-feed-header">
-        <div>
-          {session.isAdmin ? (
-            <Link href="/kenangan/host/events" className="kk-feed-count">
-              ← Semua acara
-            </Link>
-          ) : null}
-          <h1 className="kk-feed-title">{event.name}</h1>
-          <p className="kk-feed-count">/{event.slug}</p>
+      <header className="kk-event-head">
+        {session.isAdmin ? (
+          <Link href="/kenangan/host/events" className="kk-feed-count">
+            ← Semua acara
+          </Link>
+        ) : null}
+        <div className="kk-event-head-top">
+          <div>
+            <h1 className="kk-feed-title">{event.name}</h1>
+            <p className="kk-feed-count">/{event.slug}</p>
+          </div>
+          <span className="kk-badge" data-status={event.status}>
+            {STATUS_LABELS[event.status]}
+          </span>
         </div>
-        <form action={kenanganHostLogout}>
-          <button type="submit" className="kk-link-btn">Keluar</button>
-        </form>
-      </div>
-
-      {saved ? <p className="kk-form-ok">Perubahan tersimpan.</p> : null}
-      {error === "invalid" ? (
-        <p className="kk-form-error">Data tidak valid. Periksa kembali.</p>
-      ) : null}
-      {error === "published" ? (
-        <p className="kk-form-error">Acara sudah terpublikasi dan tidak bisa diubah statusnya.</p>
-      ) : null}
-
-      <section className="kk-card">
-        <h2 className="kk-section-title">
-          Status: <span className="kk-badge" data-status={event.status}>{STATUS_LABELS[event.status]}</span>
-        </h2>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-          {event.status === "draft" || event.status === "closed" ? (
+        {(event.status === "draft" || event.status === "closed") && paketPaid ? (
+          <div className="kk-event-head-actions">
             <form action={kenanganSetEventStatus}>
               <input type="hidden" name="eventId" value={event.id} />
               <input type="hidden" name="status" value="live" />
@@ -165,8 +158,13 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
                 {event.status === "draft" ? "Mulai Terima Foto" : "Buka Kembali"}
               </ConfirmSubmit>
             </form>
-          ) : null}
-          {event.status === "live" ? (
+          </div>
+        ) : null}
+        {event.status === "live" ? (
+          <div className="kk-event-head-actions">
+            <Link href={`/kenangan/e/${event.slug}/feed`} className="kk-btn kk-btn-primary">
+              Lihat Galeri Langsung
+            </Link>
             <form action={kenanganSetEventStatus}>
               <input type="hidden" name="eventId" value={event.id} />
               <input type="hidden" name="status" value="closed" />
@@ -178,13 +176,64 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
                 Tutup Acara
               </ConfirmSubmit>
             </form>
-          ) : null}
-          {event.status === "live" ? (
-            <Link href={`/kenangan/e/${event.slug}/feed`} className="kk-btn kk-btn-ghost">
-              Lihat Galeri Langsung
-            </Link>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
+        {event.status === "draft" && !paketPaid ? (
+          <p className="kk-landing-note" style={{ marginTop: 0 }}>
+            Acara bisa dimulai setelah pembayaran paket dikonfirmasi admin.
+          </p>
+        ) : null}
+      </header>
+
+      {saved ? <p className="kk-form-ok">Perubahan tersimpan.</p> : null}
+      {error === "invalid" ? (
+        <p className="kk-form-error">Data tidak valid. Periksa kembali.</p>
+      ) : null}
+      {error === "published" ? (
+        <p className="kk-form-error">Acara sudah terpublikasi dan tidak bisa diubah statusnya.</p>
+      ) : null}
+      {error === "paket-unpaid" ? (
+        <p className="kk-form-error">Pembayaran paket belum dikonfirmasi admin. Acara belum bisa dimulai.</p>
+      ) : null}
+      {error === "paket-locked" ? (
+        <p className="kk-form-error">Paket sudah dibayar dan tidak bisa diganti.</p>
+      ) : null}
+
+      <EventTabs
+        acara={
+          <>
+      <section className={`kk-card${!paketPaid ? " kk-card-primary" : ""}`}>
+        <h2 className="kk-section-title">
+          Paket {tier.name} — Rp {tier.priceIdr.toLocaleString("id-ID")}
+        </h2>
+        {paketPaid ? (
+          <p className="kk-landing-note" style={{ marginTop: 4 }}>
+            Pembayaran paket terkonfirmasi (≤{tier.guestCap} tamu). Acara siap dimulai.
+          </p>
+        ) : (
+          <>
+            <p className="kk-landing-note" style={{ marginTop: 4 }}>
+              Paket {tier.name} (≤{tier.guestCap} tamu) senilai Rp{" "}
+              {(paketOrder?.amountIdr ?? tier.priceIdr).toLocaleString("id-ID")} menunggu
+              konfirmasi pembayaran dari admin. Selesaikan pembayaran via transfer, lalu
+              konfirmasi melalui WhatsApp. Acara baru bisa dimulai setelah dikonfirmasi.
+            </p>
+            <WhatsAppButton
+              text={`Halo admin, konfirmasi pembayaran paket ${tier.name} Rp ${(paketOrder?.amountIdr ?? tier.priceIdr).toLocaleString("id-ID")} untuk acara "${event.name}" (/${event.slug}).`}
+            />
+            {session.isAdmin && paketOrder ? (
+              <form action={kenanganConfirmOrder} style={{ marginTop: 12 }}>
+                <input type="hidden" name="orderId" value={paketOrder.id} />
+                <ConfirmSubmit
+                  confirm={`Konfirmasi pembayaran paket Rp ${(paketOrder.amountIdr).toLocaleString("id-ID")}? Acara akan bisa dimulai.`}
+                  pendingLabel="Mengkonfirmasi…"
+                >
+                  Konfirmasi Pembayaran Paket (Admin)
+                </ConfirmSubmit>
+              </form>
+            ) : null}
+          </>
+        )}
       </section>
 
       <section className={`kk-card${event.status === "live" ? " kk-card-primary" : ""}`}>
@@ -211,7 +260,10 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           </p>
         )}
       </section>
-
+          </>
+        }
+        kelola={
+          <>
       {event.status === "live" ? (
         <section className="kk-card">
           <h2 className="kk-section-title">Moderasi Foto</h2>
@@ -249,6 +301,9 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
                 konfirmasi pembayaran dari admin. Selesaikan pembayaran via transfer
                 lalu konfirmasi melalui WhatsApp.
               </p>
+              <WhatsAppButton
+                text={`Halo admin, konfirmasi pembayaran peningkatan AI Rp ${order.amountIdr.toLocaleString("id-ID")} untuk acara "${event.name}" (/${event.slug}).`}
+              />
               {session.isAdmin ? (
                 <form action={kenanganConfirmOrder} style={{ marginTop: 12 }}>
                   <input type="hidden" name="orderId" value={order.id} />
@@ -295,7 +350,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         </section>
       ) : null}
 
-      <section className="kk-card kk-section-break">
+      <section className="kk-card">
         <h2 className="kk-section-title">Pengaturan Acara</h2>
         <form action={kenanganUpdateEvent} className="kk-form">
           <input type="hidden" name="eventId" value={event.id} />
@@ -303,8 +358,8 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           <input id="name" name="name" className="kk-input" defaultValue={event.name} required maxLength={120} />
           <label className="kk-label" htmlFor="eventDate">Tanggal Acara</label>
           <input id="eventDate" name="eventDate" type="date" className="kk-input" defaultValue={event.eventDate} required />
-          <label className="kk-label" htmlFor="coverUrl">URL Foto Sampul (opsional)</label>
-          <input id="coverUrl" name="coverUrl" className="kk-input" defaultValue={event.coverUrl ?? ""} placeholder="https://…" />
+          <label className="kk-label">Foto Sampul (opsional)</label>
+          <KenanganCoverPicker eventId={event.id} initialUrl={event.coverUrl ?? ""} />
           <label className="kk-label" htmlFor="themeId">Tema / Pilihan Filter</label>
           <select id="themeId" name="themeId" className="kk-input" defaultValue={event.themeId}>
             {KENANGAN_THEMES.map((theme) => (
@@ -314,13 +369,27 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
             ))}
           </select>
           <label className="kk-label" htmlFor="tier">Paket (berdasarkan jumlah tamu)</label>
-          <select id="tier" name="tier" className="kk-input" defaultValue={event.tier ?? "standard"}>
-            {KENANGAN_TIERS.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name} — ≤{t.guestCap} tamu — Rp {t.priceIdr.toLocaleString("id-ID")}
-              </option>
-            ))}
-          </select>
+          {paketPaid ? (
+            <>
+              <input
+                id="tier"
+                className="kk-input"
+                readOnly
+                tabIndex={-1}
+                value={`${tier.name} — ≤${tier.guestCap} tamu — Rp ${tier.priceIdr.toLocaleString("id-ID")}`}
+              />
+              <input type="hidden" name="tier" value={event.tier ?? "standard"} />
+              <p className="kk-field-hint">Paket sudah dibayar dan terkunci.</p>
+            </>
+          ) : (
+            <select id="tier" name="tier" className="kk-input" defaultValue={event.tier ?? "standard"}>
+              {KENANGAN_TIERS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} — ≤{t.guestCap} tamu — Rp {t.priceIdr.toLocaleString("id-ID")}
+                </option>
+              ))}
+            </select>
+          )}
           <label className="kk-label" htmlFor="downloadMode">Unduhan Foto untuk Tamu</label>
           <select id="downloadMode" name="downloadMode" className="kk-input" defaultValue={event.downloadMode}>
             <option value="after_publish">Setelah galeri dipublikasikan</option>
@@ -329,6 +398,9 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           <ConfirmSubmit pendingLabel="Menyimpan…">Simpan</ConfirmSubmit>
         </form>
       </section>
+          </>
+        }
+      />
     </main>
   );
 }

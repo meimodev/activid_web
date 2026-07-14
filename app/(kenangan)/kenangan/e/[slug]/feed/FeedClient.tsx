@@ -19,7 +19,6 @@ import { kenanganFullUrl, kenanganThumbUrl, type KenanganDownloadMode } from "@/
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
 import Lightbox from "./Lightbox";
-import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 
 // No `where("status" == ...)` clause: equality + orderBy would demand a
 // composite Firestore index. Order by createdAt only, filter status in code.
@@ -192,14 +191,11 @@ export default function FeedClient({
           </button>
         </div>
       ) : !ready ? (
-        <>
-          <KkProgress className="kk-load-progress" />
-          <div className="kk-feed-grid" aria-hidden>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="kk-feed-item kk-skeleton" />
-            ))}
-          </div>
-        </>
+        <div className="kk-feed-grid" aria-hidden>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="kk-feed-item kk-skeleton" />
+          ))}
+        </div>
       ) : photos.length === 0 ? (
         <div className="kk-feed-empty">
           <p>Belum ada foto.</p>

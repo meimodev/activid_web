@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { DateTime } from "luxon";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { getKenanganHostSession } from "@/lib/kenangan-host-session";
 import type { KenanganEvent } from "@/types/kenangan";
@@ -12,12 +13,17 @@ function createdAtMillis(event: KenanganEvent): number {
   return ts?.toMillis?.() ?? 0;
 }
 
+function formatDate(iso: string): string {
+  const dt = DateTime.fromISO(iso).setLocale("id");
+  return dt.isValid ? dt.toFormat("d MMM yyyy") : iso;
+}
+
 export default async function KenanganHostEventsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; error?: string }>;
+  searchParams: Promise<{ tab?: string; tier?: string; error?: string }>;
 }) {
-  const [session, { tab, error }] = await Promise.all([
+  const [session, { tab, tier, error }] = await Promise.all([
     getKenanganHostSession(),
     searchParams,
   ]);
@@ -39,7 +45,7 @@ export default async function KenanganHostEventsPage({
     id: e.id,
     name: e.name,
     slug: e.slug,
-    eventDate: e.eventDate,
+    eventDate: formatDate(e.eventDate),
     status: e.status,
   }));
 
@@ -47,6 +53,7 @@ export default async function KenanganHostEventsPage({
     <HostConsole
       events={events}
       initialTab={tab === "create" ? "create" : "dashboard"}
+      initialTier={tier}
       error={error}
     />
   );

@@ -12,7 +12,7 @@ import {
   type KenanganHostSession,
 } from "@/lib/kenangan-host-session";
 import { KENANGAN_DEFAULT_THEME_ID, isKenanganThemeId } from "@/data/kenangan-themes";
-import { KENANGAN_TIERS, getKenanganTier } from "@/types/kenangan";
+import { KENANGAN_TIERS, getKenanganTier, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
 
 const SLUG_REGEX = /^[a-z0-9-]{3,40}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -55,8 +55,14 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
   const name = String(formData.get("name") ?? "").trim();
   const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
   const eventDate = String(formData.get("eventDate") ?? "").trim();
+  const tier = String(formData.get("tier") ?? "").trim();
 
-  if (!name || name.length > 120 || !SLUG_REGEX.test(slug) || !DATE_REGEX.test(eventDate)) {
+  if (
+    !name || name.length > 120 ||
+    !SLUG_REGEX.test(slug) ||
+    !DATE_REGEX.test(eventDate) ||
+    !KENANGAN_TIERS.some((t) => t.id === tier)
+  ) {
     redirect("/kenangan/host/events?tab=create&error=invalid");
   }
 
@@ -74,12 +80,23 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
     ownerUid: session.uid,
     eventDate,
     coverUrl: "",
-    tier: "standard",
-    guestCap: getKenanganTier("standard").guestCap,
+    tier,
+    guestCap: getKenanganTier(tier).guestCap,
     themeId: KENANGAN_DEFAULT_THEME_ID,
     downloadMode: "after_publish",
     status: "draft",
     enhancementPurchased: false,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  // Upfront Paket charge: a pending order the Admin confirms before the event
+  // may go Live. See ADR-0005.
+  await db.collection("kenanganOrders").add({
+    eventId: ref.id,
+    kind: "paket",
+    amountIdr: getKenanganTier(tier).priceIdr,
+    status: "pending",
+    confirmedAt: null,
     createdAt: FieldValue.serverTimestamp(),
   });
 
@@ -112,6 +129,22 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
   }
 
   const { ref, data } = await requireOwnedEvent(session, eventId);
+  const db = getAdminDb();
+
+  // Paket order for this event, if any (pending or confirmed).
+  const paketSnap = await db
+    .collection("kenanganOrders")
+    .where("eventId", "==", eventId)
+    .get();
+  const paketOrder = paketSnap.docs
+    .map((doc) => ({ id: doc.id, ...(doc.data() as KenanganOrder) }))
+    .find((o) => kenanganOrderKind(o) === "paket" && ["pending", "confirmed"].includes(o.status));
+
+  // A confirmed Paket locks the tier (money already moved). Reject a changed
+  // tier; the form disables the control, this guards the server. See ADR-0005.
+  if (paketOrder?.status === "confirmed" && tier !== data.tier) {
+    redirect(`${back}?error=paket-locked`);
+  }
 
   await ref.update({
     name,
@@ -122,6 +155,15 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
     tier,
     guestCap: getKenanganTier(tier).guestCap,
   });
+
+  // Re-selecting a Paket before payment rewrites the pending order's amount.
+  if (paketOrder?.status === "pending" && tier !== data.tier) {
+    await db
+      .collection("kenanganOrders")
+      .doc(paketOrder.id)
+      .update({ amountIdr: getKenanganTier(tier).priceIdr });
+  }
+
   await revalidateKenanganEvent(data.slug as string);
   redirect(`${back}?saved=1`);
 }
@@ -142,6 +184,20 @@ export async function kenanganSetEventStatus(formData: FormData): Promise<void> 
     redirect(`/kenangan/host/events/${eventId}?error=published`);
   }
 
+  // Going Live requires a confirmed Paket payment. See ADR-0005.
+  if (status === "live") {
+    const paketSnap = await getAdminDb()
+      .collection("kenanganOrders")
+      .where("eventId", "==", eventId)
+      .get();
+    const paketPaid = paketSnap.docs
+      .map((doc) => doc.data())
+      .some((o) => kenanganOrderKind(o) === "paket" && o.status === "confirmed");
+    if (!paketPaid) {
+      redirect(`/kenangan/host/events/${eventId}?error=paket-unpaid`);
+    }
+  }
+
   await ref.update({ status });
   await revalidateKenanganEvent(data.slug as string);
   redirect(`/kenangan/host/events/${eventId}?saved=1`);
@@ -159,17 +215,25 @@ export async function kenanganRequestEnhancement(formData: FormData): Promise<vo
     redirect(`/kenangan/host/events/${eventId}?saved=1`);
   }
 
-  // One order per event; no orderBy to avoid a composite index.
+  // At most one enhancement order per event; no orderBy to avoid a composite
+  // index. Ignore Paket orders here — they share the collection.
   const existing = await db
     .collection("kenanganOrders")
     .where("eventId", "==", eventId)
     .get();
-  if (existing.docs.some((doc) => ["pending", "confirmed"].includes(doc.data().status))) {
+  if (
+    existing.docs.some(
+      (doc) =>
+        kenanganOrderKind(doc.data()) === "enhancement" &&
+        ["pending", "confirmed"].includes(doc.data().status),
+    )
+  ) {
     redirect(`/kenangan/host/events/${eventId}?saved=1`);
   }
 
   await db.collection("kenanganOrders").add({
     eventId,
+    kind: "enhancement",
     amountIdr: getKenanganTier(event.tier as string).priceIdr,
     status: "pending",
     confirmedAt: null,
@@ -178,7 +242,8 @@ export async function kenanganRequestEnhancement(formData: FormData): Promise<vo
   redirect(`/kenangan/host/events/${eventId}?saved=1`);
 }
 
-/** Admin confirms a manual payment: order confirmed + enhancement unlocked. */
+/** Admin confirms a manual payment. Paket confirm just ungates going Live;
+ *  enhancement confirm also unlocks the AI gallery. See ADR-0005. */
 export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
   ensureEnabled();
   const session = await requireSession();
@@ -194,9 +259,11 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
   const order = orderSnap.data()!;
 
   await orderRef.update({ status: "confirmed", confirmedAt: FieldValue.serverTimestamp() });
-  await db
-    .collection("kenanganEvents")
-    .doc(order.eventId as string)
-    .update({ enhancementPurchased: true });
+  if (kenanganOrderKind(order) === "enhancement") {
+    await db
+      .collection("kenanganEvents")
+      .doc(order.eventId as string)
+      .update({ enhancementPurchased: true });
+  }
   redirect(`/kenangan/host/events/${order.eventId}?saved=1`);
 }

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import KkSpinner from "@/app/(kenangan)/kenangan/KkSpinner";
 
 export default function PublishButton({ eventId }: { eventId: string }) {
   const router = useRouter();
@@ -36,7 +37,14 @@ export default function PublishButton({ eventId }: { eventId: string }) {
   return (
     <div style={{ marginTop: 12 }}>
       <button type="button" className="kk-btn kk-btn-primary" onClick={publish} disabled={busy}>
-        {busy ? "Mempublikasikan…" : "Publikasikan Galeri"}
+        {busy ? (
+          <>
+            <KkSpinner />
+            Mempublikasikan…
+          </>
+        ) : (
+          "Publikasikan Galeri"
+        )}
       </button>
       {errorMsg ? <p className="kk-form-error" style={{ marginTop: 8 }}>{errorMsg}</p> : null}
     </div>

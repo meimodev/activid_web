@@ -14,14 +14,33 @@ export function getKenanganTier(id: string | undefined) {
   return KENANGAN_TIERS.find((t) => t.id === id) ?? KENANGAN_TIERS[1];
 }
 
+/** Admin WhatsApp for manual payment confirmation. E.164, no leading '+'. */
+export const KENANGAN_ADMIN_WHATSAPP = "62881080088816";
+
+/** wa.me link to the admin with a prefilled message. */
+export function kenanganAdminWaLink(text: string): string {
+  return `https://wa.me/${KENANGAN_ADMIN_WHATSAPP}?text=${encodeURIComponent(text)}`;
+}
+
 export type KenanganOrderStatus = "pending" | "confirmed";
+
+/** "paket" = upfront capacity charge that gates going Live; "enhancement" =
+ *  post-event AI gallery purchase. Orders written before this split have no
+ *  `kind` and are treated as "enhancement". */
+export type KenanganOrderKind = "paket" | "enhancement";
 
 export interface KenanganOrder {
   eventId: string;
+  kind?: KenanganOrderKind;
   amountIdr: number;
   status: KenanganOrderStatus;
   confirmedAt?: unknown;
   createdAt?: unknown;
+}
+
+/** Missing kind (legacy order) reads as an enhancement order. */
+export function kenanganOrderKind(order: { kind?: string }): KenanganOrderKind {
+  return order.kind === "paket" ? "paket" : "enhancement";
 }
 export type KenanganDownloadMode = "after_publish" | "instant_share";
 

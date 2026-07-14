@@ -147,7 +147,10 @@ export default function KenanganLandingPage() {
                 Rp {t.priceIdr.toLocaleString("id-ID")}
               </p>
               <p className="kkm-feature-body">Hingga {t.guestCap} tamu</p>
-              <Link href="/kenangan/host" className="kk-btn kk-btn-ghost kkm-price-cta">
+              <Link
+                href={`/kenangan/host?tab=create&tier=${t.id}`}
+                className="kk-btn kk-btn-ghost kkm-price-cta"
+              >
                 Pilih {t.name}
               </Link>
             </div>

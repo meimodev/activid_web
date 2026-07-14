@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { kenanganThumbUrl } from "@/types/kenangan";
 import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
+import KkSpinner from "@/app/(kenangan)/kenangan/KkSpinner";
 
 type HostMode = "live" | "curate";
 
@@ -31,10 +32,14 @@ export default function HostPhotosClient({
   const [photos, setPhotos] = useState<HostPhoto[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Distinguishes a "load more" fetch from a reset/reload so only the pressed
+  // button spins (both share `loading`).
+  const [loadingMore, setLoadingMore] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   async function load(reset: boolean) {
     setLoading(true);
+    if (!reset) setLoadingMore(true);
     setErrorMsg("");
     try {
       const cursor = !reset && photos.length > 0 ? photos[photos.length - 1].createdAtMs : null;
@@ -54,6 +59,7 @@ export default function HostPhotosClient({
       setErrorMsg("Gagal memuat foto. Coba lagi.");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }
 
@@ -88,7 +94,14 @@ export default function HostPhotosClient({
           {mode === "curate" ? ` · ${keeperCount} terpilih` : ""}
         </span>
         <button type="button" className="kk-link-btn" onClick={() => load(true)} disabled={loading}>
-          {loading ? "Memuat…" : "Muat Ulang"}
+          {loading && !loadingMore ? (
+            <>
+              <KkSpinner />
+              Memuat…
+            </>
+          ) : (
+            "Muat Ulang"
+          )}
         </button>
       </div>
       {errorMsg ? <p className="kk-form-error">{errorMsg}</p> : null}
@@ -135,7 +148,14 @@ export default function HostPhotosClient({
       {hasMore ? (
         <div style={{ textAlign: "center", marginTop: 14 }}>
           <button type="button" className="kk-btn kk-btn-ghost" onClick={() => load(false)} disabled={loading}>
-            Muat Lebih Banyak
+            {loadingMore ? (
+              <>
+                <KkSpinner />
+                Memuat…
+              </>
+            ) : (
+              "Muat Lebih Banyak"
+            )}
           </button>
         </div>
       ) : null}

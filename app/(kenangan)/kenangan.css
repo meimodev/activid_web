@@ -6,7 +6,7 @@
   --kk-cream: #f0e8da;
   --kk-sand: #e4d9c6;
   --kk-ink: #2c2822;
-  --kk-muted: #8b8276;
+  --kk-muted: #6d6456; /* AA 4.5:1+ for small text on paper/cream/sand */
   --kk-bronze: #a98a5c;
   --kk-dark: #1a1714;
   --kk-error: #a2513a;
@@ -166,20 +166,14 @@
   outline-offset: -2px;
 }
 
-/* Task-screen section rhythm. Consecutive cards/sections breathe from one
-   token instead of a per-JSX marginTop, so stacked host cards read as an even
-   column. (Animation selectors below still match — no wrappers introduced.) */
+/* Task-screen section rhythm for cards stacked directly under .kk-page (guest
+   feed/gallery, landing). The event-detail screen stacks its cards inside a
+   .kk-tab-view flex column instead, which owns its own gap. */
 .kk-page > .kk-card + .kk-card,
 .kk-page > section + section,
 .kk-page > .kk-card + section,
 .kk-page > section + .kk-card {
   margin-top: var(--kk-space-4);
-}
-
-/* Deliberate louder break — parts the "run the event" cards from the
-   "configure the event" settings below them. Rhythm, not monotony. */
-.kk-page > .kk-section-break {
-  margin-top: var(--kk-space-6);
 }
 
 /* ---------- capture (dark screen — candlelit receptions) ---------- */
@@ -379,9 +373,29 @@
   animation: kk-spin 0.8s linear infinite;
 }
 
+/* Inline 1em button spinner (KkSpinner). Inherits text color; sits beside a
+   pending label. Margin gives it breathing room from the label text. */
+.kk-btn-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.5em;
+  vertical-align: -0.15em;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-top-color: currentColor;
+  animation: kk-spin 0.7s linear infinite;
+}
+
 @keyframes kk-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kk-btn-spinner {
+    animation-duration: 1.6s;
   }
 }
 
@@ -461,6 +475,29 @@
   color: var(--kk-muted);
   font-size: 13px;
   white-space: nowrap;
+}
+
+/* Event detail header: identity + live state + the primary lifecycle action,
+   held above the tabs so status stays in view on both. Replaces a redundant
+   equal-weight Status card, giving the page a clear header -> content split. */
+.kk-event-head {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 20px;
+}
+
+.kk-event-head-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kk-event-head-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .kk-feed-grid {
@@ -1307,15 +1344,50 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Tab content: directional slide + fade on Dashboard <-> Create switch. */
+/* Tab content: directional slide + fade on tab switch. Flex column + gap owns
+   the rhythm between stacked cards inside a panel, so nesting under the tab
+   wrapper doesn't starve them of the .kk-page sibling-margin rule. */
 .kk-tab-view {
   animation: kk-tab-in 0.22s var(--kk-ease) both;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kk-space-4);
 }
 .kk-tab-view[data-dir="left"]  { --kk-tab-from: -16px; }
 .kk-tab-view[data-dir="right"] { --kk-tab-from: 16px; }
 @keyframes kk-tab-in {
   from { opacity: 0; transform: translateX(var(--kk-tab-from, 16px)); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- event detail: top segmented tab bar (Acara / Kelola) ---- */
+.kk-detail-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: var(--kk-space-4);
+  background: var(--kk-paper);
+  border: 1.5px solid var(--kk-sand);
+  border-radius: 999px;
+}
+
+.kk-detail-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--kk-muted);
+  padding: 10px 12px;
+  border-radius: 999px;
+  transition: background 0.2s var(--kk-ease), color 0.2s var(--kk-ease);
+}
+
+.kk-detail-tab[data-active="true"] {
+  background: var(--kk-bronze);
+  color: var(--kk-paper);
 }
 
 /* ---- host console: mobile-app shell with bottom navbar ---- */
@@ -1403,6 +1475,112 @@
 .kk-nav-icon {
   width: 22px;
   height: 22px;
+}
+
+/* ---------- cover picker (host event settings) ---------- */
+
+.kk-cover-picker {
+  display: grid;
+  gap: var(--kk-space-3);
+}
+
+.kk-cover-preview {
+  position: relative;
+}
+
+/* Upload/optimize progress bar overlaid at the bottom of the preview image. */
+.kk-cover-progress {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  width: auto;
+  height: 4px;
+}
+
+.kk-cover-empty {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  background: var(--kk-cream);
+  border: 1.5px dashed var(--kk-sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kk-muted);
+  font-size: 14px;
+}
+
+.kk-cover-actions {
+  display: flex;
+  gap: var(--kk-space-2);
+  flex-wrap: wrap;
+}
+
+.kk-cover-actions .kk-btn {
+  flex: 1;
+  padding: 12px 18px;
+  font-size: 15px;
+}
+
+.kk-btn-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.kk-cover-defaults {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--kk-space-2);
+}
+
+.kk-cover-default {
+  display: grid;
+  gap: var(--kk-space-1);
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: var(--kk-muted);
+  text-align: center;
+}
+
+.kk-cover-default img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--kk-cream);
+  box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow 0.15s ease;
+}
+
+.kk-cover-default span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.kk-cover-default[data-active="true"] {
+  color: var(--kk-ink);
+}
+
+.kk-cover-default[data-active="true"] img {
+  box-shadow: inset 0 0 0 2px var(--kk-bronze), 0 4px 12px -6px rgba(169, 138, 92, 0.6);
+}
+
+.kk-cover-default:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .kk-cover-default:hover img {
+    box-shadow: inset 0 0 0 2px var(--kk-sand);
+  }
+  .kk-cover-default[data-active="true"]:hover img {
+    box-shadow: inset 0 0 0 2px var(--kk-bronze);
+  }
 }
 
 /* ---- accessibility: honor reduced-motion everywhere ---- */

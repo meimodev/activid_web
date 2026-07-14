@@ -8,6 +8,7 @@ import {
   getInvitationAffiliateSessionCookieName,
   isInvitationAffiliateSessionValid,
 } from "@/lib/invitation-affiliate-session";
+import { getKenanganHostSession } from "@/lib/kenangan-host-session";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -24,7 +25,9 @@ export async function POST(request: NextRequest) {
       : undefined;
     const isAffiliate =
       isAffiliateId && isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateId);
-    if (!isAffiliate) {
+    // KenanganKita hosts (Google session) optimize their event cover here too.
+    const isKenanganHost = isAffiliate ? false : !!(await getKenanganHostSession());
+    if (!isAffiliate && !isKenanganHost) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }

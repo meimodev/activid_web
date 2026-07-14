@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { kenanganCreateEvent, kenanganHostLogout } from "../actions";
 import ConfirmSubmit from "../ConfirmSubmit";
+import { KENANGAN_TIERS } from "@/types/kenangan";
 
 type Tab = "dashboard" | "create";
 
@@ -39,13 +40,19 @@ function slugifyName(name: string): string {
 export default function HostConsole({
   events,
   initialTab,
+  initialTier,
   error,
 }: {
   events: ConsoleEvent[];
   initialTab: Tab;
+  initialTier?: string;
   error?: string;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
+  // Preselect the tier the guest picked on the landing page; ignore junk params.
+  const tierDefault = KENANGAN_TIERS.some((t) => t.id === initialTier)
+    ? initialTier
+    : "standard";
   const [name, setName] = useState("");
   // Uniqueness marker fixed once on mount so the preview matches the saved link.
   const [suffix] = useState(() => Date.now().toString(36).slice(-5));
@@ -115,6 +122,18 @@ export default function HostConsole({
               </p>
               <label className="kk-label" htmlFor="eventDate">Tanggal Acara</label>
               <input id="eventDate" name="eventDate" type="date" className="kk-input" required />
+              <label className="kk-label" htmlFor="tier">Paket (berdasarkan jumlah tamu)</label>
+              <select id="tier" name="tier" className="kk-input" defaultValue={tierDefault}>
+                {KENANGAN_TIERS.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} — ≤{t.guestCap} tamu — Rp {t.priceIdr.toLocaleString("id-ID")}
+                  </option>
+                ))}
+              </select>
+              <p className="kk-field-hint">
+                Dibayar di muka. Acara baru bisa dimulai setelah admin mengkonfirmasi
+                pembayaran paket.
+              </p>
               {error === "invalid" ? (
                 <p className="kk-form-error">Data tidak valid. Periksa kembali.</p>
               ) : null}

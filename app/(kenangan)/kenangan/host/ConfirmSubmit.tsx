@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useFormStatus } from "react-dom";
+import KkSpinner from "../KkSpinner";
 
 // Submit button for the host's server-action forms. Two jobs:
 //   1. window.confirm gate for irreversible / paid actions (native, no deps).
@@ -27,7 +28,14 @@ export default function ConfirmSubmit({
         if (confirm && !window.confirm(confirm)) e.preventDefault();
       }}
     >
-      {pending ? (pendingLabel ?? children) : children}
+      {pending ? (
+        <>
+          <KkSpinner />
+          {pendingLabel ?? children}
+        </>
+      ) : (
+        children
+      )}
     </button>
   );
 }

@@ -5,9 +5,22 @@ import GoogleSignIn from "./GoogleSignIn";
 
 export const metadata: Metadata = { title: "Masuk Host" };
 
-export default async function KenanganHostLoginPage() {
-  const session = await getKenanganHostSession();
-  if (session) redirect("/kenangan/host/events");
+export default async function KenanganHostLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; tier?: string }>;
+}) {
+  const [session, { tab, tier }] = await Promise.all([
+    getKenanganHostSession(),
+    searchParams,
+  ]);
+  // Carry the landing's tier/tab intent through login into the console.
+  const params = new URLSearchParams();
+  if (tab) params.set("tab", tab);
+  if (tier) params.set("tier", tier);
+  const qs = params.toString();
+  const dest = `/kenangan/host/events${qs ? `?${qs}` : ""}`;
+  if (session) redirect(dest);
 
   return (
     <main className="kk-page" style={{ justifyContent: "center" }}>
@@ -19,7 +32,7 @@ export default async function KenanganHostLoginPage() {
         Masuk dengan akun Google untuk mengelola acaramu.
       </p>
 
-      <GoogleSignIn />
+      <GoogleSignIn redirectTo={dest} />
     </main>
   );
 }
