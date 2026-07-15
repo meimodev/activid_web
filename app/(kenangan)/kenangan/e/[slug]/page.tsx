@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { DateTime } from "luxon";
 import { getKenanganEventBySlug, getKenanganPaketStatus } from "@/lib/kenangan-event";
 import { verifyKenanganGuestToken } from "@/lib/kenangan-guest-token";
-import { KENANGAN_EVENT_TYPES, kenanganEventTitle } from "@/types/kenangan";
+import { isKenanganPublished, KENANGAN_EVENT_TYPES, kenanganEventTitle } from "@/types/kenangan";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -37,11 +37,12 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
 
   // The landing is a router, not a destination: a scanning Guest is sent
   // straight to the gallery for the Event's current state. Only the dead-end
-  // states (closed, bad token) render here. See CONTEXT.md "Guest Landing".
+  // states (draft, bad token) render here. See CONTEXT.md "Guest Landing".
   if (authorized && event.status === "live") {
     redirect(`/kenangan/e/${slug}/feed${tokenQuery}`);
   }
-  if (event.status === "published") {
+  // Closed IS published (ADR-0007) — the memory gallery is live.
+  if (isKenanganPublished(event.status)) {
     redirect(`/kenangan/e/${slug}/gallery`);
   }
 
@@ -71,18 +72,6 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
           <p className="kk-landing-date">{formatEventDate(event.eventDate)}</p>
         </div>
       </header>
-
-      {authorized && event.status === "closed" ? (
-        <div className="kk-card" style={{ marginTop: 28 }}>
-          <p className="kk-section-title" style={{ marginBottom: 8 }}>
-            Terima kasih sudah hadir.
-          </p>
-          <p style={{ lineHeight: 1.6 }}>
-            Acara telah selesai. Galeri kenangan sedang dikurasi oleh tuan rumah —
-            nantikan hasilnya di sini.
-          </p>
-        </div>
-      ) : null}
 
       {authorized && event.status === "draft" ? (
         <div className="kk-card" style={{ marginTop: 28 }}>

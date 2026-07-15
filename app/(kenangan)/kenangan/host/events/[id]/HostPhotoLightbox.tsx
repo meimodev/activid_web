@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { kenanganFullUrl } from "@/types/kenangan";
-import type { HostMode, HostPhoto } from "./HostPhotosClient";
-import { HostPhotoIcon, STATUS_LABELS } from "./HostPhotosClient";
+import type { HostPhoto } from "./HostPhotosClient";
+import { enhanceBadge, HostPhotoIcon } from "./HostPhotosClient";
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 160 : -160, opacity: 0 }),
@@ -18,22 +18,24 @@ const swipePower = (offset: number, velocity: number) => Math.abs(offset) * velo
 /** Host-side full-screen viewer over the already-loaded photos. Separate from
  *  the guest Lightbox (which grades via canvas, offers downloads, and evicts
  *  moderated photos). Here photos never leave the set — hiding only flips
- *  status — so pagination is a plain clamp over the loaded array, and the
- *  same hide/keeper actions as the grid bar live in the top bar. */
+ *  status — so pagination is a plain clamp over the loaded array, and the same
+ *  hide + enhance actions as the grid bar live in the top bar (ADR-0007). */
 export default function HostPhotoLightbox({
   photos,
   openId,
   onOpenId,
   onClose,
-  mode,
+  canEnhance,
   onSetStatus,
+  onEnhance,
 }: {
   photos: HostPhoto[];
   openId: string | null;
   onOpenId: (id: string | null) => void;
   onClose: () => void;
-  mode: HostMode;
-  onSetStatus: (photo: HostPhoto, status: "live" | "hidden" | "keeper") => void;
+  canEnhance: boolean;
+  onSetStatus: (photo: HostPhoto, status: "live" | "hidden") => void;
+  onEnhance: (photo: HostPhoto) => void;
 }) {
   const [direction, setDirection] = useState<1 | -1>(1);
   const [loadedId, setLoadedId] = useState<string | null>(null);
@@ -96,9 +98,13 @@ export default function HostPhotoLightbox({
 
   if (typeof document === "undefined" || !current) return null;
 
-  const canKeeper = mode === "curate" && current.status !== "hidden";
-  const isKeeper = current.status === "keeper";
   const isHidden = current.status === "hidden";
+  const badge = enhanceBadge(current);
+  const showEnhance = canEnhance && !current.enhancedPath;
+  const enhancePending = current.enhanceState === "pending";
+  // Enhanced photos render their server-graded file; the rest, the ungraded
+  // original (the host viewer doesn't LUT-grade — a rough moderation preview).
+  const imgSrc = kenanganFullUrl(current.enhancedPath ?? current.originalPath);
 
   return createPortal(
     <AnimatePresence>
@@ -118,16 +124,17 @@ export default function HostPhotoLightbox({
               {index + 1} / {total}
             </span>
             <div className="kk-lightbox-actions">
-              {canKeeper ? (
+              {showEnhance ? (
                 <button
                   type="button"
                   className="kk-lightbox-action"
-                  data-on={isKeeper}
-                  onClick={() => onSetStatus(current, isKeeper ? "live" : "keeper")}
-                  aria-label={isKeeper ? "Batal pilih" : "Pilih"}
+                  data-on={enhancePending}
+                  disabled={enhancePending}
+                  onClick={() => onEnhance(current)}
+                  aria-label="Tingkatkan dengan AI"
                 >
-                  <HostPhotoIcon name={isKeeper ? "star-filled" : "star"} />
-                  {isKeeper ? "Batal" : "Pilih"}
+                  <HostPhotoIcon name="sparkles" />
+                  {enhancePending ? "Meningkatkan…" : current.enhanceState === "failed" ? "Coba Lagi" : "Tingkatkan"}
                 </button>
               ) : null}
               <button
@@ -176,13 +183,16 @@ export default function HostPhotoLightbox({
                   else if (swipe > 8000) paginate(-1);
                 }}
               >
-                {current.status !== "live" ? (
-                  <span className="kk-photo-status" data-status={current.status}>
-                    {STATUS_LABELS[current.status] ?? current.status}
+                {badge ? (
+                  <span
+                    className="kk-photo-status"
+                    data-status={current.enhancedPath ? "enhanced" : current.enhanceState}
+                  >
+                    {badge}
                   </span>
                 ) : null}
                 <img
-                  src={kenanganFullUrl(current.originalPath)}
+                  src={imgSrc}
                   alt="Foto tamu"
                   className="kk-lightbox-img"
                   data-dim={isHidden}

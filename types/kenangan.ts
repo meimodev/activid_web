@@ -1,11 +1,21 @@
 export const KENANGAN_IMAGEKIT_URL_BASE = "https://ik.imagekit.io/geb6bfhmhx";
 
+// `closed` is the terminal, published state — closing an event publishes its
+// gallery (ADR-0007). `published` is a legacy value: never written anymore, but
+// still read as "closed" so pre-ADR-0007 events keep working.
 export type KenanganEventStatus = "draft" | "live" | "closed" | "published";
+
+/** True for the terminal published state — `closed`, or legacy `published`. */
+export function isKenanganPublished(status: string): boolean {
+  return status === "closed" || status === "published";
+}
 
 export const KENANGAN_TIERS = [
   { id: "intimate", name: "Intimate", guestCap: 100, priceIdr: 300_000 },
   { id: "standard", name: "Standard", guestCap: 300, priceIdr: 600_000 },
   { id: "grand", name: "Grand", guestCap: 600, priceIdr: 1_200_000 },
+  { id: "premium", name: "Premium", guestCap: 1200, priceIdr: 1_800_000 },
+  { id: "ultimate", name: "Ultimate", guestCap: 2000, priceIdr: 2_400_000 },
 ] as const;
 
 export type KenanganTierId = (typeof KENANGAN_TIERS)[number]["id"];
@@ -67,8 +77,6 @@ export interface KenanganOrder {
 export function kenanganOrderKind(order: { kind?: string }): KenanganOrderKind {
   return order.kind === "paket" ? "paket" : "enhancement";
 }
-export type KenanganDownloadMode = "after_publish" | "instant_share";
-
 export interface KenanganEvent {
   slug: string;
   name: string;
@@ -82,7 +90,6 @@ export interface KenanganEvent {
   tier?: string;
   guestCap?: number;
   themeId?: string;
-  downloadMode: KenanganDownloadMode;
   status: KenanganEventStatus;
   enhancementPurchased: boolean;
   publishedAt?: unknown;
@@ -98,7 +105,14 @@ export interface KenanganHost {
   lastLoginAt?: unknown;
 }
 
-export type KenanganPhotoStatus = "live" | "hidden" | "keeper" | "enhanced" | "failed";
+// Visibility only — one axis (ADR-0007). Enhancement is orthogonal, tracked by
+// `enhancedPath` + `enhanceState`. Legacy photos may carry `keeper`/`enhanced`/
+// `failed`; those read as visible (only `hidden` drops a photo from guests).
+export type KenanganPhotoStatus = "live" | "hidden";
+
+/** In-flight / failed AI enhancement of a single photo. Absent = never enhanced
+ *  (or already done — success sets `enhancedPath` and clears this). ADR-0007. */
+export type KenanganEnhanceState = "pending" | "failed";
 
 export interface KenanganPhoto {
   guestSessionId: string;
@@ -106,6 +120,7 @@ export interface KenanganPhoto {
   /** ImageKit path, e.g. /kenangan/{eventId}/{photoId}.jpg */
   originalPath: string;
   enhancedPath?: string;
+  enhanceState?: KenanganEnhanceState;
   status: KenanganPhotoStatus;
   width: number;
   height: number;

@@ -45,9 +45,9 @@ the host can purchase an AI-enhanced, colour-graded final gallery.
 
 **Not a photo booth. The whole venue is the camera.**
 
-| | Live Feed | Published Gallery |
+| | Live Feed | Closed Gallery |
 |---|---|---|
-| When | During event, realtime | After event, batched |
+| When | During event, realtime | After close, per-photo enhance |
 | Processing | Client-side LUT only | Server-side AI restore + LUT re-apply |
 | Resolution | ImageKit thumb transform (~400px) | Full resolution |
 | Cost to run | ~zero | Paid (Replicate ~$0.007/photo) |
@@ -86,15 +86,15 @@ app/
         page.tsx                    # Guest landing (server component)
         capture/page.tsx            # Camera — CLIENT component ("use client")
         feed/page.tsx               # Live feed — client, Firestore onSnapshot
-        gallery/page.tsx            # Published gallery (server, revalidate on publish)
+        gallery/page.tsx            # Gallery, gated on closed (server, revalidate on curation)
       host/
         page.tsx                    # Host login (access code → HMAC session cookie)
         events/page.tsx             # Event list
-        events/[id]/page.tsx        # Setup, live moderation, keeper curation, publish
+        events/[id]/page.tsx        # Setup, live moderation, hide/unhide curation, per-photo enhance
   api/kenangan/
     upload-auth/route.ts            # POST → ImageKit signature (guest-token gated)
     photos/route.ts                 # POST commit metadata / GET ?after=cursor catch-up
-    publish/route.ts                # POST → keeper filter, enqueue Replicate batch
+    enhance/route.ts                # POST {eventId,photoId} → enqueue one Replicate prediction
     replicate/webhook/route.ts      # Replicate async prediction callback
     session/route.ts                # Host login/logout
 ```
@@ -129,24 +129,26 @@ Capture (client)
 
 [event ends]
 
-Host: Close & Publish
-  └─ Curate keepers (manual hide/keep + auto-flag blur/dark candidates)
-  └─ IF enhancement purchased (admin-confirmed order):
-        └─ /api/kenangan/publish creates Replicate async predictions (webhook mode)
-           in chunks — Real-ESRGAN (2x cap) + GFPGAN, restorative only
-        └─ Webhook per prediction → re-apply the SAME LUT server-side (sharp or
-           canvas-in-node against the stored .cube) → upload enhanced file to ImageKit
-           → update photo doc
-  └─ Set event status=published → gallery page revalidates → guests notified
+Host: Close (= Publish, irreversible — ADR-0007)
+  └─ Curate: hide/unhide any photo (auto-flag blur/dark candidates)
+  └─ live → closed stamps publishedAt; the static gallery goes live immediately
+  └─ IF enhancement purchased (admin-confirmed order), per-photo in the lightbox:
+        └─ /api/kenangan/enhance {eventId,photoId} creates one Replicate async
+           prediction (webhook mode) — Real-ESRGAN restoration-only (deblur/sharpen);
+           no upscale, no face restore
+        └─ Webhook → re-apply the SAME LUT server-side (sharp against the stored
+           .cube) → upload enhanced file to ImageKit → set enhancedPath, clear enhanceState
+  └─ Curation writes revalidate the gallery tag → guests see changes on next load
 ```
 
 **Two rules that must not be broken (unchanged from v0.1):**
 
-1. **The LUT owns colour. The AI owns pixels.** AI does denoise/sharpen/upscale/face-restore
-   only; the stored `lutId` is re-applied deterministically at full res on top. The final
-   gallery is a higher-quality version of exactly what the guest previewed.
-2. **Restorative, never generative.** No creative upscalers, no high-denoise diffusion.
-   Conservative strength. On failure, publish the LUT-graded original — never a mangled face.
+1. **The LUT owns colour. The AI owns pixels.** AI deblurs/sharpens only; the stored
+   `lutId` is re-applied deterministically at full res on top. The final gallery is a
+   cleaner version of exactly what the guest previewed — same size, same faces.
+2. **Restorative, never generative.** No upscaling, no face restore (GFPGAN), no creative
+   upscalers, no denoise diffusion. Fix lighting (the LUT) and blur if present — nothing
+   else. On failure, keep the LUT-graded original — never a mangled face.
 
 ### 3.1 ImageKit specifics
 
@@ -154,7 +156,7 @@ Host: Close & Publish
 - Feed thumbs: URL transform `?tr=w-400,q-70` — zero client or server resize work.
 - Enhanced files: `/kenangan/{eventId}/enhanced/{photoId}.jpg`. Original never overwritten.
 - Signature endpoint mirrors `/api/imagekit/auth` but is gated by guest token + per-session rate limit (the existing endpoint is open; do not reuse it directly).
-- Retention: scheduled cleanup of originals 60 days post-publish via ImageKit delete API (`/api/imagekit/delete` pattern) — host-visible promise.
+- Retention: scheduled cleanup of originals 60 days post-close via ImageKit delete API (`/api/imagekit/delete` pattern) — host-visible promise.
 
 ### 3.2 Non-negotiable Next.js constraints (carried over, still true on this stack)
 
@@ -180,14 +182,15 @@ Host: Close & Publish
 ```
 kenanganEvents/{eventId}
   slug, name, eventDate, coverUrl, tier, guestCap, themeId,
-  downloadMode: "after_publish" | "instant_share",
-  status: "draft" | "live" | "closed" | "published",
+  downloadMode: "after_close" | "instant_share",
+  status: "draft" | "live" | "closed",   # closed = published (ADR-0007); legacy "published" tolerated on read
   hostAccessCode, enhancementPurchased: bool, publishedAt, createdAt
 
 kenanganEvents/{eventId}/photos/{photoId}
   guestSessionId, lutId,
   originalPath, enhancedPath?,        # ImageKit paths; thumb = URL transform of original
-  status: "live" | "hidden" | "keeper" | "enhanced" | "failed",
+  status: "live" | "hidden",          # visibility only (ADR-0007)
+  enhanceState?: "pending" | "failed", # enhancement lifecycle; undefined = never enhanced
   width, height, createdAt
 
 kenanganEvents/{eventId}/guestSessions/{sessionId}
@@ -205,9 +208,9 @@ kenanganThemes/{themeId}               # or static data/kenangan-themes.ts if LU
 
 Notes:
 - Photos as a **subcollection** keeps the feed query trivial (`orderBy createdAt desc`, `where status == "live"`) and `onSnapshot` scoped per event.
-- `lutId` stored, never baked — batch re-grades cleanly at full res.
+- `lutId` stored, never baked — re-grades cleanly at full res per enhanced photo.
 - Slug lookup: query `kenganEvents where slug ==` wrapped in `React.cache()` + `unstable_cache` with tag `kenangan-event:{slug}` — same pattern as `getValidatedConfig` in `lib/invitation-config.ts`.
-- Firestore security rules: client reads allowed on `photos` where event `status in ["live","published"]`; **all writes via admin SDK in API routes only**.
+- Firestore security rules: client reads allowed on `photos` where event `status in ["live","closed","published"]` (`published` = legacy tolerance, ADR-0007); **all writes via admin SDK in API routes only**.
 
 ---
 
@@ -225,16 +228,17 @@ Notes:
 
 | Item | Choice |
 |---|---|
-| Models | Real-ESRGAN (upscale/denoise) + GFPGAN (face restore, likeness-preserving) |
-| Excluded | Creative/generative upscalers, high-denoise diffusion, CodeFormer at high strength |
-| Upscale cap | **2x** — phone/Instagram viewing; higher is wasted cost + storage |
+| Models | Real-ESRGAN, restoration-only (`scale: 1`, `face_enhance: false`) — deblur/sharpen at native res |
+| Does | Fix lighting (deterministic LUT re-grade) + deblur if present. Nothing else |
+| Excluded | Upscaling, GFPGAN/face restore, CodeFormer, creative/generative upscalers, denoise diffusion |
 | Cost | ~$0.007/photo |
 | Execution | Async predictions + webhook (`REPLICATE_WEBHOOK_SECRET` verified), post-event only |
-| Failure policy | Retain original; on failure publish LUT-graded original. Never a mangled face |
+| Failure policy | Retain original; on failure keep the LUT-graded original (set `enhanceState: "failed"` for retry). Never a mangled face |
 | Sanity check | Optional human spot-check on premium tier |
 
-**Keeper gate before the batch** cuts cost, raises gallery quality, and *is* the moderation
-mechanism. Never enhance blindly.
+**Per-photo, host-paced (ADR-0007).** Enhancement is on-demand in the lightbox, one photo at
+a time — not a close-time batch. The host enhances the few photos worth it; no accidental
+batch of hundreds of Replicate calls. Never enhance blindly.
 
 ---
 
@@ -286,7 +290,7 @@ Scoped tokens in `app/(kenangan)/kenangan.css` — never touch `globals.css` or 
 
 - Host: hide/delete any photo; optional approve-before-public mode.
 - Guest: report button → flags doc for host.
-- Auto-flag candidates at keeper gate: blur, extreme underexposure, near-duplicates.
+- Auto-flag candidates during curation: blur, extreme underexposure, near-duplicates.
 - Rate-limit uploads per guest session (`uploadCount` check in `upload-auth`; open QR = open upload).
 - Signed expiring event token in QR (§2.3) — never a bare public URL.
 
@@ -296,8 +300,8 @@ Scoped tokens in `app/(kenangan)/kenangan.css` — never touch `globals.css` or 
 
 1. **Core loop** — middleware subdomain + guest landing + camera/LUT capture + ImageKit direct upload + Firestore commit + `onSnapshot` feed. *Nothing else matters until this feels magic on a real phone in a dim room.*
 2. Host: access-code session, event setup, theme/LUT choice, QR generation, download-mode toggle.
-3. Moderation, keeper gate, close & publish, published gallery page.
-4. Replicate batch + server-side LUT re-apply + webhook + guest notify.
+3. Moderation, hide/unhide curation, close (= publish, irreversible), gallery page.
+4. Per-photo Replicate enhance + server-side LUT re-apply + webhook.
 5. Orders (manual confirm) + tiering.
 6. Phase 2 payments → Phase 3 white-label.
 
@@ -326,7 +330,7 @@ REPLICATE_WEBHOOK_SECRET=...
 | **8-bit banding** | Browser grading is 8-bit sRGB; strong LUTs band on skies/walls. Verify before locking presets. |
 | **Face restoration failure** | Waxy faces at a wedding are unforgivable. Conservative strength, keep originals, fail safe to un-enhanced. |
 | **Server-side LUT re-apply parity** | New risk from ImageKit pipeline: the node-side .cube application must match the WebGL preview pixel-for-pixel in colour. Build a parity test (same input + LUT through both paths, assert ΔE small) in step 4. |
-| **Firestore rules surface** | Client SDK reads photos directly; rules must scope reads to live/published events and block all client writes. Review before launch. |
+| **Firestore rules surface** | Client SDK reads photos directly; rules must scope reads to live/closed (+legacy published) events and block all client writes. Review before launch. |
 
 ---
 
@@ -355,13 +359,14 @@ until the previous one works:
    lib/invitation-affiliate-session.ts, secret KENANGAN_SESSION_SECRET),
    access-code login, event CRUD, theme/LUT selection, QR generation with
    signed token URL, download-mode toggle.
-3. Moderation + keeper curation + close & publish + published gallery page
-   with cache tag kenangan-event:{slug} revalidation.
-4. Replicate integration: publish route creates async predictions (Real-ESRGAN
-   2x + GFPGAN, restorative settings only), webhook route verifies signature,
-   re-applies the stored .cube LUT server-side at full res, uploads enhanced
-   file to ImageKit, updates the photo doc; failure path publishes the
-   LUT-graded original. Include the WebGL-vs-server LUT parity test from §12.
+3. Moderation + hide/unhide curation + close (= publish, irreversible) + gallery
+   page with cache tag kenangan-event:{slug} revalidation.
+4. Replicate integration: per-photo enhance route creates one async prediction
+   (Real-ESRGAN restoration-only — scale 1, face_enhance false; deblur/sharpen,
+   no upscale, no face restore), webhook route verifies signature, re-applies the
+   stored .cube LUT server-side at full res, uploads enhanced file to ImageKit,
+   sets enhancedPath + clears enhanceState; failure sets enhanceState "failed" and
+   keeps the LUT-graded original. Include the WebGL-vs-server LUT parity test from §12.
 5. kenanganOrders with manual admin confirmation gating enhancement.
 
 Constraints throughout: all guest/host copy in Bahasa Indonesia; never proxy

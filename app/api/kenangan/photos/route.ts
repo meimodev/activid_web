@@ -2,26 +2,29 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { isKenanganEnabled } from "@/lib/kenangan-event";
+import { isKenanganEnabled, listKenanganHostPhotos, revalidateKenanganEvent } from "@/lib/kenangan-event";
 import { verifyKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
 import { isKenanganLutId } from "@/data/kenangan-luts";
 
 const GUEST_SESSION_ID_REGEX = /^[A-Za-z0-9_-]{10,64}$/;
 const PHOTO_ID_REGEX = /^[0-9a-z]{16}$/;
-const HOST_PAGE_SIZE = 60;
 
-async function requireHostAccess(eventId: string): Promise<NextResponse | null> {
+async function requireHostAccess(
+  eventId: string,
+): Promise<{ error: NextResponse } | { slug: string }> {
   const session = await getKenanganHostSession();
   // One extra doc read per poll to resolve the owner; cheap and keeps authz
-  // in one place rather than trusting the client's eventId alone.
+  // in one place rather than trusting the client's eventId alone. Returns the
+  // slug so a mutating handler can revalidate the guest gallery.
   const snap = await getAdminDb().collection("kenanganEvents").doc(eventId).get();
-  if (!canAccessEvent(session, snap.data()?.ownerUid as string | undefined)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const data = snap.data();
+  if (!canAccessEvent(session, data?.ownerUid as string | undefined)) {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
-  return null;
+  return { slug: (data?.slug as string) ?? "" };
 }
 
 /** Host-only: list photos (all statuses) for moderation/curation, cursor-paged. */
@@ -35,39 +38,14 @@ export async function GET(request: NextRequest) {
   if (!eventId) {
     return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 400 });
   }
-  const denied = await requireHostAccess(eventId);
-  if (denied) return denied;
+  const access = await requireHostAccess(eventId);
+  if ("error" in access) return access.error;
 
-  let query = getAdminDb()
-    .collection("kenanganEvents")
-    .doc(eventId)
-    .collection("photos")
-    .orderBy("createdAt", "desc")
-    .limit(HOST_PAGE_SIZE);
-  const afterMs = Number(after);
-  if (after && Number.isFinite(afterMs)) {
-    query = query.startAfter(Timestamp.fromMillis(afterMs));
-  }
-
-  const snap = await query.get();
-  const photos = snap.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      status: data.status,
-      originalPath: data.originalPath,
-      lutId: data.lutId,
-      createdAtMs: (data.createdAt as Timestamp | undefined)?.toMillis() ?? 0,
-    };
-  });
-
-  return NextResponse.json({
-    photos,
-    hasMore: snap.docs.length === HOST_PAGE_SIZE,
-  });
+  const afterMs = after ? Number(after) : undefined;
+  return NextResponse.json(await listKenanganHostPhotos(eventId, afterMs));
 }
 
-/** Host-only: moderation / keeper curation status changes. */
+/** Host-only: photo visibility toggle — hide/unhide (ADR-0007). */
 export async function PATCH(request: NextRequest) {
   if (!isKenanganEnabled()) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -78,11 +56,11 @@ export async function PATCH(request: NextRequest) {
   const photoId = typeof body?.photoId === "string" ? body.photoId : "";
   const status = typeof body?.status === "string" ? body.status : "";
 
-  if (!eventId || !PHOTO_ID_REGEX.test(photoId) || !["live", "hidden", "keeper"].includes(status)) {
+  if (!eventId || !PHOTO_ID_REGEX.test(photoId) || !["live", "hidden"].includes(status)) {
     return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 400 });
   }
-  const denied = await requireHostAccess(eventId);
-  if (denied) return denied;
+  const access = await requireHostAccess(eventId);
+  if ("error" in access) return access.error;
 
   const ref = getAdminDb()
     .collection("kenanganEvents")
@@ -94,6 +72,9 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Foto tidak ditemukan." }, { status: 404 });
   }
   await ref.update({ status });
+  // Curation reflects on the published gallery (ADR-0007): bust its cache. The
+  // live feed is realtime already, so this only matters after close.
+  if (access.slug) await revalidateKenanganEvent(access.slug);
   return NextResponse.json({ ok: true });
 }
 

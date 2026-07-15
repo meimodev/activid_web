@@ -20,7 +20,10 @@ export default async function KenanganFeedPage({ params, searchParams }: Props) 
   const event = await getKenanganEventBySlug(slug);
   if (!event) notFound();
 
-  if (event.status !== "live") {
+  // Guests browse the live feed while the event is "live" and after it's
+  // "closed" (host curating). Uploads are live-only — the capture FAB is gated
+  // below and the upload API rejects non-live events regardless.
+  if (event.status !== "live" && event.status !== "closed") {
     return (
       <main className="kk-page">
         <p className="kk-brand">Kita</p>
@@ -45,7 +48,7 @@ export default async function KenanganFeedPage({ params, searchParams }: Props) 
       coverUrl={event.coverUrl ?? ""}
       slug={slug}
       token={t ?? null}
-      downloadMode={event.downloadMode}
+      canCapture={event.status === "live"}
     />
   );
 }

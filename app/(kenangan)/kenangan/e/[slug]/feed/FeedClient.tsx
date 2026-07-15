@@ -15,7 +15,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { kenanganFullUrl, kenanganThumbUrl, type KenanganDownloadMode } from "@/types/kenangan";
+import { kenanganFullUrl, kenanganThumbUrl } from "@/types/kenangan";
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
 import Lightbox from "./Lightbox";
@@ -37,7 +37,9 @@ interface FeedPhoto {
 }
 
 function toFeedPhoto(id: string, data: DocumentData): FeedPhoto | null {
-  if (data.status !== "live") return null;
+  // Only moderated-out photos are hidden from guests. Keeper/enhanced stay
+  // visible so the feed doesn't shrink as the host curates after closing.
+  if (data.status === "hidden") return null;
   const originalPath = typeof data.originalPath === "string" ? data.originalPath : "";
   if (!originalPath) return null;
   const createdAt = data.createdAt as Timestamp | null | undefined;
@@ -58,7 +60,7 @@ export default function FeedClient({
   coverUrl,
   slug,
   token,
-  downloadMode,
+  canCapture,
 }: {
   eventId: string;
   eventName: string;
@@ -66,7 +68,7 @@ export default function FeedClient({
   coverUrl?: string;
   slug: string;
   token: string | null;
-  downloadMode: KenanganDownloadMode;
+  canCapture: boolean;
 }) {
   const [photos, setPhotos] = useState<FeedPhoto[]>([]);
   const [ready, setReady] = useState(false);
@@ -172,7 +174,8 @@ export default function FeedClient({
   }, [eventId, exhausted]);
 
   const tokenQuery = token ? `?t=${encodeURIComponent(token)}` : "";
-  const canDownload = downloadMode === "instant_share";
+  // Download available live throughout the event.
+  const canDownload = true;
 
   return (
     <main className="kk-page" style={{ paddingBottom: 110 }}>
@@ -239,7 +242,7 @@ export default function FeedClient({
         canDownload={canDownload}
       />
 
-      {token ? (
+      {token && canCapture ? (
         <Link href={`/kenangan/e/${slug}/capture${tokenQuery}`} className="kk-btn kk-btn-primary kk-feed-fab">
           Ambil Foto
         </Link>

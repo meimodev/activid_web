@@ -15,10 +15,11 @@ service cloud.firestore {
 
     // --- KenanganKita -------------------------------------------------------
     // Guests subscribe to the photo stream directly with the client SDK.
-    // Reads scoped to live/published events; ALL writes go through API routes
-    // using the admin SDK, which bypasses these rules.
+    // Reads scoped to live/closed/published events (guests keep browsing while
+    // the host curates after closing); ALL writes go through API routes using
+    // the admin SDK, which bypasses these rules.
     match /kenanganEvents/{eventId}/photos/{photoId} {
-      allow read: if get(/databases/$(database)/documents/kenanganEvents/$(eventId)).data.status in ['live', 'published'];
+      allow read: if get(/databases/$(database)/documents/kenanganEvents/$(eventId)).data.status in ['live', 'closed', 'published'];
       allow write: if false;
     }
 

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DateTime } from "luxon";
 import { getKenanganEventBySlug, getKenanganGalleryPhotos } from "@/lib/kenangan-event";
-import { KENANGAN_IMAGEKIT_URL_BASE, kenanganEventTitle } from "@/types/kenangan";
+import { isKenanganPublished, kenanganEventTitle } from "@/types/kenangan";
+import GalleryGrid from "./GalleryGrid";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -17,14 +18,14 @@ export default async function KenanganGalleryPage({ params }: Props) {
   const event = await getKenanganEventBySlug(slug);
   if (!event) notFound();
 
-  if (event.status !== "published") {
+  if (!isKenanganPublished(event.status)) {
     return (
       <main className="kk-page">
         <p className="kk-brand">Kita</p>
         <div className="kk-card" style={{ marginTop: 28 }}>
           <p style={{ lineHeight: 1.6 }}>
-            Galeri kenangan belum dipublikasikan. Kembali lagi setelah tuan rumah
-            selesai mengkurasi foto terbaik.
+            Galeri kenangan belum tersedia. Kembali lagi setelah acara ditutup
+            oleh tuan rumah.
           </p>
         </div>
       </main>
@@ -39,27 +40,10 @@ export default async function KenanganGalleryPage({ params }: Props) {
       <p className="kk-brand">Kita</p>
       <div style={{ textAlign: "center", margin: "20px 0 24px" }}>
         <h1 className="kk-landing-title" style={{ margin: 0 }}>{kenanganEventTitle(event)}</h1>
-        <p className="kk-landing-date">{dateLabel} · {photos.length} foto pilihan</p>
+        <p className="kk-landing-date">{dateLabel} · {photos.length} foto kenangan</p>
       </div>
 
-      <div className="kk-feed-grid">
-        {photos.map((photo) => (
-          <figure key={photo.id} className="kk-feed-item">
-            <img
-              src={`${KENANGAN_IMAGEKIT_URL_BASE}${photo.path}?tr=w-800,q-80`}
-              alt="Foto kenangan"
-              loading="lazy"
-              decoding="async"
-            />
-            <a
-              className="kk-download-link"
-              href={`${KENANGAN_IMAGEKIT_URL_BASE}${photo.path}?ik-attachment=true`}
-            >
-              Unduh
-            </a>
-          </figure>
-        ))}
-      </div>
+      <GalleryGrid photos={photos} />
     </main>
   );
 }

@@ -10,7 +10,7 @@ import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-sess
 import { createKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { KENANGAN_THEMES } from "@/data/kenangan-themes";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { getKenanganTier, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
+import { getKenanganTier, isKenanganPublished, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
 import {
   kenanganConfirmOrder,
   kenanganRequestEnhancement,
@@ -20,10 +20,8 @@ import {
 import ConfirmSubmit from "../../ConfirmSubmit";
 import CopyButton from "./CopyButton";
 import EventTabs from "./EventTabs";
-import HostPhotosClient from "./HostPhotosClient";
 import KenanganCoverPicker from "./KenanganCoverPicker";
 import KenanganTierCards from "../KenanganTierCards";
-import PublishButton from "./PublishButton";
 import WhatsAppButton from "./WhatsAppButton";
 
 export const metadata: Metadata = { title: "Kelola Acara" };
@@ -134,18 +132,17 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
   }
 
   // AI enhancement upsell. Rendered at the TOP of Kelola once the Event is
-  // Closed (curation time — the natural "enhance my picks" moment), accented
-  // while unpurchased; otherwise it sits lower in its default slot so it never
-  // buries the live moderation grid.
-  const aiAtTop = event.status === "closed";
-  const aiSection =
-    event.status !== "published" ? (
+  // published (closed — curation time, the natural "enhance my photos" moment),
+  // accented while unpurchased; otherwise it sits lower in its default slot so
+  // it never buries the live moderation grid.
+  const aiAtTop = isKenanganPublished(event.status);
+  const aiSection = (
       <section className={`kk-card${!event.enhancementPurchased && aiAtTop ? " kk-card-primary" : ""}`}>
         <h2 className="kk-section-title">Galeri Kenangan AI</h2>
         {event.enhancementPurchased ? (
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
-            Peningkatan kualitas AI sudah aktif. Foto terpilih akan ditingkatkan
-            saat galeri dipublikasikan.
+            Peningkatan kualitas AI aktif. Buka sebuah foto di Kurasi Galeri untuk
+            meningkatkan kualitasnya dengan AI.
           </p>
         ) : order?.status === "pending" ? (
           <>
@@ -172,8 +169,8 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
         ) : (
           <>
             <p className="kk-landing-note" style={{ marginTop: 4 }}>
-              Tingkatkan foto terpilih dengan AI (ketajaman, pencahayaan, wajah)
-              sebelum galeri dipublikasikan. Paket {tier.name} (≤{tier.guestCap} tamu):
+              Tingkatkan foto pilihanmu dengan AI (ketajaman, pencahayaan, wajah),
+              satu per satu saat kurasi. Paket {tier.name} (≤{tier.guestCap} tamu):
               Rp {tier.priceIdr.toLocaleString("id-ID")} per acara. Pembayaran manual
               via transfer — admin akan mengkonfirmasi.
             </p>
@@ -189,7 +186,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           </>
         )}
       </section>
-    ) : null;
+  );
 
   return (
     <main className="kk-page" style={{ maxWidth: 640 }}>
@@ -206,14 +203,12 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
             {STATUS_LABELS[event.status]}
           </span>
         </div>
-        {(event.status === "draft" || event.status === "closed") && paketPaid ? (
+        {event.status === "draft" && paketPaid ? (
           <div className="kk-event-head-actions">
             <form action={kenanganSetEventStatus}>
               <input type="hidden" name="eventId" value={event.id} />
               <input type="hidden" name="status" value="live" />
-              <ConfirmSubmit pendingLabel="Menyimpan…">
-                {event.status === "draft" ? "Mulai Terima Foto" : "Buka Kembali"}
-              </ConfirmSubmit>
+              <ConfirmSubmit pendingLabel="Menyimpan…">Mulai Terima Foto</ConfirmSubmit>
             </form>
           </div>
         ) : null}
@@ -227,10 +222,10 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
               <input type="hidden" name="status" value="closed" />
               <ConfirmSubmit
                 className="kk-btn kk-btn-ghost"
-                confirm="Tutup acara? Tamu tidak bisa lagi menambah foto ke galeri langsung."
+                confirm="Tutup acara sekarang? Tamu tidak bisa lagi menambah foto DAN acara TIDAK BISA dibuka kembali. Galeri kenangan langsung terpublikasi dan dapat dibagikan."
                 pendingLabel="Menutup…"
               >
-                Tutup Acara
+                Tutup & Publikasikan
               </ConfirmSubmit>
             </form>
           </div>
@@ -246,8 +241,8 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
       {error === "invalid" ? (
         <p className="kk-form-error">Data tidak valid. Periksa kembali.</p>
       ) : null}
-      {error === "published" ? (
-        <p className="kk-form-error">Acara sudah terpublikasi dan tidak bisa diubah statusnya.</p>
+      {error === "closed" ? (
+        <p className="kk-form-error">Acara sudah ditutup dan terpublikasi — tidak bisa dibuka kembali.</p>
       ) : null}
       {error === "paket-unpaid" ? (
         <p className="kk-form-error">Pembayaran paket belum dikonfirmasi admin. Acara belum bisa dimulai.</p>
@@ -329,25 +324,28 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Sembunyikan foto yang tidak pantas — foto langsung hilang dari galeri tamu.
           </p>
-          <HostPhotosClient eventId={event.id} mode="live" />
+          <Link href={`/kenangan/host/events/${event.id}/photos`} className="kk-btn kk-btn-primary" style={{ marginTop: 12 }}>
+            Buka Moderasi Foto
+          </Link>
         </section>
       ) : null}
 
-      {event.status === "closed" ? (
+      {isKenanganPublished(event.status) ? (
         <section className="kk-card kk-card-primary">
-          <h2 className="kk-section-title">Kurasi Foto Terbaik</h2>
+          <h2 className="kk-section-title">Kurasi Galeri Kenangan</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
-            Pilih foto-foto terbaik untuk galeri kenangan. Hanya foto terpilih yang
-            dipublikasikan{event.enhancementPurchased ? " dan ditingkatkan kualitasnya" : ""}.
+            Sembunyikan foto yang tak ingin ditampilkan — perubahan langsung tampak
+            di galeri kenangan{event.enhancementPurchased ? ", dan tingkatkan foto pilihan dengan AI" : ""}.
           </p>
-          <HostPhotosClient eventId={event.id} mode="curate" />
-          <PublishButton eventId={event.id} />
+          <Link href={`/kenangan/host/events/${event.id}/photos`} className="kk-btn kk-btn-primary" style={{ marginTop: 12 }}>
+            Buka Kurasi Galeri
+          </Link>
         </section>
       ) : null}
 
       {!aiAtTop ? aiSection : null}
 
-      {event.status === "published" ? (
+      {isKenanganPublished(event.status) ? (
         <section className="kk-card">
           <h2 className="kk-section-title">Galeri Terpublikasi</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
@@ -382,11 +380,6 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           {paketPaid ? (
             <p className="kk-field-hint">Paket sudah dibayar dan terkunci.</p>
           ) : null}
-          <label className="kk-label" htmlFor="downloadMode">Unduhan Foto untuk Tamu</label>
-          <select id="downloadMode" name="downloadMode" className="kk-input" defaultValue={event.downloadMode}>
-            <option value="after_publish">Setelah galeri dipublikasikan</option>
-            <option value="instant_share">Langsung saat acara</option>
-          </select>
           <ConfirmSubmit pendingLabel="Menyimpan…">Simpan</ConfirmSubmit>
         </form>
       </section>

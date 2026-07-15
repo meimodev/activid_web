@@ -3,12 +3,10 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
-import {
-  gradeAndStoreKenanganPhoto,
-  kenanganOriginalUrl,
-} from "@/lib/kenangan-enhance";
+import { gradeAndStoreKenanganPhoto } from "@/lib/kenangan-enhance";
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 
 export const maxDuration = 120;
@@ -104,20 +102,16 @@ export async function POST(request: NextRequest) {
       // AI owns pixels, the LUT owns colour: re-apply the stored LUT to the
       // enhanced output at full res so the gallery matches the guest preview.
       const enhancedPath = await gradeAndStoreKenanganPhoto(eventId, photoId, outputUrl, lutId);
-      await photoRef.update({ enhancedPath, status: "enhanced" });
+      // Success: store the enhanced path and clear the in-flight flag (ADR-0007).
+      await photoRef.update({ enhancedPath, enhanceState: FieldValue.delete() });
       await jobRef.set(
         { photoId, replicateId: prediction.id ?? null, status: "succeeded", error: null },
         { merge: true },
       );
     } else {
-      // Failure path: never a mangled face — publish the LUT-graded original.
-      const enhancedPath = await gradeAndStoreKenanganPhoto(
-        eventId,
-        photoId,
-        kenanganOriginalUrl(photo.originalPath as string),
-        lutId,
-      );
-      await photoRef.update({ enhancedPath, status: "failed" });
+      // Failure: no fallback file — leave the photo showing its graded original
+      // and mark the state so the host can retry (ADR-0007).
+      await photoRef.update({ enhanceState: "failed" });
       await jobRef.set(
         {
           photoId,

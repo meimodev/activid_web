@@ -13,7 +13,7 @@ import {
 } from "@/lib/kenangan-host-session";
 import { isKenanganThemeId } from "@/data/kenangan-themes";
 import { kenanganCoverForTheme } from "@/data/kenangan-covers";
-import { KENANGAN_TIERS, getKenanganTier, isKenanganEventType, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
+import { KENANGAN_TIERS, getKenanganTier, isKenanganEventType, isKenanganPublished, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
 
 const SLUG_REGEX = /^[a-z0-9-]{3,200}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -94,7 +94,6 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
     tier,
     guestCap: getKenanganTier(tier).guestCap,
     themeId,
-    downloadMode: "after_publish",
     status: "draft",
     enhancementPurchased: false,
     createdAt: FieldValue.serverTimestamp(),
@@ -123,7 +122,6 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
   const eventDate = String(formData.get("eventDate") ?? "").trim();
   const coverUrl = String(formData.get("coverUrl") ?? "").trim();
   const themeId = String(formData.get("themeId") ?? "");
-  const downloadMode = String(formData.get("downloadMode") ?? "");
   const tier = String(formData.get("tier") ?? "");
 
   const back = `/kenangan/host/events/${eventId}`;
@@ -133,7 +131,6 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
     coverUrl.length > 500 ||
     (coverUrl && !coverUrl.startsWith("https://")) ||
     !isKenanganThemeId(themeId) ||
-    !["after_publish", "instant_share"].includes(downloadMode) ||
     !KENANGAN_TIERS.some((t) => t.id === tier)
   ) {
     redirect(`${back}?error=invalid`);
@@ -162,7 +159,6 @@ export async function kenanganUpdateEvent(formData: FormData): Promise<void> {
     eventDate,
     coverUrl,
     themeId,
-    downloadMode,
     tier,
     guestCap: getKenanganTier(tier).guestCap,
   });
@@ -185,18 +181,22 @@ export async function kenanganSetEventStatus(formData: FormData): Promise<void> 
   const eventId = String(formData.get("eventId") ?? "");
   const status = String(formData.get("status") ?? "");
 
-  // "published" goes through the publish flow, never this action.
-  if (!["draft", "live", "closed"].includes(status)) {
+  // Only two transitions exist: draft→live (open) and live→closed (publish).
+  if (!["live", "closed"].includes(status)) {
     redirect(`/kenangan/host/events/${eventId}?error=invalid`);
   }
 
   const { ref, data } = await requireOwnedEvent(session, eventId);
-  if (data.status === "published") {
-    redirect(`/kenangan/host/events/${eventId}?error=published`);
+  // Closed is terminal and IS published (ADR-0007) — no reopen, ever.
+  if (isKenanganPublished(data.status as string)) {
+    redirect(`/kenangan/host/events/${eventId}?error=closed`);
   }
 
-  // Going Live requires a confirmed Paket payment. See ADR-0005.
   if (status === "live") {
+    if (data.status !== "draft") {
+      redirect(`/kenangan/host/events/${eventId}?error=invalid`);
+    }
+    // Going Live requires a confirmed Paket payment. See ADR-0005.
     const paketSnap = await getAdminDb()
       .collection("kenanganOrders")
       .where("eventId", "==", eventId)
@@ -207,9 +207,15 @@ export async function kenanganSetEventStatus(formData: FormData): Promise<void> 
     if (!paketPaid) {
       redirect(`/kenangan/host/events/${eventId}?error=paket-unpaid`);
     }
+    await ref.update({ status: "live" });
+  } else {
+    // status === "closed": publish. Only from live.
+    if (data.status !== "live") {
+      redirect(`/kenangan/host/events/${eventId}?error=invalid`);
+    }
+    await ref.update({ status: "closed", publishedAt: FieldValue.serverTimestamp() });
   }
 
-  await ref.update({ status });
   await revalidateKenanganEvent(data.slug as string);
   redirect(`/kenangan/host/events/${eventId}?saved=1`);
 }

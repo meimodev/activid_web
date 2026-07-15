@@ -1,31 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { kenanganThumbUrl } from "@/types/kenangan";
+import type { KenanganEnhanceState } from "@/types/kenangan";
 import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 import KkSpinner from "@/app/(kenangan)/kenangan/KkSpinner";
 import HostPhotoLightbox from "./HostPhotoLightbox";
 
-export type HostMode = "live" | "curate";
-
 export interface HostPhoto {
   id: string;
-  status: "live" | "hidden" | "keeper" | "enhanced" | "failed";
+  status: "live" | "hidden";
   originalPath: string;
+  enhancedPath?: string;
+  enhanceState?: KenanganEnhanceState;
   createdAtMs: number;
 }
 
-export const STATUS_LABELS: Record<string, string> = {
-  live: "Tampil",
-  hidden: "Disembunyikan",
-  keeper: "Terpilih",
-  enhanced: "Ditingkatkan",
-  failed: "Gagal",
-};
-
 // Inline SVGs (feather-style), shared by the grid bar and the lightbox so the
-// hide/keeper affordances read identically in both. star-filled paints; the
-// rest are stroked outlines.
+// hide/enhance affordances read identically in both.
 const ICON_PATHS: Record<string, string[]> = {
   eye: ["M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z", "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"],
   "eye-off": [
@@ -33,8 +25,7 @@ const ICON_PATHS: Record<string, string[]> = {
     "M1 1l22 22",
     "M6.61 6.61A18.5 18.5 0 0 0 1 12s4 8 11 8a9.12 9.12 0 0 0 5.39-1.61",
   ],
-  star: ["M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2Z"],
-  "star-filled": ["M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2Z"],
+  sparkles: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"],
 };
 
 export function HostPhotoIcon({ name }: { name: keyof typeof ICON_PATHS }) {
@@ -42,7 +33,7 @@ export function HostPhotoIcon({ name }: { name: keyof typeof ICON_PATHS }) {
     <svg
       className="kk-photo-icon"
       viewBox="0 0 24 24"
-      fill={name === "star-filled" ? "currentColor" : "none"}
+      fill="none"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
@@ -56,15 +47,28 @@ export function HostPhotoIcon({ name }: { name: keyof typeof ICON_PATHS }) {
   );
 }
 
+/** Enhancement badge text for a photo, or null when there's nothing to show. */
+export function enhanceBadge(photo: HostPhoto): string | null {
+  if (photo.enhancedPath) return "Ditingkatkan";
+  if (photo.enhanceState === "pending") return "Meningkatkan…";
+  if (photo.enhanceState === "failed") return "Gagal";
+  return null;
+}
+
 export default function HostPhotosClient({
   eventId,
-  mode,
+  canEnhance,
+  initialPhotos,
+  initialHasMore,
 }: {
   eventId: string;
-  mode: HostMode;
+  // True in the closed (published) phase for events that bought AI enhancement.
+  canEnhance: boolean;
+  initialPhotos: HostPhoto[];
+  initialHasMore: boolean;
 }) {
-  const [photos, setPhotos] = useState<HostPhoto[]>([]);
-  const [hasMore, setHasMore] = useState(false);
+  const [photos, setPhotos] = useState<HostPhoto[]>(initialPhotos);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   // Distinguishes a "load more" fetch from a reset/reload so only the pressed
   // button spins (both share `loading`).
@@ -98,12 +102,7 @@ export default function HostPhotosClient({
     }
   }
 
-  useEffect(() => {
-    void load(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId]);
-
-  async function setStatus(photo: HostPhoto, status: "live" | "hidden" | "keeper") {
+  async function setStatus(photo: HostPhoto, status: "live" | "hidden") {
     const previous = photo.status;
     setPhotos((prev) => prev.map((p) => (p.id === photo.id ? { ...p, status } : p)));
     try {
@@ -119,15 +118,33 @@ export default function HostPhotosClient({
     }
   }
 
-  const keeperCount = photos.filter((p) => p.status === "keeper").length;
+  // Fire-and-track: the enhanced file arrives async via the Replicate webhook.
+  // We flip the photo to "pending" optimistically; the host reloads to pick up
+  // `enhancedPath` once it lands (host list isn't realtime — ADR-0007).
+  async function enhance(photo: HostPhoto) {
+    if (photo.enhancedPath || photo.enhanceState === "pending") return;
+    setPhotos((prev) =>
+      prev.map((p) => (p.id === photo.id ? { ...p, enhanceState: "pending" } : p)),
+    );
+    try {
+      const res = await fetch("/api/kenangan/enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, photoId: photo.id }),
+      });
+      if (!res.ok) throw new Error("enhance");
+    } catch {
+      setPhotos((prev) =>
+        prev.map((p) => (p.id === photo.id ? { ...p, enhanceState: "failed" } : p)),
+      );
+      setErrorMsg("Gagal memulai peningkatan. Coba lagi.");
+    }
+  }
 
   return (
     <div style={{ marginTop: 12 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <span className="kk-feed-count">
-          {photos.length} foto dimuat
-          {mode === "curate" ? ` · ${keeperCount} terpilih` : ""}
-        </span>
+        <span className="kk-feed-count">{photos.length} foto dimuat</span>
         <button type="button" className="kk-link-btn" onClick={() => load(true)} disabled={loading}>
           {loading && !loadingMore ? (
             <>
@@ -151,8 +168,7 @@ export default function HostPhotosClient({
         <div className="kk-feed-grid" style={{ marginTop: 10 }}>
           {photos.map((photo) => {
             const isHidden = photo.status === "hidden";
-            const canKeeper = mode === "curate" && !isHidden;
-            const isKeeper = photo.status === "keeper";
+            const badge = enhanceBadge(photo);
             return (
               <figure key={photo.id} className="kk-feed-item" data-dim={isHidden}>
                 <button
@@ -161,25 +177,27 @@ export default function HostPhotosClient({
                   onClick={() => setOpenId(photo.id)}
                   aria-label="Buka foto"
                 >
-                  {/* Status pill on the photo — curation only, and only when it
-                      isn't the resting "Tampil" state (would be noise on every tile). */}
-                  {mode === "curate" && photo.status !== "live" ? (
-                    <span className="kk-photo-status" data-status={photo.status}>
-                      {STATUS_LABELS[photo.status] ?? photo.status}
+                  {badge ? (
+                    <span
+                      className="kk-photo-status"
+                      data-status={photo.enhancedPath ? "enhanced" : photo.enhanceState}
+                    >
+                      {badge}
                     </span>
                   ) : null}
                   <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
                 </button>
                 <figcaption className="kk-host-photo-bar">
-                  {canKeeper ? (
+                  {canEnhance && !photo.enhancedPath ? (
                     <button
                       type="button"
                       className="kk-photo-btn"
-                      data-on={isKeeper}
-                      onClick={() => setStatus(photo, isKeeper ? "live" : "keeper")}
-                      aria-label={isKeeper ? "Batal pilih" : "Pilih"}
+                      data-on={photo.enhanceState === "pending"}
+                      disabled={photo.enhanceState === "pending"}
+                      onClick={() => enhance(photo)}
+                      aria-label="Tingkatkan dengan AI"
                     >
-                      <HostPhotoIcon name={isKeeper ? "star-filled" : "star"} />
+                      <HostPhotoIcon name="sparkles" />
                     </button>
                   ) : null}
                   <button
@@ -217,8 +235,9 @@ export default function HostPhotosClient({
         openId={openId}
         onOpenId={setOpenId}
         onClose={() => setOpenId(null)}
-        mode={mode}
+        canEnhance={canEnhance}
         onSetStatus={setStatus}
+        onEnhance={enhance}
       />
     </div>
   );
