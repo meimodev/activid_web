@@ -58,3 +58,7 @@ next-env.d.ts
 
 # CodeGraph index (local, rebuildable)
 .codegraph/
+
+# Playwright
+/test-results/
+/playwright-report/

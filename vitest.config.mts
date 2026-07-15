@@ -10,6 +10,8 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     testTimeout: 20000,
     passWithNoTests: true,
+    // e2e specs are Playwright's, not vitest's
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
   },
   resolve: {
     alias: {
