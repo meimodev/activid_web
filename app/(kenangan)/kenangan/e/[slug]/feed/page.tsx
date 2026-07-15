@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getKenanganEventBySlug } from "@/lib/kenangan-event";
+import { KENANGAN_EVENT_TYPES, kenanganEventTitle } from "@/types/kenangan";
 import FeedClient from "./FeedClient";
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const event = await getKenanganEventBySlug(slug);
-  return { title: event ? `Galeri ${event.name}` : "Galeri" };
+  return { title: event ? `Galeri ${kenanganEventTitle(event)}` : "Galeri" };
 }
 
 export default async function KenanganFeedPage({ params, searchParams }: Props) {
@@ -34,10 +35,14 @@ export default async function KenanganFeedPage({ params, searchParams }: Props) 
     );
   }
 
+  const eventTypeLabel = KENANGAN_EVENT_TYPES.find((et) => et.id === event.eventType)?.label;
+
   return (
     <FeedClient
       eventId={event.id}
       eventName={event.name}
+      eventTypeLabel={eventTypeLabel}
+      coverUrl={event.coverUrl ?? ""}
       slug={slug}
       token={t ?? null}
       downloadMode={event.downloadMode}

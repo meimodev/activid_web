@@ -70,3 +70,17 @@ Detects `invitation.*` subdomains and rewrites to `/invitation/...` paths; maps 
 ## API routes
 
 `/api/imagekit/auth`, `/api/imagekit/delete` (ImageKit), `/api/tinypng/optimize` (image optimization), `/api/dropbox/audio` (audio), `/api/wishes` (RSVP guest wishes).
+
+## Agent skills
+
+### Issue tracker
+
+Issues tracked as GitHub issues in `meimodev/activid_web` via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.

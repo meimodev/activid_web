@@ -29,3 +29,9 @@ export const KENANGAN_DEFAULT_COVERS: KenanganDefaultCover[] = [
     url: `${KENANGAN_IMAGEKIT_URL_BASE}/kenangan/defaults/kk-cover-ceria.jpg`,
   },
 ];
+
+/** Default cover url for a theme. Cover ids mirror theme ids 1:1; unknown
+ *  themes fall back to the first cover. Used to seed coverUrl at event creation. */
+export function kenanganCoverForTheme(themeId: string | undefined): string {
+  return (KENANGAN_DEFAULT_COVERS.find((c) => c.id === themeId) ?? KENANGAN_DEFAULT_COVERS[0]).url;
+}

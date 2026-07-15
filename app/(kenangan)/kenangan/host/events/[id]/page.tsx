@@ -10,7 +10,7 @@ import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-sess
 import { createKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { KENANGAN_THEMES } from "@/data/kenangan-themes";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { KENANGAN_TIERS, getKenanganTier, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
+import { getKenanganTier, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
 import {
   kenanganConfirmOrder,
   kenanganRequestEnhancement,
@@ -22,6 +22,7 @@ import CopyButton from "./CopyButton";
 import EventTabs from "./EventTabs";
 import HostPhotosClient from "./HostPhotosClient";
 import KenanganCoverPicker from "./KenanganCoverPicker";
+import KenanganTierCards from "../KenanganTierCards";
 import PublishButton from "./PublishButton";
 import WhatsAppButton from "./WhatsAppButton";
 
@@ -193,11 +194,9 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
   return (
     <main className="kk-page" style={{ maxWidth: 640 }}>
       <header className="kk-event-head">
-        {session.isAdmin ? (
-          <Link href="/kenangan/host/events" className="kk-feed-count">
-            ← Semua acara
-          </Link>
-        ) : null}
+        <Link href="/kenangan/host/events" className="kk-feed-count">
+          ← Semua acara
+        </Link>
         <div className="kk-event-head-top">
           <div>
             <h1 className="kk-feed-title">{event.name}</h1>
@@ -378,28 +377,11 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
               </option>
             ))}
           </select>
-          <label className="kk-label" htmlFor="tier">Paket (berdasarkan jumlah tamu)</label>
+          <span className="kk-label">Paket (berdasarkan jumlah tamu)</span>
+          <KenanganTierCards value={event.tier ?? "standard"} locked={paketPaid} />
           {paketPaid ? (
-            <>
-              <input
-                id="tier"
-                className="kk-input"
-                readOnly
-                tabIndex={-1}
-                value={`${tier.name} — ≤${tier.guestCap} tamu — Rp ${tier.priceIdr.toLocaleString("id-ID")}`}
-              />
-              <input type="hidden" name="tier" value={event.tier ?? "standard"} />
-              <p className="kk-field-hint">Paket sudah dibayar dan terkunci.</p>
-            </>
-          ) : (
-            <select id="tier" name="tier" className="kk-input" defaultValue={event.tier ?? "standard"}>
-              {KENANGAN_TIERS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} — ≤{t.guestCap} tamu — Rp {t.priceIdr.toLocaleString("id-ID")}
-                </option>
-              ))}
-            </select>
-          )}
+            <p className="kk-field-hint">Paket sudah dibayar dan terkunci.</p>
+          ) : null}
           <label className="kk-label" htmlFor="downloadMode">Unduhan Foto untuk Tamu</label>
           <select id="downloadMode" name="downloadMode" className="kk-input" defaultValue={event.downloadMode}>
             <option value="after_publish">Setelah galeri dipublikasikan</option>

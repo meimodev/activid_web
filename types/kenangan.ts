@@ -14,6 +14,31 @@ export function getKenanganTier(id: string | undefined) {
   return KENANGAN_TIERS.find((t) => t.id === id) ?? KENANGAN_TIERS[1];
 }
 
+/** Event category chosen once at creation. `id` (kebab) doubles as the leading
+ *  slug token; `label` leads the display title. "acara" is the generic default.
+ *  Set-once and baked into the frozen slug — see ADR-0006. */
+export const KENANGAN_EVENT_TYPES = [
+  { id: "pernikahan", label: "Pernikahan" },
+  { id: "ulang-tahun", label: "Ulang Tahun" },
+  { id: "syukuran", label: "Syukuran" },
+  { id: "acara", label: "Acara" },
+] as const;
+
+export type KenanganEventTypeId = (typeof KENANGAN_EVENT_TYPES)[number]["id"];
+
+export const KENANGAN_DEFAULT_EVENT_TYPE: KenanganEventTypeId = "acara";
+
+export function isKenanganEventType(id: string): id is KenanganEventTypeId {
+  return KENANGAN_EVENT_TYPES.some((t) => t.id === id);
+}
+
+/** Display title = "{type label} {name}". Legacy events without an eventType
+ *  (or an unknown one) show the raw name unprefixed — see ADR-0006. */
+export function kenanganEventTitle(event: { eventType?: string; name: string }): string {
+  const type = KENANGAN_EVENT_TYPES.find((t) => t.id === event.eventType);
+  return type ? `${type.label} ${event.name}` : event.name;
+}
+
 /** Admin WhatsApp for manual payment confirmation. E.164, no leading '+'. */
 export const KENANGAN_ADMIN_WHATSAPP = "62881080088816";
 
@@ -47,6 +72,8 @@ export type KenanganDownloadMode = "after_publish" | "instant_share";
 export interface KenanganEvent {
   slug: string;
   name: string;
+  /** Event category, set once at creation. Absent on legacy events. See ADR-0006. */
+  eventType?: KenanganEventTypeId;
   /** Firebase Auth uid of the host account that owns this event. */
   ownerUid: string;
   /** ISO date string, e.g. "2026-08-01" */

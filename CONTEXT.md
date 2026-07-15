@@ -6,7 +6,9 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **KenanganKita** — Event photo platform (`/kenangan`). Guests join an **Event** via a link/QR (no app, no account), snap photos into a shared live feed; after the event the **Host** can buy an AI-enhanced, colour-graded final gallery. Guest-facing and host-facing copy is Bahasa Indonesia.
 
-**Event Link (Tautan Acara)** — The guest-facing address that identifies an Event and forms the URL a Guest scans or opens to reach its **Guest Landing**. Auto-derived from the Event's name with an appended uniqueness marker, not chosen or typed by the **Host** — the Host sees it as a read-only preview while creating the Event. Stable for the Event's life; printed on the Event QR.
+**Event Link (Tautan Acara)** — The guest-facing address that identifies an Event and forms the URL a Guest scans or opens to reach its **Guest Landing**. Auto-derived from the Event's **Event Type** token, then the Event's name, then an appended uniqueness marker (e.g. `pernikahan-budi-dan-ani-x7k2q`), not chosen or typed by the **Host** — the Host sees it as a read-only preview while creating the Event. Stable for the Event's life; printed on the Event QR.
+
+**Event Type (Jenis Acara)** — A fixed category the **Host** picks when creating an **Event**: one of Pernikahan / Ulang Tahun / Syukuran / Acara, where **Acara is the default and the generic catch-all**. Chosen once at creation and never changed afterward (not shown on the edit surface). Its word leads the Event's **display title** — the Host and Guest see the Event as "{Type} {name}" (e.g. "Pernikahan Budi & Ani"), though the name is stored without it — and forms the leading token of the **Event Link**. Purely a naming/categorization choice: not a feature bundle, not tied to a theme or **Paket**.
 
 **Event Cover (Foto Sampul)** — Optional hero image the **Host** sets for an **Event**, shown on the **Guest Landing** above the Event name (4:3). Chosen in the **Host Console** event settings by uploading an image or picking one of three built-in **Default Covers**. Absent by default — an Event with no cover simply shows no hero image.
 
@@ -34,7 +36,11 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Host Console** — The signed-in **Host**'s home at `/kenangan/host/events`: a mobile-app-style shell with a bottom navbar. Two tab views — **Dashboard** (the list of every Event the Host Account owns; admins see all) and **Create** (the new-Event form) — plus a **Logout** action (confirm, then end session). An individual Event opens as a pushed detail screen outside the Console (its own route, back button, no navbar). Distinct from the host login page, which is pre-auth and has no navbar.
 
-**Admin** — Privileged ops role, not a normal Host. Identified by an email allowlist (not a code). Can see all Events and confirm manual payments that unlock the paid enhanced gallery. Powers a Host lacks.
+**Admin** — Privileged ops role, not a normal Host. Identified by an email allowlist (not a code). Can see all Events and confirm manual payments that unlock the paid enhanced gallery. Reaches the **Payment** surface to work payments in one place. Powers a Host lacks.
+
+**Payment (Pembayaran)** — The Admin-only surface (`/kenangan/host/payments`) listing manual-payment **Orders** across every Event and Host in one place, so the Admin need not open each Event to confirm. Pending Orders sit on top as the work queue; a short tail of recently-confirmed Orders sits below for "did I already do this?" — older confirmed Orders fall off the tail and live only on their Event. Each row carries enough context (Event name, Host email, kind, amount, date) to decide without opening the Event, plus a mailto link to reach the Host. The Admin confirms an Order here; confirming a Paket ungates the Event going Live, confirming an enhancement unlocks the **Memory Gallery**. A Host never reaches it. Distinct from the **Host Console** (Host-scoped) — Payment is an Admin ops station.
+
+**Order** — A single manual-payment record for an Event: either a **Paket** charge (upfront, gates going Live) or an enhancement charge (post-event, unlocks the **Memory Gallery**). Raised as pending when incurred; moved to confirmed by the **Admin** on the **Payment** surface once the money is verified. One-directional — confirming is not undone in the UI.
 
 **Activid** — The portfolio website and web-based creative-agency product. The umbrella brand under which the mobile apps ship.
 

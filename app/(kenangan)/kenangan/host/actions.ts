@@ -11,10 +11,11 @@ import {
   getKenanganHostSessionCookieName,
   type KenanganHostSession,
 } from "@/lib/kenangan-host-session";
-import { KENANGAN_DEFAULT_THEME_ID, isKenanganThemeId } from "@/data/kenangan-themes";
-import { KENANGAN_TIERS, getKenanganTier, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
+import { isKenanganThemeId } from "@/data/kenangan-themes";
+import { kenanganCoverForTheme } from "@/data/kenangan-covers";
+import { KENANGAN_TIERS, getKenanganTier, isKenanganEventType, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
 
-const SLUG_REGEX = /^[a-z0-9-]{3,40}$/;
+const SLUG_REGEX = /^[a-z0-9-]{3,200}$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 function ensureEnabled(): void {
@@ -56,12 +57,21 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
   const slug = String(formData.get("slug") ?? "").trim().toLowerCase();
   const eventDate = String(formData.get("eventDate") ?? "").trim();
   const tier = String(formData.get("tier") ?? "").trim();
+  const eventType = String(formData.get("eventType") ?? "").trim();
+  const themeId = String(formData.get("themeId") ?? "").trim();
+  // From the cover picker's hidden input: a staging upload or a default cover.
+  // Empty → fall back to the theme's default cover below.
+  const coverUrl = String(formData.get("coverUrl") ?? "").trim();
 
   if (
     !name || name.length > 120 ||
     !SLUG_REGEX.test(slug) ||
     !DATE_REGEX.test(eventDate) ||
-    !KENANGAN_TIERS.some((t) => t.id === tier)
+    !KENANGAN_TIERS.some((t) => t.id === tier) ||
+    !isKenanganEventType(eventType) ||
+    !isKenanganThemeId(themeId) ||
+    coverUrl.length > 500 ||
+    (coverUrl && !coverUrl.startsWith("https://"))
   ) {
     redirect("/kenangan/host/events?tab=create&error=invalid");
   }
@@ -77,12 +87,13 @@ export async function kenanganCreateEvent(formData: FormData): Promise<void> {
   const ref = await db.collection("kenanganEvents").add({
     slug,
     name,
+    eventType,
     ownerUid: session.uid,
     eventDate,
-    coverUrl: "",
+    coverUrl: coverUrl || kenanganCoverForTheme(themeId),
     tier,
     guestCap: getKenanganTier(tier).guestCap,
-    themeId: KENANGAN_DEFAULT_THEME_ID,
+    themeId,
     downloadMode: "after_publish",
     status: "draft",
     enhancementPurchased: false,
@@ -252,6 +263,12 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
   const orderId = String(formData.get("orderId") ?? "");
   if (!orderId) redirect("/kenangan/host/events");
 
+  // Where to land after confirming. The Payment desk passes "/kenangan/host/payments"
+  // to stay put; the event page passes nothing and falls back to itself. Only
+  // internal /kenangan paths allowed (no open redirect).
+  const returnToRaw = String(formData.get("returnTo") ?? "");
+  const returnTo = returnToRaw.startsWith("/kenangan/") ? returnToRaw : "";
+
   const db = getAdminDb();
   const orderRef = db.collection("kenanganOrders").doc(orderId);
   const orderSnap = await orderRef.get();
@@ -265,5 +282,5 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
       .doc(order.eventId as string)
       .update({ enhancementPurchased: true });
   }
-  redirect(`/kenangan/host/events/${order.eventId}?saved=1`);
+  redirect(returnTo ? `${returnTo}?saved=1` : `/kenangan/host/events/${order.eventId}?saved=1`);
 }

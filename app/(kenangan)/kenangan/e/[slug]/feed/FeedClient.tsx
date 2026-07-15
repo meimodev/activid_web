@@ -54,12 +54,16 @@ function toFeedPhoto(id: string, data: DocumentData): FeedPhoto | null {
 export default function FeedClient({
   eventId,
   eventName,
+  eventTypeLabel,
+  coverUrl,
   slug,
   token,
   downloadMode,
 }: {
   eventId: string;
   eventName: string;
+  eventTypeLabel?: string;
+  coverUrl?: string;
   slug: string;
   token: string | null;
   downloadMode: KenanganDownloadMode;
@@ -173,9 +177,15 @@ export default function FeedClient({
   return (
     <main className="kk-page" style={{ paddingBottom: 110 }}>
       <p className="kk-brand">KenanganKita</p>
-      <header className="kk-feed-header" style={{ marginTop: 20 }}>
-        <h1 className="kk-feed-title">{eventName}</h1>
-        <span className="kk-feed-count">{photos.length} foto</span>
+      <header className="kk-hero">
+        {coverUrl ? (
+          <img src={coverUrl} alt={eventName} className="kk-landing-cover" />
+        ) : null}
+        <div className="kk-hero-text">
+          {eventTypeLabel ? <p className="kk-hero-kicker">{eventTypeLabel}</p> : null}
+          <h1 className="kk-landing-title">{eventName}</h1>
+          <span className="kk-feed-count">{photos.length} foto</span>
+        </div>
       </header>
 
       {failed ? (

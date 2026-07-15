@@ -22,16 +22,24 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => null);
   const eventId = typeof body?.eventId === "string" ? body.eventId : "";
-  if (!eventId) {
-    return NextResponse.json({ error: "eventId is required" }, { status: 400 });
-  }
 
-  const snap = await getAdminDb().collection("kenanganEvents").doc(eventId).get();
-  if (!snap.exists) {
-    return NextResponse.json({ error: "Event not found" }, { status: 404 });
-  }
-  if (!canAccessEvent(session, snap.data()?.ownerUid as string | undefined)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // With an eventId: cover for an existing event → verify ownership, folder
+  // /kenangan/{eventId}. Without one (create form, no event yet): upload to the
+  // host's own staging folder, keyed by the server-side uid so it's a safe
+  // per-host boundary. The URL is saved when the event is created; the file
+  // stays put (ImageKit serves by URL regardless of folder).
+  let folder: string;
+  if (eventId) {
+    const snap = await getAdminDb().collection("kenanganEvents").doc(eventId).get();
+    if (!snap.exists) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+    if (!canAccessEvent(session, snap.data()?.ownerUid as string | undefined)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    folder = `/kenangan/${eventId}`;
+  } else {
+    folder = `/kenangan/_staging/${session.uid}`;
   }
 
   const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
@@ -54,7 +62,7 @@ export async function POST(request: NextRequest) {
     expire,
     signature,
     publicKey,
-    folder: `/kenangan/${eventId}`,
+    folder,
     fileName: `cover-${Date.now()}.jpg`,
   });
 }

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DateTime } from "luxon";
 import { getKenanganEventBySlug, getKenanganGalleryPhotos } from "@/lib/kenangan-event";
-import { KENANGAN_IMAGEKIT_URL_BASE } from "@/types/kenangan";
+import { KENANGAN_IMAGEKIT_URL_BASE, kenanganEventTitle } from "@/types/kenangan";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const event = await getKenanganEventBySlug(slug);
-  return { title: event ? `Galeri Kenangan ${event.name}` : "Galeri Kenangan" };
+  return { title: event ? `Galeri Kenangan ${kenanganEventTitle(event)}` : "Galeri Kenangan" };
 }
 
 export default async function KenanganGalleryPage({ params }: Props) {
@@ -38,7 +38,7 @@ export default async function KenanganGalleryPage({ params }: Props) {
     <main className="kk-page" style={{ maxWidth: 640 }}>
       <p className="kk-brand">Kita</p>
       <div style={{ textAlign: "center", margin: "20px 0 24px" }}>
-        <h1 className="kk-landing-title" style={{ margin: 0 }}>{event.name}</h1>
+        <h1 className="kk-landing-title" style={{ margin: 0 }}>{kenanganEventTitle(event)}</h1>
         <p className="kk-landing-date">{dateLabel} · {photos.length} foto pilihan</p>
       </div>
 

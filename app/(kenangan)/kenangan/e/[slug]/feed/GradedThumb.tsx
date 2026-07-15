@@ -30,12 +30,36 @@ export default function GradedThumb({
   // Drives the fade-in: the tile paints transparent, then eases to opaque once
   // the grade (or fallback img) has actually rendered. Set once; stays set.
   const [ready, setReady] = useState(false);
+  // Gates the WebGL grade to the viewport. The grade + full-res decode is the
+  // feed's real cost; running it for every appended offscreen tile is what
+  // melts a long feed. One-shot: flips true when the tile nears the viewport
+  // and stays true, so scroll-back never re-grades (no flicker, no rework).
+  const [visible, setVisible] = useState(false);
   const onReadyRef = useRef(onReady);
   useEffect(() => {
     onReadyRef.current = onReady;
   });
 
   useEffect(() => {
+    // Canvas is present on first mount (fallback starts false), so this guards
+    // only the impossible; the effect runs once and observes that canvas.
+    const el = canvasRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
     let cancelled = false;
     const image = new Image();
     image.crossOrigin = "anonymous";
@@ -63,7 +87,7 @@ export default function GradedThumb({
     return () => {
       cancelled = true;
     };
-  }, [src, lutId]);
+  }, [src, lutId, visible]);
 
   const cls = ["kk-thumb", className].filter(Boolean).join(" ");
 

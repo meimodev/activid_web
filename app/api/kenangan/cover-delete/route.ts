@@ -24,16 +24,26 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const eventId = typeof body?.eventId === "string" ? body.eventId : "";
   const fileId = typeof body?.fileId === "string" ? body.fileId : "";
-  if (!eventId || !fileId) {
-    return NextResponse.json({ error: "eventId and fileId are required" }, { status: 400 });
+  if (!fileId) {
+    return NextResponse.json({ error: "fileId is required" }, { status: 400 });
   }
 
-  const snap = await getAdminDb().collection("kenanganEvents").doc(eventId).get();
-  if (!snap.exists) {
-    return NextResponse.json({ error: "Event not found" }, { status: 404 });
-  }
-  if (!canAccessEvent(session, snap.data()?.ownerUid as string | undefined)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // The path prefix — not the client-supplied ids — is what actually protects
+  // the defaults folder and other hosts' files. With an eventId: verify
+  // ownership, guard /kenangan/{eventId}/. Without one (staging cover from the
+  // create form): guard the host's own /kenangan/_staging/{uid}/ folder.
+  let guardPrefix: string;
+  if (eventId) {
+    const snap = await getAdminDb().collection("kenanganEvents").doc(eventId).get();
+    if (!snap.exists) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+    if (!canAccessEvent(session, snap.data()?.ownerUid as string | undefined)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    guardPrefix = `/kenangan/${eventId}/`;
+  } else {
+    guardPrefix = `/kenangan/_staging/${session.uid}/`;
   }
 
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
@@ -59,7 +69,7 @@ export async function POST(request: NextRequest) {
   }
   const detail = (await detailRes.json().catch(() => null)) as { filePath?: unknown } | null;
   const filePath = typeof detail?.filePath === "string" ? detail.filePath : "";
-  if (!filePath.startsWith(`/kenangan/${eventId}/`)) {
+  if (!filePath.startsWith(guardPrefix)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

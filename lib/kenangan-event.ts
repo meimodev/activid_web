@@ -1,7 +1,7 @@
 import "server-only";
 
 import { getAdminDb } from "@/lib/firebase-admin";
-import type { KenanganEvent } from "@/types/kenangan";
+import { kenanganOrderKind, type KenanganEvent, type KenanganOrder, type KenanganOrderStatus } from "@/types/kenangan";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 
@@ -104,6 +104,22 @@ export async function getKenanganGalleryPhotos(slug: string): Promise<KenanganGa
     { revalidate: 60 * 60, tags: [getKenanganEventTag(slug)] },
   );
   return cached();
+}
+
+/** Paket order status for an event, for gating/messaging. "pending" = created,
+ *  awaiting admin confirmation; "confirmed" = paid; null = no paket order (legacy).
+ *  Uncached direct read — the draft/pending state is transient. */
+export async function getKenanganPaketStatus(
+  eventId: string,
+): Promise<KenanganOrderStatus | null> {
+  const snap = await getAdminDb()
+    .collection("kenanganOrders")
+    .where("eventId", "==", eventId)
+    .get();
+  const paket = snap.docs
+    .map((doc) => doc.data() as KenanganOrder)
+    .find((o) => kenanganOrderKind(o) === "paket");
+  return paket ? paket.status : null;
 }
 
 export async function revalidateKenanganEvent(slug: string): Promise<void> {

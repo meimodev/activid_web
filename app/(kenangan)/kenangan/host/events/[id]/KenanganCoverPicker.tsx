@@ -29,7 +29,7 @@ async function optimizeWithTinyPng(file: File): Promise<File> {
   }
 }
 
-async function deleteUploaded(eventId: string, fileId: string): Promise<void> {
+async function deleteUploaded(eventId: string | undefined, fileId: string): Promise<void> {
   try {
     await fetch("/api/kenangan/cover-delete", {
       method: "POST",
@@ -45,7 +45,9 @@ export default function KenanganCoverPicker({
   eventId,
   initialUrl,
 }: {
-  eventId: string;
+  /** Absent on the create form (no event yet) → uploads land in the host's
+   *  staging folder and the URL is saved when the event is created. */
+  eventId?: string;
   initialUrl: string;
 }) {
   // fileId is set only for a cover uploaded in THIS session; it drives

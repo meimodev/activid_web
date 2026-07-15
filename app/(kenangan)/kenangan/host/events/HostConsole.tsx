@@ -4,7 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { kenanganCreateEvent, kenanganHostLogout } from "../actions";
 import ConfirmSubmit from "../ConfirmSubmit";
-import { KENANGAN_TIERS } from "@/types/kenangan";
+import {
+  KENANGAN_TIERS,
+  KENANGAN_EVENT_TYPES,
+  KENANGAN_DEFAULT_EVENT_TYPE,
+  kenanganEventTitle,
+} from "@/types/kenangan";
+import { KENANGAN_THEMES, KENANGAN_DEFAULT_THEME_ID } from "@/data/kenangan-themes";
+import KenanganCoverPicker from "./[id]/KenanganCoverPicker";
+import KenanganTierCards from "./KenanganTierCards";
 
 type Tab = "dashboard" | "create";
 
@@ -12,6 +20,7 @@ type Tab = "dashboard" | "create";
 export type ConsoleEvent = {
   id: string;
   name: string;
+  eventType?: string;
   slug: string;
   eventDate: string;
   status: string;
@@ -32,7 +41,7 @@ function slugifyName(name: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 34)
+    .slice(0, 120)
     .replace(/-+$/g, "");
   return base || "kenangan";
 }
@@ -42,11 +51,13 @@ export default function HostConsole({
   initialTab,
   initialTier,
   error,
+  isAdmin = false,
 }: {
   events: ConsoleEvent[];
   initialTab: Tab;
   initialTier?: string;
   error?: string;
+  isAdmin?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   // Preselect the tier the guest picked on the landing page; ignore junk params.
@@ -54,9 +65,10 @@ export default function HostConsole({
     ? initialTier
     : "standard";
   const [name, setName] = useState("");
+  const [eventType, setEventType] = useState<string>(KENANGAN_DEFAULT_EVENT_TYPE);
   // Uniqueness marker fixed once on mount so the preview matches the saved link.
   const [suffix] = useState(() => Date.now().toString(36).slice(-5));
-  const slug = `${slugifyName(name)}-${suffix}`;
+  const slug = `${eventType}-${slugifyName(name)}-${suffix}`;
 
   return (
     <div className="kk-console-root">
@@ -87,7 +99,7 @@ export default function HostConsole({
                     className="kk-event-row"
                   >
                     <span className="kk-event-row-main">
-                      <strong>{event.name}</strong>
+                      <strong>{kenanganEventTitle(event)}</strong>
                       <span className="kk-feed-count">
                         /{event.slug} · {event.eventDate}
                       </span>
@@ -104,6 +116,20 @@ export default function HostConsole({
           <section>
             <h1 className="kk-feed-title">Buat Acara</h1>
             <form action={kenanganCreateEvent} className="kk-form">
+              <label className="kk-label" htmlFor="eventType">Jenis Acara</label>
+              <select
+                id="eventType"
+                name="eventType"
+                className="kk-input"
+                value={eventType}
+                onChange={(e) => setEventType(e.target.value)}
+              >
+                {KENANGAN_EVENT_TYPES.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
               <label className="kk-label" htmlFor="name">Nama Acara</label>
               <input
                 id="name"
@@ -122,14 +148,29 @@ export default function HostConsole({
               </p>
               <label className="kk-label" htmlFor="eventDate">Tanggal Acara</label>
               <input id="eventDate" name="eventDate" type="date" className="kk-input" required />
-              <label className="kk-label" htmlFor="tier">Paket (berdasarkan jumlah tamu)</label>
-              <select id="tier" name="tier" className="kk-input" defaultValue={tierDefault}>
-                {KENANGAN_TIERS.map((t) => (
+              <label className="kk-label" htmlFor="themeId">Tema</label>
+              <select
+                id="themeId"
+                name="themeId"
+                className="kk-input"
+                defaultValue={KENANGAN_DEFAULT_THEME_ID}
+              >
+                {KENANGAN_THEMES.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name} — ≤{t.guestCap} tamu — Rp {t.priceIdr.toLocaleString("id-ID")}
+                    {t.name}
                   </option>
                 ))}
               </select>
+              <p className="kk-field-hint">
+                Menentukan gaya foto tamu dan sampul bawaan acara.
+              </p>
+              <label className="kk-label">Foto Sampul (opsional)</label>
+              <KenanganCoverPicker initialUrl="" />
+              <p className="kk-field-hint">
+                Kosongkan untuk memakai sampul bawaan sesuai tema.
+              </p>
+              <span className="kk-label">Paket (berdasarkan jumlah tamu)</span>
+              <KenanganTierCards value={tierDefault} />
               <p className="kk-field-hint">
                 Dibayar di muka. Acara baru bisa dimulai setelah admin mengkonfirmasi
                 pembayaran paket.
@@ -166,6 +207,12 @@ export default function HostConsole({
           <NavIcon name="create" />
           Buat
         </button>
+        {isAdmin ? (
+          <Link href="/kenangan/host/payments" className="kk-nav-item">
+            <NavIcon name="payments" />
+            Bayar
+          </Link>
+        ) : null}
         <form action={kenanganHostLogout} className="kk-nav-form">
           <ConfirmSubmit className="kk-nav-item" confirm="Keluar dari akun?">
             <NavIcon name="logout" />
@@ -177,11 +224,12 @@ export default function HostConsole({
   );
 }
 
-function NavIcon({ name }: { name: "dashboard" | "create" | "logout" }) {
+function NavIcon({ name }: { name: "dashboard" | "create" | "logout" | "payments" }) {
   const paths: Record<string, string> = {
     dashboard: "M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z",
     create: "M12 5v14M5 12h14",
     logout: "M15 3H5v18h10M10 12h11m0 0-4-4m4 4-4 4",
+    payments: "M3 10h18M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z",
   };
   return (
     <svg

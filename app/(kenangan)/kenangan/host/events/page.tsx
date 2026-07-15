@@ -44,6 +44,7 @@ export default async function KenanganHostEventsPage({
   const events: ConsoleEvent[] = raw.map((e) => ({
     id: e.id,
     name: e.name,
+    eventType: e.eventType,
     slug: e.slug,
     eventDate: formatDate(e.eventDate),
     status: e.status,
@@ -55,6 +56,7 @@ export default async function KenanganHostEventsPage({
       initialTab={tab === "create" ? "create" : "dashboard"}
       initialTier={tier}
       error={error}
+      isAdmin={session.isAdmin}
     />
   );
 }

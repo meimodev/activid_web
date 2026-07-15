@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { DateTime } from "luxon";
-import { getKenanganEventBySlug } from "@/lib/kenangan-event";
+import { getKenanganEventBySlug, getKenanganPaketStatus } from "@/lib/kenangan-event";
 import { verifyKenanganGuestToken } from "@/lib/kenangan-guest-token";
+import { KENANGAN_EVENT_TYPES, kenanganEventTitle } from "@/types/kenangan";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -13,9 +14,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const event = await getKenanganEventBySlug(slug);
   if (!event) return { title: "KenanganKita" };
+  const title = kenanganEventTitle(event);
   return {
-    title: event.name,
-    description: `Galeri foto langsung untuk ${event.name}.`,
+    title,
+    description: `Galeri foto langsung untuk ${title}.`,
   };
 }
 
@@ -43,17 +45,32 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
     redirect(`/kenangan/e/${slug}/gallery`);
   }
 
+  // Draft = not yet live. Distinguish "awaiting admin payment confirmation"
+  // (pending paket) from "host hasn't started it yet" so a scanning Guest knows
+  // which. Only queried for the draft state. See CONTEXT.md "Guest Landing".
+  const paketPending =
+    authorized && event.status === "draft"
+      ? (await getKenanganPaketStatus(event.id)) === "pending"
+      : false;
+
+  // Type as a kicker above the name (the name never carries the type). Legacy
+  // events without an eventType show just the name — no kicker. See ADR-0006.
+  const eventTypeLabel = KENANGAN_EVENT_TYPES.find((t) => t.id === event.eventType)?.label;
+
   return (
     <main className="kk-page">
       <p className="kk-brand">KenanganKita</p>
 
-      <div style={{ marginTop: 24 }}>
+      <header className="kk-hero">
         {event.coverUrl ? (
-          <img src={event.coverUrl} alt={event.name} className="kk-landing-cover" />
+          <img src={event.coverUrl} alt={kenanganEventTitle(event)} className="kk-landing-cover" />
         ) : null}
-        <h1 className="kk-landing-title">{event.name}</h1>
-        <p className="kk-landing-date">{formatEventDate(event.eventDate)}</p>
-      </div>
+        <div className="kk-hero-text">
+          {eventTypeLabel ? <p className="kk-hero-kicker">{eventTypeLabel}</p> : null}
+          <h1 className="kk-landing-title">{event.name}</h1>
+          <p className="kk-landing-date">{formatEventDate(event.eventDate)}</p>
+        </div>
+      </header>
 
       {authorized && event.status === "closed" ? (
         <div className="kk-card" style={{ marginTop: 28 }}>
@@ -63,6 +80,19 @@ export default async function KenanganGuestLandingPage({ params, searchParams }:
           <p style={{ lineHeight: 1.6 }}>
             Acara telah selesai. Galeri kenangan sedang dikurasi oleh tuan rumah —
             nantikan hasilnya di sini.
+          </p>
+        </div>
+      ) : null}
+
+      {authorized && event.status === "draft" ? (
+        <div className="kk-card" style={{ marginTop: 28 }}>
+          <p className="kk-section-title" style={{ marginBottom: 8 }}>
+            {paketPending ? "Acara sedang menunggu konfirmasi." : "Acara belum dimulai."}
+          </p>
+          <p style={{ lineHeight: 1.6 }}>
+            {paketPending
+              ? "Tuan rumah sedang menyelesaikan proses konfirmasi. Silakan pindai ulang kode QR beberapa saat lagi."
+              : "Acara belum dibuka oleh tuan rumah. Silakan pindai ulang kode QR saat acara sudah berlangsung."}
           </p>
         </div>
       ) : null}

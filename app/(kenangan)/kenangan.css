@@ -140,6 +140,39 @@
   font-size: 15px;
 }
 
+/* Guest-landing hero: cover fades into the page bg at its foot and the title
+   rides up onto that faded zone, so image → paper → title read as one piece.
+   Scoped to .kk-hero so the host cover-picker's .kk-landing-cover stays plain. */
+.kk-hero {
+  margin-top: var(--kk-space-2);
+  text-align: center;
+}
+.kk-hero .kk-landing-cover {
+  /* Feather the lower third to transparent; the paper bg shows through, giving
+     the seamless gradient into the background. Masked corners hide the radius. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 100%);
+}
+.kk-hero-text {
+  position: relative;
+  padding: 0 var(--kk-space-4);
+}
+/* Pull the title up over the faded foot of the cover — only when a cover exists. */
+.kk-hero .kk-landing-cover + .kk-hero-text {
+  margin-top: -64px;
+}
+.kk-hero .kk-landing-title {
+  letter-spacing: -0.015em;
+  margin-top: 4px;
+}
+/* Event type kicker, sits above the name. */
+.kk-hero-kicker {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--kk-bronze);
+}
+
 .kk-landing-note {
   margin-top: 16px;
   font-size: 13px;
@@ -158,6 +191,78 @@
   background: var(--kk-cream);
   border-radius: 18px;
   padding: 20px;
+}
+
+/* ---------- paket tier cards (host create/settings) ---------- */
+
+.kk-tier-cards {
+  display: grid;
+  gap: var(--kk-space-3);
+}
+.kk-tier-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kk-space-1);
+  padding: var(--kk-space-4);
+  border-radius: 14px;
+  background: var(--kk-paper);
+  box-shadow: inset 0 0 0 1.5px var(--kk-sand);
+  cursor: pointer;
+  transition: box-shadow 0.18s var(--kk-ease), background 0.18s var(--kk-ease),
+    transform 0.12s var(--kk-ease);
+}
+.kk-tier-card:active {
+  transform: scale(0.99);
+}
+@media (hover: hover) {
+  .kk-tier-card:hover {
+    box-shadow: inset 0 0 0 1.5px var(--kk-bronze);
+  }
+}
+/* Selected — the same bronze-ring language as .kk-card-primary. */
+.kk-tier-card:has(:checked) {
+  background: var(--kk-cream);
+  box-shadow: inset 0 0 0 2px var(--kk-bronze);
+}
+.kk-tier-card:has(:focus-visible) {
+  outline: 2px solid var(--kk-bronze);
+  outline-offset: 2px;
+}
+/* Locked (paid paket): static, muted, no pointer affordance. */
+.kk-tier-card[data-locked] {
+  cursor: default;
+  background: var(--kk-cream);
+  box-shadow: inset 0 0 0 1.5px var(--kk-sand);
+}
+.kk-tier-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.kk-tier-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--kk-space-3);
+}
+.kk-tier-name {
+  font-family: var(--kk-font-display), serif;
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--kk-ink);
+}
+.kk-tier-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--kk-bronze);
+  white-space: nowrap;
+}
+.kk-tier-cap {
+  font-size: 13px;
+  color: var(--kk-muted);
 }
 
 /* The card holding the action that matters for the event's current state. */
@@ -1269,6 +1374,7 @@
 }
 
 .kk-landing-cover,
+.kk-hero-kicker,
 .kk-landing-title,
 .kk-landing-date {
   animation: kk-rise 0.55s var(--kk-ease) both;
