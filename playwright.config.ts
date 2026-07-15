@@ -9,7 +9,7 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 60_000, // dev compiles each route on first hit
   fullyParallel: false,
-  reporter: 'list',
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
