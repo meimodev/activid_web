@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { DateTime } from "luxon";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { getKenanganHostSession } from "@/lib/kenangan-host-session";
-import type { KenanganEvent } from "@/types/kenangan";
+import type { KenanganEvent, KenanganHost } from "@/types/kenangan";
 import HostConsole, { type ConsoleEvent } from "./HostConsole";
 
 export const metadata: Metadata = { title: "Konsol Host" };
@@ -29,12 +29,17 @@ export default async function KenanganHostEventsPage({
   ]);
   if (!session) redirect("/kenangan/host");
 
-  const col = getAdminDb().collection("kenanganEvents");
+  const db = getAdminDb();
+  const col = db.collection("kenanganEvents");
   // Admin sees every event (indexed orderBy). A host sees only their own; we
   // sort in code to avoid a composite (ownerUid + createdAt) index.
-  const snap = session.isAdmin
-    ? await col.orderBy("createdAt", "desc").limit(100).get()
-    : await col.where("ownerUid", "==", session.uid).limit(100).get();
+  const [snap, hostSnap] = await Promise.all([
+    session.isAdmin
+      ? col.orderBy("createdAt", "desc").limit(100).get()
+      : col.where("ownerUid", "==", session.uid).limit(100).get(),
+    db.collection("kenanganHosts").doc(session.uid).get(),
+  ]);
+  const host = hostSnap.data() as KenanganHost | undefined;
   const raw = snap.docs.map((doc) => ({ id: doc.id, ...(doc.data() as KenanganEvent) }));
   if (!session.isAdmin) {
     raw.sort((a, b) => createdAtMillis(b) - createdAtMillis(a));
@@ -57,6 +62,9 @@ export default async function KenanganHostEventsPage({
       initialTier={tier}
       error={error}
       isAdmin={session.isAdmin}
+      email={session.email}
+      name={host?.name ?? null}
+      photoUrl={host?.photoUrl ?? null}
     />
   );
 }

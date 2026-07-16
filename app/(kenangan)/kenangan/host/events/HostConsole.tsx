@@ -52,12 +52,18 @@ export default function HostConsole({
   initialTier,
   error,
   isAdmin = false,
+  email = null,
+  name = null,
+  photoUrl = null,
 }: {
   events: ConsoleEvent[];
   initialTab: Tab;
   initialTier?: string;
   error?: string;
   isAdmin?: boolean;
+  email?: string | null;
+  name?: string | null;
+  photoUrl?: string | null;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   // Preselect the tier the guest picked on the landing page; ignore junk params.
@@ -79,6 +85,22 @@ export default function HostConsole({
         {tab === "dashboard" ? (
           <section>
             <h1 className="kk-feed-title">Dasbor</h1>
+            {email || name || photoUrl ? (
+              <div className="kk-console-user">
+                <span className="kk-console-avatar" aria-hidden="true">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="" referrerPolicy="no-referrer" />
+                  ) : (
+                    (name ?? email ?? "?").charAt(0).toUpperCase()
+                  )}
+                </span>
+                <span className="kk-console-user-text">
+                  <strong>{name ?? email}</strong>
+                  {name && email ? <span>{email}</span> : null}
+                </span>
+                {isAdmin ? <span className="kk-badge kk-badge-admin">Admin</span> : null}
+              </div>
+            ) : null}
             {events.length === 0 ? (
               <div className="kk-empty">
                 <p className="kk-status-msg">Belum ada acara.</p>
