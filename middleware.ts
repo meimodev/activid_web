@@ -59,13 +59,18 @@ function handleKenangan(
     return NextResponse.next();
   }
 
-  // kenangan.activid.id/host/... -> /kenangan/host/...
+  // kenangan.activid.id/           -> /kenangan            (landing)
+  // kenangan.activid.id/host/...   -> /kenangan/host/...
   // kenangan.activid.id/{slug}[/capture|/feed|/gallery] -> /kenangan/e/{slug}...
   // Clone keeps the query string (guest token ?t=...) intact.
   const url = request.nextUrl.clone();
-  url.pathname = pathname.startsWith('/host')
-    ? `/kenangan${pathname}`
-    : `/kenangan/e${pathname}`;
+  if (pathname === '/') {
+    url.pathname = '/kenangan';
+  } else if (pathname.startsWith('/host')) {
+    url.pathname = `/kenangan${pathname}`;
+  } else {
+    url.pathname = `/kenangan/e${pathname}`;
+  }
   return NextResponse.rewrite(url);
 }
 
