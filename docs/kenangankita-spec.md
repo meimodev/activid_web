@@ -141,7 +141,12 @@ Host: Close (= Publish, irreversible — ADR-0007)
   └─ Curation writes revalidate the gallery tag → guests see changes on next load
 ```
 
-**Two rules that must not be broken (unchanged from v0.1):**
+> **⚠️ Reversed by ADR-0008 for enhanced photos.** The enhancement model is now
+> `openai/gpt-image-2` (generative), and the server-side LUT re-apply is dropped —
+> the model owns colour. The two rules below describe the original Real-ESRGAN design;
+> the capture-time WebGL LUT preview still applies to the live feed.
+
+**Two rules (original Real-ESRGAN design — superseded by ADR-0008):**
 
 1. **The LUT owns colour. The AI owns pixels.** AI deblurs/sharpens only; the stored
    `lutId` is re-applied deterministically at full res on top. The final gallery is a
@@ -184,13 +189,14 @@ kenanganEvents/{eventId}
   slug, name, eventDate, coverUrl, tier, guestCap, themeId,
   downloadMode: "after_close" | "instant_share",
   status: "draft" | "live" | "closed",   # closed = published (ADR-0007); legacy "published" tolerated on read
-  hostAccessCode, enhancementPurchased: bool, publishedAt, createdAt
+  hostAccessCode, enhancementPurchased: bool, publishedAt, createdAt   # enhancementPurchased deprecated → per-photo `paid` (ADR-0008); legacy grandfather only
 
 kenanganEvents/{eventId}/photos/{photoId}
   guestSessionId, lutId,
   originalPath, enhancedPath?,        # ImageKit paths; thumb = URL transform of original
   status: "live" | "hidden",          # visibility only (ADR-0007)
   enhanceState?: "pending" | "failed", # enhancement lifecycle; undefined = never enhanced
+  paid?: bool, paidBy?: "host"|"guest", paidAt?, paidOrderId?,  # per-photo enhancement purchase (ADR-0008); absent = unpaid
   width, height, createdAt
 
 kenanganEvents/{eventId}/guestSessions/{sessionId}
@@ -200,7 +206,7 @@ kenanganEvents/{eventId}/jobs/{jobId}
   photoId, replicateId, status, error, createdAt
 
 kenanganOrders/{orderId}
-  eventId, amountIdr, status: "pending" | "confirmed", confirmedAt
+  eventId, kind: "paket" | "enhancement", amountIdr, photoIds?: string[], status: "pending" | "confirmed", confirmedAt   # photoIds = photos an enhancement order covered (ADR-0008)
 
 kenanganThemes/{themeId}               # or static data/kenangan-themes.ts if LUT sets are fixed
   name, lutPresets: [{ id, name, cubeUrl, sortOrder }]
@@ -224,27 +230,29 @@ Notes:
 
 ---
 
-## 6. AI Enhancement (Replicate) — unchanged from v0.1
+## 6. AI Enhancement (Replicate) — updated by ADR-0008
+
+**Model switched to `openai/gpt-image-2` (generative edit), replacing Real-ESRGAN.**
+This reverses the §3 "restorative, never generative" rule — accepted deliberately; see ADR-0008.
 
 | Item | Choice |
 |---|---|
-| Models | Real-ESRGAN, restoration-only (`scale: 1`, `face_enhance: false`) — deblur/sharpen at native res |
-| Does | Fix lighting (deterministic LUT re-grade) + deblur if present. Nothing else |
-| Excluded | Upscaling, GFPGAN/face restore, CodeFormer, creative/generative upscalers, denoise diffusion |
-| Cost | ~$0.007/photo |
-| Execution | Async predictions + webhook (`REPLICATE_WEBHOOK_SECRET` verified), post-event only |
-| Failure policy | Retain original; on failure keep the LUT-graded original (set `enhanceState: "failed"` for retry). Never a mangled face |
-| Sanity check | Optional human spot-check on premium tier |
+| Model | `openai/gpt-image-2`, `quality: medium` — deblur/denoise + exposure/white-balance |
+| Prompt | Conservative, identity-preserving (full text in ADR-0008): no add/remove/reposition, no identity change, photorealistic, no beautification |
+| Config | `input_images:[original]`; `aspect_ratio:auto` then crop back to source AR in the webhook (`sharp`); `output_format:jpeg`, `background:opaque`, `moderation:low`, `number_of_images:1` |
+| LUT | **Server-side LUT re-apply dropped** — the model owns colour. Capture-time WebGL LUT preview stays for the live feed only |
+| Cost | ~$0.042/photo (~Rp 760) at `medium`; `high` (~Rp 3,015) ≈ break-even vs the Rp 3,000 price, rejected. Confirm exact Replicate price before launch |
+| Execution | Async predictions + webhook (`REPLICATE_WEBHOOK_SECRET` verified), post-close only |
+| Failure policy | Keep the original, set `enhanceState: "failed"` (retry; `paid` stays). Never a mangled face |
 
-**Per-photo, host-paced (ADR-0007).** Enhancement is on-demand in the lightbox, one photo at
-a time — not a close-time batch. The host enhances the few photos worth it; no accidental
-batch of hundreds of Replicate calls. Never enhance blindly.
+**Per-photo, host-paced for host-pay (ADR-0007); auto-enqueued on guest-pay.** Enhancement is
+on-demand, one photo at a time — never a blind batch of hundreds of Replicate calls.
 
 ---
 
-## 7. Monetization — unchanged economics, adapted rails
+## 7. Monetization — two charges: Paket (guest count) + enhancement (per photo)
 
-Per event, metered by **guest count** (never photo capacity).
+**Paket (gates going Live)** — per event, metered by **guest count** (never photo capacity). Unchanged (ADR-0005).
 
 | Tier | Guests | Price | Approx COGS | Margin |
 |---|---|---|---|---|
@@ -252,9 +260,19 @@ Per event, metered by **guest count** (never photo capacity).
 | Standard | ≤300 | Rp 600k | ~Rp 196k | ~67% |
 | Grand | ≤600 | Rp 1,200k | ~Rp 427k | ~64% |
 
+**Enhancement (updated by ADR-0008)** — separate from the Paket above. AI enhancement is
+**flat Rp 3,000 per photo**, host and guest the same, tracked by a per-photo `paid` flag (the
+`enhancementPurchased` flat unlock is retired). At gpt-image-2 `medium` (~Rp 760 COGS) that is
+~75% margin. Two payers:
+- **Host** buys selected photos post-close via the manual admin-confirm flow.
+- **Guest** ("out-of-guest-pocket") selects any *unpaid* photos from the closed public gallery
+  and pays the same Rp 3,000 each — **no identity or ownership**; "selected by the guest itself"
+  = the guest does the choosing, not "photos the guest captured". Checkout rail is Phase-2
+  (below); the pricing + UX are specified now.
+
 **Phasing (adapted to activid_web having no payment gateway):**
-1. **Phase 1** — Live feed free. Enhanced gallery paid via **manual flow**: WhatsApp/transfer → admin confirms `kenanganOrders` doc → `enhancementPurchased=true`. Matches how the invitation platform operates today.
-2. **Phase 2** — Payment gateway (Midtrans/Xendit + QRIS) for self-serve checkout + guest self-enhance fallback.
+1. **Phase 1** — Live feed free. Enhancement paid **per photo** via **manual flow**: host selects photos → WhatsApp/transfer → admin confirms a `kenanganOrders{kind:"enhancement", photoIds}` doc → those photos flip to `paid`. Matches how the invitation platform operates today.
+2. **Phase 2** — Payment gateway (Midtrans/Xendit + QRIS) for self-serve checkout, unlocking **guest self-pay** (guest picks + pays for their own selection).
 3. **Phase 3** — Venue/organizer white-label subscription (~Rp 2.5M/mo unlimited branded events). The recurring engine.
 
 Model is insensitive to cost (processing ~2% of revenue) and sensitive to distribution.
