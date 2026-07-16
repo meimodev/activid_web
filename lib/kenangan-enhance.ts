@@ -63,6 +63,21 @@ async function createReplicatePrediction(
 }
 
 /**
+ * Public HTTPS origin Replicate posts the webhook back to. Prefers an explicit
+ * `KENANGAN_WEBHOOK_ORIGIN`, else derives it from Vercel's injected production
+ * URL (zero-config on Vercel), else the caller's fallback (e.g. request origin).
+ */
+export function kenanganWebhookOrigin(fallback?: string): string | undefined {
+  return (
+    process.env.KENANGAN_WEBHOOK_ORIGIN ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined) ||
+    fallback
+  );
+}
+
+/**
  * Enqueue one gpt-image-2 enhancement for a photo: creates the async prediction
  * (webhook stores the result), flips the photo to `pending`, and records the job.
  * Shared by the host-triggered enhance route and the guest-order auto-enqueue on

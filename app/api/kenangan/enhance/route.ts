@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled } from "@/lib/kenangan-event";
 import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
-import { enqueueKenanganEnhance } from "@/lib/kenangan-enhance";
+import { enqueueKenanganEnhance, kenanganWebhookOrigin } from "@/lib/kenangan-enhance";
 import { isKenanganPublished } from "@/types/kenangan";
 
 // Kicking off one Replicate prediction is fast; the enhancement runs async and
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, skipped: "already pending" });
   }
 
-  const webhookOrigin = process.env.KENANGAN_WEBHOOK_ORIGIN || request.nextUrl.origin;
+  const webhookOrigin = kenanganWebhookOrigin(request.nextUrl.origin)!;
   try {
     await enqueueKenanganEnhance(eventId, photoId, photo.originalPath as string, webhookOrigin);
   } catch (err) {

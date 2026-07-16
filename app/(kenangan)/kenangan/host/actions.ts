@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
-import { enqueueKenanganEnhance } from "@/lib/kenangan-enhance";
+import { enqueueKenanganEnhance, kenanganWebhookOrigin } from "@/lib/kenangan-enhance";
 import {
   canAccessEvent,
   getKenanganHostSession,
@@ -266,7 +266,7 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
       // trigger UI (ADR-0008). Host orders stay host-paced. Needs a public
       // webhook origin; if unset, photos stay paid and the host can enhance.
       if (paidBy === "guest") {
-        const origin = process.env.KENANGAN_WEBHOOK_ORIGIN;
+        const origin = kenanganWebhookOrigin();
         if (origin) {
           const snaps = await db.getAll(
             ...photoIds.map((id) => eventRef.collection("photos").doc(id)),
@@ -283,7 +283,7 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
           }
         } else {
           console.warn(
-            "kenangan confirm: KENANGAN_WEBHOOK_ORIGIN unset — guest photos paid but not auto-enqueued",
+            "kenangan confirm: no webhook origin (set KENANGAN_WEBHOOK_ORIGIN) — guest photos paid but not auto-enqueued",
           );
         }
       }
