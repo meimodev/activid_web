@@ -29,8 +29,9 @@ export default async function KenanganHostPhotosPage({ params }: Props) {
   const initial = showModeration
     ? await listKenanganHostPhotos(event.id)
     : { photos: [], hasMore: false };
-  // Per-photo AI enhancement is offered only after close, and only when bought.
-  const canEnhance = isPublished && Boolean(event.enhancementPurchased);
+  // Per-photo AI enhancement is offered after close; paying is per-photo
+  // (ADR-0008). Legacy events with the retired flat unlock stay grandfathered.
+  const legacyUnlocked = Boolean(event.enhancementPurchased);
 
   const backLink = (
     <Link href={`/kenangan/host/events/${event.id}`} className="kk-feed-count">
@@ -54,7 +55,8 @@ export default async function KenanganHostPhotosPage({ params }: Props) {
           </p>
           <HostPhotosClient
             eventId={event.id}
-            canEnhance={false}
+            isPublished={false}
+            legacyUnlocked={false}
             initialPhotos={initial.photos}
             initialHasMore={initial.hasMore}
           />
@@ -64,14 +66,13 @@ export default async function KenanganHostPhotosPage({ params }: Props) {
           <h2 className="kk-section-title">Kurasi Galeri Kenangan</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Sembunyikan foto yang tak ingin ditampilkan — perubahan langsung tampak
-            di galeri kenangan.
-            {canEnhance
-              ? " Buka sebuah foto untuk meningkatkan kualitasnya dengan AI."
-              : ""}
+            di galeri kenangan. Buka sebuah foto lalu bayar Rp 3.000 untuk
+            meningkatkan kualitasnya dengan AI.
           </p>
           <HostPhotosClient
             eventId={event.id}
-            canEnhance={canEnhance}
+            isPublished={true}
+            legacyUnlocked={legacyUnlocked}
             initialPhotos={initial.photos}
             initialHasMore={initial.hasMore}
           />

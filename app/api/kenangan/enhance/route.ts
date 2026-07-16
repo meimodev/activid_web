@@ -15,11 +15,18 @@ export const maxDuration = 60;
 
 const PHOTO_ID_REGEX = /^[0-9a-z]{16}$/;
 
-// nightmareai/real-esrgan — used restoration-only (scale 1, no face restore).
-// Fixes lighting (via the re-applied LUT) and deblurs/sharpens; no upscale, no
-// generative face enhancement per spec §6.
-const DEFAULT_REPLICATE_VERSION =
-  "f121d640bd286e1fdc67f9799164c1d5be36ff74576ee11c803ae5b665dd46aa";
+// openai/gpt-image-2 — generative edit (ADR-0008). Conservative,
+// identity-preserving prompt; `medium` quality keeps ~75% margin at the flat
+// Rp 3,000/photo price. Runs via the official-model prediction endpoint.
+const KENANGAN_ENHANCE_MODEL = "openai/gpt-image-2";
+const KENANGAN_ENHANCE_PROMPT =
+  "Restore and enhance this event photograph. Improve sharpness, reduce motion " +
+  "blur and noise, correct exposure and white balance for natural skin tones, " +
+  "and recover detail in shadows and highlights. Preserve the exact composition, " +
+  "framing, people, faces, expressions, clothing, and background — do not add, " +
+  "remove, reposition, or alter any person or object, and do not change anyone's " +
+  "identity or facial features. Keep it fully photorealistic; no stylization, no " +
+  "beautification.";
 
 async function createReplicatePrediction(
   imageUrl: string,
@@ -28,18 +35,27 @@ async function createReplicatePrediction(
   webhookOrigin: string,
 ): Promise<string> {
   const apiToken = process.env.REPLICATE_API_TOKEN!;
-  const version = process.env.KENANGAN_REPLICATE_VERSION || DEFAULT_REPLICATE_VERSION;
+  const model = process.env.KENANGAN_REPLICATE_MODEL || KENANGAN_ENHANCE_MODEL;
   const webhook = `${webhookOrigin}/api/kenangan/replicate/webhook?eventId=${eventId}&photoId=${photoId}`;
 
-  const res = await fetch("https://api.replicate.com/v1/predictions", {
+  const res = await fetch(`https://api.replicate.com/v1/models/${model}/predictions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiToken}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      version,
-      input: { image: imageUrl, scale: 1, face_enhance: false },
+      input: {
+        prompt: KENANGAN_ENHANCE_PROMPT,
+        input_images: [imageUrl],
+        quality: "medium",
+        aspect_ratio: "auto",
+        background: "opaque",
+        output_format: "jpeg",
+        output_compression: 90,
+        moderation: "low",
+        number_of_images: 1,
+      },
       webhook,
       webhook_events_filter: ["completed"],
     }),
@@ -76,10 +92,6 @@ export async function POST(request: NextRequest) {
   if (!canAccessEvent(session, event.ownerUid as string | undefined)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  // Enhancement is a paid feature and belongs to the post-event curation phase.
-  if (!event.enhancementPurchased) {
-    return NextResponse.json({ error: "Peningkatan AI belum dibeli." }, { status: 402 });
-  }
   if (!isKenanganPublished(event.status as string)) {
     return NextResponse.json(
       { error: "Tutup acara terlebih dahulu sebelum meningkatkan foto." },
@@ -96,6 +108,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Foto tidak ditemukan." }, { status: 404 });
   }
   const photo = photoSnap.data()!;
+  // Enhancement is paid per-photo (ADR-0008); the legacy event unlock
+  // grandfathers old events where photos have no `paid` flag.
+  if (!photo.paid && !event.enhancementPurchased) {
+    return NextResponse.json({ error: "Foto ini belum dibayar." }, { status: 402 });
+  }
   if (photo.enhancedPath) {
     return NextResponse.json({ ok: true, skipped: "already enhanced" });
   }

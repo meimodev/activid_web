@@ -19,6 +19,7 @@ export interface KenanganHostPhoto {
   originalPath: string;
   enhancedPath?: string;
   enhanceState?: KenanganEnhanceState;
+  paid?: boolean;
   createdAtMs: number;
 }
 
@@ -48,6 +49,7 @@ export async function listKenanganHostPhotos(
       originalPath: data.originalPath as string,
       enhancedPath: data.enhancedPath as string | undefined,
       enhanceState: data.enhanceState as KenanganEnhanceState | undefined,
+      paid: Boolean(data.paid),
       createdAtMs: (data.createdAt as Timestamp | undefined)?.toMillis() ?? 0,
     };
   });

@@ -52,6 +52,9 @@ export function kenanganEventTitle(event: { eventType?: string; name: string }):
 /** Admin WhatsApp for manual payment confirmation. E.164, no leading '+'. */
 export const KENANGAN_ADMIN_WHATSAPP = "62881080088816";
 
+/** Flat per-photo AI-enhancement price, host and guest identical (ADR-0008). */
+export const KENANGAN_ENHANCE_PRICE_IDR = 3000;
+
 /** wa.me link to the admin with a prefilled message. */
 export function kenanganAdminWaLink(text: string): string {
   return `https://wa.me/${KENANGAN_ADMIN_WHATSAPP}?text=${encodeURIComponent(text)}`;
@@ -68,6 +71,8 @@ export interface KenanganOrder {
   eventId: string;
   kind?: KenanganOrderKind;
   amountIdr: number;
+  /** For `enhancement` orders: the photos this order pays to enhance (ADR-0008). */
+  photoIds?: string[];
   status: KenanganOrderStatus;
   confirmedAt?: unknown;
   createdAt?: unknown;
@@ -91,6 +96,8 @@ export interface KenanganEvent {
   guestCap?: number;
   themeId?: string;
   status: KenanganEventStatus;
+  /** @deprecated Flat enhancement unlock — replaced by the per-photo `paid`
+   *  flag (ADR-0008). Retained only to grandfather legacy events. */
   enhancementPurchased: boolean;
   publishedAt?: unknown;
   createdAt?: unknown;
@@ -122,6 +129,12 @@ export interface KenanganPhoto {
   enhancedPath?: string;
   enhanceState?: KenanganEnhanceState;
   status: KenanganPhotoStatus;
+  /** Per-photo enhancement purchase (ADR-0008); absent = unpaid. Gates the
+   *  enhance route; `paidBy` distinguishes host- from guest-funded. */
+  paid?: boolean;
+  paidBy?: "host" | "guest";
+  paidAt?: unknown;
+  paidOrderId?: string;
   width: number;
   height: number;
   createdAt?: unknown;

@@ -13,6 +13,7 @@ export interface HostPhoto {
   originalPath: string;
   enhancedPath?: string;
   enhanceState?: KenanganEnhanceState;
+  paid?: boolean;
   createdAtMs: number;
 }
 
@@ -26,6 +27,8 @@ const ICON_PATHS: Record<string, string[]> = {
     "M6.61 6.61A18.5 18.5 0 0 0 1 12s4 8 11 8a9.12 9.12 0 0 0 5.39-1.61",
   ],
   sparkles: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"],
+  tag: ["M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H4a1 1 0 0 0-1 1v5.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8Z", "M7.5 7.5h.01"],
+  clock: ["M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z", "M12 6v6l4 2"],
 };
 
 export function HostPhotoIcon({ name }: { name: keyof typeof ICON_PATHS }) {
@@ -57,19 +60,24 @@ export function enhanceBadge(photo: HostPhoto): string | null {
 
 export default function HostPhotosClient({
   eventId,
-  canEnhance,
+  isPublished,
+  legacyUnlocked,
   initialPhotos,
   initialHasMore,
 }: {
   eventId: string;
-  // True in the closed (published) phase for events that bought AI enhancement.
-  canEnhance: boolean;
+  // Post-close phase: the per-photo pay + enhance UI is offered.
+  isPublished: boolean;
+  // Legacy events with the retired flat unlock — treat every photo as paid.
+  legacyUnlocked: boolean;
   initialPhotos: HostPhoto[];
   initialHasMore: boolean;
 }) {
   const [photos, setPhotos] = useState<HostPhoto[]>(initialPhotos);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
+  // Photos whose payment the host just requested (optimistic "awaiting confirm").
+  const [payingIds, setPayingIds] = useState<Set<string>>(new Set());
   // Distinguishes a "load more" fetch from a reset/reload so only the pressed
   // button spins (both share `loading`).
   const [loadingMore, setLoadingMore] = useState(false);
@@ -141,6 +149,30 @@ export default function HostPhotosClient({
     }
   }
 
+  // Per-photo pay (ADR-0008): creates a pending order. Admin confirms → the
+  // photo's `paid` flag flips (host reloads to pick it up). Rp 3.000/foto.
+  async function pay(photo: HostPhoto) {
+    if (photo.paid || payingIds.has(photo.id)) return;
+    setPayingIds((prev) => new Set(prev).add(photo.id));
+    try {
+      const res = await fetch("/api/kenangan/pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, photoId: photo.id }),
+      });
+      if (!res.ok) throw new Error("pay");
+    } catch {
+      setPayingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(photo.id);
+        return next;
+      });
+      setErrorMsg("Gagal membuat pesanan. Coba lagi.");
+    }
+  }
+
+  const isPaid = (photo: HostPhoto) => Boolean(photo.paid) || legacyUnlocked;
+
   return (
     <div style={{ marginTop: 12 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
@@ -188,17 +220,37 @@ export default function HostPhotosClient({
                   <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
                 </button>
                 <figcaption className="kk-host-photo-bar">
-                  {canEnhance && !photo.enhancedPath ? (
-                    <button
-                      type="button"
-                      className="kk-photo-btn"
-                      data-on={photo.enhanceState === "pending"}
-                      disabled={photo.enhanceState === "pending"}
-                      onClick={() => enhance(photo)}
-                      aria-label="Tingkatkan dengan AI"
-                    >
-                      <HostPhotoIcon name="sparkles" />
-                    </button>
+                  {isPublished && !photo.enhancedPath ? (
+                    isPaid(photo) ? (
+                      <button
+                        type="button"
+                        className="kk-photo-btn"
+                        data-on={photo.enhanceState === "pending"}
+                        disabled={photo.enhanceState === "pending"}
+                        onClick={() => enhance(photo)}
+                        aria-label="Tingkatkan dengan AI"
+                      >
+                        <HostPhotoIcon name="sparkles" />
+                      </button>
+                    ) : payingIds.has(photo.id) ? (
+                      <button
+                        type="button"
+                        className="kk-photo-btn"
+                        disabled
+                        aria-label="Menunggu konfirmasi pembayaran"
+                      >
+                        <HostPhotoIcon name="clock" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="kk-photo-btn"
+                        onClick={() => pay(photo)}
+                        aria-label="Bayar Rp 3.000 untuk tingkatkan"
+                      >
+                        <HostPhotoIcon name="tag" />
+                      </button>
+                    )
                   ) : null}
                   <button
                     type="button"
@@ -235,9 +287,12 @@ export default function HostPhotosClient({
         openId={openId}
         onOpenId={setOpenId}
         onClose={() => setOpenId(null)}
-        canEnhance={canEnhance}
+        isPublished={isPublished}
+        isPaid={isPaid}
+        payingIds={payingIds}
         onSetStatus={setStatus}
         onEnhance={enhance}
+        onPay={pay}
       />
     </div>
   );

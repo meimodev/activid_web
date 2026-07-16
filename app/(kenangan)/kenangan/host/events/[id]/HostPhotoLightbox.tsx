@@ -25,17 +25,23 @@ export default function HostPhotoLightbox({
   openId,
   onOpenId,
   onClose,
-  canEnhance,
+  isPublished,
+  isPaid,
+  payingIds,
   onSetStatus,
   onEnhance,
+  onPay,
 }: {
   photos: HostPhoto[];
   openId: string | null;
   onOpenId: (id: string | null) => void;
   onClose: () => void;
-  canEnhance: boolean;
+  isPublished: boolean;
+  isPaid: (photo: HostPhoto) => boolean;
+  payingIds: Set<string>;
   onSetStatus: (photo: HostPhoto, status: "live" | "hidden") => void;
   onEnhance: (photo: HostPhoto) => void;
+  onPay: (photo: HostPhoto) => void;
 }) {
   const [direction, setDirection] = useState<1 | -1>(1);
   const [loadedId, setLoadedId] = useState<string | null>(null);
@@ -100,7 +106,10 @@ export default function HostPhotoLightbox({
 
   const isHidden = current.status === "hidden";
   const badge = enhanceBadge(current);
-  const showEnhance = canEnhance && !current.enhancedPath;
+  const paid = isPaid(current);
+  const canEnhanceNow = isPublished && paid && !current.enhancedPath;
+  const canPayNow = isPublished && !paid && !current.enhancedPath;
+  const payPending = payingIds.has(current.id);
   const enhancePending = current.enhanceState === "pending";
   // Enhanced photos render their server-graded file; the rest, the ungraded
   // original (the host viewer doesn't LUT-grade — a rough moderation preview).
@@ -124,7 +133,7 @@ export default function HostPhotoLightbox({
               {index + 1} / {total}
             </span>
             <div className="kk-lightbox-actions">
-              {showEnhance ? (
+              {canEnhanceNow ? (
                 <button
                   type="button"
                   className="kk-lightbox-action"
@@ -135,6 +144,18 @@ export default function HostPhotoLightbox({
                 >
                   <HostPhotoIcon name="sparkles" />
                   {enhancePending ? "Meningkatkan…" : current.enhanceState === "failed" ? "Coba Lagi" : "Tingkatkan"}
+                </button>
+              ) : canPayNow ? (
+                <button
+                  type="button"
+                  className="kk-lightbox-action"
+                  data-on={payPending}
+                  disabled={payPending}
+                  onClick={() => onPay(current)}
+                  aria-label="Bayar Rp 3.000 untuk meningkatkan"
+                >
+                  <HostPhotoIcon name={payPending ? "clock" : "tag"} />
+                  {payPending ? "Menunggu konfirmasi…" : "Bayar Rp 3.000"}
                 </button>
               ) : null}
               <button

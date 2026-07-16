@@ -220,45 +220,6 @@ export async function kenanganSetEventStatus(formData: FormData): Promise<void> 
   redirect(`/kenangan/host/events/${eventId}?saved=1`);
 }
 
-/** Host requests the paid AI-enhanced gallery: creates a pending order. */
-export async function kenanganRequestEnhancement(formData: FormData): Promise<void> {
-  ensureEnabled();
-  const session = await requireSession();
-  const eventId = String(formData.get("eventId") ?? "");
-
-  const db = getAdminDb();
-  const { data: event } = await requireOwnedEvent(session, eventId);
-  if (event.enhancementPurchased) {
-    redirect(`/kenangan/host/events/${eventId}?saved=1`);
-  }
-
-  // At most one enhancement order per event; no orderBy to avoid a composite
-  // index. Ignore Paket orders here — they share the collection.
-  const existing = await db
-    .collection("kenanganOrders")
-    .where("eventId", "==", eventId)
-    .get();
-  if (
-    existing.docs.some(
-      (doc) =>
-        kenanganOrderKind(doc.data()) === "enhancement" &&
-        ["pending", "confirmed"].includes(doc.data().status),
-    )
-  ) {
-    redirect(`/kenangan/host/events/${eventId}?saved=1`);
-  }
-
-  await db.collection("kenanganOrders").add({
-    eventId,
-    kind: "enhancement",
-    amountIdr: getKenanganTier(event.tier as string).priceIdr,
-    status: "pending",
-    confirmedAt: null,
-    createdAt: FieldValue.serverTimestamp(),
-  });
-  redirect(`/kenangan/host/events/${eventId}?saved=1`);
-}
-
 /** Admin confirms a manual payment. Paket confirm just ungates going Live;
  *  enhancement confirm also unlocks the AI gallery. See ADR-0005. */
 export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
@@ -283,10 +244,25 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
 
   await orderRef.update({ status: "confirmed", confirmedAt: FieldValue.serverTimestamp() });
   if (kenanganOrderKind(order) === "enhancement") {
-    await db
-      .collection("kenanganEvents")
-      .doc(order.eventId as string)
-      .update({ enhancementPurchased: true });
+    const eventId = order.eventId as string;
+    const photoIds = Array.isArray(order.photoIds) ? (order.photoIds as string[]) : [];
+    if (photoIds.length > 0) {
+      // Per-photo model (ADR-0008): mark exactly the paid photos.
+      const eventRef = db.collection("kenanganEvents").doc(eventId);
+      const batch = db.batch();
+      for (const photoId of photoIds) {
+        batch.update(eventRef.collection("photos").doc(photoId), {
+          paid: true,
+          paidBy: "host",
+          paidOrderId: orderId,
+          paidAt: FieldValue.serverTimestamp(),
+        });
+      }
+      await batch.commit();
+    } else {
+      // Legacy flat-unlock order (no photoIds): grandfather the whole event.
+      await db.collection("kenanganEvents").doc(eventId).update({ enhancementPurchased: true });
+    }
   }
   redirect(returnTo ? `${returnTo}?saved=1` : `/kenangan/host/events/${order.eventId}?saved=1`);
 }

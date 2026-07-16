@@ -81,6 +81,28 @@ export async function gradeAndStoreKenanganPhoto(
   return uploadKenanganImage(graded, `${photoId}.jpg`, `/kenangan/${eventId}/enhanced`);
 }
 
+/**
+ * Store a gpt-image-2 enhancement output (ADR-0008). The generative model owns
+ * colour now — no LUT re-apply. It emits fixed aspect buckets, so crop/resize
+ * back to the original dimensions to preserve framing, then store under
+ * /kenangan/{eventId}/enhanced/. Returns the stored ImageKit path.
+ */
+export async function storeEnhancedKenanganPhoto(
+  eventId: string,
+  photoId: string,
+  outputUrl: string,
+  width?: number,
+  height?: number,
+): Promise<string> {
+  const source = await fetchImageBuffer(outputUrl);
+  let pipeline = sharp(source).rotate();
+  if (width && height) {
+    pipeline = pipeline.resize(width, height, { fit: "cover", position: "centre" });
+  }
+  const jpeg = await pipeline.jpeg({ quality: 90 }).toBuffer();
+  return uploadKenanganImage(jpeg, `${photoId}.jpg`, `/kenangan/${eventId}/enhanced`);
+}
+
 export function kenanganOriginalUrl(originalPath: string): string {
   return `${KENANGAN_IMAGEKIT_URL_BASE}${originalPath}`;
 }

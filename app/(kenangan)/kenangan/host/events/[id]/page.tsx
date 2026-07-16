@@ -10,10 +10,15 @@ import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-sess
 import { createKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { KENANGAN_THEMES } from "@/data/kenangan-themes";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { getKenanganTier, isKenanganPublished, kenanganOrderKind, type KenanganOrder } from "@/types/kenangan";
+import {
+  getKenanganTier,
+  isKenanganPublished,
+  kenanganOrderKind,
+  KENANGAN_ENHANCE_PRICE_IDR,
+  type KenanganOrder,
+} from "@/types/kenangan";
 import {
   kenanganConfirmOrder,
-  kenanganRequestEnhancement,
   kenanganSetEventStatus,
   kenanganUpdateEvent,
 } from "../../actions";
@@ -105,7 +110,6 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
   const activeOrders = ordersSnap.docs
     .map((doc) => ({ id: doc.id, ...(doc.data() as KenanganOrder) }))
     .filter((o) => ["pending", "confirmed"].includes(o.status));
-  const order = activeOrders.find((o) => kenanganOrderKind(o) === "enhancement");
   const paketOrder = activeOrders.find((o) => kenanganOrderKind(o) === "paket");
   const paketPaid = paketOrder?.status === "confirmed";
   const tier = getKenanganTier(event.tier);
@@ -137,53 +141,26 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
   // it never buries the live moderation grid.
   const aiAtTop = isKenanganPublished(event.status);
   const aiSection = (
-      <section className={`kk-card${!event.enhancementPurchased && aiAtTop ? " kk-card-primary" : ""}`}>
+      <section className={`kk-card${aiAtTop ? " kk-card-primary" : ""}`}>
         <h2 className="kk-section-title">Galeri Kenangan AI</h2>
-        {event.enhancementPurchased ? (
-          <p className="kk-landing-note" style={{ marginTop: 4 }}>
-            Peningkatan kualitas AI aktif. Buka sebuah foto di Kurasi Galeri untuk
-            meningkatkan kualitasnya dengan AI.
-          </p>
-        ) : order?.status === "pending" ? (
-          <>
-            <p className="kk-landing-note" style={{ marginTop: 4 }}>
-              Pesanan senilai Rp {order.amountIdr.toLocaleString("id-ID")} menunggu
-              konfirmasi pembayaran dari admin. Selesaikan pembayaran via transfer
-              lalu konfirmasi melalui WhatsApp.
-            </p>
-            <WhatsAppButton
-              text={`Halo admin, konfirmasi pembayaran peningkatan AI Rp ${order.amountIdr.toLocaleString("id-ID")} untuk acara "${event.name}" (/${event.slug}).`}
-            />
-            {session.isAdmin ? (
-              <form action={kenanganConfirmOrder} style={{ marginTop: 12 }}>
-                <input type="hidden" name="orderId" value={order.id} />
-                <ConfirmSubmit
-                  confirm={`Konfirmasi pembayaran Rp ${order.amountIdr.toLocaleString("id-ID")}? Peningkatan AI akan aktif untuk acara ini.`}
-                  pendingLabel="Mengkonfirmasi…"
-                >
-                  Konfirmasi Pembayaran (Admin)
-                </ConfirmSubmit>
-              </form>
-            ) : null}
-          </>
+        <p className="kk-landing-note" style={{ marginTop: 4 }}>
+          Tingkatkan foto pilihan dengan AI (ketajaman, pencahayaan, wajah) —
+          Rp {KENANGAN_ENHANCE_PRICE_IDR.toLocaleString("id-ID")} per foto. Buka
+          Kurasi Galeri, buka sebuah foto, lalu bayar. Pembayaran manual via
+          transfer — admin mengkonfirmasi di meja Pembayaran.
+        </p>
+        {aiAtTop ? (
+          <Link
+            href={`/kenangan/host/events/${event.id}/photos`}
+            className="kk-btn kk-btn-ghost"
+            style={{ marginTop: 12 }}
+          >
+            Buka Kurasi Galeri
+          </Link>
         ) : (
-          <>
-            <p className="kk-landing-note" style={{ marginTop: 4 }}>
-              Tingkatkan foto pilihanmu dengan AI (ketajaman, pencahayaan, wajah),
-              satu per satu saat kurasi. Paket {tier.name} (≤{tier.guestCap} tamu):
-              Rp {tier.priceIdr.toLocaleString("id-ID")} per acara. Pembayaran manual
-              via transfer — admin akan mengkonfirmasi.
-            </p>
-            <form action={kenanganRequestEnhancement} style={{ marginTop: 12 }}>
-              <input type="hidden" name="eventId" value={event.id} />
-              <ConfirmSubmit
-                confirm={`Ajukan peningkatan AI paket ${tier.name} seharga Rp ${tier.priceIdr.toLocaleString("id-ID")}? Pesanan dibuat sekarang, tapi kamu baru ditagih setelah admin konfirmasi pembayaran.`}
-                pendingLabel="Mengajukan…"
-              >
-                Ajukan Peningkatan AI
-              </ConfirmSubmit>
-            </form>
-          </>
+          <p className="kk-landing-note" style={{ marginTop: 8 }}>
+            Tersedia setelah acara ditutup.
+          </p>
         )}
       </section>
   );
@@ -335,7 +312,7 @@ export default async function KenanganHostEventPage({ params, searchParams }: Pr
           <h2 className="kk-section-title">Kurasi Galeri Kenangan</h2>
           <p className="kk-landing-note" style={{ marginTop: 4 }}>
             Sembunyikan foto yang tak ingin ditampilkan — perubahan langsung tampak
-            di galeri kenangan{event.enhancementPurchased ? ", dan tingkatkan foto pilihan dengan AI" : ""}.
+            di galeri kenangan, dan tingkatkan foto pilihan dengan AI.
           </p>
           <Link href={`/kenangan/host/events/${event.id}/photos`} className="kk-btn kk-btn-primary" style={{ marginTop: 12 }}>
             Buka Kurasi Galeri

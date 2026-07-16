@@ -6,8 +6,7 @@ import type { NextRequest } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
-import { gradeAndStoreKenanganPhoto } from "@/lib/kenangan-enhance";
-import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
+import { storeEnhancedKenanganPhoto } from "@/lib/kenangan-enhance";
 
 export const maxDuration = 120;
 
@@ -94,14 +93,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, skipped: "already enhanced" });
   }
 
-  const lutId: KenanganLutId = isKenanganLutId(photo.lutId) ? photo.lutId : "natural";
   const outputUrl = prediction.status === "succeeded" ? pickOutputUrl(prediction.output) : null;
 
   try {
     if (outputUrl) {
-      // AI owns pixels, the LUT owns colour: re-apply the stored LUT to the
-      // enhanced output at full res so the gallery matches the guest preview.
-      const enhancedPath = await gradeAndStoreKenanganPhoto(eventId, photoId, outputUrl, lutId);
+      // gpt-image-2 owns colour now — no LUT re-apply (ADR-0008). Crop the
+      // output back to the original dimensions so framing is preserved.
+      const enhancedPath = await storeEnhancedKenanganPhoto(
+        eventId,
+        photoId,
+        outputUrl,
+        photo.width as number | undefined,
+        photo.height as number | undefined,
+      );
       // Success: store the enhanced path and clear the in-flight flag (ADR-0007).
       await photoRef.update({ enhancedPath, enhanceState: FieldValue.delete() });
       await jobRef.set(
