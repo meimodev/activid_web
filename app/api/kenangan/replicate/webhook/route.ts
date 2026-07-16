@@ -3,10 +3,9 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
-import { storeEnhancedKenanganPhoto } from "@/lib/kenangan-enhance";
+import { settleKenanganEnhance } from "@/lib/kenangan-enhance";
 
 export const maxDuration = 120;
 
@@ -47,15 +46,6 @@ function verifyReplicateSignature(request: NextRequest, rawBody: string): boolea
   });
 }
 
-function pickOutputUrl(output: unknown): string | null {
-  if (typeof output === "string") return output;
-  if (Array.isArray(output)) {
-    const last = output[output.length - 1];
-    if (typeof last === "string") return last;
-  }
-  return null;
-}
-
 export async function POST(request: NextRequest) {
   if (!isKenanganEnabled()) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -81,57 +71,23 @@ export async function POST(request: NextRequest) {
 
   const db = getAdminDb();
   const eventRef = db.collection("kenanganEvents").doc(eventId);
-  const photoRef = eventRef.collection("photos").doc(photoId);
-  const jobRef = eventRef.collection("jobs").doc(photoId);
 
-  const [eventSnap, photoSnap] = await Promise.all([eventRef.get(), photoRef.get()]);
-  if (!eventSnap.exists || !photoSnap.exists) {
+  const eventSnap = await eventRef.get();
+  if (!eventSnap.exists) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  const photo = photoSnap.data()!;
-  if (photo.enhancedPath) {
-    return NextResponse.json({ ok: true, skipped: "already enhanced" });
-  }
-
-  const outputUrl = prediction.status === "succeeded" ? pickOutputUrl(prediction.output) : null;
 
   try {
-    if (outputUrl) {
-      // gpt-image-2 owns colour now — no LUT re-apply (ADR-0008). Crop the
-      // output back to the original dimensions so framing is preserved.
-      const enhancedPath = await storeEnhancedKenanganPhoto(
-        eventId,
-        photoId,
-        outputUrl,
-        photo.width as number | undefined,
-        photo.height as number | undefined,
-      );
-      // Success: store the enhanced path and clear the in-flight flag (ADR-0007).
-      await photoRef.update({ enhancedPath, enhanceState: FieldValue.delete() });
-      await jobRef.set(
-        { photoId, replicateId: prediction.id ?? null, status: "succeeded", error: null },
-        { merge: true },
-      );
-    } else {
-      // Failure: no fallback file — leave the photo showing its graded original
-      // and mark the state so the host can retry (ADR-0007).
-      await photoRef.update({ enhanceState: "failed" });
-      await jobRef.set(
-        {
-          photoId,
-          replicateId: prediction.id ?? null,
-          status: prediction.status ?? "failed",
-          error: typeof prediction.error === "string" ? prediction.error : null,
-        },
-        { merge: true },
-      );
+    const changed = await settleKenanganEnhance(eventId, photoId, prediction);
+    if (!changed) {
+      return NextResponse.json({ ok: true, skipped: "already settled" });
     }
   } catch (err) {
     console.error(`kenangan webhook: photo ${photoId} grading failed`, err);
-    await jobRef.set(
-      { photoId, status: "error", error: String(err) },
-      { merge: true },
-    );
+    await eventRef
+      .collection("jobs")
+      .doc(photoId)
+      .set({ photoId, status: "error", error: String(err) }, { merge: true });
     // 500 -> Replicate retries the webhook
     return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }

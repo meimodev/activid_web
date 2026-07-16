@@ -207,3 +207,144 @@ export async function storeEnhancedKenanganPhoto(
 export function kenanganOriginalUrl(originalPath: string): string {
   return `${KENANGAN_IMAGEKIT_URL_BASE}${originalPath}`;
 }
+
+/** Prediction fields the settle path reads (webhook body or GET /predictions). */
+export interface KenanganPredictionResult {
+  id?: string;
+  status?: string;
+  output?: unknown;
+  error?: unknown;
+}
+
+function pickOutputUrl(output: unknown): string | null {
+  if (typeof output === "string") return output;
+  if (Array.isArray(output)) {
+    const last = output[output.length - 1];
+    if (typeof last === "string") return last;
+  }
+  return null;
+}
+
+/**
+ * Apply a terminal Replicate prediction to a photo: store the output under
+ * /enhanced/ and set `enhancedPath`, or mark the photo `failed` so the host
+ * can retry (ADR-0007). Shared by the webhook and the poll-side reconciler.
+ * Returns true when the photo changed (caller busts the gallery cache).
+ * Throws when storing the output fails, so the webhook can 500 → Replicate
+ * retries.
+ */
+export async function settleKenanganEnhance(
+  eventId: string,
+  photoId: string,
+  prediction: KenanganPredictionResult,
+): Promise<boolean> {
+  const eventRef = getAdminDb().collection("kenanganEvents").doc(eventId);
+  const photoRef = eventRef.collection("photos").doc(photoId);
+  const jobRef = eventRef.collection("jobs").doc(photoId);
+
+  const photoSnap = await photoRef.get();
+  if (!photoSnap.exists) return false;
+  const photo = photoSnap.data()!;
+  if (photo.enhancedPath) return false;
+
+  const outputUrl = prediction.status === "succeeded" ? pickOutputUrl(prediction.output) : null;
+  if (outputUrl) {
+    // gpt-image-2 owns colour now — no LUT re-apply (ADR-0008). Crop the
+    // output back to the original dimensions so framing is preserved.
+    const enhancedPath = await storeEnhancedKenanganPhoto(
+      eventId,
+      photoId,
+      outputUrl,
+      photo.width as number | undefined,
+      photo.height as number | undefined,
+    );
+    // Success: store the enhanced path and clear the in-flight flag (ADR-0007).
+    await photoRef.update({ enhancedPath, enhanceState: FieldValue.delete() });
+    await jobRef.set(
+      { photoId, replicateId: prediction.id ?? null, status: "succeeded", error: null },
+      { merge: true },
+    );
+  } else {
+    // Failure: no fallback file — leave the photo showing its graded original
+    // and mark the state so the host can retry (ADR-0007).
+    await photoRef.update({ enhanceState: "failed" });
+    await jobRef.set(
+      {
+        photoId,
+        replicateId: prediction.id ?? null,
+        status: prediction.status ?? "failed",
+        error: typeof prediction.error === "string" ? prediction.error : null,
+      },
+      { merge: true },
+    );
+  }
+  return true;
+}
+
+function toMillis(value: unknown): number {
+  const candidate = value as { toMillis?: () => number } | undefined;
+  return typeof candidate?.toMillis === "function" ? candidate.toMillis() : 0;
+}
+
+// Webhooks get a minute's head start; each job is then re-checked at most once
+// a minute (the host page polls every 8s while anything is pending).
+const RECONCILE_MIN_AGE_MS = 60_000;
+const RECONCILE_THROTTLE_MS = 60_000;
+
+/**
+ * Webhook-loss fallback: for photos still `pending`, ask Replicate directly
+ * and settle any terminal prediction. Fired from the host photos poll (after
+ * the response), so a lost or rejected webhook heals the next time the host
+ * looks at the page. Returns true when any photo changed.
+ */
+export async function reconcileKenanganEnhances(
+  eventId: string,
+  photoIds: string[],
+): Promise<boolean> {
+  const apiToken = process.env.REPLICATE_API_TOKEN;
+  if (!apiToken) return false;
+  const eventRef = getAdminDb().collection("kenanganEvents").doc(eventId);
+  let changed = false;
+  for (const photoId of photoIds) {
+    try {
+      const jobRef = eventRef.collection("jobs").doc(photoId);
+      const jobSnap = await jobRef.get();
+      const job = jobSnap.data();
+      const replicateId = job?.replicateId as string | undefined;
+      if (!replicateId) continue;
+      const now = Date.now();
+      if (
+        now - toMillis(job?.createdAt) < RECONCILE_MIN_AGE_MS ||
+        now - toMillis(job?.lastReconcileAt) < RECONCILE_THROTTLE_MS
+      ) {
+        continue;
+      }
+      await jobRef.set({ lastReconcileAt: FieldValue.serverTimestamp() }, { merge: true });
+
+      const res = await fetch(`https://api.replicate.com/v1/predictions/${replicateId}`, {
+        headers: { Authorization: `Bearer ${apiToken}` },
+      });
+      if (!res.ok) continue;
+      const prediction = (await res.json()) as KenanganPredictionResult & {
+        data_removed?: boolean;
+      };
+      if (!["succeeded", "failed", "canceled"].includes(prediction.status ?? "")) continue;
+
+      // Replicate expires output files — if the webhook was lost for too long
+      // there is nothing left to store; mark failed so the host can retry.
+      const effective: KenanganPredictionResult =
+        prediction.status === "succeeded" && prediction.data_removed
+          ? {
+              id: prediction.id,
+              status: "failed",
+              error: "Replicate output expired before it could be stored",
+            }
+          : prediction;
+      if (await settleKenanganEnhance(eventId, photoId, effective)) changed = true;
+    } catch (err) {
+      // Per-photo: a transient store failure retries on the next reconcile tick.
+      console.error(`kenangan reconcile: photo ${photoId} failed`, err);
+    }
+  }
+  return changed;
+}

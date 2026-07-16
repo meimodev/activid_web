@@ -1,10 +1,11 @@
 import "server-only";
 
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import type { NextRequest } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, listKenanganHostPhotos, revalidateKenanganEvent } from "@/lib/kenangan-event";
+import { reconcileKenanganEnhances } from "@/lib/kenangan-enhance";
 import { verifyKenanganGuestToken } from "@/lib/kenangan-guest-token";
 import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
 import { isKenanganLutId } from "@/data/kenangan-luts";
@@ -34,15 +35,35 @@ export async function GET(request: NextRequest) {
   }
 
   const eventId = request.nextUrl.searchParams.get("eventId") ?? "";
-  const after = request.nextUrl.searchParams.get("after");
+  const afterParam = request.nextUrl.searchParams.get("after");
   if (!eventId) {
     return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 400 });
   }
   const access = await requireHostAccess(eventId);
   if ("error" in access) return access.error;
 
-  const afterMs = after ? Number(after) : undefined;
-  return NextResponse.json(await listKenanganHostPhotos(eventId, afterMs));
+  const afterMs = afterParam ? Number(afterParam) : undefined;
+  const result = await listKenanganHostPhotos(eventId, afterMs);
+
+  // Webhook-loss fallback: photos stuck "pending" are settled against
+  // Replicate directly, after the response — the host's 8s poll picks the
+  // result up on its next tick.
+  const pendingIds = result.photos
+    .filter((p) => p.enhanceState === "pending")
+    .map((p) => p.id);
+  if (pendingIds.length > 0) {
+    after(async () => {
+      try {
+        if (await reconcileKenanganEnhances(eventId, pendingIds) && access.slug) {
+          await revalidateKenanganEvent(access.slug);
+        }
+      } catch (err) {
+        console.error("kenangan reconcile failed", err);
+      }
+    });
+  }
+
+  return NextResponse.json(result);
 }
 
 /** Host-only: photo visibility toggle — hide/unhide (ADR-0007). */

@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
   // serverless bundle instead of being (mis)bundled by Turbopack — otherwise
   // it fails to dlopen at runtime on Vercel's linux-x64.
   serverExternalPackages: ["sharp"],
+  // serverExternalPackages alone isn't enough on Vercel: sharp's native
+  // binding is require()d (traced), but libvips-cpp.so is loaded via ELF
+  // RPATH from @img/sharp-libvips-linux-x64 — invisible to require-tracing,
+  // so force-include it wherever the enhance path can run.
+  outputFileTracingIncludes: {
+    "/api/kenangan/**": [
+      "./node_modules/.pnpm/@img+sharp-libvips-linux-x64@*/**",
+    ],
+  },
   // Let a cloudflared tunnel host reach dev assets/HMR for real-device testing (dev-only).
   allowedDevOrigins: ["*.trycloudflare.com"],
   experimental: {
