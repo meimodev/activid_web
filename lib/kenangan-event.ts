@@ -112,6 +112,9 @@ export interface KenanganGalleryPhoto {
    *  otherwise it's the ungraded original — grade it client-side with `lutId`. */
   path: string;
   enhanced: boolean;
+  /** Set only when `enhanced` — the pre-enhancement file, for the guest-facing
+   *  before/after compare. Absent otherwise (path IS the original then). */
+  originalPath?: string;
   /** Already purchased for enhancement (ADR-0008) — not selectable for guest-pay. */
   paid: boolean;
   lutId: KenanganLutId;
@@ -146,6 +149,7 @@ export async function getKenanganGalleryPhotos(slug: string): Promise<KenanganGa
             id: doc.id,
             path: enhancedPath ?? (data.originalPath as string),
             enhanced: Boolean(enhancedPath),
+            originalPath: enhancedPath ? (data.originalPath as string) : undefined,
             paid: Boolean(data.paid),
             lutId: (isKenanganLutId(data.lutId) ? data.lutId : "natural") as KenanganLutId,
             width: (data.width as number) ?? 0,

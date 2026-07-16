@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { kenanganFullUrl } from "@/types/kenangan";
+import KkCompareSlider from "@/app/(kenangan)/kenangan/KkCompareSlider";
 import type { HostPhoto } from "./HostPhotosClient";
 import { enhanceBadge, HostPhotoIcon } from "./HostPhotosClient";
 
@@ -111,9 +112,6 @@ export default function HostPhotoLightbox({
   const canPayNow = isPublished && !paid && !current.enhancedPath;
   const payPending = payingIds.has(current.id);
   const enhancePending = current.enhanceState === "pending";
-  // Enhanced photos render their server-graded file; the rest, the ungraded
-  // original (the host viewer doesn't LUT-grade — a rough moderation preview).
-  const imgSrc = kenanganFullUrl(current.enhancedPath ?? current.originalPath);
 
   return createPortal(
     <AnimatePresence>
@@ -212,13 +210,25 @@ export default function HostPhotoLightbox({
                     {badge}
                   </span>
                 ) : null}
-                <img
-                  src={imgSrc}
-                  alt="Foto tamu"
-                  className="kk-lightbox-img"
-                  data-dim={isHidden}
-                  onLoad={() => setLoadedId(current.id)}
-                />
+                {current.enhancedPath ? (
+                  // Enhanced: before/after drag slider — server-graded result vs
+                  // the ungraded original (the host viewer doesn't LUT-grade).
+                  <KkCompareSlider
+                    originalSrc={kenanganFullUrl(current.originalPath)}
+                    enhancedSrc={kenanganFullUrl(current.enhancedPath)}
+                    alt="Foto tamu"
+                    dim={isHidden}
+                    onReady={() => setLoadedId(current.id)}
+                  />
+                ) : (
+                  <img
+                    src={kenanganFullUrl(current.originalPath)}
+                    alt="Foto tamu"
+                    className="kk-lightbox-img"
+                    data-dim={isHidden}
+                    onLoad={() => setLoadedId(current.id)}
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>

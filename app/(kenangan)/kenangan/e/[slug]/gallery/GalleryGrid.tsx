@@ -8,6 +8,7 @@ import {
 } from "@/types/kenangan";
 import type { KenanganGalleryPhoto } from "@/lib/kenangan-event";
 import GradedThumb from "../feed/GradedThumb";
+import KkCompareSlider from "@/app/(kenangan)/kenangan/KkCompareSlider";
 
 // ponytail: same 800px display transform whether the file is enhanced (already
 // server-graded) or an original (graded client-side). Only the grading path
@@ -43,6 +44,8 @@ export default function GalleryGrid({
   const [submitting, setSubmitting] = useState(false);
   const [ordered, setOrdered] = useState(false);
   const [orderError, setOrderError] = useState("");
+  // Enhanced photo opened in the before/after compare overlay.
+  const [compare, setCompare] = useState<KenanganGalleryPhoto | null>(null);
 
   const selectable = (p: KenanganGalleryPhoto) => !p.enhanced && !p.paid;
   const anySelectable = photos.some(selectable);
@@ -150,7 +153,21 @@ export default function GalleryGrid({
                 </button>
               ) : (
                 <>
-                  {thumb}
+                  {photo.enhanced && photo.originalPath && !selectMode ? (
+                    // Enhanced photos open the before/after compare on tap.
+                    // Stale cache entries without originalPath fall through to
+                    // the plain thumb until the gallery cache revalidates.
+                    <button
+                      type="button"
+                      className="kk-feed-open"
+                      onClick={() => setCompare(photo)}
+                      aria-label="Bandingkan dengan foto asli"
+                    >
+                      {thumb}
+                    </button>
+                  ) : (
+                    thumb
+                  )}
                   {selectMode && photo.enhanced ? (
                     <span className="kk-photo-status" data-status="enhanced">Ditingkatkan</span>
                   ) : selectMode && photo.paid ? (
@@ -224,6 +241,45 @@ export default function GalleryGrid({
                 </button>
               </>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {compare?.originalPath ? (
+        <div
+          className="kk-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Perbandingan foto"
+          onClick={() => setCompare(null)}
+        >
+          <div className="kk-lightbox-bar" onClick={(e) => e.stopPropagation()}>
+            <span className="kk-lightbox-count">Asli vs Hasil AI</span>
+            <div className="kk-lightbox-actions">
+              <a
+                href={downloadUrl(compare.path)}
+                className="kk-lightbox-action"
+                aria-label="Unduh foto"
+              >
+                Unduh
+              </a>
+              <button
+                type="button"
+                className="kk-lightbox-action"
+                autoFocus
+                onClick={() => setCompare(null)}
+                aria-label="Tutup"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+          <div className="kk-lightbox-stage" onClick={() => setCompare(null)}>
+            <KkCompareSlider
+              originalSrc={displayUrl(compare.originalPath)}
+              enhancedSrc={displayUrl(compare.path)}
+              alt="Foto kenangan"
+            />
           </div>
         </div>
       ) : null}
