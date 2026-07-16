@@ -73,9 +73,11 @@ host and guest paths onto one field:
   that subset; it does **not** mean "photos the guest captured" (`guestSessionId`
   stays capture-attribution/rate-limit only). On payment the photos flip to
   `paid:true, paidBy:"guest"` and the enhance auto-enqueues (guest paid, wants
-  the result — no host action). The **checkout rail is blocked on the Phase-2
-  payment gateway** and is out of scope here; until then the guest flow is
-  select + total + a stubbed "cara bayar".
+  the result — no host action). **Payment uses the existing manual-confirm
+  mechanism** (not a payment gateway): the guest creates a pending order
+  (`paidBy: "guest"`) from the public gallery, then arranges transfer with the
+  admin over WhatsApp; the admin confirms it at the payments desk, which flips
+  the photos to `paid` and auto-enqueues the enhance.
 
 ### Model — `openai/gpt-image-2` (generative)
 
@@ -128,7 +130,7 @@ deliberately. The mitigation is a conservative, identity-preserving prompt:
 - **Host-pay UX** (wayfinder ticket #9) — post-close multi-select + total +
   manual-pay handoff; paid/unpaid/enhancing states.
 - **Guest-pay UX** (wayfinder ticket #10) — closed-gallery multi-select + total
-  + stubbed checkout (real rail blocked on Phase-2).
+  + manual-confirm order (guest creates a pending order, admin confirms at the desk).
 - **Order flow** — admin confirmation of an `enhancement` order sets `paid` on
   the order's `photoIds`.
 
@@ -147,5 +149,7 @@ deliberately. The mitigation is a conservative, identity-preserving prompt:
   from the deterministic grade.
 - **Margin depends on the quality tier.** `medium` holds ~75%; `high` is
   break-even at Rp 3,000. Locked to `medium`; revisit if quality is insufficient.
-- **Guest checkout is deferred** — the model and UX are specified now, but no
-  guest can actually pay until the Phase-2 gateway lands.
+- **Guest-pay reuses the manual-confirm rails** — no payment gateway is needed;
+  a guest order is a pending `kenanganOrder` an admin confirms at the desk, and
+  confirmation auto-enqueues the enhance. A dedicated gateway (QRIS self-serve)
+  remains a later convenience, not a blocker.

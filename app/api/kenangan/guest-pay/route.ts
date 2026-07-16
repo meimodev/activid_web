@@ -4,57 +4,51 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { isKenanganEnabled } from "@/lib/kenangan-event";
-import { canAccessEvent, getKenanganHostSession } from "@/lib/kenangan-host-session";
+import { getKenanganEventBySlug, isKenanganEnabled } from "@/lib/kenangan-event";
 import { isKenanganPublished, KENANGAN_ENHANCE_PRICE_IDR } from "@/types/kenangan";
 
 export const maxDuration = 30;
 
 const PHOTO_ID_REGEX = /^[0-9a-z]{16}$/;
+const MAX_BATCH = 200;
 
-/** Host-only: create a pending per-photo enhancement order (ADR-0008). Admin
- *  confirmation (kenanganConfirmOrder) flips the photo's `paid` flag, which the
- *  enhance route then gates on. Flat Rp 3,000/photo. */
+/**
+ * Public guest self-pay (ADR-0008). Any visitor to the closed public gallery
+ * may order enhancement for unpaid photos — no identity, no login. Creates a
+ * pending order (`paidBy: "guest"`); an admin confirms it at the payments desk,
+ * which flips the photos to `paid` and auto-enqueues the enhance. Open by
+ * design: a pending order costs nothing until an admin confirms it.
+ */
 export async function POST(request: NextRequest) {
   if (!isKenanganEnabled()) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const body = await request.json().catch(() => null);
-  const eventId = typeof body?.eventId === "string" ? body.eventId : "";
-  // Accept a single `photoId` (lightbox) or a `photoIds` batch (grid select).
-  const rawIds: unknown[] = Array.isArray(body?.photoIds)
-    ? body.photoIds
-    : typeof body?.photoId === "string"
-      ? [body.photoId]
-      : [];
-  const photoIds = [...new Set(rawIds.filter((id): id is string => typeof id === "string" && PHOTO_ID_REGEX.test(id)))];
-  if (!eventId || photoIds.length === 0) {
+  const slug = typeof body?.slug === "string" ? body.slug : "";
+  const rawIds: unknown[] = Array.isArray(body?.photoIds) ? body.photoIds : [];
+  const photoIds = [
+    ...new Set(rawIds.filter((id): id is string => typeof id === "string" && PHOTO_ID_REGEX.test(id))),
+  ].slice(0, MAX_BATCH);
+  if (!slug || photoIds.length === 0) {
     return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 400 });
   }
 
-  const session = await getKenanganHostSession();
-  const db = getAdminDb();
-  const eventRef = db.collection("kenanganEvents").doc(eventId);
-  const eventSnap = await eventRef.get();
-  if (!eventSnap.exists) {
+  const event = await getKenanganEventBySlug(slug);
+  if (!event) {
     return NextResponse.json({ error: "Acara tidak ditemukan." }, { status: 404 });
   }
-  const event = eventSnap.data()!;
-  if (!canAccessEvent(session, event.ownerUid as string | undefined)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isKenanganPublished(event.status)) {
+    return NextResponse.json({ error: "Galeri belum tersedia." }, { status: 409 });
   }
-  if (!isKenanganPublished(event.status as string)) {
-    return NextResponse.json(
-      { error: "Tutup acara terlebih dahulu sebelum membeli peningkatan." },
-      { status: 409 },
-    );
-  }
+
+  const db = getAdminDb();
+  const eventRef = db.collection("kenanganEvents").doc(event.id);
 
   // Photos already covered by a pending order — don't stack duplicates.
   const pending = await db
     .collection("kenanganOrders")
-    .where("eventId", "==", eventId)
+    .where("eventId", "==", event.id)
     .where("status", "==", "pending")
     .get();
   const pendingIds = new Set<string>();
@@ -66,7 +60,7 @@ export async function POST(request: NextRequest) {
   const photosCol = eventRef.collection("photos");
   const snaps = await db.getAll(...photoIds.map((id) => photosCol.doc(id)));
   const eligible = snaps
-    .filter((s) => s.exists && !s.data()!.paid && !pendingIds.has(s.id))
+    .filter((s) => s.exists && s.data()!.status !== "hidden" && !s.data()!.paid && !pendingIds.has(s.id))
     .map((s) => s.id);
 
   if (eligible.length === 0) {
@@ -74,10 +68,10 @@ export async function POST(request: NextRequest) {
   }
 
   await db.collection("kenanganOrders").add({
-    eventId,
+    eventId: event.id,
     kind: "enhancement",
     photoIds: eligible,
-    paidBy: "host",
+    paidBy: "guest",
     amountIdr: eligible.length * KENANGAN_ENHANCE_PRICE_IDR,
     status: "pending",
     confirmedAt: null,

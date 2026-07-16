@@ -267,12 +267,14 @@ on-demand, one photo at a time — never a blind batch of hundreds of Replicate 
 - **Host** buys selected photos post-close via the manual admin-confirm flow.
 - **Guest** ("out-of-guest-pocket") selects any *unpaid* photos from the closed public gallery
   and pays the same Rp 3,000 each — **no identity or ownership**; "selected by the guest itself"
-  = the guest does the choosing, not "photos the guest captured". Checkout rail is Phase-2
-  (below); the pricing + UX are specified now.
+  = the guest does the choosing, not "photos the guest captured". Payment uses the existing
+  **manual-confirm** mechanism: the guest creates a pending order, arranges transfer with the
+  admin via WhatsApp, and the admin confirms it at the payments desk — which flips the photos to
+  `paid` and auto-enqueues the enhance.
 
 **Phasing (adapted to activid_web having no payment gateway):**
 1. **Phase 1** — Live feed free. Enhancement paid **per photo** via **manual flow**: host selects photos → WhatsApp/transfer → admin confirms a `kenanganOrders{kind:"enhancement", photoIds}` doc → those photos flip to `paid`. Matches how the invitation platform operates today.
-2. **Phase 2** — Payment gateway (Midtrans/Xendit + QRIS) for self-serve checkout, unlocking **guest self-pay** (guest picks + pays for their own selection).
+2. **Phase 2** — Optional payment gateway (Midtrans/Xendit + QRIS) for **self-serve** checkout — a convenience over the manual admin confirm, which already powers both host- and guest-pay. Not a blocker.
 3. **Phase 3** — Venue/organizer white-label subscription (~Rp 2.5M/mo unlimited branded events). The recurring engine.
 
 Model is insensitive to cost (processing ~2% of revenue) and sensitive to distribution.

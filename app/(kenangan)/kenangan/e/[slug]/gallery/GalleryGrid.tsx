@@ -30,14 +30,19 @@ const rupiah = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
  *  so "Lanjut" hands off to the admin via WhatsApp for now. */
 export default function GalleryGrid({
   photos,
+  slug,
   eventName,
 }: {
   photos: KenanganGalleryPhoto[];
+  slug: string;
   eventName: string;
 }) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [ordered, setOrdered] = useState(false);
+  const [orderError, setOrderError] = useState("");
 
   const selectable = (p: KenanganGalleryPhoto) => !p.enhanced && !p.paid;
   const anySelectable = photos.some(selectable);
@@ -57,11 +62,35 @@ export default function GalleryGrid({
     setSelectMode(false);
     setSelected(new Set());
     setSheetOpen(false);
+    setOrdered(false);
+    setOrderError("");
+  }
+
+  // Manual-confirm (ADR-0008): create a pending guest order, then hand off to the
+  // admin via WhatsApp to arrange the transfer. Admin confirms at the desk →
+  // photos flip to paid and the enhance auto-enqueues.
+  async function submitOrder() {
+    if (submitting || count === 0) return;
+    setSubmitting(true);
+    setOrderError("");
+    try {
+      const res = await fetch("/api/kenangan/guest-pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, photoIds: [...selected] }),
+      });
+      if (!res.ok) throw new Error("order");
+      setOrdered(true);
+    } catch {
+      setOrderError("Gagal membuat pesanan. Coba lagi.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const waText =
-    `Halo admin, saya ingin meningkatkan ${count} foto dengan AI di galeri ` +
-    `"${eventName}". Total ${rupiah(total)}. Bagaimana cara pembayarannya?`;
+    `Halo admin, saya sudah memesan peningkatan AI untuk ${count} foto di galeri ` +
+    `"${eventName}" (total ${rupiah(total)}). Bagaimana cara pembayarannya?`;
 
   return (
     <div>
@@ -152,27 +181,49 @@ export default function GalleryGrid({
       ) : null}
 
       {sheetOpen ? (
-        <div className="kk-sheet-scrim" onClick={() => setSheetOpen(false)}>
+        <div className="kk-sheet-scrim" onClick={() => (ordered ? exitSelect() : setSheetOpen(false))}>
           <div className="kk-sheet" onClick={(e) => e.stopPropagation()}>
             <div className="kk-sheet-grab" />
-            <h3 className="kk-section-title" style={{ textAlign: "center" }}>Pembayaran</h3>
-            <p className="kk-landing-note" style={{ textAlign: "center", marginTop: 2 }}>
-              {count} foto akan ditingkatkan otomatis setelah pembayaran.
-            </p>
-            <div className="kk-sheet-summary">
-              <span>{count} foto × {rupiah(KENANGAN_ENHANCE_PRICE_IDR)}</span>
-              <span>{rupiah(total)}</span>
-            </div>
-            <p className="kk-landing-note" style={{ textAlign: "center" }}>
-              Pembayaran mandiri (QRIS) segera hadir. Sementara ini, konfirmasi
-              pilihanmu ke admin via WhatsApp.
-            </p>
-            <a className="kk-btn" href={kenanganAdminWaLink(waText)} target="_blank" rel="noopener noreferrer">
-              Hubungi admin (WhatsApp)
-            </a>
-            <button type="button" className="kk-link-btn" style={{ marginTop: 10 }} onClick={() => setSheetOpen(false)}>
-              Tutup
-            </button>
+            {ordered ? (
+              <>
+                <h3 className="kk-section-title" style={{ textAlign: "center" }}>Pesanan dibuat ✓</h3>
+                <p className="kk-landing-note" style={{ textAlign: "center", marginTop: 2 }}>
+                  Hubungi admin untuk menyelesaikan pembayaran. Foto ditingkatkan
+                  otomatis setelah pembayaran dikonfirmasi.
+                </p>
+                <div className="kk-sheet-summary">
+                  <span>{count} foto × {rupiah(KENANGAN_ENHANCE_PRICE_IDR)}</span>
+                  <span>{rupiah(total)}</span>
+                </div>
+                <a className="kk-btn" href={kenanganAdminWaLink(waText)} target="_blank" rel="noopener noreferrer">
+                  Hubungi admin (WhatsApp)
+                </a>
+                <button type="button" className="kk-link-btn" style={{ marginTop: 10 }} onClick={exitSelect}>
+                  Selesai
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 className="kk-section-title" style={{ textAlign: "center" }}>Konfirmasi pesanan</h3>
+                <p className="kk-landing-note" style={{ textAlign: "center", marginTop: 2 }}>
+                  {count} foto akan ditingkatkan otomatis setelah pembayaran dikonfirmasi admin.
+                </p>
+                <div className="kk-sheet-summary">
+                  <span>{count} foto × {rupiah(KENANGAN_ENHANCE_PRICE_IDR)}</span>
+                  <span>{rupiah(total)}</span>
+                </div>
+                <p className="kk-landing-note" style={{ textAlign: "center" }}>
+                  Pembayaran manual: buat pesanan, lalu hubungi admin untuk transfer.
+                </p>
+                {orderError ? <p className="kk-form-error">{orderError}</p> : null}
+                <button type="button" className="kk-btn" disabled={submitting} onClick={submitOrder}>
+                  {submitting ? "Memproses…" : `Buat pesanan (${rupiah(total)})`}
+                </button>
+                <button type="button" className="kk-link-btn" style={{ marginTop: 10 }} onClick={() => setSheetOpen(false)}>
+                  Batal
+                </button>
+              </>
+            )}
           </div>
         </div>
       ) : null}

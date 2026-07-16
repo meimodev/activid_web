@@ -43,7 +43,7 @@ export default async function KenanganGalleryPage({ params }: Props) {
         <p className="kk-landing-date">{dateLabel} · {photos.length} foto kenangan</p>
       </div>
 
-      <GalleryGrid photos={photos} eventName={kenanganEventTitle(event)} />
+      <GalleryGrid photos={photos} slug={slug} eventName={kenanganEventTitle(event)} />
     </main>
   );
 }

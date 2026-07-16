@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { isKenanganEnabled, revalidateKenanganEvent } from "@/lib/kenangan-event";
+import { enqueueKenanganEnhance } from "@/lib/kenangan-enhance";
 import {
   canAccessEvent,
   getKenanganHostSession,
@@ -246,6 +247,7 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
   if (kenanganOrderKind(order) === "enhancement") {
     const eventId = order.eventId as string;
     const photoIds = Array.isArray(order.photoIds) ? (order.photoIds as string[]) : [];
+    const paidBy = order.paidBy === "guest" ? "guest" : "host";
     if (photoIds.length > 0) {
       // Per-photo model (ADR-0008): mark exactly the paid photos.
       const eventRef = db.collection("kenanganEvents").doc(eventId);
@@ -253,12 +255,38 @@ export async function kenanganConfirmOrder(formData: FormData): Promise<void> {
       for (const photoId of photoIds) {
         batch.update(eventRef.collection("photos").doc(photoId), {
           paid: true,
-          paidBy: "host",
+          paidBy,
           paidOrderId: orderId,
           paidAt: FieldValue.serverTimestamp(),
         });
       }
       await batch.commit();
+
+      // Guest orders auto-enqueue the enhance on confirm — the guest has no
+      // trigger UI (ADR-0008). Host orders stay host-paced. Needs a public
+      // webhook origin; if unset, photos stay paid and the host can enhance.
+      if (paidBy === "guest") {
+        const origin = process.env.KENANGAN_WEBHOOK_ORIGIN;
+        if (origin) {
+          const snaps = await db.getAll(
+            ...photoIds.map((id) => eventRef.collection("photos").doc(id)),
+          );
+          for (const snap of snaps) {
+            const data = snap.data();
+            if (snap.exists && data && !data.enhancedPath && data.enhanceState !== "pending") {
+              try {
+                await enqueueKenanganEnhance(eventId, snap.id, data.originalPath as string, origin);
+              } catch (err) {
+                console.error(`kenangan confirm: auto-enhance ${snap.id} failed`, err);
+              }
+            }
+          }
+        } else {
+          console.warn(
+            "kenangan confirm: KENANGAN_WEBHOOK_ORIGIN unset — guest photos paid but not auto-enqueued",
+          );
+        }
+      }
     } else {
       // Legacy flat-unlock order (no photoIds): grandfather the whole event.
       await db.collection("kenanganEvents").doc(eventId).update({ enhancementPurchased: true });

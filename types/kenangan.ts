@@ -73,6 +73,9 @@ export interface KenanganOrder {
   amountIdr: number;
   /** For `enhancement` orders: the photos this order pays to enhance (ADR-0008). */
   photoIds?: string[];
+  /** Who funded an `enhancement` order. Guest orders auto-enqueue the enhance on
+   *  confirm (the guest has no trigger UI); host orders are host-paced. */
+  paidBy?: "host" | "guest";
   status: KenanganOrderStatus;
   confirmedAt?: unknown;
   createdAt?: unknown;
