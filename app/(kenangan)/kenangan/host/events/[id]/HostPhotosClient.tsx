@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { kenanganThumbUrl, KENANGAN_ENHANCE_PRICE_IDR } from "@/types/kenangan";
 import type { KenanganEnhanceState } from "@/types/kenangan";
 import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
@@ -129,8 +129,32 @@ export default function HostPhotosClient({
     }
   }
 
+  // The enhanced file arrives async via the Replicate webhook, so while any
+  // photo is "pending" poll the first page and merge fresh copies in — this is
+  // what flips "Meningkatkan…" to "Ditingkatkan" (or "Gagal") without a manual
+  // reload. Existing photos are replaced in place; nothing is added or removed,
+  // so pagination state stays intact.
+  // ponytail: only the newest page refreshes — enhance on a "load more" page
+  // still needs Muat Ulang; add an ids= filter to GET if that ever matters.
+  const hasPending = photos.some((p) => p.enhanceState === "pending");
+  useEffect(() => {
+    if (!hasPending) return;
+    const timer = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/kenangan/photos?${new URLSearchParams({ eventId })}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const fresh = new Map((data.photos as HostPhoto[]).map((p) => [p.id, p]));
+        setPhotos((prev) => prev.map((p) => fresh.get(p.id) ?? p));
+      } catch {
+        // transient poll failure — next tick retries
+      }
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [hasPending, eventId]);
+
   // Fire-and-track: the enhanced file arrives async via the Replicate webhook.
-  // We flip the photo to "pending" optimistically; the host reloads to pick up
+  // We flip the photo to "pending" optimistically; the poll above picks up
   // `enhancedPath` once it lands (host list isn't realtime — ADR-0007).
   async function enhance(photo: HostPhoto) {
     if (photo.enhancedPath || photo.enhanceState === "pending") return;
