@@ -20,7 +20,14 @@ export default async function KenanganCapturePage({
 
   return (
     <Suspense fallback={null}>
-      <CaptureClient slug={slug} lutIds={theme.lutIds} />
+      <CaptureClient
+        slug={slug}
+        eventId={event.id}
+        // Closed at load time → CaptureClient skips the camera entirely and
+        // shows the closed screen; the realtime listener covers mid-session.
+        initiallyClosed={event.status !== "live"}
+        lutIds={theme.lutIds}
+      />
     </Suspense>
   );
 }

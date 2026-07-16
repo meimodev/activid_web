@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { getKenanganLutPreset, type KenanganLutId } from "@/data/kenangan-luts";
 import {
   createKenanganGl,
@@ -44,9 +46,13 @@ function drawWatermark(ctx: CanvasRenderingContext2D, width: number, height: num
 
 export default function CaptureClient({
   slug,
+  eventId,
+  initiallyClosed,
   lutIds,
 }: {
   slug: string;
+  eventId: string;
+  initiallyClosed: boolean;
   lutIds: KenanganLutId[];
 }) {
   const token = useSearchParams().get("t");
@@ -72,6 +78,29 @@ export default function CaptureClient({
   // Upload-leg byte progress: 0-100 while bytes ship to imagekit, null on the
   // quick auth/commit legs (bar falls back to indeterminate there).
   const [uploadPct, setUploadPct] = useState<number | null>(null);
+  // Event no longer accepts photos (closed by the host). Server 403s the
+  // commit regardless — this is the realtime UX in front of that gate.
+  const [closed, setClosed] = useState(initiallyClosed);
+
+  // Realtime close gate: when the host closes the event, kill the camera and
+  // swap to the closed screen immediately (same listener channel as the feed).
+  useEffect(() => {
+    const unsub = onSnapshot(
+      doc(db, "kenanganEvents", eventId),
+      (snap) => {
+        const status = snap.data()?.status;
+        if (status && status !== "live") {
+          setClosed(true);
+          streamRef.current?.getTracks().forEach((t) => t.stop());
+        }
+      },
+      () => {
+        // Permission/network error — leave the page as-is; the API gate still
+        // rejects uploads on a closed event.
+      },
+    );
+    return unsub;
+  }, [eventId]);
 
   // Render loop: create GL lazily, keep LUT in sync, draw video every frame.
   useEffect(() => {
@@ -131,11 +160,11 @@ export default function CaptureClient({
   // immediately; ref guard stops StrictMode's double-invoke from double-calling.
   const startedRef = useRef(false);
   useEffect(() => {
-    if (startedRef.current) return;
+    if (startedRef.current || closed) return;
     startedRef.current = true;
     void startCamera(facing);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [closed]);
 
   async function startCamera(mode: Facing) {
     setPhase("starting");
@@ -344,6 +373,26 @@ export default function CaptureClient({
   }
 
   const tokenQuery = token ? `?t=${encodeURIComponent(token)}` : "";
+
+  if (closed) {
+    return (
+      <main className="kk-capture">
+        <div className="kk-capture-stage">
+          <div className="kk-capture-start">
+            <p className="kk-display" style={{ fontSize: 26 }}>
+              Acara telah ditutup
+            </p>
+            <p className="kk-capture-hint">
+              Sesi foto sudah berakhir, tapi kenangannya tetap ada di galeri.
+            </p>
+            <Link href={`/kenangan/e/${slug}/gallery`} className="kk-btn kk-btn-primary">
+              Lihat Galeri
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (!token) {
     return (

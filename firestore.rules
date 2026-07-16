@@ -23,6 +23,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Guests listen to the event doc itself so the capture page can react in
+    // realtime when the host closes the event. get-by-id only; drafts stay
+    // hidden and enumeration stays denied.
+    match /kenanganEvents/{eventId} {
+      allow get: if resource.data.status in ['live', 'closed', 'published'];
+      allow list, write: if false;
+    }
+
     // --- Invitation platform ------------------------------------------------
     // Invitation configs are public-by-link (the whole invitation renders at a
     // public URL). Client reads one doc by exact id; list/enumeration stays
