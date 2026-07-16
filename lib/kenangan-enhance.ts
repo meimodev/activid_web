@@ -1,6 +1,5 @@
 import "server-only";
 
-import sharp from "sharp";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import {
@@ -117,6 +116,9 @@ export async function applyKenanganLutToJpeg(
   input: Buffer,
   lutId: KenanganLutId,
 ): Promise<Buffer> {
+  // ponytail: lazy import so merely importing this module doesn't dlopen
+  // sharp's native libvips — only the enhance path pays that cost.
+  const sharp = (await import("sharp")).default;
   const preset = getKenanganLutPreset(lutId);
   const { data, info } = await sharp(input)
     .rotate() // bake EXIF orientation before grading
@@ -192,6 +194,7 @@ export async function storeEnhancedKenanganPhoto(
   width?: number,
   height?: number,
 ): Promise<string> {
+  const sharp = (await import("sharp")).default;
   const source = await fetchImageBuffer(outputUrl);
   let pipeline = sharp(source).rotate();
   if (width && height) {
