@@ -22,8 +22,14 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => null);
   const eventId = typeof body?.eventId === "string" ? body.eventId : "";
-  const photoId = typeof body?.photoId === "string" ? body.photoId : "";
-  if (!eventId || !PHOTO_ID_REGEX.test(photoId)) {
+  // Accept a single `photoId` (lightbox) or a `photoIds` batch (grid select).
+  const rawIds: unknown[] = Array.isArray(body?.photoIds)
+    ? body.photoIds
+    : typeof body?.photoId === "string"
+      ? [body.photoId]
+      : [];
+  const photoIds = [...new Set(rawIds.filter((id): id is string => typeof id === "string" && PHOTO_ID_REGEX.test(id)))];
+  if (!eventId || photoIds.length === 0) {
     return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 400 });
   }
 
@@ -45,37 +51,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const photoSnap = await eventRef.collection("photos").doc(photoId).get();
-  if (!photoSnap.exists) {
-    return NextResponse.json({ error: "Foto tidak ditemukan." }, { status: 404 });
-  }
-  if (photoSnap.data()!.paid) {
-    return NextResponse.json({ ok: true, skipped: "already paid" });
-  }
-
-  // One pending order per photo — don't stack duplicates if the host taps twice.
+  // Photos already covered by a pending order — don't stack duplicates.
   const pending = await db
     .collection("kenanganOrders")
     .where("eventId", "==", eventId)
     .where("status", "==", "pending")
     .get();
-  const already = pending.docs.some((doc) => {
+  const pendingIds = new Set<string>();
+  for (const doc of pending.docs) {
     const ids = doc.data().photoIds;
-    return Array.isArray(ids) && ids.includes(photoId);
-  });
-  if (already) {
-    return NextResponse.json({ ok: true, skipped: "already pending" });
+    if (Array.isArray(ids)) for (const id of ids) pendingIds.add(id as string);
+  }
+
+  const photosCol = eventRef.collection("photos");
+  const snaps = await db.getAll(...photoIds.map((id) => photosCol.doc(id)));
+  const eligible = snaps
+    .filter((s) => s.exists && !s.data()!.paid && !pendingIds.has(s.id))
+    .map((s) => s.id);
+
+  if (eligible.length === 0) {
+    return NextResponse.json({ ok: true, count: 0, skipped: "nothing eligible" });
   }
 
   await db.collection("kenanganOrders").add({
     eventId,
     kind: "enhancement",
-    photoIds: [photoId],
-    amountIdr: KENANGAN_ENHANCE_PRICE_IDR,
+    photoIds: eligible,
+    amountIdr: eligible.length * KENANGAN_ENHANCE_PRICE_IDR,
     status: "pending",
     confirmedAt: null,
     createdAt: FieldValue.serverTimestamp(),
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, count: eligible.length });
 }

@@ -1914,3 +1914,8 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+
+/* Host batch-select ring (reuses .kk-gallery-price / .kk-gallery-check). */
+.kk-feed-item[data-selected] {
+  box-shadow: inset 0 0 0 3px var(--kk-bronze);
+}

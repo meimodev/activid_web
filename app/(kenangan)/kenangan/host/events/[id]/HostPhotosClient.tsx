@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { kenanganThumbUrl } from "@/types/kenangan";
+import { kenanganThumbUrl, KENANGAN_ENHANCE_PRICE_IDR } from "@/types/kenangan";
 import type { KenanganEnhanceState } from "@/types/kenangan";
 import KkProgress from "@/app/(kenangan)/kenangan/KkProgress";
 import KkSpinner from "@/app/(kenangan)/kenangan/KkSpinner";
@@ -78,6 +78,9 @@ export default function HostPhotosClient({
   const [loading, setLoading] = useState(false);
   // Photos whose payment the host just requested (optimistic "awaiting confirm").
   const [payingIds, setPayingIds] = useState<Set<string>>(new Set());
+  // Batch pay: select several unpaid photos and order them in one go.
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   // Distinguishes a "load more" fetch from a reset/reload so only the pressed
   // button spins (both share `loading`).
   const [loadingMore, setLoadingMore] = useState(false);
@@ -172,21 +175,75 @@ export default function HostPhotosClient({
   }
 
   const isPaid = (photo: HostPhoto) => Boolean(photo.paid) || legacyUnlocked;
+  const canSelectPhoto = (photo: HostPhoto) =>
+    isPublished && !isPaid(photo) && !photo.enhancedPath && !payingIds.has(photo.id);
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function exitSelect() {
+    setSelectMode(false);
+    setSelected(new Set());
+  }
+
+  // One order for every selected photo. Optimistically flip them to "awaiting
+  // confirm"; admin confirmation sets `paid` (host reloads to pick it up).
+  async function payBatch() {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    setPayingIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+    exitSelect();
+    try {
+      const res = await fetch("/api/kenangan/pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, photoIds: ids }),
+      });
+      if (!res.ok) throw new Error("pay");
+    } catch {
+      setPayingIds((prev) => {
+        const next = new Set(prev);
+        for (const id of ids) next.delete(id);
+        return next;
+      });
+      setErrorMsg("Gagal membuat pesanan. Coba lagi.");
+    }
+  }
+
+  const selectTotal = selected.size * KENANGAN_ENHANCE_PRICE_IDR;
+  const hasSelectable = photos.some(canSelectPhoto);
 
   return (
     <div style={{ marginTop: 12 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <span className="kk-feed-count">{photos.length} foto dimuat</span>
-        <button type="button" className="kk-link-btn" onClick={() => load(true)} disabled={loading}>
-          {loading && !loadingMore ? (
-            <>
-              <KkSpinner />
-              Memuat…
-            </>
-          ) : (
-            "Muat Ulang"
-          )}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {isPublished && hasSelectable ? (
+            <button type="button" className="kk-link-btn" onClick={selectMode ? exitSelect : () => setSelectMode(true)}>
+              {selectMode ? "Batal" : "Pilih untuk dibayar"}
+            </button>
+          ) : null}
+          <button type="button" className="kk-link-btn" onClick={() => load(true)} disabled={loading}>
+            {loading && !loadingMore ? (
+              <>
+                <KkSpinner />
+                Memuat…
+              </>
+            ) : (
+              "Muat Ulang"
+            )}
+          </button>
+        </div>
       </div>
       {errorMsg ? <p className="kk-form-error">{errorMsg}</p> : null}
 
@@ -201,13 +258,28 @@ export default function HostPhotosClient({
           {photos.map((photo) => {
             const isHidden = photo.status === "hidden";
             const badge = enhanceBadge(photo);
+            const inSelect = selectMode && isPublished;
+            const selectable = canSelectPhoto(photo);
+            const chosen = selected.has(photo.id);
             return (
-              <figure key={photo.id} className="kk-feed-item" data-dim={isHidden}>
+              <figure
+                key={photo.id}
+                className="kk-feed-item"
+                data-dim={isHidden}
+                data-selected={inSelect && chosen ? "" : undefined}
+              >
                 <button
                   type="button"
                   className="kk-feed-open"
-                  onClick={() => setOpenId(photo.id)}
-                  aria-label="Buka foto"
+                  onClick={() => {
+                    if (inSelect) {
+                      if (selectable) toggleSelect(photo.id);
+                    } else {
+                      setOpenId(photo.id);
+                    }
+                  }}
+                  aria-label={inSelect ? (chosen ? "Batalkan pilihan" : "Pilih foto") : "Buka foto"}
+                  aria-pressed={inSelect && selectable ? chosen : undefined}
                 >
                   {badge ? (
                     <span
@@ -217,8 +289,15 @@ export default function HostPhotosClient({
                       {badge}
                     </span>
                   ) : null}
+                  {inSelect && selectable ? (
+                    <>
+                      <span className="kk-gallery-price">{`Rp ${KENANGAN_ENHANCE_PRICE_IDR.toLocaleString("id-ID")}`}</span>
+                      <span className="kk-gallery-check" aria-hidden="true">{chosen ? "✓" : ""}</span>
+                    </>
+                  ) : null}
                   <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
                 </button>
+                {inSelect ? null : (
                 <figcaption className="kk-host-photo-bar">
                   {isPublished && !photo.enhancedPath ? (
                     isPaid(photo) ? (
@@ -261,6 +340,7 @@ export default function HostPhotosClient({
                     <HostPhotoIcon name={isHidden ? "eye" : "eye-off"} />
                   </button>
                 </figcaption>
+                )}
               </figure>
             );
           })}
@@ -278,6 +358,18 @@ export default function HostPhotosClient({
             ) : (
               "Muat Lebih Banyak"
             )}
+          </button>
+        </div>
+      ) : null}
+
+      {selectMode && selected.size > 0 ? (
+        <div className="kk-gallery-paybar">
+          <div>
+            <div className="kk-gallery-paybar-count">{selected.size} foto dipilih</div>
+            <div className="kk-gallery-paybar-total">Rp {selectTotal.toLocaleString("id-ID")}</div>
+          </div>
+          <button type="button" className="kk-btn" onClick={payBatch}>
+            Bayar Rp {selectTotal.toLocaleString("id-ID")}
           </button>
         </div>
       ) : null}
