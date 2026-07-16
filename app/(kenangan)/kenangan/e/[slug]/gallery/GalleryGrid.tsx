@@ -147,8 +147,10 @@ export default function GalleryGrid({
                 >
                   {thumb}
                   <span className="kk-gallery-price">{rupiah(KENANGAN_ENHANCE_PRICE_IDR)}</span>
+                  {/* Always rendered — CSS keeps it transparent until selected
+                      so the color/pop animation has something to animate. */}
                   <span className="kk-gallery-check" aria-hidden="true">
-                    {isSelected ? "✓" : ""}
+                    ✓
                   </span>
                 </button>
               ) : (

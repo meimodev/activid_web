@@ -316,7 +316,7 @@ export default function HostPhotosClient({
                   {inSelect && selectable ? (
                     <>
                       <span className="kk-gallery-price">{`Rp ${KENANGAN_ENHANCE_PRICE_IDR.toLocaleString("id-ID")}`}</span>
-                      <span className="kk-gallery-check" aria-hidden="true">{chosen ? "✓" : ""}</span>
+                      <span className="kk-gallery-check" aria-hidden="true">✓</span>
                     </>
                   ) : null}
                   <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
