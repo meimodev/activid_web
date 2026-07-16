@@ -29,7 +29,8 @@ export default function GoogleSignIn({
       if (!res.ok) throw new Error("session");
       router.replace(redirectTo);
       router.refresh();
-    } catch {
+    } catch (e) {
+      console.error("google sign-in failed", e);
       setError(true);
       setBusy(false);
     }

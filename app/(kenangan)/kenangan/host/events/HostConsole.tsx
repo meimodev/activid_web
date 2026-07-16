@@ -70,11 +70,11 @@ export default function HostConsole({
   const tierDefault = KENANGAN_TIERS.some((t) => t.id === initialTier)
     ? initialTier
     : "standard";
-  const [name, setName] = useState("");
+  const [eventName, setEventName] = useState("");
   const [eventType, setEventType] = useState<string>(KENANGAN_DEFAULT_EVENT_TYPE);
   // Uniqueness marker fixed once on mount so the preview matches the saved link.
   const [suffix] = useState(() => Date.now().toString(36).slice(-5));
-  const slug = `${eventType}-${slugifyName(name)}-${suffix}`;
+  const slug = `${eventType}-${slugifyName(eventName)}-${suffix}`;
 
   return (
     <div className="kk-console-root">
@@ -159,8 +159,8 @@ export default function HostConsole({
                 className="kk-input"
                 required
                 maxLength={120}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
               />
               <label className="kk-label" htmlFor="slug">Tautan acara</label>
               <input id="slug" className="kk-input" readOnly value={slug} tabIndex={-1} />
