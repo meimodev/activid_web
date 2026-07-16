@@ -1013,6 +1013,7 @@
   top: 8px;
   left: 8px;
   z-index: 1;
+  pointer-events: none; /* status only — never steal the tap underneath */
   padding: 3px 9px;
   border-radius: 999px;
   font-size: 11px;

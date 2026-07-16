@@ -168,8 +168,10 @@ export default function GalleryGrid({
                   ) : (
                     thumb
                   )}
-                  {selectMode && photo.enhanced ? (
-                    <span className="kk-photo-status" data-status="enhanced">Ditingkatkan</span>
+                  {photo.enhanced ? (
+                    // Always visible so guests can tell enhanced from original
+                    // at a glance; the tap-through compare backs it up.
+                    <span className="kk-photo-status" data-status="enhanced">✨ Ditingkatkan</span>
                   ) : selectMode && photo.paid ? (
                     <span className="kk-photo-status">Sudah dibeli</span>
                   ) : null}
