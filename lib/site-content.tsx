@@ -5,6 +5,7 @@ export const siteContent: SiteContent = {
   navigation: [
     { label: 'Home', href: '/' },
     { label: 'Invitation', href: 'https://invitation.activid.id', external: true },
+    { label: 'KenanganKita', href: 'https://kenangan.activid.id', external: true },
     { label: 'About', href: '/#about' },
     { label: 'Clients', href: '/#clients' },
     { label: 'Services', href: '/#services' },
