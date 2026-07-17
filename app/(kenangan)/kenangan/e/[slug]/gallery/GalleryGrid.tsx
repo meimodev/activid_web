@@ -260,12 +260,21 @@ export default function GalleryGrid({
           <div className="kk-lightbox-bar" onClick={(e) => e.stopPropagation()}>
             <span className="kk-lightbox-count">Asli vs Hasil AI</span>
             <div className="kk-lightbox-actions">
+              {/* Enhancement never replaces the original file — both stay
+                  downloadable from the compare view. */}
+              <a
+                href={downloadUrl(compare.originalPath)}
+                className="kk-lightbox-action"
+                aria-label="Unduh foto asli"
+              >
+                Unduh Asli
+              </a>
               <a
                 href={downloadUrl(compare.path)}
                 className="kk-lightbox-action"
-                aria-label="Unduh foto"
+                aria-label="Unduh hasil AI"
               >
-                Unduh
+                Unduh Hasil AI
               </a>
               <button
                 type="button"
