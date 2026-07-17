@@ -15,7 +15,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { kenanganMarkedUrl, kenanganThumbUrl } from "@/types/kenangan";
+import { kenanganFullUrl, kenanganThumbUrl } from "@/types/kenangan";
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
 import Lightbox from "./Lightbox";
@@ -54,16 +54,14 @@ function toFeedPhoto(id: string, data: DocumentData): FeedPhoto | null {
   const createdAt = data.createdAt as Timestamp | null | undefined;
   return {
     id,
-    // Thumb stays unmarked; every larger guest surface (lightbox, compare,
-    // downloads) carries the KenanganKita mark.
     src: kenanganThumbUrl(path),
-    displaySrc: kenanganMarkedUrl(path),
-    fullSrc: kenanganMarkedUrl(path, { download: true }),
+    displaySrc: kenanganFullUrl(path),
+    fullSrc: `${kenanganFullUrl(path)}?ik-attachment=true`,
     lutId: isKenanganLutId(data.lutId) ? data.lutId : "natural",
     createdAtMs: createdAt ? createdAt.toMillis() : Date.now(),
     enhanced: Boolean(enhancedPath),
-    originalDisplaySrc: enhancedPath ? kenanganMarkedUrl(originalPath) : undefined,
-    originalFullSrc: enhancedPath ? kenanganMarkedUrl(originalPath, { download: true }) : undefined,
+    originalDisplaySrc: enhancedPath ? kenanganFullUrl(originalPath) : undefined,
+    originalFullSrc: enhancedPath ? `${kenanganFullUrl(originalPath)}?ik-attachment=true` : undefined,
   };
 }
 

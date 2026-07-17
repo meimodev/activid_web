@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import {
+  KENANGAN_IMAGEKIT_URL_BASE,
   KENANGAN_ENHANCE_PRICE_IDR,
   kenanganAdminWaLink,
-  kenanganMarkedUrl,
 } from "@/types/kenangan";
 import type { KenanganGalleryPhoto } from "@/lib/kenangan-event";
 import GradedThumb from "../feed/GradedThumb";
@@ -14,10 +14,10 @@ import KkCompareSlider from "@/app/(kenangan)/kenangan/KkCompareSlider";
 // server-graded) or an original (graded client-side). Only the grading path
 // differs, not the size.
 function displayUrl(path: string): string {
-  return kenanganMarkedUrl(path, { tr: "w-800,q-80" });
+  return `${KENANGAN_IMAGEKIT_URL_BASE}${path}?tr=w-800,q-80`;
 }
 function downloadUrl(path: string): string {
-  return kenanganMarkedUrl(path, { download: true });
+  return `${KENANGAN_IMAGEKIT_URL_BASE}${path}?ik-attachment=true`;
 }
 
 const rupiah = (n: number) => `Rp ${n.toLocaleString("id-ID")}`;
