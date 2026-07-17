@@ -319,7 +319,9 @@ export default function HostPhotosClient({
                       <span className="kk-gallery-check" aria-hidden="true">✓</span>
                     </>
                   ) : null}
-                  <img src={kenanganThumbUrl(photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
+                  {/* Enhanced photos show the AI result in the grid; the
+                      lightbox compare slider still has the original. */}
+                  <img src={kenanganThumbUrl(photo.enhancedPath ?? photo.originalPath)} alt="Foto tamu" loading="lazy" decoding="async" />
                 </button>
                 {inSelect ? null : (
                 <figcaption className="kk-host-photo-bar">
