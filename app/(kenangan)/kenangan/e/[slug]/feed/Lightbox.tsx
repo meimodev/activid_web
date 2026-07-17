@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
@@ -49,6 +49,13 @@ export default function Lightbox({
   // navigating away (swipe or arrows) drops back to normal view for free.
   const [comparingFor, setComparingFor] = useState<string | null>(null);
   const comparing = comparingFor !== null && comparingFor === openId;
+  // Every close path clears compare state — otherwise reopening the same
+  // photo lands straight back in compare with swipe-nav disabled (hardware
+  // back on Android closes the lightbox mid-compare).
+  const close = useCallback(() => {
+    setComparingFor(null);
+    onClose();
+  }, [onClose]);
   // Last index the guest actually viewed. When the open photo is removed
   // (moderation), we clamp to this to auto-advance instead of closing.
   const lastIndexRef = useRef(0);
@@ -68,6 +75,8 @@ export default function Lightbox({
   useEffect(() => {
     if (openId === null || index !== -1) return;
     if (total === 0) {
+      // Plain onClose (no compare-state clear): setState is banned in effects,
+      // and a comparingFor pointing at an evicted photo can't re-trigger.
       onClose();
       return;
     }
@@ -83,7 +92,7 @@ export default function Lightbox({
   useEffect(() => {
     if (!isOpen) return;
     window.history.pushState({ kkLightbox: true }, "");
-    const onPop = () => onClose();
+    const onPop = () => close();
     window.addEventListener("popstate", onPop);
     return () => {
       window.removeEventListener("popstate", onPop);
@@ -91,7 +100,7 @@ export default function Lightbox({
       // itself closed us (browser already removed it).
       if (window.history.state?.kkLightbox) window.history.back();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, close]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -107,7 +116,7 @@ export default function Lightbox({
       // Escape backs out of compare first; a second press closes the lightbox.
       if (e.key === "Escape") {
         if (comparing) setComparingFor(null);
-        else onClose();
+        else close();
       }
       if (e.key === "ArrowLeft") paginate(-1);
       if (e.key === "ArrowRight") paginate(1);
@@ -119,7 +128,7 @@ export default function Lightbox({
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen, openId, photos, onOpenId, onClose, comparing]);
+  }, [isOpen, openId, photos, onOpenId, close, comparing]);
 
   const paginate = (dir: 1 | -1) => {
     if (index === -1) return;
@@ -142,7 +151,7 @@ export default function Lightbox({
           role="dialog"
           aria-modal="true"
           aria-label="Foto"
-          onClick={onClose}
+          onClick={close}
         >
           <div className="kk-lightbox-bar" onClick={(e) => e.stopPropagation()}>
             <span className="kk-lightbox-count">
@@ -188,7 +197,7 @@ export default function Lightbox({
                 type="button"
                 className="kk-lightbox-action"
                 autoFocus
-                onClick={() => (comparing ? setComparingFor(null) : onClose())}
+                onClick={() => (comparing ? setComparingFor(null) : close())}
                 aria-label={comparing ? "Tutup perbandingan" : "Tutup"}
               >
                 Tutup
@@ -205,7 +214,7 @@ export default function Lightbox({
                 e.stopPropagation();
                 setComparingFor(null);
               } else {
-                onClose();
+                close();
               }
             }}
           >
@@ -255,6 +264,7 @@ export default function Lightbox({
                     src={current.displaySrc}
                     alt="Foto tamu"
                     className="kk-lightbox-img"
+                    draggable={false}
                     onLoad={() => setLoadedId(current.id)}
                   />
                 ) : (
