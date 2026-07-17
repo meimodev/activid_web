@@ -150,3 +150,20 @@ export function kenanganThumbUrl(originalPath: string): string {
 export function kenanganFullUrl(path: string): string {
   return `${KENANGAN_IMAGEKIT_URL_BASE}${path}`;
 }
+
+/** ImageKit text-layer watermark chained onto guest-facing delivery URLs.
+ *  Delivery-time only — stored files stay clean (the enhance pipeline needs
+ *  the unmarked original). Relative fs/pa so the mark scales with the image. */
+const KENANGAN_MARK_TR =
+  "l-text,i-KenanganKita,fs-bw_mul_0.04,co-FFFFFF90,lfo-bottom_right,pa-bw_mul_0.02,l-end";
+
+/** Guest-facing delivery URL carrying the KenanganKita mark. `tr` chains
+ *  before the mark step; `download` adds the attachment header. Host surfaces
+ *  and the enhance pipeline use the unmarked builders above instead. */
+export function kenanganMarkedUrl(
+  path: string,
+  opts?: { tr?: string; download?: boolean },
+): string {
+  const tr = opts?.tr ? `${opts.tr}:${KENANGAN_MARK_TR}` : KENANGAN_MARK_TR;
+  return `${KENANGAN_IMAGEKIT_URL_BASE}${path}?tr=${tr}${opts?.download ? "&ik-attachment=true" : ""}`;
+}

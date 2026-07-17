@@ -15,7 +15,7 @@ import {
   type Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { kenanganFullUrl, kenanganThumbUrl } from "@/types/kenangan";
+import { kenanganMarkedUrl, kenanganThumbUrl } from "@/types/kenangan";
 import { isKenanganLutId, type KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
 import Lightbox from "./Lightbox";
@@ -34,6 +34,13 @@ interface FeedPhoto {
   fullSrc: string;
   lutId: KenanganLutId;
   createdAtMs: number;
+  // AI-enhanced (server-graded): src/displaySrc/fullSrc point at the enhanced
+  // file (rendered as-is, no LUT); the original stays reachable for the
+  // before/after compare and its own download. Parity with the published
+  // gallery (ADR-0007/0008).
+  enhanced: boolean;
+  originalDisplaySrc?: string;
+  originalFullSrc?: string;
 }
 
 function toFeedPhoto(id: string, data: DocumentData): FeedPhoto | null {
@@ -42,14 +49,21 @@ function toFeedPhoto(id: string, data: DocumentData): FeedPhoto | null {
   if (data.status === "hidden") return null;
   const originalPath = typeof data.originalPath === "string" ? data.originalPath : "";
   if (!originalPath) return null;
+  const enhancedPath = typeof data.enhancedPath === "string" ? data.enhancedPath : "";
+  const path = enhancedPath || originalPath;
   const createdAt = data.createdAt as Timestamp | null | undefined;
   return {
     id,
-    src: kenanganThumbUrl(originalPath),
-    displaySrc: kenanganFullUrl(originalPath),
-    fullSrc: `${kenanganFullUrl(originalPath)}?ik-attachment=true`,
+    // Thumb stays unmarked; every larger guest surface (lightbox, compare,
+    // downloads) carries the KenanganKita mark.
+    src: kenanganThumbUrl(path),
+    displaySrc: kenanganMarkedUrl(path),
+    fullSrc: kenanganMarkedUrl(path, { download: true }),
     lutId: isKenanganLutId(data.lutId) ? data.lutId : "natural",
     createdAtMs: createdAt ? createdAt.toMillis() : Date.now(),
+    enhanced: Boolean(enhancedPath),
+    originalDisplaySrc: enhancedPath ? kenanganMarkedUrl(originalPath) : undefined,
+    originalFullSrc: enhancedPath ? kenanganMarkedUrl(originalPath, { download: true }) : undefined,
   };
 }
 
@@ -225,8 +239,16 @@ export default function FeedClient({
                 onClick={() => setOpenId(photo.id)}
                 aria-label="Perbesar foto"
               >
-                <GradedThumb src={photo.src} lutId={photo.lutId} alt="Foto tamu" />
+                {photo.enhanced ? (
+                  // Enhanced files are server-graded — render as-is, no LUT.
+                  <img src={photo.src} alt="Foto tamu" loading="lazy" decoding="async" />
+                ) : (
+                  <GradedThumb src={photo.src} lutId={photo.lutId} alt="Foto tamu" />
+                )}
               </button>
+              {photo.enhanced ? (
+                <span className="kk-photo-status" data-status="enhanced">✨ Ditingkatkan</span>
+              ) : null}
             </figure>
           ))}
         </div>

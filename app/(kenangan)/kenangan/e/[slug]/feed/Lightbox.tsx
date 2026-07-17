@@ -5,12 +5,18 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { KenanganLutId } from "@/data/kenangan-luts";
 import GradedThumb from "./GradedThumb";
+import KkCompareSlider from "@/app/(kenangan)/kenangan/KkCompareSlider";
 
 export interface LightboxPhoto {
   id: string;
   displaySrc: string;
   fullSrc: string;
   lutId: KenanganLutId;
+  // AI-enhanced: displaySrc/fullSrc are the server-graded result; the original
+  // backs the compare slider and its own download.
+  enhanced: boolean;
+  originalDisplaySrc?: string;
+  originalFullSrc?: string;
 }
 
 const slideVariants = {
@@ -37,6 +43,12 @@ export default function Lightbox({
   const [direction, setDirection] = useState<1 | -1>(1);
   // Which photo's graded canvas has painted — spinner shows until it matches.
   const [loadedId, setLoadedId] = useState<string | null>(null);
+  // Before/after compare, opt-in per photo. A toggle (not inline-always like
+  // the host viewer) so swipe-nav keeps working on enhanced photos — the
+  // slider owns horizontal drags while it's up. Keyed by photo id so
+  // navigating away (swipe or arrows) drops back to normal view for free.
+  const [comparingFor, setComparingFor] = useState<string | null>(null);
+  const comparing = comparingFor !== null && comparingFor === openId;
   // Last index the guest actually viewed. When the open photo is removed
   // (moderation), we clamp to this to auto-advance instead of closing.
   const lastIndexRef = useRef(0);
@@ -92,7 +104,11 @@ export default function Lightbox({
       onOpenId(photos[next].id);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      // Escape backs out of compare first; a second press closes the lightbox.
+      if (e.key === "Escape") {
+        if (comparing) setComparingFor(null);
+        else onClose();
+      }
       if (e.key === "ArrowLeft") paginate(-1);
       if (e.key === "ArrowRight") paginate(1);
     };
@@ -103,7 +119,7 @@ export default function Lightbox({
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen, openId, photos, onOpenId, onClose]);
+  }, [isOpen, openId, photos, onOpenId, onClose, comparing]);
 
   const paginate = (dir: 1 | -1) => {
     if (index === -1) return;
@@ -130,27 +146,69 @@ export default function Lightbox({
         >
           <div className="kk-lightbox-bar" onClick={(e) => e.stopPropagation()}>
             <span className="kk-lightbox-count">
-              {index + 1} / {total}
+              {comparing ? "Asli vs Hasil AI" : `${index + 1} / ${total}`}
             </span>
             <div className="kk-lightbox-actions">
-              {canDownload ? (
+              {/* Contextual bar (430px budget, no wrap): normal view offers one
+                  download; compare swaps in both — same pair as the published
+                  gallery. Enhancement never replaces the original file. */}
+              {canDownload && comparing && current.originalFullSrc ? (
+                <>
+                  <a
+                    href={current.originalFullSrc}
+                    className="kk-lightbox-action"
+                    aria-label="Unduh foto asli"
+                  >
+                    Unduh Asli
+                  </a>
+                  <a
+                    href={current.fullSrc}
+                    className="kk-lightbox-action"
+                    aria-label="Unduh hasil AI"
+                  >
+                    Unduh Hasil AI
+                  </a>
+                </>
+              ) : canDownload && !comparing ? (
                 <a href={current.fullSrc} className="kk-lightbox-action" aria-label="Unduh foto">
                   Unduh
                 </a>
+              ) : null}
+              {current.enhanced && current.originalDisplaySrc && !comparing ? (
+                <button
+                  type="button"
+                  className="kk-lightbox-action"
+                  onClick={() => setComparingFor(current.id)}
+                  aria-label="Bandingkan dengan foto asli"
+                >
+                  Bandingkan
+                </button>
               ) : null}
               <button
                 type="button"
                 className="kk-lightbox-action"
                 autoFocus
-                onClick={onClose}
-                aria-label="Tutup"
+                onClick={() => (comparing ? setComparingFor(null) : onClose())}
+                aria-label={comparing ? "Tutup perbandingan" : "Tutup"}
               >
                 Tutup
               </button>
             </div>
           </div>
 
-          <div className="kk-lightbox-stage" onClick={onClose}>
+          <div
+            className="kk-lightbox-stage"
+            onClick={(e) => {
+              // Backdrop tap backs out of compare first (gallery parity);
+              // stop it so the root onClose doesn't also fire.
+              if (comparing) {
+                e.stopPropagation();
+                setComparingFor(null);
+              } else {
+                onClose();
+              }
+            }}
+          >
             {!loaded ? <div className="kk-lightbox-spinner" aria-hidden /> : null}
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
@@ -176,13 +234,35 @@ export default function Lightbox({
                   else if (swipe > 8000) paginate(-1);
                 }}
               >
-                <GradedThumb
-                  src={current.displaySrc}
-                  lutId={current.lutId}
-                  alt="Foto tamu"
-                  className="kk-lightbox-img"
-                  onReady={() => setLoadedId(current.id)}
-                />
+                {current.enhanced && !comparing ? (
+                  <span className="kk-photo-status" data-status="enhanced">✨ Ditingkatkan</span>
+                ) : null}
+                {current.enhanced && comparing && current.originalDisplaySrc ? (
+                  // Slider owns pointer events, so framer's swipe-drag never
+                  // fires mid-compare; exiting restores swipe-nav.
+                  <KkCompareSlider
+                    originalSrc={current.originalDisplaySrc}
+                    enhancedSrc={current.displaySrc}
+                    alt="Foto tamu"
+                    onReady={() => setLoadedId(current.id)}
+                  />
+                ) : current.enhanced ? (
+                  // Server-graded result — render as-is, no LUT.
+                  <img
+                    src={current.displaySrc}
+                    alt="Foto tamu"
+                    className="kk-lightbox-img"
+                    onLoad={() => setLoadedId(current.id)}
+                  />
+                ) : (
+                  <GradedThumb
+                    src={current.displaySrc}
+                    lutId={current.lutId}
+                    alt="Foto tamu"
+                    className="kk-lightbox-img"
+                    onReady={() => setLoadedId(current.id)}
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
