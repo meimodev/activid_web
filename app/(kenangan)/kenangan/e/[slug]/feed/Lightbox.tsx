@@ -224,11 +224,14 @@ export default function Lightbox({
                   opacity: { duration: 0.2 },
                 }}
                 onClick={(e) => e.stopPropagation()}
-                drag={total > 1 ? "x" : false}
+                // Swipe-nav off while comparing: framer's native pointer
+                // listeners fire despite the slider's stopPropagation, so the
+                // slider must own horizontal drags exclusively.
+                drag={total > 1 && !comparing ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.6}
                 onDragEnd={(_, info) => {
-                  if (total <= 1) return;
+                  if (total <= 1 || comparing) return;
                   const swipe = swipePower(info.offset.x, info.velocity.x);
                   if (swipe < -8000) paginate(1);
                   else if (swipe > 8000) paginate(-1);
