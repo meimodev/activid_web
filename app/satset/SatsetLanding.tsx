@@ -14,6 +14,9 @@ const WA = "https://wa.me/6289525699078?text=%5BSatSet%5D";
 // same-origin — the click becomes a download rather than a navigation, so no
 // tab is created for one to go missing.
 const APK = "/satset/download";
+// The "Coba Sendiri" section — data-index="4" — holds the demo accounts and
+// the install steps, so it is where a download should land you.
+const DEMO_SECTION_INDEX = 4;
 // Known-good path on device, kept as the escape hatch: a normal HTML page,
 // so it survives both the tap bug and in-app webviews dropping attachments.
 const APK_PAGE = "https://github.com/meimodev/satset/releases/latest";
@@ -85,6 +88,8 @@ type Copy = {
     para: string;
     ctaApk: string;
     apkAlt: string;
+    sideloadLabel: string;
+    sideloadSteps: string[];
     req: string;
     accountsLabel: string;
     passLabel: string;
@@ -181,7 +186,15 @@ const COPY: Record<Lang, Copy> = {
       para: "Bukan video, bukan tur berpemandu. APK-nya bisa kamu unduh sekarang, lengkap dengan satu resto yang lagi ramai buat kamu bongkar sepuasnya.",
       ctaApk: "Unduh APK",
       apkAlt: "Unduhan mandek? Buka halaman rilis",
-      req: "Butuh Android 10 ke atas. Ukuran file 113 MB — pakai Wi-Fi kalau bisa. Saat diminta, izinkan pasang dari sumber tidak dikenal.",
+      sideloadLabel: "Belum pernah pasang aplikasi di luar Play Store?",
+      sideloadSteps: [
+        "Setelah unduhan selesai, buka notifikasinya — atau cari satset.apk di folder Download — lalu ketuk filenya.",
+        "Android bakal bilang sumbernya nggak dikenal. Itu normal untuk aplikasi di luar Play Store. Ketuk Setelan di kotak yang muncul.",
+        "Nyalakan Izinkan dari sumber ini, lalu tekan tombol Kembali.",
+        "Ketuk Pasang. Kalau Play Protect nanya, pilih Pasang tanpa dipindai.",
+        "Selesai. SatSet muncul di layar utama seperti aplikasi lain.",
+      ],
+      req: "Butuh Android 10 ke atas. Ukuran file 113 MB — pakai Wi-Fi kalau bisa.",
       accountsLabel: "Akun demo — pakai salah satu",
       passLabel: "Password semuanya",
       stepsLabel: "Langkahnya",
@@ -286,7 +299,15 @@ const COPY: Record<Lang, Copy> = {
       para: "Not a video, not a guided tour. Download the APK right now — it comes with a restaurant mid-service for you to pull apart however you like.",
       ctaApk: "Download APK",
       apkAlt: "Download stalling? Open the release page",
-      req: "Needs Android 10 or newer. It's a 113 MB file — use Wi-Fi if you can. Allow installing from unknown sources when your phone asks.",
+      sideloadLabel: "Never installed an app from outside the Play Store?",
+      sideloadSteps: [
+        "When the download finishes, open the notification — or find satset.apk in your Download folder — and tap the file.",
+        "Android will say the source is unknown. That is normal for anything outside the Play Store. Tap Settings in the dialog.",
+        "Turn on Allow from this source, then press Back.",
+        "Tap Install. If Play Protect asks, choose Install without scanning.",
+        "Done. SatSet shows up on your home screen like any other app.",
+      ],
+      req: "Needs Android 10 or newer. It's a 113 MB file — use Wi-Fi if you can.",
       accountsLabel: "Demo accounts — use any one",
       passLabel: "Password for all",
       stepsLabel: "How it goes",
@@ -396,6 +417,10 @@ function buildMarkup(t: Copy, lang: Lang): string {
     )
     .join("");
 
+  const sideloadSteps = t.demo.sideloadSteps
+    .map((s) => `<li style="padding-left:2px">${s}</li>`)
+    .join("");
+
   const demoAccounts = DEMO_ACCOUNTS.map(
     (a) =>
       `<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:#EEF2E6;padding:6px 0;border-bottom:1px solid rgba(238,242,230,.07)">${a}</div>`,
@@ -426,7 +451,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <button data-lang aria-label="Switch language" style="cursor:pointer;background:rgba(238,242,230,.06);border:1px solid rgba(238,242,230,.18);color:#EEF2E6;font-weight:700;font-size:13px;letter-spacing:.04em;padding:9px 13px;border-radius:999px;font-family:inherit;line-height:1">${other}</button>
-      <a class="nav-dl" href="${APK}" download="satset.apk" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
+      <a class="nav-dl" data-dl href="${APK}" download="satset.apk" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
         ${DL_SVG(15)}
         ${t.nav.download}
       </a>
@@ -463,7 +488,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
         ${t.hero.para}
       </p>
       <div data-reveal data-delay="240" style="opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);display:flex;gap:14px;align-items:center;margin-top:34px;flex-wrap:wrap">
-        <a href="${APK}" download="satset.apk" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a data-dl href="${APK}" download="satset.apk" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
@@ -628,6 +653,15 @@ function buildMarkup(t: Copy, lang: Lang): string {
         </div>
         <p data-reveal data-delay="170" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);font-size:12.5px;color:#808977;line-height:1.45;margin:12px 0 0">${t.demo.req}</p>
 
+        <details class="sideload" data-reveal data-delay="190" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);margin:12px 0 0;background:linear-gradient(165deg,#171B14,#10130E);border:1px solid rgba(163,230,53,.14);border-radius:15px;padding:0 15px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px;color:#BEF264;font-weight:600;padding:14px 0;line-height:1.35">
+            <svg class="sideload-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#BEF264" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="m9 5 7 7-7 7"/></svg>
+            ${t.demo.sideloadLabel}
+          </summary>
+          <ol style="list-style:decimal;margin:0 0 15px;padding:0 0 0 19px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:#AEB6A6;line-height:1.5">${sideloadSteps}
+          </ol>
+        </details>
+
         <div data-reveal data-delay="220" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-top:18px;background:linear-gradient(165deg,#171B14,#10130E);border:1px solid rgba(163,230,53,.14);border-radius:15px;padding:15px 17px">
           <div style="font-size:11.5px;color:#808977;letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px">${t.demo.accountsLabel}</div>
           ${demoAccounts}
@@ -787,6 +821,14 @@ export default function SatsetLanding() {
       }),
     );
     dots.forEach((d, i) => d.addEventListener("click", () => go(i)));
+
+    // Downloading from the nav or the hero leaves you looking at the hero,
+    // with no hint that the demo venues need a login at all. Send the page to
+    // the demo section, which already carries the accounts and the install
+    // steps. No preventDefault — the download has to fire as normal.
+    root.querySelectorAll<HTMLElement>("[data-dl]").forEach((a) =>
+      a.addEventListener("click", () => go(DEMO_SECTION_INDEX)),
+    );
 
     const langBtn = wrap.querySelector<HTMLElement>("[data-lang]");
     langBtn?.addEventListener("click", () =>
