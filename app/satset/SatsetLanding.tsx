@@ -8,9 +8,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const WA = "https://wa.me/6289525699078?text=%5BSatSet%5D";
 
+// ponytail: plain same-tab link, no target/download. Chrome Android ties a
+// download to the tab that started it, and target="_blank" leaves a blank tab
+// that closes the moment the transfer begins — the bar reaches 100% and the
+// file never lands. download= is a no-op here anyway (ignored cross-origin;
+// Content-Disposition already names the file).
 const APK = "https://github.com/meimodev/satset/releases/latest/download/satset.apk";
 // In-app webviews (WhatsApp, Instagram) silently drop cross-origin attachment
-// downloads. The releases page is a normal HTML page, so it always opens —
+// downloads, and the line above means we no longer hand off to the system
+// browser. The releases page is a normal HTML page, so it always opens —
 // from there the visitor can grab the asset in a real browser.
 const APK_PAGE = "https://github.com/meimodev/satset/releases/latest";
 
@@ -605,7 +611,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     <div class="demo-row" style="position:relative;z-index:2;display:flex;gap:48px;margin-top:32px;align-items:flex-start">
 
       <div class="demo-side" style="flex:0 0 350px;max-width:350px">
-        <a data-reveal data-delay="120" href="${APK}" target="_blank" rel="noopener noreferrer" download="satset.apk" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a data-reveal data-delay="120" href="${APK}" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B0D0A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/></svg>
           ${t.demo.ctaApk}
         </a>
