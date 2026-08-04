@@ -8,17 +8,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const WA = "https://wa.me/6289525699078?text=%5BSatSet%5D";
 
-// Version-pinned on purpose: this URL redirects once to the asset host, where
-// /releases/latest/download/... takes two hops. Bump the version when a new
-// release ships; path and filename both carry it, so a stale value 404s
-// rather than quietly serving an old build.
-//
-// Opened in a new tab deliberately. On Chrome Android a same-tab tap reaches
-// 100% and never finalises, while the same link via long-press → "open in new
-// tab" completes — so the tab the download is attached to is what matters.
-// An earlier _blank attempt did fail, but only ever against the two-hop URL,
-// so it was never tested in this combination.
-const APK = "https://github.com/meimodev/satset/releases/download/v1.0.2/satset-1.0.2.apk";
+// Same-origin route that streams the GitHub asset. See app/satset/download for
+// why: every cross-origin variant of this link stalls at 100% on Chrome
+// Android. Same-tab with a download attribute, which only carries weight
+// same-origin — the click becomes a download rather than a navigation, so no
+// tab is created for one to go missing.
+const APK = "/satset/download";
 // Known-good path on device, kept as the escape hatch: a normal HTML page,
 // so it survives both the tap bug and in-app webviews dropping attachments.
 const APK_PAGE = "https://github.com/meimodev/satset/releases/latest";
@@ -431,7 +426,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <button data-lang aria-label="Switch language" style="cursor:pointer;background:rgba(238,242,230,.06);border:1px solid rgba(238,242,230,.18);color:#EEF2E6;font-weight:700;font-size:13px;letter-spacing:.04em;padding:9px 13px;border-radius:999px;font-family:inherit;line-height:1">${other}</button>
-      <a class="nav-dl" href="${APK}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
+      <a class="nav-dl" href="${APK}" download="satset.apk" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
         ${DL_SVG(15)}
         ${t.nav.download}
       </a>
@@ -468,7 +463,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
         ${t.hero.para}
       </p>
       <div data-reveal data-delay="240" style="opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);display:flex;gap:14px;align-items:center;margin-top:34px;flex-wrap:wrap">
-        <a href="${APK}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a href="${APK}" download="satset.apk" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
@@ -621,7 +616,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     <div class="demo-row" style="position:relative;z-index:2;display:flex;gap:48px;margin-top:32px;align-items:flex-start">
 
       <div class="demo-side" style="flex:0 0 350px;max-width:350px">
-        <a data-reveal data-delay="120" href="${APK}" target="_blank" rel="noopener noreferrer" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a data-reveal data-delay="120" href="${APK}" download="satset.apk" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
