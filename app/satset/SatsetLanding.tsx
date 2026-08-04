@@ -8,16 +8,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const WA = "https://wa.me/6289525699078?text=%5BSatSet%5D";
 
-// ponytail: plain same-tab link, no target/download. Chrome Android ties a
-// download to the tab that started it, and target="_blank" leaves a blank tab
-// that closes the moment the transfer begins — the bar reaches 100% and the
-// file never lands. download= is a no-op here anyway (ignored cross-origin;
-// Content-Disposition already names the file).
-const APK = "https://github.com/meimodev/satset/releases/latest/download/satset.apk";
-// In-app webviews (WhatsApp, Instagram) silently drop cross-origin attachment
-// downloads, and the line above means we no longer hand off to the system
-// browser. The releases page is a normal HTML page, so it always opens —
-// from there the visitor can grab the asset in a real browser.
+// ponytail: every download CTA points at the releases *page*, not the asset.
+// Linking the .apk directly fails on Chrome Android — the navigation turns
+// into a cross-origin attachment, Chrome hands it to a tab that goes blank,
+// and the transfer reaches 100% and never finalises. Same URL pasted into the
+// address bar completes, so it is the link-initiated navigation that breaks,
+// not the file. Verified on device: releases page → tap satset.apk → completes.
+// Costs one extra tap and works in in-app webviews too, since a normal HTML
+// page always opens where an attachment response is silently dropped.
 const APK_PAGE = "https://github.com/meimodev/satset/releases/latest";
 
 // Three separate demo venues so simultaneous visitors don't fight over one dataset.
@@ -86,7 +84,6 @@ type Copy = {
     h2b: string;
     para: string;
     ctaApk: string;
-    apkAlt: string;
     req: string;
     accountsLabel: string;
     passLabel: string;
@@ -182,8 +179,7 @@ const COPY: Record<Lang, Copy> = {
       h2b: "jalankan restonya sendiri.",
       para: "Bukan video, bukan tur berpemandu. APK-nya bisa kamu unduh sekarang, lengkap dengan satu resto yang lagi ramai buat kamu bongkar sepuasnya.",
       ctaApk: "Unduh APK",
-      apkAlt: "Unduhan nggak jalan? Buka halaman rilis",
-      req: "Butuh Android 10 ke atas. Ukuran file 113 MB — pakai Wi-Fi kalau bisa. Saat diminta, izinkan pasang dari sumber tidak dikenal.",
+      req: "Tombolnya membuka halaman rilis di GitHub — pilih satset.apk di sana. Butuh Android 10 ke atas, ukurannya 113 MB, jadi pakai Wi-Fi kalau bisa. Saat diminta, izinkan pasang dari sumber tidak dikenal.",
       accountsLabel: "Akun demo — pakai salah satu",
       passLabel: "Password semuanya",
       stepsLabel: "Langkahnya",
@@ -287,8 +283,7 @@ const COPY: Record<Lang, Copy> = {
       h2b: "run the restaurant yourself.",
       para: "Not a video, not a guided tour. Download the APK right now — it comes with a restaurant mid-service for you to pull apart however you like.",
       ctaApk: "Download APK",
-      apkAlt: "Download not starting? Open the release page",
-      req: "Needs Android 10 or newer. It's a 113 MB file — use Wi-Fi if you can. Allow installing from unknown sources when your phone asks.",
+      req: "The button opens the release page on GitHub — pick satset.apk there. Needs Android 10 or newer and it's a 113 MB file, so use Wi-Fi if you can. Allow installing from unknown sources when your phone asks.",
       accountsLabel: "Demo accounts — use any one",
       passLabel: "Password for all",
       stepsLabel: "How it goes",
@@ -428,7 +423,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <button data-lang aria-label="Switch language" style="cursor:pointer;background:rgba(238,242,230,.06);border:1px solid rgba(238,242,230,.18);color:#EEF2E6;font-weight:700;font-size:13px;letter-spacing:.04em;padding:9px 13px;border-radius:999px;font-family:inherit;line-height:1">${other}</button>
-      <a class="nav-dl" href="${APK}" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
+      <a class="nav-dl" href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
         ${DL_SVG(15)}
         ${t.nav.download}
       </a>
@@ -465,7 +460,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
         ${t.hero.para}
       </p>
       <div data-reveal data-delay="240" style="opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);display:flex;gap:14px;align-items:center;margin-top:34px;flex-wrap:wrap">
-        <a href="${APK}" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
@@ -618,16 +613,10 @@ function buildMarkup(t: Copy, lang: Lang): string {
     <div class="demo-row" style="position:relative;z-index:2;display:flex;gap:48px;margin-top:32px;align-items:flex-start">
 
       <div class="demo-side" style="flex:0 0 350px;max-width:350px">
-        <a data-reveal data-delay="120" href="${APK}" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B0D0A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/></svg>
+        <a data-reveal data-delay="120" href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+          ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
-        <div data-reveal data-delay="150" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);margin:11px 0 0">
-          <a href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#BEF264;text-decoration:underline;text-decoration-color:rgba(163,230,53,.4);text-underline-offset:4px;padding:13px 0">
-            ${t.demo.apkAlt}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#BEF264" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>
-          </a>
-        </div>
         <p data-reveal data-delay="170" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);font-size:12.5px;color:#808977;line-height:1.45;margin:12px 0 0">${t.demo.req}</p>
 
         <div data-reveal data-delay="220" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);margin-top:18px;background:linear-gradient(165deg,#171B14,#10130E);border:1px solid rgba(163,230,53,.14);border-radius:15px;padding:15px 17px">
