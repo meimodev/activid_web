@@ -8,15 +8,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const WA = "https://wa.me/6289525699078?text=%5BSatSet%5D";
 
-// ponytail: every download CTA points at the releases *page*, not the asset.
-// Linking the .apk directly fails on Chrome Android — the navigation turns
-// into a cross-origin attachment, Chrome hands it to a tab that goes blank,
-// and the transfer reaches 100% and never finalises. Same URL pasted into the
-// address bar completes, so it is the link-initiated navigation that breaks,
-// not the file. Verified on device: releases page → tap satset.apk → completes.
-// Costs one extra tap and works in in-app webviews too, since a normal HTML
-// page always opens where an attachment response is silently dropped.
-const APK_PAGE = "https://github.com/meimodev/satset/releases/latest";
+// Version-pinned on purpose: this URL redirects once to the asset host, where
+// /releases/latest/download/... takes two hops. Plain same-tab anchor, no
+// target and no download attribute — target="_blank" leaves a tab that goes
+// blank the instant the transfer starts, and the download never finalises.
+// Bump the version here when a new release ships; the path and the filename
+// both carry it, so a stale value 404s rather than serving something old.
+const APK = "https://github.com/meimodev/satset/releases/download/v1.0.2/satset-1.0.2.apk";
 
 // Three separate demo venues so simultaneous visitors don't fight over one dataset.
 const DEMO_ACCOUNTS = ["admin@satset.id", "admin2@satset.id", "admin3@satset.id"];
@@ -179,7 +177,7 @@ const COPY: Record<Lang, Copy> = {
       h2b: "jalankan restonya sendiri.",
       para: "Bukan video, bukan tur berpemandu. APK-nya bisa kamu unduh sekarang, lengkap dengan satu resto yang lagi ramai buat kamu bongkar sepuasnya.",
       ctaApk: "Unduh APK",
-      req: "Tombolnya membuka halaman rilis di GitHub — pilih satset.apk di sana. Butuh Android 10 ke atas, ukurannya 113 MB, jadi pakai Wi-Fi kalau bisa. Saat diminta, izinkan pasang dari sumber tidak dikenal.",
+      req: "Butuh Android 10 ke atas. Ukuran file 113 MB — pakai Wi-Fi kalau bisa. Saat diminta, izinkan pasang dari sumber tidak dikenal.",
       accountsLabel: "Akun demo — pakai salah satu",
       passLabel: "Password semuanya",
       stepsLabel: "Langkahnya",
@@ -283,7 +281,7 @@ const COPY: Record<Lang, Copy> = {
       h2b: "run the restaurant yourself.",
       para: "Not a video, not a guided tour. Download the APK right now — it comes with a restaurant mid-service for you to pull apart however you like.",
       ctaApk: "Download APK",
-      req: "The button opens the release page on GitHub — pick satset.apk there. Needs Android 10 or newer and it's a 113 MB file, so use Wi-Fi if you can. Allow installing from unknown sources when your phone asks.",
+      req: "Needs Android 10 or newer. It's a 113 MB file — use Wi-Fi if you can. Allow installing from unknown sources when your phone asks.",
       accountsLabel: "Demo accounts — use any one",
       passLabel: "Password for all",
       stepsLabel: "How it goes",
@@ -423,7 +421,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <button data-lang aria-label="Switch language" style="cursor:pointer;background:rgba(238,242,230,.06);border:1px solid rgba(238,242,230,.18);color:#EEF2E6;font-weight:700;font-size:13px;letter-spacing:.04em;padding:9px 13px;border-radius:999px;font-family:inherit;line-height:1">${other}</button>
-      <a class="nav-dl" href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
+      <a class="nav-dl" href="${APK}" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
         ${DL_SVG(15)}
         ${t.nav.download}
       </a>
@@ -460,7 +458,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
         ${t.hero.para}
       </p>
       <div data-reveal data-delay="240" style="opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);display:flex;gap:14px;align-items:center;margin-top:34px;flex-wrap:wrap">
-        <a href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a href="${APK}" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
@@ -613,7 +611,7 @@ function buildMarkup(t: Copy, lang: Lang): string {
     <div class="demo-row" style="position:relative;z-index:2;display:flex;gap:48px;margin-top:32px;align-items:flex-start">
 
       <div class="demo-side" style="flex:0 0 350px;max-width:350px">
-        <a data-reveal data-delay="120" href="${APK_PAGE}" target="_blank" rel="noopener noreferrer" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+        <a data-reveal data-delay="120" href="${APK}" style="opacity:0;transform:translateY(24px);transition:all .8s cubic-bezier(.16,1,.3,1);cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:15px 26px;border-radius:999px;font-size:16px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
           ${DL_SVG(17)}
           ${t.demo.ctaApk}
         </a>
