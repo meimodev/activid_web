@@ -27,7 +27,7 @@ const DEMO_PASSWORD = "password";
 type Lang = "id" | "en";
 
 type Copy = {
-  nav: { features: string; day: string; floor: string; reports: string; demo: string; contact: string };
+  nav: { features: string; day: string; floor: string; reports: string; demo: string; contact: string; download: string };
   hero: {
     badge: string;
     h1a: string;
@@ -35,7 +35,6 @@ type Copy = {
     h1c: string;
     para: string;
     ctaPrimary: string;
-    ctaSecondary: string;
     meta1: string;
     meta2: string;
     meta3: string;
@@ -103,7 +102,7 @@ type Copy = {
 
 const COPY: Record<Lang, Copy> = {
   id: {
-    nav: { features: "Fitur", day: "Sehari Penuh", floor: "Area Resto", reports: "Laporan", demo: "Coba Sendiri", contact: "Hubungi Kami" },
+    nav: { features: "Fitur", day: "Sehari Penuh", floor: "Area Resto", reports: "Laporan", demo: "Coba Sendiri", contact: "Hubungi Kami", download: "Unduh APK" },
     hero: {
       badge: "Pakai Wi-Fi sendiri · Tetap jalan offline",
       h1a: "Sistem restoran",
@@ -111,7 +110,6 @@ const COPY: Record<Lang, Copy> = {
       h1c: "Wi-Fi kamu sendiri.",
       para: "Ubah HP dan tablet Android biasa jadi sistem pemesanan yang lengkap. Pairing lewat QR dalam hitungan detik. Tanpa internet, tanpa tagihan cloud bulanan, tanpa langganan untuk mencatat pesanan.",
       ctaPrimary: "Hubungi Kami",
-      ctaSecondary: "Lihat cara kerjanya",
       meta1: "⎯ Siap pakai dalam hitungan menit",
       meta2: "⎯ Terenkripsi antar perangkat",
       meta3: "⎯ Datamu tetap di jaringanmu",
@@ -209,7 +207,7 @@ const COPY: Record<Lang, Copy> = {
     footer: { tagline: "Terenkripsi antar perangkat · Login dengan PIN · Datamu tetap di jaringanmu" },
   },
   en: {
-    nav: { features: "Features", day: "A full day", floor: "The floor", reports: "Reports", demo: "Try it", contact: "Contact us" },
+    nav: { features: "Features", day: "A full day", floor: "The floor", reports: "Reports", demo: "Try it", contact: "Contact us", download: "Download APK" },
     hero: {
       badge: "Runs on your Wi-Fi · Works offline",
       h1a: "The restaurant",
@@ -217,7 +215,6 @@ const COPY: Record<Lang, Copy> = {
       h1c: "your own Wi-Fi.",
       para: "Turn ordinary Android phones and tablets into a complete point-of-order system. Pair by QR in seconds. No internet, no monthly cloud bill, no subscription to take an order.",
       ctaPrimary: "Contact us",
-      ctaSecondary: "See how it works",
       meta1: "⎯ Set up in minutes",
       meta2: "⎯ Encrypted device-to-device",
       meta3: "⎯ Your data stays local",
@@ -318,8 +315,13 @@ const COPY: Record<Lang, Copy> = {
 
 const LOGO_SVG = `<svg width="30" height="30" viewBox="0 0 48 48" style="display:block"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#BEF264"/><stop offset="1" stop-color="#84CC16"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lg)"/><path d="M24 12a13 13 0 0 0-13 13h26a13 13 0 0 0-13-13Z" fill="#151912"/><circle cx="24" cy="11" r="3" fill="#151912"/><rect x="9" y="26" width="30" height="4.6" rx="2.3" fill="#151912"/><path d="M25.5 15 19 25h4.2l-1.4 6 6.7-10h-4.2Z" fill="#BEF264"/></svg>`;
 
-const MAIL_SVG = (size: number) =>
-  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="#0B0D0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>`;
+// Stroke is a parameter because these icons now sit on both the lime fill
+// (dark stroke) and the outline variant on black (light stroke).
+const MAIL_SVG = (size: number, stroke = "#0B0D0A") =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>`;
+
+const DL_SVG = (size: number, stroke = "#0B0D0A") =>
+  `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 17v2.5A1.5 1.5 0 0 0 5.5 21h13a1.5 1.5 0 0 0 1.5-1.5V17"/></svg>`;
 
 const FEATURE_ICONS = [
   `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#BEF264" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3m4 0v4m-7 0h3" stroke-linecap="round"/></svg>`,
@@ -426,8 +428,12 @@ function buildMarkup(t: Copy, lang: Lang): string {
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <button data-lang aria-label="Switch language" style="cursor:pointer;background:rgba(238,242,230,.06);border:1px solid rgba(238,242,230,.18);color:#EEF2E6;font-weight:700;font-size:13px;letter-spacing:.04em;padding:9px 13px;border-radius:999px;font-family:inherit;line-height:1">${other}</button>
-      <a href="${WA}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
-        ${MAIL_SVG(15)}
+      <a class="nav-dl" href="${APK}" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none;box-shadow:0 8px 22px -8px rgba(163,230,53,.6)">
+        ${DL_SVG(15)}
+        ${t.nav.download}
+      </a>
+      <a href="${WA}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(238,242,230,.2);color:#EEF2E6;font-weight:600;padding:11px 20px;border-radius:999px;font-size:14.5px;text-decoration:none">
+        ${MAIL_SVG(15, "#EEF2E6")}
         ${t.nav.contact}
       </a>
     </div>
@@ -459,12 +465,13 @@ function buildMarkup(t: Copy, lang: Lang): string {
         ${t.hero.para}
       </p>
       <div data-reveal data-delay="240" style="opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);display:flex;gap:14px;align-items:center;margin-top:34px;flex-wrap:wrap">
-        <a href="${WA}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0B0D0A" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
-          ${t.hero.ctaPrimary}
+        <a href="${APK}" style="cursor:pointer;display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#BEF264,#84CC16);color:#0B0D0A;font-weight:700;padding:16px 28px;border-radius:999px;font-size:16.5px;text-decoration:none;box-shadow:0 14px 34px -10px rgba(163,230,53,.6)">
+          ${DL_SVG(17)}
+          ${t.demo.ctaApk}
         </a>
-        <a data-go="1" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(238,242,230,.18);color:#EEF2E6;font-weight:600;padding:16px 24px;border-radius:999px;font-size:16px;text-decoration:none">
-          ${t.hero.ctaSecondary}
+        <a href="${WA}" target="_blank" rel="noopener noreferrer" style="cursor:pointer;display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(238,242,230,.2);color:#EEF2E6;font-weight:600;padding:16px 24px;border-radius:999px;font-size:16px;text-decoration:none">
+          ${MAIL_SVG(16, "#EEF2E6")}
+          ${t.hero.ctaPrimary}
         </a>
       </div>
       <div class="hero-meta" data-reveal data-delay="320" style="opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);display:flex;gap:26px;margin-top:40px;font-size:13.5px;color:#808977">

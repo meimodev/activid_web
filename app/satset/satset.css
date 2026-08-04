@@ -80,6 +80,9 @@
   .satset-root nav { padding: 16px 22px !important; }
   /* 9px vertical padding leaves a 33px-tall toggle — under the 44px touch target. */
   .satset-root nav [data-lang] { padding: 15px !important; }
+  /* Logo + lang + two pills overflow 390px. The hero and the demo section both
+     carry the download CTA, so the nav copy is the one to drop here. */
+  .satset-root .nav-dl { display: none !important; }
   .satset-root .snap-sec { min-height: auto !important; }
   .satset-root .hero { flex-direction: column !important; justify-content: center !important; text-align: center; padding: 118px 22px 72px !important; min-height: 100dvh !important; }
   .satset-root .hero-copy { max-width: 620px !important; flex: none !important; align-items: center; display: flex; flex-direction: column; }
