@@ -16,9 +16,9 @@ export interface ProjectData {
   description: string;
   /** Outcome description */
   results: string;
-  /** Array of exactly 9 image URLs for 3x3 Instagram grid */
+  /** Mockup URLs for the grid — 1 renders full-bleed, more tile 3-up. `.mp4` renders as video. */
   mockupImages: string[];
-  /** Array of exactly 9 alt texts matching images */
+  /** Alt texts matching mockupImages by index */
   imageAlts: string[];
 }
 
@@ -89,8 +89,8 @@ export const PROJECT_DATA_SCHEMA = {
   projectType: { type: 'string' as const, required: true },
   description: { type: 'string' as const, required: true },
   results: { type: 'string' as const, required: true },
-  mockupImages: { type: 'array' as const, required: true, length: 9 },
-  imageAlts: { type: 'array' as const, required: true, length: 9 },
+  mockupImages: { type: 'array' as const, required: true },
+  imageAlts: { type: 'array' as const, required: true },
 } as const;
 
 /**
@@ -112,8 +112,10 @@ export const DEFAULT_PROJECT: ProjectData = {
   projectType: 'Project Type',
   description: 'Project description unavailable.',
   results: 'Results pending.',
-  mockupImages: Array(9).fill('/placeholder-image.jpg'),
-  imageAlts: Array(9).fill('Project mockup placeholder'),
+  // Empty, not a placeholder path — `/placeholder-image.jpg` never existed, so every
+  // fallback rendered a broken tile. The grid renders an empty state instead.
+  mockupImages: [],
+  imageAlts: [],
 };
 
 /**
@@ -150,16 +152,12 @@ export function validateProjectData(data: Partial<ProjectData>): {
     errors.push('results is required and must be a string');
   }
 
-  if (!Array.isArray(data.mockupImages)) {
-    errors.push('mockupImages is required and must be an array');
-  } else if (data.mockupImages.length !== 9) {
-    errors.push('mockupImages must contain exactly 9 images');
+  if (!Array.isArray(data.mockupImages) || data.mockupImages.length === 0) {
+    errors.push('mockupImages is required and must be a non-empty array');
   }
 
-  if (!Array.isArray(data.imageAlts)) {
-    errors.push('imageAlts is required and must be an array');
-  } else if (data.imageAlts.length !== 9) {
-    errors.push('imageAlts must contain exactly 9 alt texts');
+  if (!Array.isArray(data.imageAlts) || data.imageAlts.length !== (data.mockupImages?.length ?? -1)) {
+    errors.push('imageAlts must have one entry per mockup image');
   }
 
   return {
@@ -187,11 +185,12 @@ export function ensureValidProjectData(data: Partial<ProjectData>): ProjectData 
     projectType: data.projectType || DEFAULT_PROJECT.projectType,
     description: data.description || DEFAULT_PROJECT.description,
     results: data.results || DEFAULT_PROJECT.results,
-    mockupImages: Array.isArray(data.mockupImages) && data.mockupImages.length === 9
+    mockupImages: Array.isArray(data.mockupImages) && data.mockupImages.length > 0
       ? data.mockupImages
       : DEFAULT_PROJECT.mockupImages,
-    imageAlts: Array.isArray(data.imageAlts) && data.imageAlts.length === 9
-      ? data.imageAlts
+    // Pad/trim alts to match — a short alts array must not drop real images.
+    imageAlts: Array.isArray(data.mockupImages) && data.mockupImages.length > 0
+      ? data.mockupImages.map((_, i) => data.imageAlts?.[i] || `${data.client || 'Project'} mockup ${i + 1}`)
       : DEFAULT_PROJECT.imageAlts,
   };
 }

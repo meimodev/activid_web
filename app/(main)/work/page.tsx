@@ -13,15 +13,15 @@ export default function WorkPage() {
 
     // Aggregate and normalize projects from different service categories
     const allProjects: ProjectData[] = [
-        // Branding Projects
-        ...servicePages.branding.projects.map(p => ({
-            id: `branding-${p.id}`,
+        // Social Media Projects
+        ...servicePages.socialMedia.projects.map(p => ({
+            id: `social-${p.id}`,
             client: p.client || 'Unknown Client',
-            projectType: p.service || 'Branding',
+            projectType: p.service || 'Social Media',
             description: p.description || '',
             results: p.result || '',
             mockupImages: [p.image].filter((img): img is string => !!img),
-            imageAlts: [p.client ? `${p.client} branding` : 'Branding project'],
+            imageAlts: [p.client ? `${p.client} social media` : 'Social media project'],
         })),
 
         // Product Photography Projects
@@ -49,7 +49,7 @@ export default function WorkPage() {
 
     return (
         <main className="min-h-screen pt-20">
-            <ProjectShowcase projects={allProjects} className="bg-transparent" />
+            <ProjectShowcase projects={allProjects} />
         </main>
     );
 }

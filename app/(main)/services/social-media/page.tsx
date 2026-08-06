@@ -11,7 +11,15 @@ export const metadata: Metadata = {
 };
 
 export default function SocialMediaPage() {
-    const { header, showcases } = siteContent.servicePages.socialMedia;
+    const {
+        header,
+        showcasesTitle,
+        showcasesSubtitle,
+        showcases,
+        projectsTitle,
+        projectsSubtitle,
+        projects,
+    } = siteContent.servicePages.socialMedia;
 
     return (
         <main className="min-h-screen w-full bg-[#0B0F19] text-white overflow-hidden relative">
@@ -35,9 +43,26 @@ export default function SocialMediaPage() {
                             {header.description}
                         </p>
                     </div>
+
+                    <div className="w-full lg:w-1/2 relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden shadow-2xl animate-fade-left">
+                        {header.image && (
+                            <Image
+                                src={header.image}
+                                alt={header.title}
+                                fill
+                                className="object-cover hover:scale-105 transition-transform duration-700"
+                                priority
+                            />
+                        )}
+                    </div>
                 </div>
 
-                {/* Showcases Grid */}
+                {/* Showcases */}
+                <div className="mb-16">
+                    <h2 className="text-6xl lg:text-8xl font-black tracking-tighter text-[#F8EFDE] mb-2">{showcasesTitle}</h2>
+                    <p className="text-2xl lg:text-3xl font-medium text-gray-300">{showcasesSubtitle}</p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {showcases.map((item, index) => (
                         <div key={index} className="bg-[#F8EFDE] rounded-3xl p-6 text-[#1a1a3e] flex flex-col gap-6 h-full hover:transform hover:scale-[1.02] transition-all duration-300 shadow-xl">
@@ -50,8 +75,6 @@ export default function SocialMediaPage() {
 
                             {/* Instagram-Style Grid Mockup */}
                             <div className="bg-white rounded-xl overflow-hidden shadow-inner">
-
-                                {/* Instagram Grid */}
                                 <div className="relative aspect-square bg-gray-200">
                                     <Image
                                         src={item.image}
@@ -63,12 +86,59 @@ export default function SocialMediaPage() {
                                 </div>
                             </div>
 
-                            {/* Description */}
-                            <p className="text-sm text-center leading-relaxed mt-auto font-medium opacity-90">
-                                {item.description}
+                            {/* Industry Label */}
+                            <p className="text-sm text-center tracking-wider uppercase mt-auto font-bold opacity-70">
+                                {item.category}
                             </p>
                         </div>
                     ))}
+                </div>
+
+                {/* Case Studies */}
+                <div className="mt-32">
+                    <div className="mb-16">
+                        <h2 className="text-6xl lg:text-8xl font-black tracking-tighter text-[#F8EFDE] mb-2">{projectsTitle}</h2>
+                        <p className="text-2xl lg:text-3xl font-medium text-gray-300">{projectsSubtitle}</p>
+                    </div>
+
+                    <div className="space-y-32">
+                        {projects.map((project, index) => (
+                            <div key={index} className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                                {/* Image Card */}
+                                <div className="lg:col-span-5 relative aspect-4/3 rounded-3xl overflow-hidden shadow-2xl group">
+                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
+                                    {project.image && (
+                                        <Image
+                                            src={project.image}
+                                            alt={project.client || 'Project Image'}
+                                            fill
+                                            className="object-cover hover:scale-105 transition-transform duration-700"
+                                        />
+                                    )}
+                                    <div className="absolute inset-0 border border-white/10 rounded-3xl pointer-events-none" />
+                                </div>
+
+                                {/* Content */}
+                                <div className="lg:col-span-7 space-y-6">
+                                    <div className="text-6xl font-black text-white/10 select-none">{project.id}.</div>
+                                    <div>
+                                        <h3 className={`text-2xl lg:text-3xl font-bold mb-2 ${project.color}`}>
+                                            {project.client} <span className="text-[#F8EFDE] font-medium">| {project.service}</span>
+                                        </h3>
+                                        <p className="text-lg text-gray-300 leading-relaxed mb-6">
+                                            {project.description}
+                                        </p>
+                                        <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                            <span className="font-bold text-[#F8EFDE] block mb-1">Result:</span>
+                                            <p className="text-gray-200 font-medium">
+                                                {project.result}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
             <CTA />

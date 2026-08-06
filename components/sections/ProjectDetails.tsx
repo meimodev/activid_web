@@ -30,27 +30,27 @@ function ProjectDetailsComponent({
     >
       {/* Project Number, Client Handle, and Project Type */}
       <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm md:text-base">
-        <span 
-          className="font-semibold text-[#1a1a3e]"
+        <span
+          className="font-semibold text-white/40"
           aria-label={`Project number ${projectNumber}`}
         >
           {projectNumber}
         </span>
-        <span 
-          className="text-[#1a1a3e] font-medium"
+        <span
+          className="text-[#F8EFDE] font-medium"
           aria-label={`Client ${client}`}
         >
           {client}
         </span>
-        <span 
-          className="text-gray-400 select-none"
+        <span
+          className="text-white/30 select-none"
           aria-hidden="true"
           role="separator"
         >
           |
         </span>
-        <span 
-          className="text-[#1a1a3e]"
+        <span
+          className="text-gray-300"
           aria-label={`Project type: ${projectType}`}
         >
           {projectType}
@@ -58,20 +58,20 @@ function ProjectDetailsComponent({
       </div>
 
       {/* Description */}
-      <p 
-        className="text-[#1a1a3e] text-sm sm:text-base md:text-lg leading-relaxed break-words overflow-wrap-anywhere"
+      <p
+        className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed break-words overflow-wrap-anywhere"
         aria-label="Project description"
       >
         {description}
       </p>
 
       {/* Results with "Result:" label */}
-      <div 
-        className="text-[#1a1a3e] text-sm sm:text-base md:text-lg leading-relaxed"
+      <div
+        className="bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-5 text-sm sm:text-base md:text-lg leading-relaxed"
         aria-label="Project results"
       >
-        <span className="font-semibold">Result: </span>
-        <span className="break-words overflow-wrap-anywhere">{results}</span>
+        <span className="font-semibold text-[#F8EFDE]">Result: </span>
+        <span className="text-gray-200 break-words overflow-wrap-anywhere">{results}</span>
       </div>
     </div>
   );

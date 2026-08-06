@@ -115,7 +115,6 @@ export interface ShowcaseItem {
     category: string;
     colors: string[];
     image: string;
-    description: string;
 }
 
 export interface VideoThumbnail {
@@ -128,14 +127,14 @@ export interface TechStack {
     description: string;
 }
 
-export interface BrandingPageContent {
-    header: ServicePageHeader;
-    projects: ProjectItem[];
-}
-
 export interface SocialMediaPageContent {
     header: ServicePageHeader;
+    showcasesTitle: string;
+    showcasesSubtitle: string;
     showcases: ShowcaseItem[];
+    projectsTitle: string;
+    projectsSubtitle: string;
+    projects: ProjectItem[];
 }
 
 export interface EventDocumentationPageContent {
@@ -214,7 +213,6 @@ export interface ContactPageContent {
 }
 
 export interface ServicePagesContent {
-    branding: BrandingPageContent;
     socialMedia: SocialMediaPageContent;
     eventDocumentation: EventDocumentationPageContent;
     videoPodcast: VideoPodcastPageContent;

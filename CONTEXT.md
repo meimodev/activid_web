@@ -44,6 +44,8 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Activid** — The portfolio website and web-based creative-agency product. The umbrella brand under which the mobile apps ship.
 
+**Social Media Management** — One of the five services Activid sells on the marketing site (`/services/social-media`), and the one that **includes brand-identity work** — logo, colour palette, typography — as the front half of an engagement that continues into content strategy, design, copywriting and performance analysis. There is no separate branding service: *Branding & Design* was retired as a standalone offering and absorbed here (ADR-0009). "Branding" remains a valid word for the identity work inside this service; it is not a service name.
+
 **Palakat** — A mobile application (iOS + Android) published under Activid.
 
 **Bol-bol Studio** — A self-photo-studio booking page (`/bol-bol-studio`), its own standalone brand world: independent theme, fonts, and layout, not part of the marketing site or invitation platform. Mobile-first; the booking flow is a multi-step (Tanggal → Jam → Paket → Latar → Konfirmasi → Selesai) single-page carousel that submits via WhatsApp.

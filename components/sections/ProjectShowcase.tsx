@@ -13,7 +13,7 @@ import type { ProjectShowcaseProps } from '@/types/project-showcase.types';
  * 
  * Features:
  * - Section badge with number "03"
- * - Section header with "Project" heading and "Branding & Design" subtitle
+ * - Section header with "Project" heading and "Selected Work" subtitle
  * - Responsive grid layout for case studies
  * - Consistent styling with landing page aesthetic
  * - Dynamic rendering with data validation
@@ -30,7 +30,7 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
 
   return (
     <section
-      className={`relative py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-[#F8EFDE] ${className}`}
+      className={`relative py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 ${className}`}
       aria-labelledby="project-showcase-heading"
     >
       <div className="container mx-auto max-w-7xl">
@@ -40,7 +40,7 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="absolute p-3 sm:p-4 rounded-bl-4xl bg-[#1a1a3e] top-2 right-4 sm:right-8 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black opacity-90 text-[#F8EFDE] font-[family-name:var(--font-bricolage)]"
+          className="absolute p-3 sm:p-4 rounded-bl-4xl bg-[#F8EFDE] top-2 right-4 sm:right-8 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black opacity-90 text-[#1a1a3e] font-[family-name:var(--font-bricolage)]"
           aria-label="Section number 03"
         >
           03
@@ -50,12 +50,12 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
         <FadeUp duration={0.8} className="mb-8 sm:mb-12 md:mb-16">
           <h2
             id="project-showcase-heading"
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[#1a1a3e] leading-none font-[family-name:var(--font-bricolage)]"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[#F8EFDE] leading-none font-[family-name:var(--font-bricolage)]"
           >
             Project
           </h2>
-          <p className="text-lg sm:text-xl md:text-2xl text-[#1a1a3e] mt-2 font-[family-name:var(--font-bricolage)]">
-            Branding & Design
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mt-2 font-[family-name:var(--font-bricolage)]">
+            Selected Work
           </p>
         </FadeUp>
 
@@ -77,7 +77,7 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
                   scale: 1.02,
                   transition: { duration: 0.3, ease: 'easeInOut' },
                 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-[#1a1a3e] focus-within:ring-offset-4 rounded-lg transition-shadow"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-10 lg:gap-12 items-start cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-[#F8EFDE] focus-within:ring-offset-4 focus-within:ring-offset-transparent rounded-lg transition-shadow"
                 style={{
                   willChange: 'transform',
                 }}
@@ -117,10 +117,10 @@ export function ProjectShowcase({ projects, className = '' }: ProjectShowcasePro
             role="status"
             aria-live="polite"
           >
-            <p className="text-xl md:text-2xl text-[#1a1a3e] font-[family-name:var(--font-bricolage)]">
+            <p className="text-xl md:text-2xl text-[#F8EFDE] font-[family-name:var(--font-bricolage)]">
               No projects available at this time.
             </p>
-            <p className="text-base md:text-lg text-gray-600 mt-2">
+            <p className="text-base md:text-lg text-gray-300 mt-2">
               Check back soon for our latest work.
             </p>
           </motion.div>

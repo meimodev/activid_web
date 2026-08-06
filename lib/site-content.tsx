@@ -62,19 +62,9 @@ export const siteContent: SiteContent = {
     title: 'Our Services',
     items: [
       {
-        id: 'branding',
-        title: 'Branding & Design',
-        description: 'Membentuk identitas visual yang kuat dari logo, palet warna, tipografi, hingga panduan brand lengkap yang menggambarkan nilai dan karakter bisnis Anda.',
-        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
-        imageAlt: 'Branding and Design',
-        color: '#7a7a9d',
-        buttonText: 'View Project',
-        buttonLink: '/services/branding',
-      },
-      {
         id: 'social-media',
         title: 'Social Media Management',
-        description: 'Mengelola dan mengembangkan citra brand Anda di media sosial. Mulai dari strategi konten, desain, copywriting, hingga analisis performa agar audiens Anda tumbuh secara organik dan relevan.',
+        description: 'Membangun identitas visual brand Anda — logo, palet warna, tipografi — lalu mengelola dan mengembangkannya di media sosial: strategi konten, desain, copywriting, hingga analisis performa agar audiens tumbuh secara organik dan relevan.',
         image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_cover_1.jpg',
         imageAlt: 'Social Media Management',
         color: '#5a5a8d',
@@ -215,12 +205,38 @@ export const siteContent: SiteContent = {
     ],
   },
   servicePages: {
-    branding: {
+    socialMedia: {
       header: {
-        title: 'Branding & Design',
-        description: 'Membentuk identitas visual yang kuat dari logo, palet warna, tipografi, hingga panduan brand lengkap yang menggambarkan nilai dan karakter bisnis Anda.',
-        image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=600&fit=crop',
+        title: 'Social Media Management',
+        description: 'Membangun identitas visual brand Anda — logo, palet warna, tipografi — lalu mengelola dan mengembangkannya di media sosial: strategi konten, desain, copywriting, hingga analisis performa agar audiens tumbuh secara organik dan relevan.',
+        image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_cover_1.jpg',
       },
+      showcasesTitle: 'Showcase',
+      showcasesSubtitle: 'Ragam industri yang kami tangani',
+      showcases: [
+        {
+          category: 'Coffee Shop',
+          colors: ['#2C4A3B', '#E8DCCA', '#5C4033'],
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_2-min.jpg',
+        },
+        {
+          category: 'Beauty',
+          colors: ['#FFB7B2', '#FFFFFF', '#C08552'],
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_3-min.jpg',
+        },
+        {
+          category: 'F&B',
+          colors: ['#E67E22', '#1A1A1A', '#F1C40F'],
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_1-min.jpg',
+        },
+        {
+          category: 'Automotive',
+          colors: ['#C0392B', '#000000', '#922B21'],
+          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_4-min.jpg',
+        },
+      ],
+      projectsTitle: 'Case Study',
+      projectsSubtitle: 'Hasil nyata dari brand yang kami bangun',
       projects: [
         {
           id: '01',
@@ -229,7 +245,8 @@ export const siteContent: SiteContent = {
           description: 'Kami bantu klien membangun kembali branding mulai dari logo, strategi konten kreatif, visual konsisten, dan tone komunikasi yang relevan.',
           result: 'Engagement naik 60% dalam 2 bulan, dengan citra brand yang lebih profesional.',
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_bakso_denny.jpg',
-          color: 'text-[#D9381E]',
+          // Tuned for the dark #0B0F19 shell — the cream-era values failed contrast here.
+          color: 'text-[#FF6B52]',
         },
         {
           id: '02',
@@ -238,7 +255,7 @@ export const siteContent: SiteContent = {
           description: 'Kami mendampingi klien sejak awal membangun identitas digital mulai dari konsep visual, tone warna, hingga gaya komunikasi di media sosial agar tampil konsisten dan siap bersaing secara online.',
           result: 'Brand berhasil hadir dengan tampilan digital yang rapi, terarah, dan mudah dikenali audiens.',
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_bbold.jpg',
-          color: 'text-[#8B4513]',
+          color: 'text-[#D9A066]',
         },
         {
           id: '03',
@@ -247,39 +264,7 @@ export const siteContent: SiteContent = {
           description: 'Kami bantu klien mengembangkan tampilan media sosial yang menyesuaikan keinginan dan karakter owner dari pemilihan warna, dan tema visual.',
           result: 'Tujuan tercapai untuk pembuatan Feed yang ceria dan menarik, serta berhasil membangun kedekatan dengan audiens.',
           image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_fourever.jpg',
-          color: 'text-[#E91E63]',
-        },
-      ],
-    },
-    socialMedia: {
-      header: {
-        title: 'Social Media Management',
-        description: 'Mengelola dan mengembangkan citra brand Anda di media sosial. Mulai dari strategi konten, desain, copywriting, hingga analisis performa.',
-      },
-      showcases: [
-        {
-          category: 'Coffee Shop',
-          colors: ['#2C4A3B', '#E8DCCA', '#5C4033'],
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_2-min.jpg',
-          description: '',
-        },
-        {
-          category: 'Beauty',
-          colors: ['#FFB7B2', '#FFFFFF', '#C08552'],
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_3-min.jpg',
-          description: '',
-        },
-        {
-          category: 'F&B',
-          colors: ['#E67E22', '#1A1A1A', '#F1C40F'],
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_1-min.jpg',
-          description: '',
-        },
-        {
-          category: 'Automotive',
-          colors: ['#C0392B', '#000000', '#922B21'],
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_social_4-min.jpg',
-          description: '',
+          color: 'text-[#FF6FA5]',
         },
       ],
     },

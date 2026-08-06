@@ -6,10 +6,13 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import type { InstagramGridProps } from '@/types/project-showcase.types';
 
 /**
- * InstagramGrid component that renders a 3x3 grid of images
+ * InstagramGrid component that tiles project mockups
  * Used within BrowserFrame to display project mockups
- * 
- * @param images - Array of image URLs (should be 9 for 3x3 grid)
+ *
+ * Renders exactly as many cells as it is given: a single mockup goes full-bleed,
+ * several tile 3-up. `.mp4` sources render as muted looping video.
+ *
+ * @param images - Array of mockup URLs (image or .mp4); empty renders an empty state
  * @param alts - Array of alt texts corresponding to images
  * @param isLoading - Loading state indicator
  * @param priority - Priority loading for above-the-fold images
@@ -30,22 +33,30 @@ function InstagramGridComponent({ images, alts, isLoading = false, priority = fa
   const handleImageLoadStart = (index: number) => {
     setImageLoading(prev => ({ ...prev, [index]: true }));
   };
-  // Ensure we have exactly 9 items for the 3x3 grid
-  const gridItems = Array.from({ length: 9 }, (_, index) => {
+  const gridItems = images.map((src, index) => {
     const altText = alts[index]?.trim();
     // Use fallback if alt text is missing, whitespace-only, or too short to be descriptive
     const isValidAlt = altText && altText.length >= 5;
     return {
-      src: images[index] || '/placeholder-image.jpg',
-      alt: isValidAlt ? alts[index] : 'Project mockup placeholder',
+      src,
+      alt: isValidAlt ? alts[index] : 'Project mockup',
+      isVideo: /\.mp4($|\?)/i.test(src),
     };
   });
 
+  if (gridItems.length === 0) {
+    return (
+      <div className="w-full aspect-square flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
+        No mockups yet
+      </div>
+    );
+  }
+
   return (
-    <div 
-      className="grid grid-cols-3 gap-0.5 sm:gap-1 w-full aspect-square"
+    <div
+      className={`grid gap-0.5 sm:gap-1 w-full ${gridItems.length === 1 ? 'grid-cols-1' : 'grid-cols-3'}`}
       role="grid"
-      aria-label="Instagram-style project mockup grid"
+      aria-label="Project mockup grid"
     >
       {gridItems.map((item, index) => (
         <div
@@ -83,12 +94,26 @@ function InstagramGridComponent({ images, alts, isLoading = false, priority = fa
               </svg>
               <span className="text-xs text-center px-1">Image unavailable</span>
             </div>
+          ) : item.isVideo ? (
+            <video
+              src={item.src}
+              aria-label={item.alt}
+              className="absolute inset-0 w-full h-full object-cover"
+              muted
+              loop
+              playsInline
+              autoPlay
+              preload="metadata"
+              onError={() => handleImageError(index)}
+            />
           ) : (
             <Image
               src={item.src}
               alt={item.alt}
               fill
-              sizes="(max-width: 640px) 30vw, (max-width: 768px) 28vw, (max-width: 1024px) 20vw, 15vw"
+              sizes={gridItems.length === 1
+                ? '(max-width: 768px) 100vw, 45vw'
+                : '(max-width: 640px) 30vw, (max-width: 768px) 28vw, (max-width: 1024px) 20vw, 15vw'}
               className="object-cover"
               loading={priority ? undefined : "lazy"}
               priority={priority}
