@@ -240,30 +240,27 @@ export const siteContent: SiteContent = {
       projects: [
         {
           id: '01',
-          client: '@baksodenny',
+          client: 'iceman es kristal',
           service: 're-branding',
           description: 'Kami bantu klien membangun kembali branding mulai dari logo, strategi konten kreatif, visual konsisten, dan tone komunikasi yang relevan.',
           result: 'Engagement naik 60% dalam 2 bulan, dengan citra brand yang lebih profesional.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_bakso_denny.jpg',
           // Tuned for the dark #0B0F19 shell — the cream-era values failed contrast here.
           color: 'text-[#FF6B52]',
         },
         {
           id: '02',
-          client: '@bbold.mmxx',
+          client: 'bbold MMXX',
           service: 'Brand Kickstart & Social Media Setup',
           description: 'Kami mendampingi klien sejak awal membangun identitas digital mulai dari konsep visual, tone warna, hingga gaya komunikasi di media sosial agar tampil konsisten dan siap bersaing secara online.',
           result: 'Brand berhasil hadir dengan tampilan digital yang rapi, terarah, dan mudah dikenali audiens.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_bbold.jpg',
           color: 'text-[#D9A066]',
         },
         {
           id: '03',
-          client: '@fourevergift_',
+          client: 'especto coffee',
           service: 'Social Media Setup',
           description: 'Kami bantu klien mengembangkan tampilan media sosial yang menyesuaikan keinginan dan karakter owner dari pemilihan warna, dan tema visual.',
           result: 'Tujuan tercapai untuk pembuatan Feed yang ceria dan menarik, serta berhasil membangun kedekatan dengan audiens.',
-          image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_branding_fourever.jpg',
           color: 'text-[#FF6FA5]',
         },
       ],

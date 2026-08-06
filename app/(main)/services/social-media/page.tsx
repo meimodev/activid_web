@@ -101,39 +101,22 @@ export default function SocialMediaPage() {
                         <p className="text-2xl lg:text-3xl font-medium text-gray-300">{projectsSubtitle}</p>
                     </div>
 
-                    <div className="space-y-32">
+                    <div className="space-y-20">
                         {projects.map((project, index) => (
-                            <div key={index} className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                                {/* Image Card */}
-                                <div className="lg:col-span-5 relative aspect-4/3 rounded-3xl overflow-hidden shadow-2xl group">
-                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
-                                    {project.image && (
-                                        <Image
-                                            src={project.image}
-                                            alt={project.client || 'Project Image'}
-                                            fill
-                                            className="object-cover hover:scale-105 transition-transform duration-700"
-                                        />
-                                    )}
-                                    <div className="absolute inset-0 border border-white/10 rounded-3xl pointer-events-none" />
-                                </div>
-
-                                {/* Content */}
-                                <div className="lg:col-span-7 space-y-6">
-                                    <div className="text-6xl font-black text-white/10 select-none">{project.id}.</div>
-                                    <div>
-                                        <h3 className={`text-2xl lg:text-3xl font-bold mb-2 ${project.color}`}>
-                                            {project.client} <span className="text-[#F8EFDE] font-medium">| {project.service}</span>
-                                        </h3>
-                                        <p className="text-lg text-gray-300 leading-relaxed mb-6">
-                                            {project.description}
+                            <div key={index} className="space-y-6">
+                                <div className="text-6xl font-black text-white/10 select-none">{project.id}.</div>
+                                <div>
+                                    <h3 className={`text-2xl lg:text-3xl font-bold mb-2 ${project.color}`}>
+                                        {project.client} <span className="text-[#F8EFDE] font-medium">| {project.service}</span>
+                                    </h3>
+                                    <p className="text-lg text-gray-300 leading-relaxed mb-6">
+                                        {project.description}
+                                    </p>
+                                    <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
+                                        <span className="font-bold text-[#F8EFDE] block mb-1">Result:</span>
+                                        <p className="text-gray-200 font-medium">
+                                            {project.result}
                                         </p>
-                                        <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
-                                            <span className="font-bold text-[#F8EFDE] block mb-1">Result:</span>
-                                            <p className="text-gray-200 font-medium">
-                                                {project.result}
-                                            </p>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
