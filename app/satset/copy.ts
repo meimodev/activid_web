@@ -69,6 +69,7 @@ export type Copy = {
     req: string;
     accountsLabel: string;
     passLabel: string;
+    staffLabel: string;
     stepsLabel: string;
     steps: { t: string; d: string }[];
     bonusLabel: string;
@@ -173,6 +174,7 @@ export const COPY: Record<Lang, Copy> = {
       req: "Butuh Android 10 ke atas. Ukuran file 113 MB — pakai Wi-Fi kalau bisa.",
       accountsLabel: "Akun demo — pakai salah satu",
       passLabel: "Password semuanya",
+      staffLabel: "Staf bawaan — setelah data demo dimuat",
       stepsLabel: "Langkahnya",
       steps: [
         { t: "Unduh & pasang", d: "Ambil APK-nya, lalu izinkan pemasangan saat HP-mu bertanya." },
@@ -286,6 +288,7 @@ export const COPY: Record<Lang, Copy> = {
       req: "Needs Android 10 or newer. It's a 113 MB file — use Wi-Fi if you can.",
       accountsLabel: "Demo accounts — use any one",
       passLabel: "Password for all",
+      staffLabel: "Demo staff — after the demo data loads",
       stepsLabel: "How it goes",
       steps: [
         { t: "Download & install", d: "Grab the APK, then allow the install when your phone asks." },

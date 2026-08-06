@@ -29,6 +29,18 @@ const APK_PAGE = "https://github.com/meimodev/satset/releases/latest";
 const DEMO_ACCOUNTS = ["admin@satset.id", "admin2@satset.id", "admin3@satset.id"];
 const DEMO_PASSWORD = "password";
 
+// Staff sign in by PIN, admins by email — two paths on the app's one sign-in
+// screen. These four are seeded by the demo data load, so they only exist from
+// step 4 onward. Names are rows in the app's DB, identical in both locales, so
+// they stay here rather than in copy.ts — and they must match `genericUsers` in
+// the satset repo's seed_data.dart exactly, or the visitor types a dead PIN.
+const DEMO_STAFF = [
+  { name: "Pelayan 1", pin: "100001" },
+  { name: "Dapur 1", pin: "100002" },
+  { name: "Pelayan 2", pin: "100003" },
+  { name: "Dapur 2", pin: "100004" },
+];
+
 function buildMarkup(t: Copy, lang: Lang): string {
   const other = lang === "id" ? "EN" : "ID";
 
@@ -77,6 +89,17 @@ function buildMarkup(t: Copy, lang: Lang): string {
   const demoAccounts = DEMO_ACCOUNTS.map(
     (a) =>
       `<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:#EEF2E6;padding:6px 0;border-bottom:1px solid rgba(238,242,230,.07)">${a}</div>`,
+  ).join("");
+
+  // Same row rhythm as the accounts above; the PIN takes the password's lime so
+  // "the bit you type in" reads the same everywhere in this card. No rule under
+  // the last row — nothing follows it, unlike the accounts list.
+  const demoStaff = DEMO_STAFF.map(
+    (s, i) =>
+      `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 0${i < DEMO_STAFF.length - 1 ? ";border-bottom:1px solid rgba(238,242,230,.07)" : ""}">
+            <span style="font-size:13.5px;color:#EEF2E6">${s.name}</span>
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:#BEF264;font-weight:600">${s.pin}</span>
+          </div>`,
   ).join("");
 
   const floorDelays = [200, 260, 320];
@@ -319,6 +342,10 @@ function buildMarkup(t: Copy, lang: Lang): string {
           <div style="font-size:11.5px;color:#808977;letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px">${t.demo.accountsLabel}</div>
           ${demoAccounts}
           <div style="display:flex;align-items:baseline;gap:8px;margin-top:9px"><span style="font-size:12.5px;color:#808977">${t.demo.passLabel}</span><span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:#BEF264;font-weight:600">${DEMO_PASSWORD}</span></div>
+          <div style="margin-top:14px;padding-top:13px;border-top:1px solid rgba(238,242,230,.09)">
+            <div style="font-size:11.5px;color:#808977;letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px;line-height:1.4">${t.demo.staffLabel}</div>
+            ${demoStaff}
+          </div>
         </div>
       </div>
 

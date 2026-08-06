@@ -50,6 +50,12 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Latar (Background)** — The studio backdrop the customer poses against, chosen as a required step between Paket and Konfirmasi. A fixed set of named backdrop options (e.g. white, peach, green, corner), each shown as a labelled photo thumbnail; selecting one advances the flow. The chosen Latar appears in the Konfirmasi order summary and in the WhatsApp message. Distinct from a Paket (a priced session) and an Add-on.
 
+**SatSet** — Offline-first restaurant point-of-order system (Android), pitched at `/satset`; the app itself lives in a separate repo and ships as an APK release this site proxies. Invite-only. Runs on a venue's own Wi-Fi with no cloud dependency for day-to-day service.
+
+**Demo Account (SatSet)** — One of three admin identities (`admin@satset.id`, `admin2@…`, `admin3@…`, shared password) published on the SatSet landing page so a visitor can sign into a freshly-installed APK. Email + password, admin only — three separate ones so simultaneous visitors don't share a dataset. Distinct from a **Staff Account**.
+
+**Staff Account (SatSet)** — A non-admin person inside a SatSet venue (waiter, kitchen), signing in by PIN rather than email, so every action is attributed to them. The landing page publishes the seeded demo staff and their PINs; these exist only after the demo data is loaded, and must match the seed in the latest satset release. Distinct from a **Demo Account**.
+
 **LOIT** — Full product name **LOIT — Shareable Finance Tracker**. A mobile application (iOS + Android) published under Activid. Always written uppercase. Collects: account identity (name/username) + contact (email/phone), camera + photos (uploaded and stored), and location. Backed by Supabase (auth, database, photo storage), Firebase (analytics + crash reporting), Firebase Cloud Messaging (push; device token collected), and Google Play Services / Maps (location).
 
 **Privacy Policy** — Site-wide legal page (`/privacy`) covering Activid, Palakat, and LOIT jointly.
