@@ -109,6 +109,8 @@ export interface ProjectItem {
     image?: string;
     images?: string[];
     color?: string;
+    link?: string;
+    handle?: string;
 }
 
 export interface ShowcaseItem {

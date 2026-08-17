@@ -246,6 +246,8 @@ export const siteContent: SiteContent = {
           result: 'Engagement naik 60% dalam 2 bulan, dengan citra brand yang lebih profesional.',
           // Tuned for the dark #0B0F19 shell — the cream-era values failed contrast here.
           color: 'text-[#FF6B52]',
+          link: 'https://www.instagram.com/icemaneskristal/',
+          handle: '@icemaneskristal',
         },
         {
           id: '02',
@@ -254,6 +256,8 @@ export const siteContent: SiteContent = {
           description: 'Kami mendampingi klien sejak awal membangun identitas digital mulai dari konsep visual, tone warna, hingga gaya komunikasi di media sosial agar tampil konsisten dan siap bersaing secara online.',
           result: 'Brand berhasil hadir dengan tampilan digital yang rapi, terarah, dan mudah dikenali audiens.',
           color: 'text-[#D9A066]',
+          link: 'https://www.instagram.com/bbold.mmxx/',
+          handle: '@bbold.mmxx',
         },
         {
           id: '03',
@@ -262,6 +266,8 @@ export const siteContent: SiteContent = {
           description: 'Kami bantu klien mengembangkan tampilan media sosial yang menyesuaikan keinginan dan karakter owner dari pemilihan warna, dan tema visual.',
           result: 'Tujuan tercapai untuk pembuatan Feed yang ceria dan menarik, serta berhasil membangun kedekatan dengan audiens.',
           color: 'text-[#FF6FA5]',
+          link: 'https://www.instagram.com/esspecto_coffee/?hl=en',
+          handle: '@esspecto_coffee',
         },
       ],
     },
