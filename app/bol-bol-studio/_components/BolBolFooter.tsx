@@ -4,16 +4,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const AUTO_COLLAPSE_MS = 10000;
+const AUTO_COLLAPSE_MS = 2000;
 
 export default function BolBolFooter() {
   const [expanded, setExpanded] = useState(true);
 
+  // ponytail: only the first, automatic collapse — a manual re-open stays open.
   useEffect(() => {
-    if (!expanded) return;
     const timer = setTimeout(() => setExpanded(false), AUTO_COLLAPSE_MS);
     return () => clearTimeout(timer);
-  }, [expanded]);
+  }, []);
 
   return (
     <div className="w-full px-4 pb-2">
