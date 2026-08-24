@@ -50,6 +50,12 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Bol-bol Studio** — A self-photo-studio booking page (`/bol-bol-studio`), its own standalone brand world: independent theme, fonts, and layout, not part of the marketing site or invitation platform. Mobile-first; the booking flow is a multi-step (Tanggal → Jam → Paket → Latar → Konfirmasi → Selesai) single-page carousel that submits via WhatsApp.
 
+**Booking Request (Permintaan Booking)** — What a Bol-bol Studio customer produces at the end of the Konfirmasi step: a slot they have asked for, not a slot they hold. It leaves the site as a WhatsApp message to the studio admin and is mirrored onto the **Studio Calendar** as tentative. It is not a **Booking** — nothing is reserved, and a customer who never sends the WhatsApp message still leaves a Booking Request behind. Becomes a Booking only when the admin records it.
+
+**Booking** — A studio session the admin has accepted: a specific customer holding a specific slot for a specific **Paket**. Only the admin creates one, and its existence is what makes the slot unavailable to other customers. Mirrored onto the **Studio Calendar** as confirmed, replacing the tentative entry the matching **Booking Request** left there.
+
+**Studio Calendar (Kalender Studio)** — The single Google calendar the studio owner reads to see their day. Holds both tentative **Booking Requests** and confirmed **Bookings**, visually distinguished, and is a mirror rather than a record: it is written to, never read from, and losing it loses no information the studio needs. Dedicated to the studio, not the owner's personal calendar.
+
 **Latar (Background)** — The studio backdrop the customer poses against, chosen as a required step between Paket and Konfirmasi. A fixed set of named backdrop options (e.g. white, peach, green, corner), each shown as a labelled photo thumbnail; selecting one advances the flow. The chosen Latar appears in the Konfirmasi order summary and in the WhatsApp message. Distinct from a Paket (a priced session) and an Add-on.
 
 **SatSet** — Offline-first restaurant point-of-order system (Android), pitched at `/satset`; the app itself lives in a separate repo and ships as an APK release this site proxies. Invite-only. Runs on a venue's own Wi-Fi with no cloud dependency for day-to-day service.

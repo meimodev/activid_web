@@ -30,6 +30,19 @@ import {
 const TOTAL_STEPS = 6;
 const STEP_LABELS = ["Tanggal", "Jam", "Paket", "Latar", "Konfirmasi", "Selesai"];
 
+// Mirrors a slot onto the studio Google Calendar. Fire-and-forget on purpose:
+// the WhatsApp message is the source of truth, the calendar is a convenience
+// copy, so a calendar failure must never block or alarm the customer.
+// `keepalive` keeps the request alive across the WhatsApp navigation.
+function mirrorToCalendar(payload: Record<string, unknown>) {
+  void fetch("/api/bol-bol-studio/calendar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 function updateUrlSlide(router: ReturnType<typeof useRouter>, searchParams: URLSearchParams, index: number) {
   const nextParams = new URLSearchParams(searchParams.toString());
   if (index === 0) {
@@ -133,7 +146,17 @@ export default function BolBolStudioClient({
       const bookingTime = `${formatTime(order.dateTime)} ${studioInfo.timezoneLabel}`.trim();
       const adminPhone = studioInfo.adminPhone;
       const url = `https://api.whatsapp.com/send?phone=${adminPhone}&text=Bol-bol%20studio%2C%20%F0%9F%93%B7%20booking%20info%3A%0A%F0%9F%91%A4%20nama%3A%20${encodeURIComponent(order.name)}%0A%F0%9F%93%9E%20phone%3A%20${encodeURIComponent(order.phone)}%0A%F0%9F%93%B8%20instagram%3A%20${encodeURIComponent(order.instagram)}%0A%F0%9F%93%85%20tanggal%20booking%3A%20${encodeURIComponent(bookingDate)}%0A%F0%9F%95%92%20jam%20booking%3A%20${encodeURIComponent(bookingTime)}%0A%F0%9F%93%A6%20paket%3A%20${encodeURIComponent(order.package.name)}%0A%F0%9F%97%84%EF%B8%8F%20kapasitas%20paket%20%3A%20${encodeURIComponent(String(order.package.capacity))}%20orang%20%0A%F0%9F%8E%A8%20background%3A%20${encodeURIComponent(order.background.name)}%0A%F0%9F%91%8D%20--mohon%20menunggu%20konfirmasi%20admin--`;
+      // Opened first and synchronously in the click handler, or popup blockers eat it.
       window.open(url, "_blank", "noopener,noreferrer");
+      mirrorToCalendar({
+        startMs: order.dateTime.getTime(),
+        name: order.name,
+        phone: order.phone,
+        instagram: order.instagram,
+        packageName: order.package.name,
+        packageCapacity: order.package.capacity,
+        backgroundName: order.background.name,
+      });
       resetOrder();
       goToSlide(6);
     }} />,
@@ -243,6 +266,18 @@ export default function BolBolStudioClient({
             booking_timestamp: booking.booking_timestamp.getTime(),
           };
           await setDoc(doc(db, BB_FIRESTORE.BOOKINGS_COLLECTION, docRef.id), updatedBooking, { merge: true });
+          // Same slot + phone as the customer's tentative entry, so this upserts
+          // that entry into a confirmed one rather than adding a second.
+          mirrorToCalendar({
+            startMs: booking.start.getTime(),
+            endMs: booking.end.getTime(),
+            name: booking.name,
+            phone: booking.phone,
+            packageName: booking.package || "Booking admin",
+            note: booking.note,
+            adminPhone: phone,
+            adminPin: pin,
+          });
           setBookings((current) => [...current, updatedBooking]);
         }}
       />

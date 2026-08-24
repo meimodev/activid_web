@@ -6,6 +6,7 @@ export const BB_FIRESTORE = {
   ADDS_DOC_ID: "adds",
   PUBLIC_COLLECTION: "bb_public",
   PUBLIC_DOC_ID: "bol_bol_studio",
+  CALENDAR_QUOTA_COLLECTION: "bb_calendar_quota",
 } as const;
 
 export const BB_DEFAULTS = {
