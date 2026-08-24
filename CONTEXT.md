@@ -66,6 +66,12 @@ Canonical language for this codebase. Definitions only; no implementation detail
 
 **Account Deletion** — The user-facing data/account deletion flow (`/account-deletion`), via WhatsApp + email to the Activid admin. The deletion path that **LOIT Privacy Policy** points to.
 
+**Redirect Link (Tautan Alih)** — A short Activid-hosted address (`/link/{code}`) that a visitor reaches from a printed QR or sticker, sees a brief thank-you screen naming the business, and is then forwarded to an external destination that business owns (Google Review page, WhatsApp, menu). Created and maintained by Activid on behalf of a client business, never self-serve. Carries the business name, an optional thank-you note, the destination, and an active flag — switching it off leaves the printed code resolvable but parks the visitor instead of forwarding. Distinct from an **Event Link** (KenanganKita, guest-facing, auto-derived from the Event) and from an invitation slug.
+
+**Redirect Code** — The opaque identifier in a **Redirect Link**'s URL. Machine-generated at creation, never chosen or edited by staff; unguessable, so Activid's set of client links cannot be enumerated. Permanent for the life of the Redirect Link, because it is printed on physical material that cannot be recalled.
+
+**Link Console** — The password-gated page at `/link/manage` where Activid staff create, edit, deactivate, and delete **Redirect Links**. One shared password, no user accounts, no per-staff identity. Distinct from the **Host Console** (KenanganKita, per-Host Google login) and from the invitation admin portal.
+
 **Invitation Catalog** — The invitation landing page (`/invitation`): a grid of template cards, each showing a small live preview of the rendered template, with filtering by purpose, a preview dialog, testimonials, and FAQ. The shopper-facing entry to the invitation platform. Distinct from a rendered **Invitation** (a single `/invitation/{slug}` page) and from the **Demo Playground** (the theme/purpose switcher shown on `*-demo` slugs).
 
 **Preview Mode** — A lightweight render of an invitation template intended for embedding inside a Catalog card: the bare template only, without the Demo Playground sidebar, music, or auto-scroll. Optimized for being one of several simultaneous on-page previews rather than a standalone, interactive invitation.
