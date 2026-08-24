@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
 import SmoothScroll from "@/components/layouts/SmoothScroll";
@@ -17,6 +18,24 @@ const bricolageGrotesque = localFont({
     variable: "--font-bricolage",
     display: "swap",
 });
+
+// ACTIVID-site defaults. Deliberately no `title.template`: every page under
+// (main) already spells out its own "… | ACTIVID" suffix, and a template would
+// double it.
+export const metadata: Metadata = {
+    title: {
+        default: "ACTIVID | Creative Agency",
+        template: "%s",
+    },
+    openGraph: {
+        type: "website",
+        locale: "id_ID",
+        siteName: "ACTIVID",
+    },
+    twitter: {
+        card: "summary_large_image",
+    },
+};
 
 export default function MainLayout({
     children,

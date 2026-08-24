@@ -2,31 +2,21 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 
+// Root metadata is inherited by every product in this app — the ACTIVID site
+// under (main), plus invitation, kenangan, bbold, bol-bol-studio, satset and
+// loit, which are separate brands with their own layout metadata. So keep this
+// to what is genuinely shared: no `title.template` (it would suffix every
+// brand's title) and no `alternates.canonical` (a root '/' canonical is
+// inherited by every page that doesn't override it). Brand-specific metadata
+// belongs in the route group's own layout.
 export const metadata: Metadata = {
-  title: {
-    default: "Premium Landing Page | Build Beautiful Experiences",
-    template: "%s | Premium Landing Page",
-  },
-  description: "A sophisticated multi-page landing page with immersive animations, 60fps performance, and exceptional user experience. Built with Next.js and Framer Motion.",
-  keywords: ['landing page', 'web design', 'web development', 'animations', 'framer motion', 'next.js', 'performance', 'accessibility', 'responsive design'],
-  authors: [{ name: 'Premium Landing Page Team' }],
-  creator: 'Premium Landing Page Team',
-  publisher: 'Premium Landing Page',
-  metadataBase: new URL('https://example.com'), // Replace with actual domain
-  alternates: {
-    canonical: '/',
-  },
+  title: "ACTIVID",
+  description:
+    "ACTIVID is a creative agency in Manado - Tondano: social media management, event documentation, video production, product photography, and website development.",
+  metadataBase: new URL("https://www.activid.id"),
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    siteName: 'Premium Landing Page',
-    title: 'Premium Landing Page | Build Beautiful Experiences',
-    description: 'A sophisticated multi-page landing page with immersive animations, 60fps performance, and exceptional user experience.',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Premium Landing Page | Build Beautiful Experiences',
-    description: 'A sophisticated multi-page landing page with immersive animations, 60fps performance, and exceptional user experience.',
+    type: "website",
+    locale: "id_ID",
   },
   robots: {
     index: true,
@@ -48,13 +38,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <GoogleAnalytics />
       <body>
+        <GoogleAnalytics />
         {children}
-      {/* impeccable-live-start */}
-<script src="http://localhost:8400/live.js"></script>
-{/* impeccable-live-end */}
-</body>
+      </body>
     </html>
   );
 }
