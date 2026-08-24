@@ -1,53 +1,59 @@
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { AnimatedGradientBackground } from '@/components/ui';
 import Navigation from '@/components/layouts/Navigation';
+import { Hero } from '@/components/sections/Hero';
 import type { Metadata } from 'next';
 import { siteContent } from '@/lib/site-content';
 
+const TITLE = 'ACTIVID | Creative Agency';
+const DESCRIPTION =
+  'We are a creative agency that specializes in branding, social media management, event documentation, video production, and website development.';
+
 export const metadata: Metadata = {
-  title: 'ACTIVID | Creative Agency',
-  description: 'We are a creative agency that specializes in branding, social media management, event documentation, video production, and website development.',
-  keywords: ['web design', 'web development', 'animations', 'framer motion', 'next.js', 'performance', 'accessibility'],
-  authors: [{ name: 'ACTIVID Team' }],
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: '/' },
   openGraph: {
-    title: 'ACTIVID | Creative Agency',
-    description: 'We are a creative agency that specializes in branding, social media management, event documentation, video production, and website development.',
+    title: TITLE,
+    description: DESCRIPTION,
     type: 'website',
-    locale: 'en_US',
+    locale: 'id_ID',
     siteName: 'ACTIVID',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ACTIVID | Creative Agency',
-    description: 'We are a creative agency that specializes in branding, social media management, event documentation, video production, and website development.',
+    title: TITLE,
+    description: DESCRIPTION,
   },
 };
 
-// Dynamic imports with loading fallbacks for heavy animation components
-// Requirements: 5.4 - Display skeleton screens during dynamic import
-// Note: SSR is enabled for SSG (Static Site Generation) compatibility
-const Hero = dynamic(() => import('@/components/sections').then(mod => ({ default: mod.Hero })), {
-  loading: () => <Skeleton className="min-h-screen" />,
-});
-
-const AboutUs = dynamic(() => import('@/components/sections').then(mod => ({ default: mod.AboutUs })), {
+// Below-the-fold sections are lazy-loaded with skeleton fallbacks.
+// SSR stays on for SSG compatibility.
+//
+// Import the concrete files, NOT the '@/components/sections' barrel: every
+// dynamic() pointing at the barrel resolves the same module, so webpack emits
+// one chunk holding every section the barrel re-exports (Features,
+// TeamShowcase, ProjectShowcase, …) instead of one chunk per section.
+//
+// Hero is a plain static import — it is the LCP element, so a chunk round-trip
+// before it can paint is exactly the wrong trade.
+const AboutUs = dynamic(() => import('@/components/sections/AboutUs').then(mod => ({ default: mod.AboutUs })), {
   loading: () => <Skeleton className="h-96" />,
 });
 
-const Testimonials = dynamic(() => import('@/components/sections').then(mod => ({ default: mod.Testimonials })), {
+const Testimonials = dynamic(() => import('@/components/sections/Testimonials').then(mod => ({ default: mod.Testimonials })), {
   loading: () => <Skeleton className="h-96" />,
 });
 
-const ServiceStack = dynamic(() => import('@/components/sections').then(mod => ({ default: mod.ServiceStack })), {
+const ServiceStack = dynamic(() => import('@/components/sections/ServiceStack').then(mod => ({ default: mod.ServiceStack })), {
   loading: () => <Skeleton className="min-h-screen" />,
 });
 
-const OurClients = dynamic(() => import('@/components/sections').then(mod => ({ default: mod.OurClients })), {
+const OurClients = dynamic(() => import('@/components/sections/OurClients').then(mod => ({ default: mod.OurClients })), {
   loading: () => <Skeleton className="h-48" />,
 });
 
-const CTA = dynamic(() => import('@/components/sections').then(mod => ({ default: mod.CTA })), {
+const CTA = dynamic(() => import('@/components/sections/CTA').then(mod => ({ default: mod.CTA })), {
   loading: () => <Skeleton className="h-96" />,
 });
 
@@ -61,7 +67,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <AnimatedGradientBackground className="fixed -z-50" />
+      {/* No AnimatedGradientBackground here: at `fixed -z-50` inside <main> it
+          painted behind the opaque bg on the .dark wrapper in the layout, which
+          creates no stacking context — so it rendered nothing while running a
+          permanent animation. Removed rather than un-hidden; the sections all
+          carry their own background. */}
       <Hero content={heroContent} />
       <Navigation position="sticky" />
       <OurClients />

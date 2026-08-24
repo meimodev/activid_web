@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { siteContent } from '@/lib/site-content';
 import { trackCTA } from '@/lib/analytics';
 
 export function CTA() {
+    const reduceMotion = useReducedMotion();
+
     const fadeUpVariant = {
-        hidden: { opacity: 0, y: 40 },
+        hidden: { opacity: 0, y: reduceMotion ? 0 : 40 },
         visible: (delay: number) => ({
             opacity: 1,
             y: 0,
@@ -24,7 +26,7 @@ export function CTA() {
             {/* Background Gradient Orbs - Slow Floating Animation */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <motion.div
-                    animate={{
+                    animate={reduceMotion ? { opacity: 0.2 } : {
                         scale: [1, 1.2, 1],
                         opacity: [0.15, 0.25, 0.15],
                         x: [0, 20, 0],
@@ -38,7 +40,7 @@ export function CTA() {
                     className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#8B5CF6] rounded-full blur-[120px]"
                 />
                 <motion.div
-                    animate={{
+                    animate={reduceMotion ? { opacity: 0.2 } : {
                         scale: [1, 1.1, 1],
                         opacity: [0.15, 0.25, 0.15],
                         x: [0, -30, 0],
@@ -87,8 +89,8 @@ export function CTA() {
                     >
                         <Link href={siteContent.ctaSection.buttonLink} passHref>
                             <motion.button
-                                whileHover={{ scale: 1.02, backgroundColor: "#ffffff" }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={reduceMotion ? { backgroundColor: "#ffffff" } : { scale: 1.02, backgroundColor: "#ffffff" }}
+                                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
                                 transition={{ duration: 0.3 }}
                                 onClick={() => trackCTA.ctaSectionClick()}
                                 className="px-12 py-6 bg-[#F8EFDE] text-[#1a1a3e] text-lg font-bold rounded-full shadow-[0_0_20px_rgba(248,239,222,0.1)] hover:shadow-[0_0_40px_rgba(248,239,222,0.4)] focus:outline-none focus:ring-2 focus:ring-[#F8EFDE] focus:ring-offset-2 focus:ring-offset-[#1a1a3e] font-sans"

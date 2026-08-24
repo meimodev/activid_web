@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import Image from 'next/image';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import type { HeroContent } from '@/types/hero.types';
 import { DateTime } from 'luxon';
 
@@ -22,6 +22,7 @@ export interface HeroProps {
 export function Hero({ content, className = '' }: HeroProps) {
   const { subtitle, backgroundVideo } = content;
   const sectionRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   const prng = (seed: number) => {
     const x = Math.sin(seed) * 10000;
@@ -44,7 +45,7 @@ export function Hero({ content, className = '' }: HeroProps) {
       className={`relative min-h-screen flex flex-col items-center justify-center overflow-hidden ${className}`}
     >
       {/* Animated Radial Gradient Orbs */}
-      {content.gradientOrbs && content.gradientOrbs.count > 0 && (
+      {!reduceMotion && content.gradientOrbs && content.gradientOrbs.count > 0 && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: content.gradientOrbs.count }).map((_, i) => (
             (() => {

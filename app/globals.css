@@ -227,64 +227,46 @@ body {
   white-space: normal;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0%);
+/* Marquee lanes (OurClients). Single track: the row renders its logos twice
+   and slides by exactly half the track width, so the loop is seamless without
+   the old second "marquee2" track — which doubled the DOM and the images for
+   the same effect. */
+@keyframes marquee-loop {
+  from {
+    transform: translateX(0);
   }
-  100% {
-    transform: translateX(-100%);
+  to {
+    transform: translateX(-50%);
   }
 }
 
-@keyframes marquee2 {
-  0% {
-    transform: translateX(100%);
+@keyframes marquee-loop-reverse {
+  from {
+    transform: translateX(-50%);
   }
-  100% {
-    transform: translateX(0%);
+  to {
+    transform: translateX(0);
   }
 }
 
 .animate-marquee {
-  animation: marquee 120s linear infinite;
-}
-
-.animate-marquee2 {
-  animation: marquee2 120s linear infinite;
-}
-
-.animate-marquee-slow {
-  animation: marquee 150s linear infinite;
-}
-
-.animate-marquee2-slow {
-  animation: marquee2 150s linear infinite;
-}
-
-@keyframes marquee-reverse {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(0%);
-  }
-}
-
-@keyframes marquee2-reverse {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  animation: marquee-loop 120s linear infinite;
 }
 
 .animate-marquee-reverse {
-  animation: marquee-reverse 120s linear infinite;
+  animation: marquee-loop-reverse 120s linear infinite;
 }
 
-.animate-marquee2-reverse {
-  animation: marquee2-reverse 120s linear infinite;
+.animate-marquee-slow {
+  animation: marquee-loop 150s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-marquee-slow {
+    animation: none;
+  }
 }
 
 /* ServiceStack — sticky card deck on the landing page.

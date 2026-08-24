@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { ScrollReveal } from '@/components/animations/ScrollReveal';
 
 export interface Testimonial {
@@ -28,13 +29,16 @@ export interface TestimonialsProps {
  */
 export function Testimonials({ title, testimonials, className = '' }: TestimonialsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
+    if (!scrollContainer || reduceMotion) return;
 
-    let animationId: number;
+    let animationId = 0;
     let scrollPosition = 0;
+    let onScreen = false;
+    let hovered = false;
     const scrollSpeed = 0.5; // pixels per frame
 
     const animate = () => {
@@ -50,26 +54,49 @@ export function Testimonials({ title, testimonials, className = '' }: Testimonia
       animationId = requestAnimationFrame(animate);
     };
 
-    animationId = requestAnimationFrame(animate);
-
-    // Pause on hover
-    const handleMouseEnter = () => {
+    // Always cancel before scheduling: mouseenter/mouseleave and the
+    // IntersectionObserver can both fire back-to-back, and without this a
+    // second loop would start with no handle left to cancel the first.
+    const start = () => {
+      if (!onScreen || hovered) return;
       cancelAnimationFrame(animationId);
+      animationId = requestAnimationFrame(animate);
+    };
+
+    const stop = () => cancelAnimationFrame(animationId);
+
+    // Writing scrollLeft forces layout on every frame, so only run the loop
+    // while the section is actually on screen.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen) start();
+        else stop();
+      },
+      { threshold: 0 }
+    );
+    observer.observe(scrollContainer);
+
+    const handleMouseEnter = () => {
+      hovered = true;
+      stop();
     };
 
     const handleMouseLeave = () => {
-      animationId = requestAnimationFrame(animate);
+      hovered = false;
+      start();
     };
 
     scrollContainer.addEventListener('mouseenter', handleMouseEnter);
     scrollContainer.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      stop();
+      observer.disconnect();
       scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
       scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [reduceMotion]);
 
   // Duplicate testimonials for seamless infinite scroll
   const duplicatedTestimonials = [...testimonials, ...testimonials];
