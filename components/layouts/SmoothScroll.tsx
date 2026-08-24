@@ -13,7 +13,13 @@ export default function SmoothScroll({ children, className }: SmoothScrollProps)
 
   useEffect(() => {
     // Initialize Lenis smooth scroll
+    // autoRaf, not a hand-rolled requestAnimationFrame recursion: the manual
+    // loop could not be cancelled on cleanup, so it kept scheduling itself and
+    // calling .raf() on a destroyed instance forever (twice over, under
+    // StrictMode's double-mount). Lenis owns the frame loop and tears it down
+    // in destroy().
     const lenis = new Lenis({
+      autoRaf: true,
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
@@ -23,14 +29,6 @@ export default function SmoothScroll({ children, className }: SmoothScrollProps)
     });
 
     lenisRef.current = lenis;
-
-    // Integrate with Framer Motion by updating on each frame
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
 
     // Cleanup on unmount
     return () => {
