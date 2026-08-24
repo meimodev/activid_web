@@ -13,7 +13,7 @@ export const BB_DEFAULTS = {
   TIMEZONE_LABEL: "WITA",
   OPENING_HOURS: {
     openMinutes: 11 * 60,
-    closeMinutes: 21 * 60,
+    closeMinutes: 20 * 60,
   },
   SOCIALS: {
     instagramUrl: "https://www.instagram.com/bolbol_studio",
