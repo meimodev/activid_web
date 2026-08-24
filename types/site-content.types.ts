@@ -35,6 +35,7 @@ export interface ServiceItem {
 
 export interface ServicesContent {
   title: string;
+  subtitle: string;
   items: ServiceItem[];
 }
 

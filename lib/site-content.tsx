@@ -60,6 +60,8 @@ export const siteContent: SiteContent = {
   },
   services: {
     title: 'Our Services',
+    subtitle:
+      'Lima layanan yang saling melengkapi — dari identitas visual sampai platform digital, dikerjakan oleh satu tim yang sama.',
     items: [
       {
         id: 'social-media',
@@ -67,7 +69,7 @@ export const siteContent: SiteContent = {
         description: 'Membangun identitas visual brand Anda — logo, palet warna, tipografi — lalu mengelola dan mengembangkannya di media sosial: strategi konten, desain, copywriting, hingga analisis performa agar audiens tumbuh secara organik dan relevan.',
         image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_cover_1.jpg',
         imageAlt: 'Social Media Management',
-        color: '#5a5a8d',
+        color: '#E4A6B6',
         buttonText: 'View Project',
         buttonLink: '/services/social-media',
       },
@@ -77,7 +79,7 @@ export const siteContent: SiteContent = {
         description: 'Menangkap momen terbaik dari setiap acara Anda dari event perusahaan, pernikahan, hingga konser musik dengan kualitas visual yang hidup dan emosional.',
         image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=600&fit=crop',
         imageAlt: 'Event and Documentation',
-        color: '#5a5a8d',
+        color: '#C7A9DC',
         buttonText: 'View Project',
         buttonLink: '/services/event-documentation',
       },
@@ -87,7 +89,7 @@ export const siteContent: SiteContent = {
         description: 'Cerita yang baik layak disampaikan dengan kualitas visual dan audio yang maksimal. Dari konsep, shooting, editing, hingga final rendering, kami siap bantu Anda bercerita lewat video promosi, company profile, hingga podcast profesional.',
         image: 'https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&h=600&fit=crop',
         imageAlt: 'Video and Podcast Production',
-        color: '#4a4a7d',
+        color: '#9FA8E8',
         buttonText: 'View Project',
         buttonLink: '/services/video-podcast',
       },
@@ -97,7 +99,7 @@ export const siteContent: SiteContent = {
         description: 'Membangun platform digital yang elegan, cepat, dan user friendly. Mulai dari website company profile, landing page, hingga aplikasi mobile dengan desain antarmuka yang intuitif dan estetis.',
         image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
         imageAlt: 'Website and App Development',
-        color: '#5a5a8d',
+        color: '#E0A08E',
         buttonText: 'View Project',
         buttonLink: '/services/website-app',
       },
@@ -107,7 +109,7 @@ export const siteContent: SiteContent = {
         description: 'Menampilkan produk Anda dengan visual yang tajam, estetik, dan profesional setiap detail difoto untuk menarik perhatian dan memperkuat identitas brand.',
         image: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/another%20web%20asset/our_service_cover_2.jpg',
         imageAlt: 'Product Photography',
-        color: '#5a5a8d',
+        color: '#F8EFDE',
         buttonText: 'View Project',
         buttonLink: '/services/product-photography',
       },

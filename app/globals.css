@@ -286,3 +286,39 @@ body {
 .animate-marquee2-reverse {
   animation: marquee2-reverse 120s linear infinite;
 }
+
+/* ServiceStack — sticky card deck on the landing page.
+   Pins are `--card-h + --card-gap` apart, and `--stack-tail` ends the scroll
+   range exactly on the last pin so the depth maths in lib/stack-depth.ts maps
+   scroll progress linearly onto the active card. The deck pins at every width;
+   only prefers-reduced-motion drops it to a plain column. */
+.service-stack {
+  --pin-top: 7rem;
+  /* svh, not vh: on mobile a vh-based tail overshoots whenever the browser
+     toolbar is showing, which slides the last pin out of the scroll range the
+     depth maths is mapped onto. */
+  --card-h: clamp(420px, 68svh, 560px);
+  --travel: 70svh;
+  --card-gap: max(2rem, calc(var(--travel) - var(--card-h)));
+  --stack-tail: max(2rem, calc(100svh - var(--pin-top) - var(--card-h)));
+}
+
+/* Reduced motion: the deck degrades to a plain column. Enforced in CSS rather
+   than only through useReducedMotion() so it holds during SSR and regardless of
+   whether the hook sees a live media change — `!important` beats the inline
+   transforms framer-motion writes. */
+@media (prefers-reduced-motion: reduce) {
+  .service-stack {
+    --card-gap: 2rem;
+    --stack-tail: 0px;
+  }
+
+  .service-stack > * {
+    position: static !important;
+    transform: none !important;
+  }
+
+  .service-stack [data-stack-scrim] {
+    opacity: 0 !important;
+  }
+}

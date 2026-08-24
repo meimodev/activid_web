@@ -8,6 +8,8 @@ export { Testimonials } from './Testimonials';
 export type { TestimonialsProps, Testimonial } from './Testimonials';
 export { TeamShowcase } from './TeamShowcase';
 export type { TeamShowcaseProps, TeamMember } from './TeamShowcase';
+export { ServiceStack } from './ServiceStack';
+export type { ServiceStackProps } from './ServiceStack';
 export { ScrollExpandableCards } from './ScrollExpandableCards';
 export type { ScrollExpandableCardsProps, CardData } from './ScrollExpandableCards';
 export { Footer } from './Footer';
