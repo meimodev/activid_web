@@ -269,17 +269,153 @@ body {
   }
 }
 
+/* AboutUs type scale. The rest of that section's geometry — every beat of the
+   pinned sequence — lives in components/sections/AboutUs.tsx, because the same
+   numbers set the section's height and the keyframes; splitting them across
+   two files is what makes a timeline that long drift out of sync. */
+#about {
+  --about-h: clamp(3.5rem, 18vw, 10rem);
+}
+
+/* Testimonials type scale, and the stagger the alternating slabs sit at. The
+   rail's own geometry is measured at runtime — see the component — so these two
+   are the only numbers worth keeping here. --fb-h tracks the ServiceStack
+   heading's scale so the page's two display titles read at one size; it is
+   duplicated rather than shared because #services owns its variable as part of
+   a geometry the deck's insets are derived from. */
+#feedback {
+  --fb-h: clamp(4rem, 18vw, 15rem);
+  --fb-drop: clamp(1.5rem, 6vw, 4rem);
+}
+
+@media (min-width: 1024px) {
+  #feedback {
+    --fb-h: clamp(4rem, 13.5vw, 12rem);
+  }
+}
+
+/* CTA type scale and the staircase the words step in by. Smaller than the other
+   display headings on purpose: this one is five lines deep, and at the size the
+   others run it would not fit a viewport. --cta-indent is an em of the type, so
+   the staircase keeps its proportion at every width. */
+#cta {
+  --cta-h: clamp(3.25rem, 13vw, 7rem);
+  --cta-indent: calc(var(--cta-h) * 0.32);
+}
+
 /* ServiceStack — sticky card deck on the landing page.
    Pins are `--card-h + --card-gap` apart, and `--stack-tail` ends the scroll
    range exactly on the last pin so the depth maths in lib/stack-depth.ts maps
    scroll progress linearly onto the active card. The deck pins at every width;
    only prefers-reduced-motion drops it to a plain column. */
-.service-stack {
-  --pin-top: 7rem;
+/* ServiceStack geometry. The deck overlays the heading and is inset from its
+   top-left corner, so what stays visible is an L: the full first line across
+   the top, plus a left strip of the second. Both insets are set in em of the
+   heading itself, so the same slice of the word survives at every width.
+   --pin-top is what the cards pin to and must clear the reveal, so it is
+   derived from it rather than set twice. */
+#services {
+  --title-top: 7rem;
+  --h-size: clamp(4rem, 18vw, 15rem);
   /* svh, not vh: on mobile a vh-based tail overshoots whenever the browser
      toolbar is showing, which slides the last pin out of the scroll range the
-     depth maths is mapped onto. */
-  --card-h: clamp(420px, 68svh, 560px);
+     depth maths is mapped onto. Lives here, not on .service-stack, because
+     --reveal-top has to budget against it. */
+  --card-h: clamp(340px, 58svh, 480px);
+  --reveal-left: 0px;
+  /* Below lg the card is full-bleed, so a left inset would only narrow it
+     without revealing a readable amount of the word. The deck just tucks
+     under the last line instead. */
+  --tuck: calc(var(--h-size) * 0.2);
+  --pin-top: var(--title-top);
+  /* Breathing room under the pinned card. Also the term --reveal-top budgets
+     against, so raising it trades title reveal for bottom gap. */
+  --reveal-bottom: 3rem;
+  /* Intro. Drops the deck below the fold for the section's opening frame, so
+     the title lands on its own before any card arrives. Sized so the first
+     card's top edge sits exactly on the fold: --section-pad is the section's
+     own py-24 above the row, and what follows it is the distance from the row's
+     top to that card. Below lg that is the title's height less the tuck the
+     deck pulls back up by; the lg override swaps in --reveal-top. */
+  --section-pad: 6rem;
+  /* Space above the title during its solo frame. Below lg the heading is small
+     against a tall viewport, so pinning it to the top leaves the rest of the
+     screen looking empty by accident; this centres it so the emptiness reads as
+     deliberate. From lg the title is sticky at --title-top and this is 0. */
+  --lead: max(
+    0px,
+    calc((100svh - var(--section-pad) * 2 - var(--h-size) * 1.64) / 2)
+  );
+  --intro: max(
+    0px,
+    calc(100svh - var(--section-pad) - var(--lead) - var(--h-size) * 1.64 + var(--tuck))
+  );
+  /* No outro below lg: nothing is sticky there, so it would only be a gap. */
+  --outro: 0px;
+  /* How far the sticky title walks down the viewport over the section. 0 below
+     lg, where the title is not sticky and just scrolls with the page. */
+  --title-drift: 0px;
+  /* Where the title's `top` starts. 0 below lg on purpose: the heading is
+     `relative` there, not sticky, so a non-zero top would shift it down the
+     page rather than park it against the viewport. */
+  --title-anchor: 0px;
+}
+
+@media (min-width: 1024px) {
+  #services {
+    --h-size: clamp(4rem, 13.5vw, 12rem);
+    /* Shorter than the mobile card. The heading, the card and the bottom gap
+       all share one viewport's height, so height given back here is what lets
+       --reveal-top reach its ceiling and uncover the whole title. */
+    --card-h: clamp(320px, 47svh, 425px);
+    /* The left strip is no longer the only thing keeping the second line
+       readable — --reveal-top now clears most of it — so this can be tighter
+       than it was and hand the width to the card. It still carries legibility
+       on short windows, where --reveal-top falls back to its floor. */
+    --reveal-left: calc(var(--h-size) * 1);
+    /* Takes whatever vertical room is left once the card is placed, so a
+       taller window reveals more of the title. Floor is 0.73em, which meets
+       the second line at its ascender — below it, letter tops (the dot of the
+       "i") peek above the card edge. Ceiling is 1.5em, which lands the card on
+       the second line's baseline: every letter is clear, the descender space
+       below it still gets covered, so the deck keeps overlapping the title
+       instead of detaching from it. 1.64em (the full line-box height) would
+       uncover only empty descender space and lose the overlap. */
+    --reveal-top: clamp(
+      calc(var(--h-size) * 0.73),
+      calc(100svh - var(--title-top) - var(--card-h) - var(--reveal-bottom)),
+      calc(var(--h-size) * 1.5)
+    );
+    --pin-top: calc(var(--title-top) + var(--reveal-top));
+    /* Same idea as the base --intro, but from lg the deck is inset by
+       --reveal-top rather than tucked under the last line. */
+    --lead: 0px;
+    --intro: max(0px, calc(100svh - var(--section-pad) - var(--reveal-top)));
+    /* Outro. The last card unpins when the deck's bottom passes it and then
+       slides up over the heading, which is still stuck — so without this the
+       fully inverted title is buried before the section ends and never gets
+       seen on its own. A margin (not padding) grows the grid row, which is the
+       heading's sticky bound, without growing the deck's border box — so the
+       scroll range useScroll is mapped onto is untouched and the colours still
+       land exactly on the last pin. 1.64em is the two-line heading height, the
+       distance the deck must travel to clear it; the 25svh is the hold after
+       that, with the title alone on the finished cream. */
+    --outro: calc(var(--h-size) * 1.64 + 25svh);
+    /* Descent. Sticky parks the title at --title-top; this is the distance from
+       there to the bottom of the viewport, so at full progress the title sits
+       --title-rest above the fold. 1.64em is the two-line heading height. max()
+       guards short windows, where the title already fills the viewport and any
+       descent would push it off the bottom. */
+    --title-rest: 3rem;
+    --title-anchor: var(--title-top);
+    --title-drift: max(
+      0px,
+      calc(100svh - var(--title-top) - var(--h-size) * 1.64 - var(--title-rest))
+    );
+  }
+}
+
+.service-stack {
   --travel: 70svh;
   --card-gap: max(2rem, calc(var(--travel) - var(--card-h)));
   --stack-tail: max(2rem, calc(100svh - var(--pin-top) - var(--card-h)));
@@ -290,6 +426,13 @@ body {
    whether the hook sees a live media change — `!important` beats the inline
    transforms framer-motion writes. */
 @media (prefers-reduced-motion: reduce) {
+  #services {
+    --lead: 0px;
+    --intro: 0px;
+    --outro: 0px;
+    --title-drift: 0px;
+  }
+
   .service-stack {
     --card-gap: 2rem;
     --stack-tail: 0px;

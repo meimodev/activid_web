@@ -33,29 +33,11 @@ export const siteContent: SiteContent = {
   },
   aboutUs: {
     title: 'About\nUs',
-    tagline: 'Agensi Kreatif',
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
-    heading: 'kenalan dulu yuk',
-    points: [
-      {
-        text: 'Activid adalah agensi kreatif yang bergerak di bidang industri kreatif',
-        highlight: 'sejak 2015',
-        suffix: 'dengan kantor fisik pertama berlokasi di Tondano dan masih aktif hingga sekarang dengan jumlah 2 cabang kantor',
-        highlight2: 'Tondano dan Manado',
-      },
-      {
-        text: 'Misi kita adalah membantu',
-        highlight: 'brand dan individu',
-        suffix: 'membangun identitas visual',
-        highlight2: 'yang kuat dan berkarakter',
-        suffix2: 'Kami percaya bahwa setiap ide memiliki potensi besar untuk berkembang dengan cara yang tepat.',
-      },
-      {
-        text: 'Solusi melalui',
-        highlight: 'strategi kreatif dan eksekusi yang solid',
-        suffix: ', mulai dari branding building, social media campaign, hingga produksi video dan website, agar pesan kamu tersampaikan dengan',
-        highlight2: 'efektif dan berkesan',
-      },
+    lead: 'Agensi kreatif yang mengubah brand jadi cerita yang diingat. Dari identitas visual, konten media sosial, produksi video, sampai website — kami rancang setiap detail agar brand Anda tampil beda dan tumbuh nyata.',
+    facts: [
+      { label: 'Berdiri', value: '2017' },
+      { label: 'Kantor', value: 'Tondano & Manado' },
+      { label: 'Layanan', value: 'Branding, sosial media, video, website' },
     ],
   },
   services: {
@@ -177,7 +159,6 @@ export const siteContent: SiteContent = {
   },
   ctaSection: {
     title: 'Ready to Start Your Project?',
-    description: 'Mari berkolaborasi untuk mewujudkan visi Anda. Apakah Anda membutuhkan website baru, branding, atau manajemen media sosial, kami siap membantu.',
     buttonText: 'Get in Touch',
     buttonLink: '/contact',
   },

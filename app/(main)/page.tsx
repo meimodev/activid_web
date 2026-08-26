@@ -79,7 +79,6 @@ export default function Home() {
       <ServiceStack
         services={servicesData.items}
         title={servicesData.title}
-        subtitle={servicesData.subtitle}
       />
       <Testimonials
         title={testimonialData.title}

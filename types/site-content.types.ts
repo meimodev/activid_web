@@ -6,20 +6,16 @@ export interface NavigationItem {
   external?: boolean;
 }
 
-export interface AboutUsPoint {
-  text: string;
-  highlight: string;
-  suffix: string;
-  highlight2: string; 
-  suffix2?: string;
+export interface AboutUsFact {
+  label: string;
+  value: string;
 }
 
 export interface AboutUsContent {
   title: string;
-  tagline: string;
-  image: string;
-  heading: string;
-  points: AboutUsPoint[];
+  /** One sentence. Everything else belongs in `facts`. */
+  lead: string;
+  facts: AboutUsFact[];
 }
 
 export interface ServiceItem {
@@ -75,7 +71,6 @@ export interface FooterContent {
 
 export interface CtaSectionContent {
     title: string;
-    description: string;
     buttonText: string;
     buttonLink: string;
 }
