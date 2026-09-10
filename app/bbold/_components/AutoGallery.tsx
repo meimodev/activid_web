@@ -3,10 +3,10 @@
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { GalleryGroup, ImageFit } from "../data";
+import type { GalleryGroup } from "../data";
 
-function imageClassName(fit: ImageFit): string {
-  return fit === "contain" ? "bg-contain bg-center bg-no-repeat" : "bg-cover bg-center";
+function imageClassName(): string {
+  return "bg-cover bg-center";
 }
 
 function shuffleImages(images: string[]): string[] {
@@ -107,7 +107,7 @@ export default function AutoGallery({
       initial={false}
       animate={isRevealed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 28, scale: 0.985 }}
       transition={{ duration: 0.9, ease: "easeInOut" }}
-      className={`relative h-full w-full overflow-hidden ${group.href ? "cursor-pointer" : ""} ${className}`}
+      className={`relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg border border-white/5 ${group.href ? "cursor-pointer" : ""} ${className}`}
       onClick={() => {
         if (draggedRef.current) {
           draggedRef.current = false;
@@ -138,7 +138,7 @@ export default function AutoGallery({
             draggedRef.current = true;
           }}
           onDragEnd={handleDragEnd}
-          className={`absolute inset-0 touch-pan-y ${imageClassName(group.fit)}`}
+          className={`absolute inset-0 touch-pan-y ${imageClassName()}`}
           style={{ backgroundImage: `url(${slide})` }}
         />
       </AnimatePresence>

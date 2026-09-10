@@ -194,7 +194,7 @@ export const pictureData: GalleryGroup[] = [
   {
     label: "C",
     href: "/bbold/c",
-    fit: "contain",
+    fit: "cover",
     images: [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_1.jpg?updatedAt=1753773325012",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/C/C_part_1_3.jpg?updatedAt=1753773325447",
@@ -216,7 +216,7 @@ export const pictureData: GalleryGroup[] = [
   {
     label: "Lanyard",
     href: "/bbold/lanyard",
-    fit: "contain",
+    fit: "cover",
     images: [
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard/Landyard_1_1.jpg?updatedAt=1753773318811",
       "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Landyard/Landyard_1_2.jpg?updatedAt=1753773318539",
@@ -282,7 +282,7 @@ export const pictureData: GalleryGroup[] = [
 
 export const availablePictures: GalleryGroup = {
   label: "BBOLD",
-  fit: "contain",
+  fit: "cover",
   labelWidthClassName: "w-[7rem] h-12",
   images: [
     "https://ik.imagekit.io/geb6bfhmhx/bbold/web_images/Order/order_1_1.jpg?updatedAt=1753773242647",
@@ -318,7 +318,6 @@ export const landingSections: LandingSection[] = [
   },
   {
     heightClassName: "h-screen",
-    containerClassName: "px-2",
     groups: [availablePictures],
   },
 ];

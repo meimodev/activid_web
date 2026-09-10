@@ -23,15 +23,14 @@ export default function BboldPage() {
     <main className="min-h-screen bg-slate-800 px-4 pb-12">
       <div className="mx-auto max-w-lg text-stone-100">
         <BboldLogo compact />
-        <div className="space-y-0">
-          <div className="h-8" />
+        <div className="flex flex-col gap-3 pt-6 sm:gap-4 sm:pt-8">
           {sectionsWithRevealDelay.map((section, sectionIndex) => (
             <div
               key={`${section.heightClassName}-${sectionIndex}`}
-              className={`${section.heightClassName} ${section.containerClassName ?? ""} flex`}
+              className={`${section.heightClassName} ${section.containerClassName ?? ""} flex gap-3 sm:gap-4`}
             >
               {section.groups.map(({ group, revealDelay }, groupIndex) => (
-                <div key={`${group.label}-${group.images[0]}`} className="h-full flex-1">
+                <div key={`${group.label}-${group.images[0]}`} className="h-full flex-1 min-w-0">
                   <AutoGallery
                     group={group}
                     delay={getGalleryDelay(sectionIndex, groupIndex, sectionIndex === sectionsWithRevealDelay.length - 1)}
