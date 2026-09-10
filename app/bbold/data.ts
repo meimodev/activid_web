@@ -15,6 +15,13 @@ export type LandingSection = {
   containerClassName?: string;
 };
 
+export type BboldMasonryCard = {
+  id: string;
+  group: GalleryGroup;
+  aspectClassName: string;
+  delayOffset?: number;
+};
+
 export type ProductPriceBlock = {
   label: string;
   price: string;
@@ -319,6 +326,64 @@ export const landingSections: LandingSection[] = [
   {
     heightClassName: "h-screen",
     groups: [availablePictures],
+  },
+];
+
+export const bboldMasonryCards: BboldMasonryCard[] = [
+  {
+    id: "c-portrait",
+    group: pictureData[7],
+    aspectClassName: "aspect-[3/4]",
+  },
+  {
+    id: "pin-square-1",
+    group: pictureData[9],
+    aspectClassName: "aspect-square",
+  },
+  {
+    id: "b4-vertical-1",
+    group: pictureData[5],
+    aspectClassName: "aspect-[4/5]",
+  },
+  {
+    id: "lanyard-tall",
+    group: pictureData[8],
+    aspectClassName: "aspect-[9/13]",
+  },
+  {
+    id: "b2-square-1",
+    group: pictureData[0],
+    aspectClassName: "aspect-square",
+  },
+  {
+    id: "b4-portrait-2",
+    group: pictureData[6],
+    aspectClassName: "aspect-[3/4]",
+  },
+  {
+    id: "pin-medium-2",
+    group: pictureData[10],
+    aspectClassName: "aspect-[4/5]",
+  },
+  {
+    id: "b2-square-2",
+    group: pictureData[1],
+    aspectClassName: "aspect-square",
+  },
+  {
+    id: "b2-tall-3",
+    group: pictureData[2],
+    aspectClassName: "aspect-[3/4]",
+  },
+  {
+    id: "b2-portrait-4",
+    group: pictureData[3],
+    aspectClassName: "aspect-[4/5]",
+  },
+  {
+    id: "b2-square-5",
+    group: pictureData[4],
+    aspectClassName: "aspect-square",
   },
 ];
 

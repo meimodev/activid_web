@@ -42,11 +42,13 @@ export default function AutoGallery({
   delay = 2800,
   revealDelay = 0,
   className = "",
+  showCounter = false,
 }: {
   group: GalleryGroup;
   delay?: number;
   revealDelay?: number;
   className?: string;
+  showCounter?: boolean;
 }) {
   const router = useRouter();
   const images = useMemo(() => shuffleImages(group.images), [group.images]);
@@ -83,7 +85,12 @@ export default function AutoGallery({
     [images.length, page],
   );
   const slide = useMemo(() => images[safeIndex] ?? images[0] ?? "", [images, safeIndex]);
-  const labelClassName = group.labelWidthClassName ?? "h-12 w-12";
+  const isShortLabel = group.label.length <= 3;
+  const labelBadgeClasses = group.labelWidthClassName
+    ? `${group.labelWidthClassName} max-w-[calc(100%-1.5rem)]`
+    : isShortLabel
+      ? "h-9 w-9 sm:h-11 sm:w-11 px-0"
+      : "h-9 sm:h-11 px-3 sm:px-4 max-w-[calc(100%-1.5rem)]";
 
   const handleDragEnd = useCallback(
     (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -107,7 +114,7 @@ export default function AutoGallery({
       initial={false}
       animate={isRevealed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 28, scale: 0.985 }}
       transition={{ duration: 0.9, ease: "easeInOut" }}
-      className={`relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg border border-white/5 ${group.href ? "cursor-pointer" : ""} ${className}`}
+      className={`group relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg border border-white/5 transition-transform duration-300 hover:scale-[1.015] active:scale-[0.99] ${group.href ? "cursor-pointer" : ""} ${className}`}
       onClick={() => {
         if (draggedRef.current) {
           draggedRef.current = false;
@@ -142,10 +149,55 @@ export default function AutoGallery({
           style={{ backgroundImage: `url(${slide})` }}
         />
       </AnimatePresence>
-      <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-black/10" />
-      <div className={`absolute left-4 top-4 z-10 flex items-center justify-center rounded-full bg-[#372f2d]/80 px-4 text-center shadow-lg backdrop-blur-sm ${labelClassName}`}>
-        <span className="text-lg leading-none" style={{ fontFamily: "var(--font-bbold-display)" }}>{group.label}</span>
+      <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-black/20 pointer-events-none" />
+
+      {/* Product label badge */}
+      <div
+        className={`absolute left-3 top-3 sm:left-4 sm:top-4 z-10 flex items-center justify-center rounded-full bg-[#1c1917]/85 text-center shadow-lg backdrop-blur-md border border-white/10 ${labelBadgeClasses}`}
+      >
+        <span
+          className="text-sm sm:text-base leading-none text-stone-100"
+          style={{ fontFamily: "var(--font-bbold-display)" }}
+        >
+          {group.label}
+        </span>
       </div>
+
+      {/* Multi-photo indicator */}
+      {showCounter && images.length > 1 && (
+        <div className="absolute right-3 top-3 sm:right-4 sm:top-4 z-10 flex items-center gap-1 rounded-full bg-black/45 px-2 py-0.5 text-[10px] sm:text-xs font-medium text-white/90 backdrop-blur-md border border-white/10 opacity-80 group-hover:opacity-100 transition-opacity">
+          <svg
+            className="w-3 h-3 text-white/80"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect width="16" height="16" x="5" y="5" rx="2" />
+            <path d="M3 15V5a2 2 0 0 1 2-2h10" />
+          </svg>
+          <span className="tracking-wide">
+            {safeIndex + 1}/{images.length}
+          </span>
+        </div>
+      )}
+
+      {/* Pinterest-style destination link indicator on desktop hover */}
+      {group.href && (
+        <div className="pointer-events-none absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10 hidden sm:flex h-8 w-8 items-center justify-center rounded-full bg-white/25 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100 border border-white/20 shadow-md">
+          <svg
+            className="w-4 h-4 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+          </svg>
+        </div>
+      )}
     </motion.div>
   );
 
