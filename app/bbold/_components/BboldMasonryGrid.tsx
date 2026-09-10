@@ -71,7 +71,10 @@ export default function BboldMasonryGrid({
 
       {/* Featured Full-Width Card (e.g. Custom Orders / Available Pictures) */}
       {featuredCard && (
-        <div className="w-full aspect-[16/11] sm:aspect-[16/10] min-w-0 pt-1">
+        <div
+          className="w-full aspect-[720/1309] min-w-0 pt-1"
+          style={{ aspectRatio: "720 / 1309" }}
+        >
           <AutoGallery
             group={featuredCard}
             delay={2200}

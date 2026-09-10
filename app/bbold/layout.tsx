@@ -2,6 +2,14 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { BBOLD_META } from "./data";
 
+const bboldBrand = localFont({
+  src: "../../public/fonts/poppins-bold.ttf",
+  variable: "--font-bbold-brand",
+  weight: "700",
+  style: "normal",
+  display: "swap",
+});
+
 const bboldDisplay = localFont({
   src: "../../public/fonts/lemon-milk-bold.otf",
   variable: "--font-bbold-display",
@@ -13,7 +21,7 @@ const bboldDisplay = localFont({
 const bboldBody = localFont({
   src: "../../public/fonts/poppins-regular.ttf",
   variable: "--font-bbold-body",
-  weight: "700",
+  weight: "400",
   style: "normal",
   display: "swap",
 });
@@ -25,7 +33,7 @@ export const metadata: Metadata = {
 
 export default function BboldLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`${bboldDisplay.variable} ${bboldBody.variable} min-h-screen bg-[#1f2937] text-stone-100`}>
+    <div className={`${bboldBrand.variable} ${bboldDisplay.variable} ${bboldBody.variable} min-h-screen bg-[#d4c3b0] text-[#241a15]`}>
       {children}
     </div>
   );

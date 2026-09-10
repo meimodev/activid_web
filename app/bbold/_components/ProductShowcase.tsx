@@ -121,19 +121,24 @@ export default function ProductShowcase({ images }: { images: string[] }) {
         onTouchEnd={() => setIsTouching(false)}
         className="flex h-full w-full overflow-x-auto snap-x snap-mandatory scroll-smooth touch-pan-x cursor-grab active:cursor-grabbing [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {orderedImages.map((img, index) => (
-          <div
-            key={`${img}-${index}`}
-            className="relative h-full w-full min-w-full shrink-0 snap-center overflow-hidden"
-          >
-            {/* Image filling end-to-end */}
+        {orderedImages.map((img, index) => {
+          const shouldLoad = Math.abs(index - activeIndex) <= 2 || index < 2;
+          return (
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${img})` }}
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/15 pointer-events-none" />
-          </div>
-        ))}
+              key={`${img}-${index}`}
+              className="relative h-full w-full min-w-full shrink-0 snap-center overflow-hidden bg-neutral-950"
+            >
+              {/* Image filling end-to-end */}
+              {shouldLoad && (
+                <div
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300"
+                  style={{ backgroundImage: `url(${img})` }}
+                />
+              )}
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/15 pointer-events-none" />
+            </div>
+          );
+        })}
       </div>
 
       {/* Slide Counter Badge */}

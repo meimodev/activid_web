@@ -67,7 +67,7 @@ export default function BboldFooter() {
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 bg-gradient-to-b from-slate-800/90 to-slate-900/95 p-7 sm:p-9 text-center shadow-xl backdrop-blur-md"
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#3d2c22]/80 bg-gradient-to-b from-[#251b15] to-[#16100c] p-7 sm:p-9 text-center shadow-2xl backdrop-blur-md"
       >
         {/* Top razor-edge light accent with reveal expansion */}
         <motion.div

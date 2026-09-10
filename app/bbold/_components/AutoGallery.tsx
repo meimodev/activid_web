@@ -3,10 +3,12 @@
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { GalleryGroup } from "../data";
+import type { GalleryGroup, ImageFit } from "../data";
 
-function imageClassName(): string {
-  return "bg-cover bg-center";
+function imageClassName(fit?: ImageFit): string {
+  return fit === "contain"
+    ? "bg-contain bg-center bg-no-repeat"
+    : "bg-cover bg-center";
 }
 
 function shuffleImages(images: string[]): string[] {
@@ -80,6 +82,13 @@ export default function AutoGallery({
     return () => window.clearInterval(timer);
   }, [delay, images.length, paginate]);
 
+  // Prefetch product detail route early for instantaneous navigation
+  useEffect(() => {
+    if (group.href) {
+      router.prefetch(group.href);
+    }
+  }, [group.href, router]);
+
   const safeIndex = useMemo(
     () => (images.length > 0 ? toPositiveModulo(page, images.length) : 0),
     [images.length, page],
@@ -114,7 +123,13 @@ export default function AutoGallery({
       initial={false}
       animate={isRevealed ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 28, scale: 0.985 }}
       transition={{ duration: 0.9, ease: "easeInOut" }}
-      className={`group relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-lg border border-white/5 transition-transform duration-300 hover:scale-[1.015] active:scale-[0.99] ${group.href ? "cursor-pointer" : ""} ${className}`}
+      className={`group relative h-full w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl border border-black/10 transition-transform duration-300 hover:scale-[1.015] active:scale-[0.99] ${group.href ? "cursor-pointer" : ""} ${className}`}
+      onMouseEnter={() => {
+        if (group.href) router.prefetch(group.href);
+      }}
+      onTouchStart={() => {
+        if (group.href) router.prefetch(group.href);
+      }}
       onClick={() => {
         if (draggedRef.current) {
           draggedRef.current = false;
@@ -145,7 +160,7 @@ export default function AutoGallery({
             draggedRef.current = true;
           }}
           onDragEnd={handleDragEnd}
-          className={`absolute inset-0 touch-pan-y ${imageClassName()}`}
+          className={`absolute inset-0 touch-pan-y ${imageClassName(group.fit)}`}
           style={{ backgroundImage: `url(${slide})` }}
         />
       </AnimatePresence>
@@ -156,8 +171,13 @@ export default function AutoGallery({
         className={`absolute left-3 top-3 sm:left-4 sm:top-4 z-10 flex items-center justify-center rounded-full bg-[#1c1917]/85 text-center shadow-lg backdrop-blur-md border border-white/10 ${labelBadgeClasses}`}
       >
         <span
-          className="text-sm sm:text-base leading-none text-stone-100"
-          style={{ fontFamily: "var(--font-bbold-display)" }}
+          className={`text-sm sm:text-base leading-none text-stone-100 ${group.label.toLowerCase() === "bbold" ? "lowercase font-bold tracking-tight" : ""}`}
+          style={{
+            fontFamily:
+              group.label.toLowerCase() === "bbold"
+                ? "var(--font-bbold-brand)"
+                : "var(--font-bbold-display)",
+          }}
         >
           {group.label}
         </span>

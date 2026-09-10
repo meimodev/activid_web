@@ -63,7 +63,7 @@ export type ProductDetail = {
 };
 
 export const BBOLD_META = {
-  title: "BBOLD MMXX Tondano | @bbold.mmxx",
+  title: "bbold MMXX Tondano | @bbold.mmxx",
   description: "ALL PICTURE HAVE GOOD MOMENT TO REMEMBER",
 };
 
@@ -288,7 +288,7 @@ export const pictureData: GalleryGroup[] = [
 ];
 
 export const availablePictures: GalleryGroup = {
-  label: "BBOLD",
+  label: "bbold",
   fit: "cover",
   labelWidthClassName: "w-[7rem] h-12",
   images: [

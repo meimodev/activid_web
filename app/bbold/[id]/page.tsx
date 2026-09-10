@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BboldDetailClient from "../_components/BboldDetailClient";
-import { BBOLD_META, getBboldProduct } from "../data";
+import { BBOLD_META, getBboldProduct, productDetails } from "../data";
+
+export function generateStaticParams() {
+  return Object.keys(productDetails).map((id) => ({ id }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
