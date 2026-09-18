@@ -11,6 +11,7 @@ export type RedirectLink = {
   /** Free text shown above the business name. Empty means "use the default copy". */
   thankYouNote: string;
   active: boolean;
+  openCount: number;
   /** Epoch ms, so the record crosses the server/client boundary as-is. */
   createdAt: number;
 };
@@ -68,6 +69,7 @@ function toRedirectLink(code: string, data: FirebaseFirestore.DocumentData): Red
     destinationUrl: String(data.destinationUrl ?? ""),
     thankYouNote: String(data.thankYouNote ?? ""),
     active: data.active !== false,
+    openCount: Number(data.openCount ?? 0),
     createdAt: Number(data.createdAt ?? 0),
   };
 }
@@ -126,6 +128,7 @@ export async function createRedirectLink(input: {
     destinationUrl: input.destinationUrl,
     thankYouNote: input.thankYouNote,
     active: true,
+    openCount: 0,
     createdAt: Date.now(),
   };
 
@@ -134,6 +137,7 @@ export async function createRedirectLink(input: {
     destinationUrl: link.destinationUrl,
     thankYouNote: link.thankYouNote,
     active: link.active,
+    openCount: link.openCount,
     createdAt: link.createdAt,
   });
   bust(code);
@@ -142,7 +146,7 @@ export async function createRedirectLink(input: {
 
 export async function updateRedirectLink(
   code: string,
-  patch: Partial<Omit<RedirectLink, "code" | "createdAt">>,
+  patch: Partial<Omit<RedirectLink, "code" | "createdAt" | "openCount">>,
 ): Promise<void> {
   if (!isRedirectCode(code)) return;
   await getAdminDb().collection(COLLECTION).doc(code).update(patch);

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { CSSProperties } from "react";
+import { recordLinkOpen } from "./actions";
 
 export const DELAY_MS = 2500;
 /** When the CTA finishes popping in. The sweep waits for it, so the bar and
@@ -14,8 +15,17 @@ const CTA_IN_MS = 780;
  * visitor without JS sees an honest plain link instead of a bar that fills and
  * goes nowhere.
  */
-export function RedirectCountdown({ url }: { url: string }) {
+export function RedirectCountdown({ code, url }: { code: string; url: string }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const countedCode = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (countedCode.current === code) return;
+    countedCode.current = code;
+    void recordLinkOpen(code).catch((error) => {
+      console.error("Failed to record link open", error);
+    });
+  }, [code]);
 
   useEffect(() => {
     ref.current?.setAttribute("data-armed", "");

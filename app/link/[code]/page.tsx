@@ -413,7 +413,7 @@ export default async function RedirectLinkPage({ params }: PageProps) {
 
         {/* Server-rendered anchor is also the no-JS path: the redirect is client-side. */}
         {link.active ? (
-          <RedirectCountdown url={link.destinationUrl} />
+          <RedirectCountdown code={code} url={link.destinationUrl} />
         ) : (
           <p className="rl-off">Tautan ini sedang tidak aktif.</p>
         )}

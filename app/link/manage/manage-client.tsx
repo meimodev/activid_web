@@ -255,6 +255,7 @@ export function LinkConsole({ links }: { links: RedirectLink[] }) {
                   <Th className="pl-4 sm:pl-5">Bisnis</Th>
                   <Th className="hidden md:table-cell">Tujuan</Th>
                   <Th>Status</Th>
+                  <Th className="text-right">Dibuka</Th>
                   <Th className="hidden sm:table-cell">Dibuat</Th>
                   <Th className="pr-4 text-right sm:pr-5">
                     <span className="sr-only">Aksi</span>
@@ -340,6 +341,9 @@ function Row({
       </td>
       <td className="px-3 py-3">
         <StatusDot active={link.active} />
+      </td>
+      <td className="lc-num px-3 py-3 text-right text-[0.8125rem] text-[var(--lc-ink-2)]">
+        {link.openCount.toLocaleString("id-ID")}
       </td>
       <td className="lc-num hidden px-3 py-3 text-[0.8125rem] text-[var(--lc-ink-3)] sm:table-cell">
         {formatDate(link.createdAt)}
