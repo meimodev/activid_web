@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pickApkAsset } from "./route";
+import { pickApkAsset } from "./apkAsset";
 
 // Shape trimmed from the real GET /repos/meimodev/satset/releases/latest
 // payload — releases there are hand-uploaded, so asset naming is the part

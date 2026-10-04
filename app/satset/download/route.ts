@@ -2,6 +2,7 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import type { NextRequest } from "next/server";
+import { pickApkAsset } from "./apkAsset";
 
 export const runtime = "nodejs";
 // A 113 MB body over a phone connection outlives the default budget.
@@ -25,26 +26,6 @@ const API_LATEST = `https://api.github.com/repos/${REPO}/releases/latest`;
 const RELEASE_PAGE = `https://github.com/${REPO}/releases/latest`;
 const FILENAME = "satset.apk";
 
-type ReleaseAsset = { name?: unknown; browser_download_url?: unknown };
-
-// Releases are hand-uploaded, so the asset filename is a convention rather
-// than a guarantee: prefer the unversioned name, fall back to any .apk. Only
-// the version-bearing name (satset-1.0.2.apk) is certain to be there.
-export function pickApkAsset(release: unknown): string | null {
-  const assets = (release as { assets?: unknown })?.assets;
-  if (!Array.isArray(assets)) return null;
-
-  const apks = (assets as ReleaseAsset[]).filter(
-    (a) =>
-      typeof a?.name === "string" &&
-      a.name.endsWith(".apk") &&
-      typeof a.browser_download_url === "string",
-  );
-  if (apks.length === 0) return null;
-
-  const exact = apks.find((a) => a.name === FILENAME);
-  return (exact ?? apks[0]).browser_download_url as string;
-}
 
 // Throws rather than returning null so a transient API failure isn't what
 // gets cached for the next hour. /releases/latest already excludes drafts and
