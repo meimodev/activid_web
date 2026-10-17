@@ -12,7 +12,7 @@ const label = "grid min-w-0 gap-2 text-sm font-semibold";
 const button = "rounded-lg bg-[#1a1a3e] px-4 py-2.5 text-sm font-semibold text-[#F8EFDE] hover:bg-[#3d2645] disabled:opacity-50";
 const secondary = "rounded-lg border border-[#1a1a3e]/25 px-4 py-2.5 text-sm font-semibold hover:bg-white/60 disabled:opacity-50";
 
-function CurrencyInput({ name, defaultValue }: { name: string; defaultValue?: number }) {
+function CurrencyInput({ name, defaultValue, onValueChange }: { name: string; defaultValue?: number; onValueChange: (value: number) => void }) {
   const [digits, setDigits] = useState(defaultValue === undefined ? "" : String(defaultValue));
   return <span className="relative block">
     <span aria-hidden="true" className="pointer-events-none absolute left-3 top-2.5 text-sm font-normal text-[#1a1a3e]/60">Rp</span>
@@ -25,7 +25,9 @@ function CurrencyInput({ name, defaultValue }: { name: string; defaultValue?: nu
           return;
         }
         event.target.setCustomValidity("");
-        setDigits(value.replaceAll(".", "").replace(/^0+(?=\d)/, ""));
+        const next = value.replaceAll(".", "").replace(/^0+(?=\d)/, "");
+        setDigits(next);
+        onValueChange(Number(next));
       }} className={`${field} pl-10 font-normal tabular-nums`} />
     <input type="hidden" name={name} value={digits} />
   </span>;
@@ -129,11 +131,15 @@ function InvoiceEditor({ invoice, onSaved }: { invoice?: VerifiedInvoice; onSave
     if (result.code) onSaved(result.code);
     return result;
   }, {});
-  const [rows, setRows] = useState(() => invoice ? invoice.items.map((_, index) => index) : [0]);
+  const [rows, setRows] = useState(() => invoice ? invoice.items.map((item, id) => ({ id, quantity: item.quantity, unitPrice: item.unitPrice })) : [{ id: 0, quantity: 1, unitPrice: 0 }]);
   const nextRow = useRef(invoice?.items.length ?? 1);
-  const [paymentRows, setPaymentRows] = useState(() => invoice?.payments.map((_, index) => index) ?? []);
+  const [paymentRows, setPaymentRows] = useState(() => invoice?.payments.map((payment, id) => ({ id, amount: payment.amount })) ?? []);
   const nextPayment = useRef(invoice?.payments.length ?? 0);
   const savedCode = state.code || invoice?.code;
+  const { total, received, due, status } = invoicePaymentSummary({ items: rows, payments: paymentRows });
+  const validAmounts = Number.isSafeInteger(total) && Number.isSafeInteger(received) && total >= 0 && received >= 0;
+  const overpaid = validAmounts && due < 0;
+  const paid = validAmounts && !overpaid && total > 0 && status === "paid";
   return <>
     <h2 className="mb-5 text-2xl font-bold">{invoice ? "Edit invoice" : "New invoice"}</h2>
     <form action={action}>
@@ -148,35 +154,49 @@ function InvoiceEditor({ invoice, onSaved }: { invoice?: VerifiedInvoice; onSave
           <label className={label}>Account number<input name="accountNumber" defaultValue={invoice?.accountNumber} required maxLength={100} className={`${field} font-mono`} /></label>
         </div>
         <div className="border-t border-[#1a1a3e]/15 pt-5">
-          <h3 className="font-bold">Invoice items</h3><p className="mt-1 text-xs text-[#1a1a3e]/65">Whole quantities and whole IDR prices. Totals are calculated when saved.</p>
-          <div className="mt-4 grid gap-4">{rows.map((row, index) => <fieldset key={row} className="grid min-w-0 gap-3 rounded-xl border border-[#1a1a3e]/15 p-4">
+          <h3 className="font-bold">Invoice items</h3><p className="mt-1 text-xs text-[#1a1a3e]/65">Whole quantities and whole IDR prices. Totals update as you edit.</p>
+          <div className="mt-4 grid gap-4">{rows.map((row, index) => <fieldset key={row.id} className="grid min-w-0 gap-3 rounded-xl border border-[#1a1a3e]/15 p-4">
             <legend className="px-1 text-xs font-semibold">Item {index + 1}</legend>
-            <label className={label}>Description<textarea name="description" defaultValue={invoice?.items[row]?.description} required maxLength={1000} rows={2} className={field} /></label>
-            <label className={label}>Date sent<input type="date" name="dateSent" defaultValue={invoice?.items[row]?.dateSent} min="2000-01-01" max="9999-12-31" required className={field} /></label>
+            <label className={label}>Description<textarea name="description" defaultValue={invoice?.items[row.id]?.description} required maxLength={1000} rows={2} className={field} /></label>
+            <label className={label}>Date sent<input type="date" name="dateSent" defaultValue={invoice?.items[row.id]?.dateSent} min="2000-01-01" max="9999-12-31" required className={field} /></label>
             <div className="grid grid-cols-2 gap-3">
-              <label className={label}>Quantity<input type="number" name="quantity" min={1} step={1} defaultValue={invoice?.items[row]?.quantity ?? 1} required className={field} /></label>
-              <label className={label}>Unit price (IDR)<CurrencyInput name="unitPrice" defaultValue={invoice?.items[row]?.unitPrice} /></label>
+              <label className={label}>Quantity<input type="number" name="quantity" min={1} step={1} defaultValue={row.quantity} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, quantity: Number(event.target.value) } : item))} required className={field} /></label>
+              <label className={label}>Unit price (IDR)<CurrencyInput name="unitPrice" defaultValue={invoice?.items[row.id]?.unitPrice} onValueChange={(unitPrice) => setRows(rows.map((item) => item.id === row.id ? { ...item, unitPrice } : item))} /></label>
             </div>
-            <button type="button" onClick={() => setRows(rows.filter((id) => id !== row))} disabled={rows.length === 1} className="justify-self-start text-xs text-red-800 underline underline-offset-4 disabled:opacity-40">Remove item {index + 1}</button>
+            <button type="button" onClick={() => setRows(rows.filter((item) => item.id !== row.id))} disabled={rows.length === 1} className="justify-self-start text-xs text-red-800 underline underline-offset-4 disabled:opacity-40">Remove item {index + 1}</button>
           </fieldset>)}</div>
-          <button type="button" className={`${secondary} mt-4`} disabled={rows.length >= 100} onClick={() => setRows([...rows, nextRow.current++])}>Add item</button>
+          <button type="button" className={`${secondary} mt-4`} disabled={rows.length >= 100} onClick={() => setRows([...rows, { id: nextRow.current++, quantity: 1, unitPrice: 0 }])}>Add item</button>
         </div>
         <div className="border-t border-[#1a1a3e]/15 pt-5">
           <h3 className="font-bold">Payments received</h3>
           <p className="mt-1 text-xs leading-relaxed text-[#1a1a3e]/65">Record actual money received, including down payments. The remaining balance and status are calculated automatically.</p>
-          {invoice && <p className="mt-3 text-sm">Received: {formatIDR(invoicePaymentSummary(invoice).received)} · Remaining: {formatIDR(invoicePaymentSummary(invoice).due)}</p>}
-          <div className="mt-4 grid gap-4">{paymentRows.map((row, index) => <fieldset key={row} className="grid min-w-0 gap-3 rounded-xl border border-emerald-800/20 p-4">
+          <div aria-label="Payment summary" aria-live="polite" className={`mt-4 rounded-xl border p-4 ${overpaid || !validAmounts ? "border-red-200 bg-red-50" : paid ? "border-emerald-300 bg-emerald-50" : "border-[#1a1a3e]/10 bg-[#F8EFDE]/40"}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wider">Payment overview</p>
+              <span className={`rounded-full px-3 py-1 text-xs font-bold ${paid ? "bg-emerald-800 text-white" : "bg-white text-[#1a1a3e]"}`}>{!validAmounts ? "Check amounts" : overpaid ? "Overpayment" : paid ? "Paid in full" : received > 0 ? "Partially paid" : "Unpaid"}</span>
+            </div>
+            <dl className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div><dt className="text-xs text-[#1a1a3e]/65">Invoice total</dt><dd className="mt-1 break-words text-lg font-bold tabular-nums">{validAmounts ? formatIDR(total) : "—"}</dd></div>
+              <div><dt className="text-xs text-[#1a1a3e]/65">Received</dt><dd className="mt-1 break-words text-lg font-bold tabular-nums text-emerald-800">{validAmounts ? formatIDR(received) : "—"}</dd></div>
+              <div><dt className="text-xs text-[#1a1a3e]/65">{overpaid ? "Overpayment" : "Remaining"}</dt><dd className={`mt-1 break-words text-lg font-bold tabular-nums ${overpaid ? "text-red-800" : ""}`}>{validAmounts ? formatIDR(Math.abs(due)) : "—"}</dd></div>
+            </dl>
+            {validAmounts && total > 0 && <progress aria-label="Invoice payment progress" max={total} value={Math.min(received, total)} className="mt-4 h-2 w-full accent-emerald-700" />}
+            <p className="mt-3 text-xs text-[#1a1a3e]/65">Updates as you type. Save the invoice to update its PDF and verification page.</p>
+          </div>
+          {overpaid && <p role="alert" className="mt-3 text-sm text-red-800">Received payments exceed the invoice total by {formatIDR(-due)}. Check the amounts before saving.</p>}
+          {!validAmounts && <p role="alert" className="mt-3 text-sm text-red-800">Use whole IDR amounts within the supported range.</p>}
+          <div className="mt-4 grid gap-4">{paymentRows.map((row, index) => <fieldset key={row.id} className="grid min-w-0 gap-3 rounded-xl border border-emerald-800/20 p-4">
             <legend className="px-1 text-xs font-semibold">Payment {index + 1}</legend>
-            <label className={label}>Payment description<input name="paymentDescription" defaultValue={invoice?.payments[row]?.description} placeholder="Down payment / Balance payment" maxLength={300} required className={field} /></label>
-            <label className={label}>Date received (if known)<input type="date" name="paymentDate" defaultValue={invoice?.payments[row]?.dateReceived ?? currentInvoiceDate()} min="2000-01-01" max="9999-12-31" className={field} /></label>
-            <label className={label}>Amount received (IDR)<CurrencyInput name="paymentAmount" defaultValue={invoice?.payments[row]?.amount} /></label>
-            <button type="button" onClick={() => setPaymentRows(paymentRows.filter((id) => id !== row))} className="justify-self-start text-xs text-red-800 underline underline-offset-4">Remove payment {index + 1}</button>
+            <label className={label}>Payment description<input name="paymentDescription" defaultValue={invoice?.payments[row.id]?.description} placeholder="Down payment / Balance payment" maxLength={300} required className={field} /></label>
+            <label className={label}>Date received (if known)<input type="date" name="paymentDate" defaultValue={invoice?.payments[row.id]?.dateReceived ?? currentInvoiceDate()} min="2000-01-01" max="9999-12-31" className={field} /></label>
+            <label className={label}>Amount received (IDR)<CurrencyInput name="paymentAmount" defaultValue={invoice?.payments[row.id]?.amount} onValueChange={(amount) => setPaymentRows(paymentRows.map((payment) => payment.id === row.id ? { ...payment, amount } : payment))} /></label>
+            <button type="button" onClick={() => setPaymentRows(paymentRows.filter((payment) => payment.id !== row.id))} className="justify-self-start text-xs text-red-800 underline underline-offset-4">Remove payment {index + 1}</button>
           </fieldset>)}</div>
-          <button type="button" className={`${secondary} mt-4`} disabled={paymentRows.length >= 100} onClick={() => setPaymentRows([...paymentRows, nextPayment.current++])}>Add received payment</button>
+          <button type="button" className={`${secondary} mt-4`} disabled={paymentRows.length >= 100} onClick={() => setPaymentRows([...paymentRows, { id: nextPayment.current++, amount: 0 }])}>Add received payment</button>
         </div>
         {state.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{state.error}</p>}
         <p className="text-xs leading-relaxed text-[#1a1a3e]/65">Anyone with the verification link can see these invoice details. Include only information intended for the recipient.</p>
-        <button className={button}>{pending ? "Saving…" : invoice ? "Save changes" : "Issue invoice"}</button>
+        <button disabled={overpaid || !validAmounts} className={button}>{pending ? "Saving…" : invoice ? "Save changes" : "Issue invoice"}</button>
       </fieldset>
     </form>
     {savedCode && <div className="mt-7 grid gap-4 border-t border-[#1a1a3e]/15 pt-6">

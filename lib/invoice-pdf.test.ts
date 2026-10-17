@@ -22,14 +22,18 @@ it("generates downloadable PDFs with an embedded verification QR, including long
     payments: [{ description: "Down payment", dateReceived: "2026-10-17", amount: 1000000 }],
   });
   const short = await generateInvoicePDF(invoice, url);
+  const paid = await generateInvoicePDF({ ...invoice, payments: [...invoice.payments, { description: "Balance payment", dateReceived: "2026-10-18", amount: 2750000 }] }, url);
   expect(short.subarray(0, 5).toString()).toBe("%PDF-");
   expect(short.toString("latin1")).toContain("/Subtype /Image");
   expect(short.toString("latin1")).toContain("https://www.activid.id/verify/");
+  expect(short.toString("latin1")).toContain("CV Tonindo Eracons");
+  expect(paid.subarray(0, 5).toString()).toBe("%PDF-");
   const long = await generateInvoicePDF({ ...invoice, items: Array.from({ length: 35 }, (_, index) => ({ ...invoice.items[index % 2], description: `Line ${index + 1}: ${"Production, editing and delivery with a detailed description. ".repeat(12)}` })) }, url);
   expect(long.length).toBeGreaterThan(short.length);
   if (process.env.INVOICE_PDF_PREVIEW_DIR) {
     await mkdir(process.env.INVOICE_PDF_PREVIEW_DIR, { recursive: true });
     await writeFile(path.join(process.env.INVOICE_PDF_PREVIEW_DIR, "sample-invoice.pdf"), short);
+    await writeFile(path.join(process.env.INVOICE_PDF_PREVIEW_DIR, "paid-invoice.pdf"), paid);
     await writeFile(path.join(process.env.INVOICE_PDF_PREVIEW_DIR, "multipage-invoice.pdf"), long);
   }
 });

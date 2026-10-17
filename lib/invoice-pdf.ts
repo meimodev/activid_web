@@ -3,7 +3,7 @@ import "server-only";
 import path from "node:path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
-import { formatIDR, formatInvoiceDate, INVOICE_LEGAL_NOTE, invoicePaymentSummary, type VerifiedInvoice } from "@/lib/verified-invoice";
+import { formatIDR, formatInvoiceDate, INVOICE_ISSUER, INVOICE_LEGAL_NOTE, invoicePaymentSummary, type VerifiedInvoice } from "@/lib/verified-invoice";
 
 export async function generateInvoicePDF(invoice: VerifiedInvoice, verificationURL: string): Promise<Buffer> {
   const font = path.join(process.cwd(), "public/fonts/poppins-regular.ttf");
@@ -12,7 +12,7 @@ export async function generateInvoicePDF(invoice: VerifiedInvoice, verificationU
   const doc = new PDFDocument({
     size: "A4", margins: { top: 44, bottom: 48, left: 44, right: 44 },
     font, bufferPages: true,
-    info: { Title: `ACTIVID Invoice ${invoice.invoiceNumber}`, Author: "ACTIVID", Subject: "Invoice with online verification" },
+    info: { Title: `ACTIVID Invoice ${invoice.invoiceNumber}`, Author: `ACTIVID - ${INVOICE_ISSUER.legalName}`, Subject: "Invoice with online verification" },
   });
   const chunks: Buffer[] = [];
   const completed = new Promise<Buffer>((resolve, reject) => {
@@ -39,14 +39,14 @@ export async function generateInvoicePDF(invoice: VerifiedInvoice, verificationU
     const options: PDFKit.Mixins.TableOptions = {
       maxWidth: width,
       columnStyles: widths.map((columnWidth, index) => ({ width: columnWidth, align: { x: rightAligned.includes(index) ? "right" : "left" } })),
-      defaultStyle: { padding: 7, border: { bottom: 0.5 }, borderColor: "#dddde3", textColor: ink },
+      defaultStyle: { padding: 5, border: { bottom: 0.5 }, borderColor: "#dddde3", textColor: ink },
       rowStyles: (index) => index === 0 ? { backgroundColor: "#F8EFDE" } : { backgroundColor: "white" },
     };
     const start = () => doc.table(options).row(headers.map((text) => ({ text, type: "TH", font: { src: bold, size: 8 } })));
     let current = start();
     for (const row of rows) {
       const cells = row.map((value) => value.replace(/\s+/g, " "));
-      const height = Math.max(...cells.map((value, index) => doc.heightOfString(value, { width: widths[index] - 14 }))) + 16;
+      const height = Math.max(...cells.map((value, index) => doc.heightOfString(value, { width: widths[index] - 10 }))) + 12;
       if (doc.y + height > doc.page.height - doc.page.margins.bottom - 2) {
         current.end();
         doc.addPage();
@@ -58,16 +58,26 @@ export async function generateInvoicePDF(invoice: VerifiedInvoice, verificationU
     doc.x = 44;
   }
 
-  doc.fillColor(ink).font("bold").fontSize(21).text("ACTIVID", 44, 44);
-  doc.font("body").fontSize(8).fillColor("#6b2737").text("CREATIVE AGENCY", 44, 74);
+  doc.roundedRect(44, 44, 44, 44, 8).fill("#000000");
+  doc.image(path.join(process.cwd(), "public/images/activid-logo.jpg"), 47, 47, { fit: [38, 38], align: "center", valign: "center" });
+  doc.fillColor(ink).font("bold").fontSize(21).text("ACTIVID", 96, 42);
+  doc.font("body").fontSize(8).fillColor("#6b2737").text("CREATIVE AGENCY", 96, 72);
+  doc.font("bold").fontSize(9).fillColor(ink).text(INVOICE_ISSUER.legalName, 44, 94, { width: 260 });
+  doc.font("body").fontSize(7.5).fillColor("#656575").text(INVOICE_ISSUER.address, 44, doc.y + 3, { width: 260, lineGap: 1 });
+  doc.text(`${INVOICE_ISSUER.phone}  |  ${INVOICE_ISSUER.website}`, 44, doc.y + 4, { width: 260 });
+  const issuerBottom = doc.y;
   doc.font("bold").fontSize(26).fillColor(ink).text("INVOICE", 300, 44, { width: width - 256, align: "right" });
   doc.font("body").fontSize(9).text(invoice.invoiceNumber, 260, 82, { width: width - 216, align: "right" });
   doc.fontSize(8).fillColor("#656575").text(`Issued ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeZone: "Asia/Makassar" }).format(new Date(invoice.createdAt))}`, 260, doc.y + 4, { width: width - 216, align: "right" });
-  const headerBottom = Math.max(110, doc.y + 10);
+  const headerBottom = Math.max(issuerBottom, doc.y) + 12;
   doc.moveTo(44, headerBottom).lineTo(44 + width, headerBottom).lineWidth(1).strokeColor(ink).stroke();
-  doc.font("bold").fontSize(9).fillColor(status === "paid" ? "#166534" : "#92400e")
-    .text(status === "paid" ? "PAID IN FULL" : status === "partial" ? "PARTIALLY PAID" : "AWAITING PAYMENT", 44, headerBottom + 14);
-  const detailsY = doc.y + 18;
+  const paid = status === "paid";
+  const bannerY = headerBottom + 14;
+  doc.roundedRect(44, bannerY, width, 52, 8).fill(paid ? "#166534" : "#FFF5DF");
+  doc.font("bold").fontSize(paid ? 18 : 15).fillColor(paid ? "#ffffff" : "#92400e")
+    .text(paid ? "LUNAS / PAID IN FULL" : status === "partial" ? "PARTIALLY PAID" : "AWAITING PAYMENT", 58, bannerY + 7, { width: width - 28 });
+  doc.font("body").fontSize(8).text(paid ? `Amount due: ${formatIDR(0)} - No further payment required.` : `Received: ${formatIDR(received)}  |  Amount due: ${formatIDR(due)}`, 58, bannerY + 34, { width: width - 28 });
+  const detailsY = bannerY + 68;
   const half = (width - 24) / 2;
   doc.font("bold").fontSize(8).fillColor("#656575").text("BILLED TO", 44, detailsY);
   doc.font("body").fontSize(10).fillColor(ink).text(invoice.billedTo, 44, doc.y + 6, { width: half });
@@ -97,11 +107,17 @@ export async function generateInvoicePDF(invoice: VerifiedInvoice, verificationU
       payment.description, payment.dateReceived ? formatInvoiceDate(payment.dateReceived) : "Not recorded", formatIDR(payment.amount),
     ]), [width - 222, 110, 112], [2]);
   }
-  room(110);
-  doc.moveDown(1);
-  table(["Payment summary", "IDR"], [
-    ["Invoice total", formatIDR(total)], ["Payments received", formatIDR(received)], ["Amount due", formatIDR(due)],
-  ], [width - 160, 160], [1]);
+  room(82);
+  const summaryY = doc.y + 14;
+  doc.roundedRect(44, summaryY, width, 68, 6).fill(paid ? "#F0FDF4" : "#F8EFDE");
+  [["Invoice total", total], ["Payments received", received], ["Amount due", due]].forEach(([title, amount], index) => {
+    const y = summaryY + 9 + index * 18;
+    doc.font(index === 2 ? "bold" : "body").fontSize(index === 2 ? 10 : 9).fillColor(paid && index === 2 ? "#166534" : ink);
+    doc.text(String(title), 56, y, { width: width - 184 });
+    doc.text(formatIDR(Number(amount)), 44 + width - 172, y, { width: 160, align: "right" });
+  });
+  doc.y = summaryY + 68;
+  doc.x = 44;
 
   const noteHeight = doc.font("body").fontSize(7).heightOfString(INVOICE_LEGAL_NOTE, { width, lineGap: 2 });
   room(145 + noteHeight);

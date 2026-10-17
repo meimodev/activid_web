@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
   // RPATH from @img/sharp-libvips-linux-x64 — invisible to require-tracing,
   // so force-include it wherever the enhance path can run.
   outputFileTracingIncludes: {
-    "/verify/*/pdf": ["./public/fonts/poppins-regular.ttf", "./public/fonts/poppins-bold.ttf"],
+    "/verify/*/pdf": ["./public/fonts/poppins-regular.ttf", "./public/fonts/poppins-bold.ttf", "./public/images/activid-logo.jpg"],
     "/api/kenangan/**": [
       "./node_modules/.pnpm/@img+sharp-libvips-linux-x64@*/**",
     ],

@@ -32,6 +32,13 @@ export class InvoiceConflictError extends Error {
   constructor() { super("This invoice changed while you were editing. Reload it before saving to preserve the latest payments."); }
 }
 
+export const INVOICE_ISSUER = {
+  legalName: "CV Tonindo Eracons",
+  address: "Kompleks Pasar Bawah, Wawalintouan, Tondano & Jln Toar, Mahakeret, Manado",
+  phone: "0881080088816",
+  website: "www.activid.id",
+};
+
 export const INVOICE_LEGAL_NOTE = "Dokumen elektronik dapat menjadi alat bukti hukum yang sah sesuai Pasal 5 UU ITE (terakhir diubah dengan UU No. 1 Tahun 2024), sepanjang memenuhi persyaratan peraturan perundang-undangan yang berlaku. Pindai kode QR untuk memverifikasi kecocokan data invoice dengan catatan ACTIVID. Kode QR ini bukan tanda tangan elektronik tersertifikasi dan tidak dengan sendirinya menjamin keabsahan hukum dokumen.";
 
 export function currentInvoiceDate(): string {
@@ -102,7 +109,7 @@ export function validateInvoice(value: unknown): InvoiceInput {
   };
 }
 
-export function invoicePaymentSummary(invoice: Pick<InvoiceInput, "items" | "payments">) {
+export function invoicePaymentSummary(invoice: { items: Pick<InvoiceItem, "quantity" | "unitPrice">[]; payments: Pick<InvoicePayment, "amount">[] }) {
   const total = invoiceTotal(invoice.items);
   const received = invoice.payments.reduce((sum, payment) => sum + payment.amount, 0);
   const due = total - received;
@@ -130,7 +137,7 @@ export function formatIDRDigits(digits: string): string {
   return digits.replace(/^0+(?=\d)/, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-export function invoiceTotal(items: InvoiceItem[]): number {
+export function invoiceTotal(items: Pick<InvoiceItem, "quantity" | "unitPrice">[]): number {
   return items.reduce((total, item) => total + item.quantity * item.unitPrice, 0);
 }
 

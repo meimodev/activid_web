@@ -37,8 +37,9 @@ describe("invoice verification flow", () => {
   it("renders the invoice recipient, payment account and item table", async () => {
     mocks.get.mockResolvedValue(record);
     const html = renderToStaticMarkup(await VerifiedInvoicePage({ params: Promise.resolve({ code: record.code }) }));
-    for (const value of ["Example client", "INV/001", "ACTIVID", "0123456789", "Photography", "17 Oct 2026", "Quantity", "Unit price", "300.000", "Awaiting payment"]) expect(html).toContain(value);
+    for (const value of ["Example client", "INV/001", "ACTIVID", "0123456789", "Photography", "17 Oct 2026", "Quantity", "Unit price", "300.000", "Awaiting payment", "CV Tonindo Eracons", "0881080088816", "www.activid.id", "Wawalintouan", "Mahakeret"]) expect(html).toContain(value);
     expect(html).toContain("<table");
+    expect(html).toContain("ACTIVID logo");
   });
 
   it("shows a paid-in-full notice with zero due for a paid invoice", async () => {
@@ -146,5 +147,26 @@ describe("invoice verification flow", () => {
     fireEvent.submit(form);
     await waitFor(() => expect(mocks.paid).toHaveBeenCalledWith(record.code));
     expect(mocks.refresh).toHaveBeenCalled();
+  });
+
+  it("updates the received amount and balance while editing payments, quantities and prices", () => {
+    render(<InvoiceManager invoices={[record]} />);
+    fireEvent.click(screen.getByRole("button", { name: /INV\/001/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Add received payment" }));
+    fireEvent.change(screen.getByRole("textbox", { name: /Amount received \(IDR\)/ }), { target: { value: "100000" } });
+    expect(screen.getByLabelText("Payment summary")).toHaveTextContent(/Received:?\s*Rp\s*100\.000/);
+    expect(screen.getByLabelText("Payment summary")).toHaveTextContent(/Remaining\s*Rp\s*200\.000/);
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Quantity" }), { target: { value: "1" } });
+    expect(screen.getByLabelText("Payment summary")).toHaveTextContent(/Remaining\s*Rp\s*50\.000/);
+    fireEvent.change(screen.getByRole("textbox", { name: /Unit price \(IDR\)/ }), { target: { value: "100000" } });
+    expect(screen.getByLabelText("Payment summary")).toHaveTextContent("Paid in full");
+    fireEvent.click(screen.getByRole("button", { name: "Add received payment" }));
+    fireEvent.change(screen.getAllByRole("textbox", { name: /Amount received \(IDR\)/ })[1], { target: { value: "25000" } });
+    expect(screen.getByRole("alert")).toHaveTextContent("exceed");
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Remove payment 1" }));
+    expect(screen.getByLabelText("Payment summary")).toHaveTextContent(/Received\s*Rp\s*25\.000/);
+    expect(screen.getByLabelText("Payment summary")).toHaveTextContent(/Remaining\s*Rp\s*75\.000/);
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeEnabled();
   });
 });

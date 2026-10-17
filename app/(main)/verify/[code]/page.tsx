@@ -1,8 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CircleCheck, ShieldCheck, Clock3 } from "lucide-react";
 import { getVerifiedInvoice } from "@/lib/verified-invoice-store";
-import { formatIDR, formatInvoiceDate, INVOICE_LEGAL_NOTE, invoicePaymentSummary } from "@/lib/verified-invoice";
+import { formatIDR, formatInvoiceDate, INVOICE_ISSUER, INVOICE_LEGAL_NOTE, invoicePaymentSummary } from "@/lib/verified-invoice";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,13 @@ export default async function VerifiedInvoicePage({ params }: { params: Promise<
     <a href={`/verify/${code}/pdf`} className="mb-6 inline-block rounded-xl bg-[#1a1a3e] px-5 py-3 text-sm font-semibold text-[#F8EFDE]">Download invoice PDF</a>
     <article className="overflow-hidden rounded-3xl border border-[#1a1a3e]/10 bg-white shadow-sm">
       <header className="flex flex-wrap items-start justify-between gap-6 border-b border-[#1a1a3e]/10 p-6 sm:p-10">
-        <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b2737]">Issued by ACTIVID</p><h1 className="mt-3 text-4xl font-bold sm:text-5xl">Invoice</h1></div>
+        <div className="min-w-0 max-w-sm">
+          <div className="flex items-center gap-3"><span className="rounded-xl bg-black p-2"><Image src="/images/activid-logo.jpg" alt="ACTIVID logo" width={36} height={36} /></span><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b2737]">Issued by ACTIVID</p></div>
+          <h1 className="mt-4 text-4xl font-bold sm:text-5xl">Invoice</h1>
+          <p className="mt-4 text-sm font-bold">{INVOICE_ISSUER.legalName}</p>
+          <p className="mt-1 text-xs leading-relaxed text-[#1a1a3e]/70">{INVOICE_ISSUER.address}</p>
+          <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs"><a href={`tel:${INVOICE_ISSUER.phone}`} className="underline underline-offset-2">{INVOICE_ISSUER.phone}</a><a href={`https://${INVOICE_ISSUER.website}`} className="underline underline-offset-2">{INVOICE_ISSUER.website}</a></p>
+        </div>
         <div className="min-w-0"><p className="text-xs uppercase tracking-wider text-[#1a1a3e]/60">Invoice number</p><p className="mt-2 break-all font-mono text-lg font-semibold">{invoice.invoiceNumber}</p></div>
       </header>
       <div className="grid gap-8 p-6 sm:grid-cols-2 sm:p-10">
