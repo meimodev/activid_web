@@ -10,12 +10,13 @@ const nextConfig: NextConfig = {
   // Keep sharp external so its native libvips binary is traced into the
   // serverless bundle instead of being (mis)bundled by Turbopack — otherwise
   // it fails to dlopen at runtime on Vercel's linux-x64.
-  serverExternalPackages: ["sharp"],
+  serverExternalPackages: ["sharp", "pdfkit"],
   // serverExternalPackages alone isn't enough on Vercel: sharp's native
   // binding is require()d (traced), but libvips-cpp.so is loaded via ELF
   // RPATH from @img/sharp-libvips-linux-x64 — invisible to require-tracing,
   // so force-include it wherever the enhance path can run.
   outputFileTracingIncludes: {
+    "/verify/*/pdf": ["./public/fonts/poppins-regular.ttf", "./public/fonts/poppins-bold.ttf"],
     "/api/kenangan/**": [
       "./node_modules/.pnpm/@img+sharp-libvips-linux-x64@*/**",
     ],

@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { InvoiceInput, VerifiedInvoice } from "@/lib/verified-invoice";
 
-const mocks = vi.hoisted(() => ({ get: vi.fn(), list: vi.fn(), save: vi.fn(), authed: vi.fn(), session: vi.fn(), clear: vi.fn(), refresh: vi.fn(), qr: vi.fn() }));
-vi.mock("@/lib/verified-invoice-store", () => ({ getVerifiedInvoice: mocks.get, listVerifiedInvoices: mocks.list, saveVerifiedInvoice: mocks.save }));
+const mocks = vi.hoisted(() => ({ get: vi.fn(), list: vi.fn(), save: vi.fn(), paid: vi.fn(), authed: vi.fn(), session: vi.fn(), clear: vi.fn(), refresh: vi.fn(), qr: vi.fn() }));
+vi.mock("@/lib/verified-invoice-store", () => ({ getVerifiedInvoice: mocks.get, listVerifiedInvoices: mocks.list, saveVerifiedInvoice: mocks.save, markVerifiedInvoicePaid: mocks.paid }));
 vi.mock("@/lib/verify-admin-session", () => ({ isVerifyAdmin: mocks.authed, setVerifyAdminSession: mocks.session, clearVerifyAdminSession: mocks.clear }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }), notFound: () => { throw new Error("NOT_FOUND"); }, redirect: (url: string) => { throw new Error(`REDIRECT:${url}`); } }));
@@ -13,13 +13,14 @@ vi.mock("qrcode", () => ({ toDataURL: mocks.qr }));
 import VerifiedInvoicePage from "./[code]/page";
 import VerifyManagePage from "./manage/page";
 import VerifyPage from "./page";
-import { loginVerifyAdmin, saveInvoice } from "./manage/actions";
+import { loginVerifyAdmin, markInvoicePaid, saveInvoice } from "./manage/actions";
 import { InvoiceManager } from "./manage/manage-client";
 
 const record: VerifiedInvoice = {
-  code: "a".repeat(32), createdAt: 1, invoiceNumber: "INV/001", billedTo: "Example client",
+  code: "a".repeat(32), createdAt: 1, revision: 0, invoiceNumber: "INV/001", billedTo: "Example client",
   payableTo: "ACTIVID", bankName: "Example bank", accountNumber: "0123456789", status: "unpaid",
   items: [{ description: "Photography", dateSent: "2026-10-17", quantity: 2, unitPrice: 150000 }],
+  payments: [],
 };
 
 function invoiceForm() {
@@ -41,7 +42,7 @@ describe("invoice verification flow", () => {
   });
 
   it("shows a paid-in-full notice with zero due for a paid invoice", async () => {
-    mocks.get.mockResolvedValue({ ...record, status: "paid" });
+    mocks.get.mockResolvedValue({ ...record, status: "paid", payments: [{ description: "Payment", dateReceived: "2026-10-17", amount: 300000 }] });
     const html = renderToStaticMarkup(await VerifiedInvoicePage({ params: Promise.resolve({ code: record.code }) }));
     expect(html).toContain("Paid in full");
     expect(html).toContain("No further payment is required");
@@ -64,18 +65,26 @@ describe("invoice verification flow", () => {
     expect(mocks.list).not.toHaveBeenCalled();
     expect(await saveInvoice({}, invoiceForm())).toHaveProperty("error");
     expect(mocks.save).not.toHaveBeenCalled();
+    expect(await markInvoicePaid({}, invoiceForm())).toHaveProperty("error");
+    expect(mocks.paid).not.toHaveBeenCalled();
   });
 
-  it("validates writes and persists paid status on the same QR code", async () => {
+  it("validates receipts and ignores submitted status, totals and invoice numbers", async () => {
     mocks.authed.mockResolvedValue(true);
     mocks.save.mockResolvedValue(record.code);
     const data = invoiceForm();
     data.set("code", record.code);
     data.set("status", "paid");
     data.set("total", "1");
+    data.set("invoiceNumber", "FORGED");
+    data.append("paymentDescription", "Down payment");
+    data.append("paymentDate", "2026-10-17");
+    data.append("paymentAmount", "100000");
     expect(await saveInvoice({}, data)).toEqual({ code: record.code });
     const saved: InvoiceInput = mocks.save.mock.calls[0][1];
-    expect(saved.status).toBe("paid");
+    expect(saved.payments[0].amount).toBe(100000);
+    expect(saved).not.toHaveProperty("status");
+    expect(saved).not.toHaveProperty("invoiceNumber");
     expect(saved.items[0].unitPrice).toBe(150000);
     expect(saved).not.toHaveProperty("total");
     expect(mocks.save.mock.calls[0][0]).toBe(record.code);
@@ -108,15 +117,34 @@ describe("invoice verification flow", () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
     render(<InvoiceManager invoices={[record]} />);
     fireEvent.click(screen.getByRole("button", { name: /INV\/001/ }));
-    fireEvent.change(screen.getByLabelText("Payment status"), { target: { value: "paid" } });
+    const price = screen.getByRole("textbox", { name: /Unit price \(IDR\)/ });
+    fireEvent.change(price, { target: { value: "1500000" } });
+    expect(price).toHaveValue("1.500.000");
+    fireEvent.click(screen.getByRole("button", { name: "Add received payment" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Payment description" }), { target: { value: "Down payment" } });
+    const paymentAmount = screen.getByRole("textbox", { name: /Amount received \(IDR\)/ });
+    fireEvent.change(paymentAmount, { target: { value: "100000" } });
+    expect(paymentAmount).toHaveValue("100.000");
     const form = screen.getByRole("button", { name: "Save changes" }).closest("form");
     if (!form) throw new Error("Invoice form missing");
     fireEvent.submit(form);
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Invoice saved"));
-    expect(mocks.save).toHaveBeenCalledWith(record.code, expect.objectContaining({ status: "paid" }));
+    expect(mocks.save).toHaveBeenCalledWith(record.code, expect.objectContaining({ items: [expect.objectContaining({ unitPrice: 1500000 })] }), record.revision);
+    expect(mocks.save).toHaveBeenCalledWith(record.code, expect.objectContaining({ payments: [expect.objectContaining({ description: "Down payment", amount: 100000 })] }), record.revision);
+    expect(screen.getByRole("link", { name: "Download invoice PDF" })).toHaveAttribute("href", `/verify/${record.code}/pdf`);
     expect(mocks.refresh).toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Download QR code" }));
     await waitFor(() => expect(click).toHaveBeenCalledOnce());
     expect(mocks.qr).toHaveBeenCalledWith(`${window.location.origin}/verify/${record.code}`, expect.any(Object));
+  });
+
+  it("offers a protected quick action to record the remaining balance as paid", async () => {
+    mocks.authed.mockResolvedValue(true);
+    render(<InvoiceManager invoices={[record]} />);
+    const form = screen.getByRole("button", { name: "Mark paid" }).closest("form");
+    if (!form) throw new Error("Quick payment form missing");
+    fireEvent.submit(form);
+    await waitFor(() => expect(mocks.paid).toHaveBeenCalledWith(record.code));
+    expect(mocks.refresh).toHaveBeenCalled();
   });
 });
