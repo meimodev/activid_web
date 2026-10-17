@@ -2,6 +2,7 @@
 
 import { getInvitationAffiliate, isAffiliateId } from "@/lib/affiliate-config";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { getAdminPassword, matchesAdminPassword } from "@/lib/admin-password";
 import {
   buildInvitationStoredMetadata,
   revalidateInvitationConfig,
@@ -109,10 +110,6 @@ function readString(formData: FormData, key: string): string {
   return value;
 }
 
-function getExpectedPassword(): string | null {
-  return process.env.INVITATION_ADMIN_PASSWORD ?? null;
-}
-
 const SITE_ORIGIN = "https://invitation.activid.id";
 
 function validateHttpUrl(rawValue: string): string | null {
@@ -198,16 +195,15 @@ export async function verifyInvitationRegisterPassword(
   _prevState: VerifyRegisterPasswordState,
   formData: FormData,
 ): Promise<VerifyRegisterPasswordState> {
-  const expectedPassword = getExpectedPassword();
-  if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
+  if (!getAdminPassword()) {
+    return { error: "Server is missing ADMIN_PASSWORD." };
   }
 
   const password = readString(formData, "password");
   const affiliateIdInput = readString(formData, "affiliateId").trim().toUpperCase();
 
   // If the admin password matches, grant global session right away
-  if (password === expectedPassword) {
+  if (matchesAdminPassword(password)) {
     return grantGlobalSession();
   }
 
@@ -301,9 +297,8 @@ export async function registerInvitation(
   _prevState: RegisterInvitationState,
   formData: FormData,
 ): Promise<RegisterInvitationState> {
-  const expectedPassword = getExpectedPassword();
-  if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
+  if (!getAdminPassword()) {
+    return { error: "Server is missing ADMIN_PASSWORD." };
   }
 
   const cookieStore = await cookies();
@@ -312,7 +307,7 @@ export async function registerInvitation(
   const hasValidSession = isInvitationRegisterSessionValid(sessionCookie);
 
   const password = readString(formData, "password");
-  const isAdminPassword = password === expectedPassword;
+  const isAdminPassword = matchesAdminPassword(password);
   const isAdminAuth = hasValidSession || isAdminPassword;
 
   if (isAdminPassword) {
@@ -361,7 +356,7 @@ export async function registerInvitation(
     ? ADMIN_INVITATION_AFFILIATE_ID
     : (affiliateId ?? undefined);
 
-  if (!hasValidAuth && password !== expectedPassword) {
+  if (!hasValidAuth && !isAdminPassword) {
     return { error: "Invalid password." };
   }
 
@@ -592,9 +587,8 @@ export async function updateInvitation(
   _prevState: RegisterInvitationState,
   formData: FormData,
 ): Promise<RegisterInvitationState> {
-  const expectedPassword = getExpectedPassword();
-  if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
+  if (!getAdminPassword()) {
+    return { error: "Server is missing ADMIN_PASSWORD." };
   }
 
   const cookieStore = await cookies();
@@ -612,12 +606,12 @@ export async function updateInvitation(
     ? isInvitationAffiliateSessionValid(affiliateSessionCookie, affiliateCookieId)
     : false;
   const password = readString(formData, "password");
-  const isAdminPassword = password === expectedPassword;
+  const isAdminPassword = matchesAdminPassword(password);
   const isAdminAuth = hasValidSession || isAdminPassword;
   const hasValidAuth = isAdminAuth || hasValidAffiliateSession;
   const isAffiliateAuth = !isAdminAuth && hasValidAffiliateSession;
 
-  if (!hasValidAuth && password !== expectedPassword) {
+  if (!hasValidAuth && !isAdminPassword) {
     return { error: "Invalid password." };
   }
 

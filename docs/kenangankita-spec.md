@@ -113,7 +113,7 @@ Clone the `invitation-affiliate-session.ts` pattern into `lib/kenangan-host-sess
 (`"server-only"`):
 
 - Each event has a `hostAccessCode` (nanoid, already a dependency) given to the host at event creation (created by admin initially — no self-serve signup in v1).
-- Host enters code at `/kenangan/host` → HMAC-signed httpOnly cookie (`kenangan_host_session`), 12h TTL, secret `KENANGAN_SESSION_SECRET`.
+- Host enters code at `/kenangan/host` → HMAC-signed httpOnly cookie (`kenangan_host_session`), 12h TTL, project-wide secret `SESSION_SECRET`.
 - All host pages and mutating API routes validate the cookie server-side.
 
 ---
@@ -331,7 +331,7 @@ Scoped tokens in `app/(kenangan)/kenangan.css` — never touch `globals.css` or 
 
 ```
 KENANGAN_ENABLED=true
-KENANGAN_SESSION_SECRET=...          # host HMAC sessions
+SESSION_SECRET=...                   # project-wide signing secret, at least 32 characters
 KENANGAN_GUEST_TOKEN_SECRET=...      # jose JWT for QR tokens
 REPLICATE_API_TOKEN=...
 REPLICATE_WEBHOOK_SECRET=...
@@ -376,7 +376,7 @@ until the previous one works:
    kenanganEvents/{id}/photos), and a virtualized live feed page driven by
    Firestore onSnapshot with rAF-batched updates and ?tr=w-400,q-70 thumbs.
 2. Host surface: lib/kenangan-host-session.ts (clone the HMAC pattern from
-   lib/invitation-affiliate-session.ts, secret KENANGAN_SESSION_SECRET),
+   lib/invitation-affiliate-session.ts, project-wide secret SESSION_SECRET),
    access-code login, event CRUD, theme/LUT selection, QR generation with
    signed token URL, download-mode toggle.
 3. Moderation + hide/unhide curation + close (= publish, irreversible) + gallery

@@ -9,6 +9,7 @@ export const siteContent: SiteContent = {
     { label: 'About', href: '/#about' },
     { label: 'Clients', href: '/#clients' },
     { label: 'Services', href: '/#services' },
+    { label: 'Verify documents', href: '/verify' },
     { label: 'Contact', href: '/contact' },
   ],
   hero: {

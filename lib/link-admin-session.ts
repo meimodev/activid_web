@@ -1,13 +1,14 @@
 import "server-only";
 
 import { SignJWT, jwtVerify } from "jose";
+import { getSessionSecret } from "@/lib/session-secret";
 
 const COOKIE_NAME = "link_admin_session";
 const TTL_SECONDS = 60 * 60 * 12;
 const ROLE = "link-admin";
 
 function getKey(): Uint8Array | null {
-  const secret = process.env.INVITATION_REGISTER_SESSION_SECRET;
+  const secret = getSessionSecret();
   if (!secret) return null;
   return new TextEncoder().encode(secret);
 }
@@ -30,7 +31,7 @@ export async function createLinkAdminCookieValue(): Promise<string> {
   const key = getKey();
   // No dev fallback secret: an unsigned-in-practice session is worse than a
   // hard failure, and this gate is the only thing in front of link editing.
-  if (!key) throw new Error("Missing environment variable: INVITATION_REGISTER_SESSION_SECRET");
+  if (!key) throw new Error("Configure SESSION_SECRET with at least 32 characters.");
 
   const iat = Math.floor(Date.now() / 1000);
   return new SignJWT({ role: ROLE })

@@ -27,6 +27,7 @@ const defaultItems: NavigationItem[] = [
   { label: 'About', href: '/#about' },
   { label: 'Services', href: '/#services' },
   { label: 'Work', href: '/#services' },
+  { label: 'Verify', href: '/verify' },
   { label: 'Invitation', href: 'https://invitation.activid.id', external: true },
   { label: 'KenanganKita', href: 'https://kenangan.activid.id', external: true },
   { label: 'Contact', href: '/contact' },

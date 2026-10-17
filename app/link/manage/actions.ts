@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { getAdminPassword, matchesAdminPassword } from "@/lib/admin-password";
 import {
   createLinkAdminCookieValue,
   getLinkAdminCookieName,
@@ -26,11 +27,10 @@ export async function loginLinkAdmin(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const expected = process.env.LINK_ADMIN_PASSWORD;
-  if (!expected) return { error: "Server belum diberi LINK_ADMIN_PASSWORD." };
+  if (!getAdminPassword()) return { error: "Server belum diberi ADMIN_PASSWORD." };
 
   const password = formData.get("password");
-  if (typeof password !== "string" || password !== expected) {
+  if (!matchesAdminPassword(password)) {
     return { error: "Kata sandi salah." };
   }
 

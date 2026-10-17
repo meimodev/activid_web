@@ -1,11 +1,12 @@
 import "server-only";
 
 import { SignJWT, jwtVerify } from "jose";
+import { getSessionSecret } from "@/lib/session-secret";
 
 function getSecret(): Uint8Array {
-  const secret = process.env.KENANGAN_GUEST_TOKEN_SECRET;
+  const secret = getSessionSecret();
   if (!secret) {
-    throw new Error("Missing environment variable: KENANGAN_GUEST_TOKEN_SECRET");
+    throw new Error("Configure SESSION_SECRET with at least 32 characters.");
   }
   return new TextEncoder().encode(secret);
 }

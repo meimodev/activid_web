@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { getAdminPassword, matchesAdminPassword } from "@/lib/admin-password";
 import { createInvitationAdminSessionCookieValue, getInvitationAdminSessionCookieName, getAdminSessionCookieOptions } from "./lib/invitation-admin-session";
 
 export type VerifyAdminPasswordState = {
@@ -12,13 +13,12 @@ export async function verifyAdminPassword(
   _prevState: VerifyAdminPasswordState,
   formData: FormData,
 ): Promise<VerifyAdminPasswordState> {
-  const expectedPassword = process.env.INVITATION_ADMIN_PASSWORD;
-  if (!expectedPassword) {
-    return { error: "Server is missing INVITATION_ADMIN_PASSWORD." };
+  if (!getAdminPassword()) {
+    return { error: "Server is missing ADMIN_PASSWORD." };
   }
 
   const password = formData.get("password");
-  if (typeof password !== "string" || password !== expectedPassword) {
+  if (!matchesAdminPassword(password)) {
     return { error: "Invalid password." };
   }
 

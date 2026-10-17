@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createHmac, timingSafeEqual } from "crypto";
+import { getSessionSecret } from "@/lib/session-secret";
 
 const COOKIE_NAME = "invitation_affiliate_session";
 const COOKIE_TTL_SECONDS = 60 * 60 * 12;
@@ -23,9 +24,9 @@ export function getInvitationAffiliateSessionCookieName(): string {
 }
 
 export function createInvitationAffiliateSessionCookieValue(affiliateId: string): string {
-  const secret = process.env.INVITATION_REGISTER_SESSION_SECRET;
+  const secret = getSessionSecret();
   if (!secret) {
-    throw new Error("Missing environment variable: INVITATION_REGISTER_SESSION_SECRET");
+    throw new Error("Configure SESSION_SECRET with at least 32 characters.");
   }
 
   const expire = Math.floor(Date.now() / 1000) + COOKIE_TTL_SECONDS;
@@ -40,7 +41,7 @@ export function isInvitationAffiliateSessionValid(
 ): boolean {
   if (!value) return false;
 
-  const secret = process.env.INVITATION_REGISTER_SESSION_SECRET;
+  const secret = getSessionSecret();
   if (!secret) return false;
 
   const [affiliateId, expireRaw, signature] = value.split(".");

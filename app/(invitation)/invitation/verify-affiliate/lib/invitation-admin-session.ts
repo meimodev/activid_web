@@ -1,7 +1,7 @@
-import { SignJWT, jwtVerify } from "jose";
+import "server-only";
 
-const SESSION_SECRET = process.env.INVITATION_REGISTER_SESSION_SECRET;
-const encodedKey = new TextEncoder().encode(SESSION_SECRET || "fallback-secret-do-not-use-in-prod");
+import { SignJWT, jwtVerify } from "jose";
+import { getSessionSecret } from "@/lib/session-secret";
 
 export function getInvitationAdminSessionCookieName(): string {
   return "inv_admin_session";
@@ -18,7 +18,8 @@ export function getAdminSessionCookieOptions() {
 }
 
 export async function createInvitationAdminSessionCookieValue(): Promise<string> {
-  if (!SESSION_SECRET) throw new Error("Missing SESSION_SECRET");
+  const secret = getSessionSecret();
+  if (!secret) throw new Error("Configure SESSION_SECRET with at least 32 characters.");
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 60 * 60 * 12; // 12 hours
 
@@ -26,13 +27,14 @@ export async function createInvitationAdminSessionCookieValue(): Promise<string>
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt(iat)
     .setExpirationTime(exp)
-    .sign(encodedKey);
+    .sign(new TextEncoder().encode(secret));
 }
 
 export async function isInvitationAdminSessionValid(cookieValue?: string): Promise<boolean> {
-  if (!cookieValue) return false;
+  const secret = getSessionSecret();
+  if (!secret || !cookieValue) return false;
   try {
-    const { payload } = await jwtVerify(cookieValue, encodedKey, {
+    const { payload } = await jwtVerify(cookieValue, new TextEncoder().encode(secret), {
       algorithms: ["HS256"],
     });
     return payload.role === "admin";
