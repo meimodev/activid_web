@@ -1,9 +1,12 @@
 # Project calendar setup
 
 Each project can connect to its own private Google secondary calendar. Important
-dates become all-day events. Timeline phases become all-day spans with inclusive
-start and end dates; Google receives the following day as its exclusive end.
-The project page is the schedule source: Google edits are not imported.
+dates and activity history (meetings, visits, and changes) become all-day events.
+Timeline phases become all-day spans with inclusive start and end dates; Google
+receives the following day as its exclusive end. The client calendar includes
+every day of a phase, shows the number of overlapping phases, and lists all
+events for the selected date. The project page is the schedule source: Google
+edits are not imported.
 
 ## Connect a calendar
 
@@ -27,7 +30,7 @@ production secrets belong in the Vercel environment, followed by a deployment.
 
 ## Behavior and recovery
 
-- Every save reconciles important dates, timeline phases, and target handover.
+- Every save reconciles important dates, timeline phases, activity history, and target handover.
   Events are tagged by project and entry; edits update the existing event.
   Removed entries delete only that project's tagged events. Other events remain.
 - Only secondary calendar IDs (`…@group.calendar.google.com`) are accepted.

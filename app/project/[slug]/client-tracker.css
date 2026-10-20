@@ -4,7 +4,7 @@
 .process-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 29px 0 26px; }
 .process-title h1 { max-width: 22ch; font-size: clamp(30px, 4vw, 42px); font-weight: 400; letter-spacing: -.045em; line-height: 1.12; }
 .process-title .project-status { margin-bottom: 4px; }
-.process-progress { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: 40px; padding: 25px; border-radius: 10px; background: #293d30; color: #f0f3e7; }
+.process-progress { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 25px; border-radius: 10px; background: #293d30; color: #f0f3e7; }
 .process-progress-heading { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
 .process-progress-heading > div > span { font-size: 12px; color: #d1dcc8; }
 .process-progress h2 { font-size: 24px; font-weight: 400; letter-spacing: -.6px; margin-top: 3px; line-height: 1.2; }
@@ -68,7 +68,7 @@
   .process-title { flex-direction: column; align-items: flex-start; padding: 24px 0 19px; gap: 12px; }
   .process-title h1 { font-size: 30px; max-width: 22ch; }
   .process-title .project-status { margin: 0; }
-  .process-progress { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: 40px; padding: 21px; }
+  .process-progress { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 21px; }
   .process-progress h2 { font-size: 23px; }
   .process-progress-heading > strong { font-size: 34px; }
   .process-progress-summary > p { font-size: 13px; margin-top: 12px; }
@@ -89,34 +89,58 @@
 }
 
 .process-progress-summary { min-width: 0; align-self: center; }
-.project-calendar { min-width: 0; padding: 16px; background: #344b3c; border-radius: 6px; }
+.project-calendar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 28px; min-width: 0; padding: 16px; background: #344b3c; border-radius: 6px; }
+.project-calendar-heading { grid-column: 1; grid-row: 1; }
 .project-calendar-heading h3 { font-size: 14px; font-weight: 500; }
 .project-calendar-heading > div { display: flex; align-items: center; justify-content: space-between; margin: 5px -8px 0; }
 .project-calendar-heading button { display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
 .project-calendar-heading span { font-size: 13px; }
-.project-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; }
+.project-calendar-grid { grid-column: 1; grid-row: 3; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px 1px; text-align: center; }
 .project-calendar-weekday { color: #c5d3c1; font-size: 11px; padding-bottom: 6px; }
-.project-calendar-grid button, .project-calendar-day { position: relative; display: grid; place-items: center; height: 40px; font-size: 12px; font-variant-numeric: tabular-nums; }
-.project-calendar-grid button { border-radius: 4px; background: #4c6551; font-weight: 600; cursor: pointer; }
+.project-calendar-grid button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; height: 42px; border-radius: 3px; font-size: 12px; font-variant-numeric: tabular-nums; cursor: pointer; }
+.project-calendar-grid button.has-phases { background: #48604d; }
 .project-calendar-grid button:hover { background: #60795d; }
 .project-calendar-grid button[aria-pressed="true"] { background: #c3d39d; color: #203225; }
-.project-calendar [aria-current="date"] { text-decoration: underline; text-underline-offset: 4px; }
-.project-calendar-dot { position: absolute; bottom: 4px; width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
-.project-calendar-agenda { margin-top: 15px; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
-.project-calendar-agenda time { color: #d1dcc8; font-size: 11px; }
-.project-calendar-agenda strong { display: block; font-size: 13px; font-weight: 500; }
-.project-calendar-agenda p, .project-calendar-agenda div > span { display: block; color: #d1dcc8; margin-top: 4px; }
-.project-calendar-agenda div + div { margin-top: 10px; }
+.project-calendar [aria-current="date"] > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
+.project-calendar-markers { display: flex; justify-content: center; align-items: center; gap: 4px; min-height: 13px; }
+.calendar-phase-count { display: grid; place-items: center; min-width: 13px; padding: 0 2px; border-radius: 2px; background: #71856b; color: #fff; font-size: 10px; line-height: 13px; }
+.project-calendar-grid button[aria-pressed="true"] .calendar-phase-count { background: #293d30; color: #f0f3e7; }
+.calendar-important-marker, .calendar-activity-marker, .calendar-phase-marker { display: inline-block; width: 5px; height: 5px; border-radius: 50%; flex: none; }
+.calendar-important-marker { background: #e5e69e; }
+.calendar-activity-marker { background: #afcee8; }
+.calendar-phase-marker { background: #71856b; width: 9px; height: 9px; border-radius: 2px; }
+.project-calendar-grid button[aria-pressed="true"] .calendar-important-marker { background: #5b581c; }
+.project-calendar-grid button[aria-pressed="true"] .calendar-activity-marker { background: #1f4c5d; }
+.project-calendar-legend { grid-column: 1; grid-row: 2; display: flex; flex-wrap: wrap; gap: 5px 12px; margin: 4px 0 15px; color: #d1dcc8; font-size: 11px; }
+.project-calendar-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.project-calendar-agenda { grid-column: 2; grid-row: 1 / span 3; align-self: start; margin-top: 0; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.project-calendar-selection { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; color: #d1dcc8; margin-bottom: 8px; font-size: 11px; }
+.calendar-entry { margin-top: 5px; background: #3c5544; border-radius: 3px; padding: 0 10px; }
+.calendar-entry summary { display: flex; justify-content: space-between; align-items: center; gap: 9px; min-height: 48px; padding: 7px 0; cursor: pointer; list-style: none; }
+.calendar-entry summary::-webkit-details-marker { display: none; }
+.calendar-entry summary > span { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 7px; align-items: baseline; min-width: 0; }
+.calendar-entry summary > svg { flex: none; }
+.calendar-entry[open] summary > svg { transform: rotate(180deg); }
+.calendar-entry small { color: #d1dcc8; font-size: 11px; }
+.calendar-entry strong { font-size: 13px; font-weight: 500; }
+.calendar-entry-range { grid-column: 1 / -1; color: #d1dcc8; font-size: 11px; }
+.calendar-entry > p { color: #d1dcc8; padding-bottom: 10px; white-space: pre-line; }
+.calendar-entry-important { background: #46563e; }
+.calendar-entry-activity { background: #364f49; }
 .project-calendar-link { display: flex; gap: 6px; align-items: center; min-height: 44px; font-size: 12px; margin-top: 8px; }
+.project-calendar-subscribe { grid-column: 1 / -1; margin-top: 10px; }
 .project-calendar-subscribe > p { color: #d1dcc8; font-size: 12px; line-height: 1.6; }
 .project-calendar button:focus-visible, .project-calendar a:focus-visible { outline: 2px solid #e6f2c8; outline-offset: 2px; }
 .process-milestone-range { flex: none; white-space: nowrap; font-size: 13px; color: var(--project-muted); }
 @media (max-width: 760px) {
   .process-progress { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .project-calendar-grid button, .project-calendar-day { height: 44px; }
+  .project-calendar { display: block; }
+  .project-calendar-agenda { margin-top: 15px; }
+  .project-calendar-grid button { height: 48px; }
 }
 @media (max-width: 600px) {
-  .project-calendar { margin: 0 -9px -9px; padding: 12px; }
+  .project-calendar { margin: 0 -21px -21px; padding: 16px 21px 21px; border-radius: 0 0 10px 10px; }
+  .project-calendar-grid { margin-inline: -15px; column-gap: 0; }
   .process-milestone-range { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; }
   .process-milestone-range > span { display: none; }
   .process-milestone-range time { font-size: 12px; }

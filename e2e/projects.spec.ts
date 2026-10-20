@@ -37,14 +37,23 @@ test("client can follow the project process and read its activity history", asyn
   await expect(page.locator(".process-milestone")).toHaveCount(6);
   await expect(page.locator(".milestone-current .process-milestone-range")).toHaveText("28 Sept – 30 Oct");
   const calendar = page.getByRole("group", { name: "Project calendar", exact: true });
-  await calendar.getByRole("button", { name: "22 Oct 2026: Approval rules review", exact: true }).click();
+  await calendar.getByRole("button", { name: /22 Oct 2026:.*Approval rules review/ }).click();
   await expect(calendar.locator(".project-calendar-agenda")).toContainText("Sales and finance leads");
   await calendar.getByRole("button", { name: "Next month" }).click();
   await expect(calendar.locator(".project-calendar-heading")).toContainText("November 2026");
-  await calendar.getByRole("button", { name: "4 Nov 2026: Client testing briefing", exact: true }).click();
+  await calendar.getByRole("button", { name: /4 Nov 2026:.*Client testing briefing/ }).click();
   await expect(calendar.locator(".project-calendar-agenda")).toContainText("testing scenarios");
   await calendar.getByRole("button", { name: "Previous month" }).click();
   await expect(calendar.locator(".project-calendar-heading")).toContainText("October 2026");
+  await calendar.getByRole("button", { name: /19 Oct 2026:.*Development progress review/ }).click();
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Meeting");
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Development progress review");
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Development");
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Online · Client leads and ACTIVID");
+  await calendar.getByRole("button", { name: /16 Oct 2026:.*Warehouse workflow visit/ }).click();
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Visit");
+  await calendar.getByRole("button", { name: /14 Oct 2026:.*Order-approval flow revised/ }).click();
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Change");
   await expect(page.getByRole("heading", { name: "Orders are connecting to stock." })).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Next step", exact: true })).toHaveCount(0);

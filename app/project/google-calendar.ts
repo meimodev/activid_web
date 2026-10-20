@@ -8,7 +8,7 @@ export function calendarServiceAccount() {
   return process.env.GOOGLE_CALENDAR_CLIENT_EMAIL || process.env.FIREBASE_ADMIN_CLIENT_EMAIL || "";
 }
 
-type GoogleEvent = { id: string; extendedProperties?: { private?: Record<string, string> } };
+type GoogleEvent = { id: string; summary?: string; description?: string; start?: { date?: string }; end?: { date?: string }; extendedProperties?: { private?: Record<string, string> } };
 
 // Only events tagged for this project are reconciled; other calendar entries are untouched.
 export async function syncProjectCalendar(project: InternalProject, checkpoint?: (calendarId: string) => Promise<void>): Promise<CalendarSync> {
@@ -62,11 +62,13 @@ export async function syncProjectCalendar(project: InternalProject, checkpoint?:
       for (const entry of projectCalendarEntries(project)) {
         const match = existing.find((event) => event.extendedProperties?.private?.actividKey === entry.key);
         const body = {
-          summary: entry.title, description: `${project.name}\n${entry.note}`,
+          summary: entry.title, description: `${project.name}\n${entry.label}\n${entry.note}`,
           start: { date: entry.start }, end: { date: nextDate(entry.end) },
           extendedProperties: { private: { actividProject: project.id, actividKey: entry.key } },
         };
-        await request(remainingCalendar, match ? `/${encodeURIComponent(match.id)}?sendUpdates=none` : "?sendUpdates=none", match ? "PATCH" : "POST", body);
+        if (!match || match.summary !== body.summary || match.description !== body.description || match.start?.date !== entry.start || match.end?.date !== body.end.date) {
+          await request(remainingCalendar, match ? `/${encodeURIComponent(match.id)}?sendUpdates=none` : "?sendUpdates=none", match ? "PATCH" : "POST", body);
+        }
         if (match) retained.add(match.id);
       }
       for (const event of existing) if (!retained.has(event.id)) await request(remainingCalendar, `/${encodeURIComponent(event.id)}?sendUpdates=none`, "DELETE");
