@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Fraunces } from "next/font/google";
 import localFont from "next/font/local";
 import { notFound } from "next/navigation";
 import { isKenanganEnabled } from "@/lib/kenangan-event";
 import "./kenangan.css";
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
+const fraunces = localFont({
+  src: [
+    { path: "../fonts/google/fraunces/normal.woff2", weight: "100 900", style: "normal" },
+  ],
   variable: "--kk-font-display",
   display: "swap",
 });

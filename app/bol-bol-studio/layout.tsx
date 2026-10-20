@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Bungee } from "next/font/google";
 import localFont from "next/font/local";
 
-const studioDisplay = Bungee({
-  weight: "400",
-  subsets: ["latin"],
+const studioDisplay = localFont({
+  src: [
+    { path: "../fonts/google/bungee/normal.woff2", weight: "400", style: "normal" },
+  ],
   variable: "--font-studio-display",
   display: "swap",
 });

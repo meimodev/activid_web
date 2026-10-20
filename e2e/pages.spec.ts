@@ -6,7 +6,6 @@ const ROUTES = [
   '/about',
   '/services',
   '/services/social-media',
-  '/services/branding',
   '/services/event-documentation',
   '/services/product-photography',
   '/services/website-app',
@@ -19,6 +18,34 @@ const ROUTES = [
   '/terms',
   '/account-deletion',
 ];
+
+// ADR-0009 merged branding into Social Media Management and retired this URL.
+test('retired branding service remains unavailable', async ({ page }) => {
+  const response = await page.goto('/services/branding');
+  expect(response?.status()).toBe(404);
+});
+
+test('product fonts load from this site', async ({ page }) => {
+  const externalFontRequests: string[] = [];
+  page.on('request', (request) => {
+    if (/fonts\.(googleapis|gstatic)\.com/.test(request.url())) externalFontRequests.push(request.url());
+  });
+  // These pages exercise local fonts without requiring Firebase credentials in CI.
+  for (const path of ['/loit', '/satset']) {
+    const fonts: number[] = [];
+    const capture = (response: import('@playwright/test').Response) => {
+      if (response.request().resourceType() === 'font' && response.url().includes('/_next/static/media/')) fonts.push(response.status());
+    };
+    page.on('response', capture);
+    const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
+    expect(response?.status(), path).toBe(200);
+    await page.evaluate(async () => { await document.fonts.ready; });
+    expect(fonts.length, `self-hosted fonts on ${path}`).toBeGreaterThan(0);
+    expect(fonts.every((status) => status === 200), `font responses on ${path}`).toBe(true);
+    page.off('response', capture);
+  }
+  expect(externalFontRequests).toEqual([]);
+});
 
 for (const path of ROUTES) {
   test(`renders ${path}`, async ({ page }) => {

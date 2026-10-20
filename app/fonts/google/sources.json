@@ -1,0 +1,91 @@
+{
+  "repository": "https://github.com/google/fonts",
+  "commit": "47d54ca1ebb14fd864695f1d39dc734f39017c33",
+  "fonts": [
+    {
+      "path": "dmsans/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/dmsans/DMSans%5Bopsz%2Cwght%5D.ttf",
+      "bytes": 88492,
+      "upstreamSha256": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+      "sha256": "7d8291e88f0ebf0fd0fb60d2995b5a2ee4bfcc667c7954fa275b2958df5fed96"
+    },
+    {
+      "path": "bodonimoda/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/bodonimoda/BodoniModa%5Bopsz%2Cwght%5D.ttf",
+      "bytes": 74116,
+      "upstreamSha256": "550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf",
+      "sha256": "0965ce3e4a8338ce3ce298e140aa083034a28e4eefc2b2435404b3072ccf8eff"
+    },
+    {
+      "path": "fraunces/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/fraunces/Fraunces%5BSOFT%2CWONK%2Copsz%2Cwght%5D.ttf",
+      "bytes": 194828,
+      "upstreamSha256": "177ff6c0f14e5550a3c624247cd1189611d4eb65d000b14944c63d967958abbb",
+      "sha256": "32cd7f0f7487a027d034d053667cb8c20616f41d1842eac02ea0c9a74ff1bffb"
+    },
+    {
+      "path": "gabarito/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/gabarito/Gabarito%5Bwght%5D.ttf",
+      "bytes": 59084,
+      "upstreamSha256": "8650e2bd7747f7d74619fd7aecbcb0309e6f37b7964024f3fb15ae4833b67ca5",
+      "sha256": "fba855a2401aa2573f84a187055b8c2fdf0c2e667338e6ba16f90bfda0e19747"
+    },
+    {
+      "path": "hankengrotesk/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/hankengrotesk/HankenGrotesk%5Bwght%5D.ttf",
+      "bytes": 57124,
+      "upstreamSha256": "813b3f8fa0965405669a89b38e51bbefd95eef6b8e20d1cb2d8c10cce062662f",
+      "sha256": "898fe93b7d42c3516feaad0bb4c6db7a1322531cdd4f7a1ccb9a22eef88dd050"
+    },
+    {
+      "path": "spacegrotesk/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf",
+      "bytes": 49276,
+      "upstreamSha256": "acad6de1fc93436f5c0f1f4137751ef04f1aea3063e7036535970ffcfbd79f72",
+      "sha256": "17020860b226067546b87c4ae2bd35dc613d3112313549943e40471f17586f50"
+    },
+    {
+      "path": "bricolagegrotesque/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/bricolagegrotesque/BricolageGrotesque%5Bopsz%2Cwdth%2Cwght%5D.ttf",
+      "bytes": 205452,
+      "upstreamSha256": "413e7357809ddd12fd80a96a8a396de0e401638d4acd3cb3e37532f0472ac682",
+      "sha256": "093b8180f6294c9964e884285da77de8895a5ce9658cebcdd1fc79352b37c46c"
+    },
+    {
+      "path": "bungee/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/bungee/Bungee-Regular.ttf",
+      "bytes": 40592,
+      "upstreamSha256": "c4f5361ce120af3e6b9156d0bf379fa19cda2ea0cd18ac01fd99596c6bf66e3f",
+      "sha256": "856587563ff611864fba3a800765d96d5e1215cbfc3e61c405441d9b43d5bca6"
+    },
+    {
+      "path": "cormorantgaramond/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf",
+      "bytes": 209276,
+      "upstreamSha256": "b20b7d9626dd956b2c5e558692ad328b1f19e3275e2782db4fa07670d83f35e0",
+      "sha256": "3438a074d983a3026bf7c778b6500989f6c62b1d901448c321ac233a21e84525"
+    },
+    {
+      "path": "cormorantgaramond/italic.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf",
+      "bytes": 144024,
+      "upstreamSha256": "0f48ea6abb2084537854f7174c470991a463b13036309e3b50a81511611c530d",
+      "sha256": "a15b8078e82ff4f18a99665479008a9fe3bd4cf7bd913e871a71253a7de82616"
+    },
+    {
+      "path": "pinyonscript/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/pinyonscript/PinyonScript-Regular.ttf",
+      "bytes": 57924,
+      "upstreamSha256": "4aab130a6ed27f8b8117738c84a5602edf9300cdcc0651a9a65bf96f451ac29a",
+      "sha256": "766978044e8cb93ee806ca72944288ec96592c6a70acf47b5dafb91d6ea669d3"
+    },
+    {
+      "path": "inter/normal.woff2",
+      "source": "https://raw.githubusercontent.com/google/fonts/47d54ca1ebb14fd864695f1d39dc734f39017c33/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+      "bytes": 350328,
+      "upstreamSha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031",
+      "sha256": "7be6ba8ae2bf5c3eae57b38310b493ca1a5fa21cecb6b1f025e459724647d303"
+    }
+  ],
+  "conversion": "WOFF2 compression with FontTools 4.60.2; all glyphs and variation axes retained."
+}

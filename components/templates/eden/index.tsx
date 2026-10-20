@@ -1,6 +1,6 @@
 "use client";
 
-import { Bodoni_Moda, DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
@@ -37,8 +37,25 @@ import {
   DEMO_GROOM_PROFILE_IMAGE_URL,
 } from "@/data/invitations";
 
-const display = Bodoni_Moda({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-display" });
-const body = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-body" });
+const display = localFont({
+  src: [
+    { path: "../../../app/fonts/google/bodonimoda/normal.woff2", weight: "400", style: "normal" },
+    { path: "../../../app/fonts/google/bodonimoda/normal.woff2", weight: "500", style: "normal" },
+    { path: "../../../app/fonts/google/bodonimoda/normal.woff2", weight: "600", style: "normal" },
+    { path: "../../../app/fonts/google/bodonimoda/normal.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-display",
+  display: "swap",
+});
+const body = localFont({
+  src: [
+    { path: "../../../app/fonts/google/dmsans/normal.woff2", weight: "400", style: "normal" },
+    { path: "../../../app/fonts/google/dmsans/normal.woff2", weight: "500", style: "normal" },
+    { path: "../../../app/fonts/google/dmsans/normal.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-body",
+  display: "swap",
+});
 
 const EDEN_DEMO_ASSETS = {
   groomPhoto: DEMO_GROOM_PROFILE_IMAGE_URL,
