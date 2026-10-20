@@ -21,9 +21,9 @@ export default function ProjectCalendar({ project, today }: { project: Project; 
   }
 
   return <div className="project-calendar" role="group" aria-label="Project calendar">
-    <div className="project-calendar-heading"><h3>Project calendar</h3><div><button type="button" onClick={() => navigate(-1)} aria-label="Previous month"><ChevronLeft size={18} /></button><span aria-live="polite">{label}</span><button type="button" onClick={() => navigate(1)} aria-label="Next month"><ChevronRight size={18} /></button></div></div>
+    <div className="project-calendar-heading"><h3>Project calendar</h3><div><button type="button" onClick={() => navigate(-1)} aria-label="Previous month"><ChevronLeft size={18} /></button><span aria-live="polite"><span key={month} className="calendar-month-label">{label}</span></span><button type="button" onClick={() => navigate(1)} aria-label="Next month"><ChevronRight size={18} /></button></div></div>
     <div className="project-calendar-legend"><span><i className="calendar-phase-marker" />Phases (count)</span><span><i className="calendar-important-marker" />Important dates</span><span><i className="calendar-activity-marker" />Activity</span></div>
-    <div className="project-calendar-grid" aria-label={label}>
+    <div className="project-calendar-grid" aria-label={label} key={month}>
       {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => <span className="project-calendar-weekday" key={day} aria-hidden="true">{day.slice(0, 2)}</span>)}
       {Array.from({ length: offset }, (_, i) => <span key={`blank-${i}`} />)}
       {Array.from({ length: days }, (_, i) => {

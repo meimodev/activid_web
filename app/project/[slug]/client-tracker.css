@@ -99,7 +99,6 @@
 .project-calendar-weekday { color: #c5d3c1; font-size: 11px; padding-bottom: 6px; }
 .project-calendar-grid button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; height: 42px; border-radius: 3px; font-size: 12px; font-variant-numeric: tabular-nums; cursor: pointer; }
 .project-calendar-grid button.has-phases { background: #48604d; }
-.project-calendar-grid button:hover { background: #60795d; }
 .project-calendar-grid button[aria-pressed="true"] { background: #c3d39d; color: #203225; }
 .project-calendar [aria-current="date"] > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
 .project-calendar-markers { display: flex; justify-content: center; align-items: center; gap: 4px; min-height: 13px; }
@@ -147,3 +146,47 @@
   .process-milestone-range time:first-child:not(:last-child)::before { content: "From "; }
   .process-milestone-range time:last-child:not(:first-child)::before { content: "To "; }
 }
+
+/* Keep the finished page visible; motion only enhances its existing states. */
+.process-tracker { --process-ease: cubic-bezier(.22, 1, .36, 1); }
+@media (hover: hover) and (pointer: fine) {
+  .project-calendar-grid button:not([aria-pressed="true"]):hover { background: #60795d; }
+  .project-calendar-heading button:hover { background: #48604d; border-radius: 3px; }
+  .calendar-entry summary:hover { color: #fff; }
+  .process-milestone summary:hover strong { color: #286240; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .process-title { animation: process-title-settle 500ms var(--process-ease); }
+  .process-progress-summary { animation: process-summary-arrive 600ms var(--process-ease); }
+  .process-progress .project-progress > span { transform-origin: left; animation: process-progress-fill 850ms var(--process-ease) 80ms backwards; }
+  .calendar-month-label { display: inline-block; animation: process-calendar-arrive 220ms var(--process-ease); }
+  .project-calendar-grid { animation: process-calendar-arrive 260ms var(--process-ease); }
+  .calendar-entry { animation: process-calendar-arrive 220ms var(--process-ease) backwards; }
+  .calendar-entry:nth-of-type(2) { animation-delay: 30ms; }
+  .calendar-entry:nth-of-type(3) { animation-delay: 60ms; }
+  .calendar-entry:nth-of-type(n+4) { animation-delay: 90ms; }
+  .process-tracker details[open] > p { animation: process-detail-open 220ms var(--process-ease); }
+  .process-tracker summary > svg { transition: transform 220ms var(--process-ease); }
+  .project-calendar button { transition: background-color 180ms ease, color 180ms ease, transform 140ms var(--process-ease); }
+  .project-calendar button:active { transform: scale(.94); }
+  .process-contact > a, .project-calendar-link { transition: color 180ms ease, transform 140ms var(--process-ease); }
+  .process-contact > a:active, .project-calendar-link:active { transform: translateY(1px); }
+  .process-contact > a > svg:last-child, .project-calendar-link > svg { transition: transform 220ms var(--process-ease); }
+  @media (hover: hover) and (pointer: fine) {
+    .process-contact > a:hover > svg:last-child, .project-calendar-link:hover > svg { transform: translate(2px, -2px); }
+    .project-calendar-heading button:first-child:hover > svg { transform: translateX(-2px); }
+    .project-calendar-heading button:last-child:hover > svg { transform: translateX(2px); }
+    .project-calendar-heading button > svg { transition: transform 220ms var(--process-ease); }
+  }
+  @supports (animation-timeline: view()) {
+    .process-history-entry { animation: process-history-arrive linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+    .process-milestone-icon { animation: process-phase-settle linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+  }
+}
+@keyframes process-title-settle { from { transform: translateY(8px); } }
+@keyframes process-summary-arrive { from { opacity: .8; } }
+@keyframes process-progress-fill { from { transform: scaleX(0); } }
+@keyframes process-calendar-arrive { from { opacity: .7; transform: translateY(4px); } }
+@keyframes process-detail-open { from { opacity: .65; transform: translateY(-3px); } }
+@keyframes process-history-arrive { from { opacity: .8; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes process-phase-settle { from { transform: scale(.85); } to { transform: none; } }

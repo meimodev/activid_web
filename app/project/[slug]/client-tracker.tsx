@@ -26,7 +26,7 @@ export default function ClientTracker({ project, updates, contactEmail, today }:
       </div>
     </header>
 
-    <main id="client-project" className="process-main overflow-x-hidden w-full max-w-full">
+    <main id="client-project" className="process-main overflow-x-clip w-full max-w-full">
       <div className="process-notice"><span>{project.sample ? "Sample project" : "Project tracker"}</span><span>Updated {formatDate(project.updated, true)}</span></div>
       <div className="process-title">
         <h1>{project.name}</h1>
