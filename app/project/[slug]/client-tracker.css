@@ -1,0 +1,89 @@
+.process-nav { max-width: 960px; height: 76px; }
+.process-main { max-width: 960px; margin: auto; padding: 0 24px 36px; }
+.process-notice { display: flex; justify-content: space-between; gap: 16px; color: var(--project-muted); font-size: 12px; padding-top: 26px; }
+.process-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 29px 0 26px; }
+.process-title h1 { max-width: 22ch; font-size: clamp(30px, 4vw, 42px); font-weight: 400; letter-spacing: -.045em; line-height: 1.12; }
+.process-title .project-status { margin-bottom: 4px; }
+.process-progress { padding: 25px; border-radius: 10px; background: #293d30; color: #f0f3e7; }
+.process-progress-heading { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+.process-progress-heading > div > span { font-size: 12px; color: #d1dcc8; }
+.process-progress h2 { font-size: 24px; font-weight: 400; letter-spacing: -.6px; margin-top: 3px; line-height: 1.2; }
+.process-progress-heading > strong { font-size: 38px; line-height: 1; font-weight: 400; letter-spacing: -1.5px; }
+.process-progress-heading > strong > span { font-size: 22px; margin-left: 1px; }
+.process-progress > p { color: #d1dcc8; font-size: 14px; line-height: 1.7; margin-top: 14px; }
+.process-progress .project-progress { height: 5px; margin-top: 20px; background: #586b56; }
+.process-progress .project-progress > span { background: #c3d39d; }
+.process-dates { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 20px; margin-top: 22px; }
+.process-dates span { display: block; font-size: 12px; color: #d1dcc8; }
+.process-dates strong { display: block; font-size: 19px; font-weight: 400; margin-top: 3px; }
+.process-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.process-section-heading h2, .process-timeline h2, .process-history h2, .process-important-dates h2 { font-size: 20px; line-height: 1.25; font-weight: 400; letter-spacing: -.5px; }
+.process-important-dates { padding-top: 32px; }
+.process-important-dates ol { list-style: none; margin: 16px 0 0; padding: 0; }
+.process-important-dates li { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--project-line); }
+.process-important-dates li > div { min-width: 0; }
+.process-important-dates h3 { font-size: 14px; line-height: 1.5; font-weight: 400; overflow-wrap: anywhere; }
+.process-important-dates p { font-size: 13px; line-height: 1.7; color: var(--project-muted); margin-top: 5px; max-width: 65ch; overflow-wrap: anywhere; }
+.process-important-dates time { flex: none; font-size: 13px; line-height: 1.7; color: #286240; white-space: nowrap; }
+.process-section-heading > span, .process-section-heading > time { font-size: 12px; color: var(--project-muted); white-space: nowrap; }
+.process-timeline { padding-top: 35px; }
+.process-timeline > ol { list-style: none; padding: 0; margin: 18px 0 0; }
+.process-milestone { position: relative; display: flex; gap: 14px; }
+.process-milestone:not(:last-child)::before { content: ""; position: absolute; top: 30px; bottom: -19px; left: 8px; width: 1px; background: #d9dfd0; }
+.process-milestone-icon { width: 18px; height: 18px; display: grid; place-items: center; color: #78856c; flex: none; margin-top: 17px; background: #f8f9f5; position: relative; z-index: 1; }
+.milestone-done .process-milestone-icon, .milestone-current .process-milestone-icon { color: #427653; }
+.process-milestone details { flex: 1; min-width: 0; border-bottom: 1px solid var(--project-line); }
+.process-milestone summary { display: flex; align-items: center; gap: 18px; cursor: pointer; list-style: none; min-height: 68px; padding: 10px 0; }
+.process-milestone summary::-webkit-details-marker { display: none; }
+.process-milestone summary > span { flex: 1; min-width: 0; }
+.process-milestone summary strong { display: block; font-size: 14px; font-weight: 400; }
+.process-milestone summary small { display: block; color: var(--project-muted); font-size: 12px; margin-top: 1px; }
+.process-milestone summary time { color: var(--project-muted); font-size: 13px; white-space: nowrap; }
+.process-milestone summary > svg { color: #74806a; flex: none; }
+.process-milestone details[open] summary > svg { transform: rotate(180deg); }
+.process-milestone details > p { font-size: 14px; line-height: 1.7; color: var(--project-muted); padding: 0 30px 17px 0; max-width: 72ch; }
+.milestone-current summary strong { color: #286240; font-weight: 700; }
+.process-timeline-note { font-size: 12px; color: var(--project-muted); line-height: 1.7; margin: 15px 0 0 32px !important; }
+.process-history { padding-top: 32px; }
+.process-history-intro { color: var(--project-muted); font-size: 13px; margin-top: 6px !important; }
+.process-history > ol { list-style: none; padding: 0; margin: 17px 0 0; }
+.process-history-entry { padding: 20px 0; border-bottom: 1px solid var(--project-line); }
+.process-history-entry:first-child { border-top: 1px solid var(--project-line); }
+.process-history-type { display: inline-flex; gap: 6px; align-items: center; color: #4f6448 !important; font-size: 12px; }
+.process-history-entry h3 { font-size: 16px; font-weight: 400; letter-spacing: -.2px; line-height: 1.4; margin-top: 10px; }
+.process-history-entry > p { font-size: 14px; line-height: 1.7; color: var(--project-muted); max-width: 75ch; margin-top: 7px; }
+.process-history-context { display: block; color: var(--project-muted); font-size: 12px; margin-top: 10px; }
+.process-update { padding: 26px 0; margin-top: 30px; border-top: 1px solid var(--project-line); border-bottom: 1px solid var(--project-line); }
+.process-update h3 { font-size: 17px; font-weight: 400; letter-spacing: -.25px; line-height: 1.4; margin-top: 19px; }
+.process-update > p { font-size: 14px; line-height: 1.8; color: var(--project-muted); margin-top: 9px; max-width: 75ch; }
+.process-update-author { display: block; color: var(--project-muted); font-size: 12px; margin-top: 13px; }
+.process-contact { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 19px; color: var(--project-muted); font-size: 13px; }
+.process-contact > a { display: inline-flex; gap: 7px; align-items: center; min-height: 44px; color: var(--project-ink); }
+.process-contact > a:hover { text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 600px) {
+  .process-nav { padding: 0 20px; gap: 14px; height: 68px; }
+  .process-nav .workspace-name { font-size: 12px; }
+  .process-main { padding: 0 20px 22px; }
+  .process-notice { padding-top: 20px; font-size: 12px; gap: 10px; }
+  .process-title { flex-direction: column; align-items: flex-start; padding: 24px 0 19px; gap: 12px; }
+  .process-title h1 { font-size: 30px; max-width: 22ch; }
+  .process-title .project-status { margin: 0; }
+  .process-progress { padding: 21px; }
+  .process-progress h2 { font-size: 23px; }
+  .process-progress-heading > strong { font-size: 34px; }
+  .process-progress > p { font-size: 13px; margin-top: 12px; }
+  .process-dates { gap: 15px; margin-top: 20px; }
+  .process-dates strong { font-size: 18px; }
+  .process-timeline { padding-top: 29px; }
+  .process-important-dates { padding-top: 28px; }
+  .process-important-dates li { gap: 16px; }
+  .process-milestone { gap: 12px; }
+  .process-milestone summary { gap: 13px; }
+  .process-milestone details > p { font-size: 13px; padding-right: 0; }
+  .process-timeline-note { margin-left: 30px !important; }
+  .process-history { padding-top: 28px; }
+  .process-history-entry > p { font-size: 13px; }
+  .process-update { padding: 23px 0; margin-top: 26px; }
+  .process-update > p { font-size: 13px; }
+  .process-contact { font-size: 12px; gap: 10px; }
+}
