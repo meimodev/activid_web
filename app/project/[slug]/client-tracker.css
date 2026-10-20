@@ -1,9 +1,11 @@
 .process-nav { max-width: 960px; height: 76px; }
 .process-main { max-width: 960px; margin: auto; padding: 0 24px 36px; }
-.process-notice { display: flex; justify-content: space-between; gap: 16px; color: var(--project-muted); font-size: 12px; padding-top: 26px; }
 .process-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 29px 0 26px; }
 .process-title h1 { max-width: 22ch; font-size: clamp(30px, 4vw, 42px); font-weight: 400; letter-spacing: -.045em; line-height: 1.12; }
 .process-title .project-status { margin-bottom: 4px; }
+.process-title-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; flex: none; }
+.process-edit-link { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 14px; border-radius: 6px; background: #e6ecdf; color: var(--project-ink); font-size: 13px; }
+.process-edit-link:focus-visible { outline: 2px solid #286240; outline-offset: 3px; }
 .process-progress { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 25px; border-radius: 10px; background: #293d30; color: #f0f3e7; }
 .process-progress-heading { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
 .process-progress-heading > div > span { font-size: 12px; color: #d1dcc8; }
@@ -62,7 +64,6 @@
   .process-nav { padding: 0 20px; gap: 14px; height: 68px; }
   .process-nav .workspace-name { font-size: 12px; }
   .process-main { padding: 0 20px 22px; }
-  .process-notice { padding-top: 20px; font-size: 12px; gap: 10px; }
   .process-title { flex-direction: column; align-items: flex-start; padding: 24px 0 19px; gap: 12px; }
   .process-title h1 { font-size: 30px; max-width: 22ch; }
   .process-title .project-status { margin: 0; }
@@ -148,6 +149,7 @@
 /* Keep the finished page visible; motion only enhances its existing states. */
 .process-tracker { --process-ease: cubic-bezier(.22, 1, .36, 1); }
 @media (hover: hover) and (pointer: fine) {
+  .process-edit-link:hover { background: #d9e3d0; }
   .project-calendar-grid button:not([aria-pressed="true"]):hover { background: #60795d; }
   .project-calendar-heading button:hover { background: #48604d; border-radius: 3px; }
   .calendar-entry summary:hover { color: #fff; }
@@ -167,6 +169,8 @@
   .process-tracker summary > svg { transition: transform 220ms var(--process-ease); }
   .project-calendar button { transition: background-color 180ms ease, color 180ms ease, transform 140ms var(--process-ease); }
   .project-calendar button:active { transform: scale(.94); }
+  .process-edit-link { transition: background-color 180ms ease, transform 140ms var(--process-ease); }
+  .process-edit-link:active { transform: scale(.98); }
   .project-calendar-link { transition: color 180ms ease, transform 140ms var(--process-ease); }
   .project-calendar-link:active { transform: translateY(1px); }
   .project-calendar-link > svg { transition: transform 220ms var(--process-ease); }

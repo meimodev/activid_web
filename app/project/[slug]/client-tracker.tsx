@@ -8,7 +8,7 @@ import type { Project, ProjectUpdate } from "../types";
 import "./client-tracker.css";
 import ProjectCalendar from "./project-calendar";
 
-export default function ClientTracker({ project, updates, today }: { project: Project; updates: ProjectUpdate[]; today: string }) {
+export default function ClientTracker({ project, updates, today, canEdit }: { project: Project; updates: ProjectUpdate[]; today: string; canEdit: boolean }) {
   const software = project.software;
   const completion = progress(project);
   const current = project.milestones.find((milestone) => milestone.state === "current");
@@ -26,10 +26,9 @@ export default function ClientTracker({ project, updates, today }: { project: Pr
     </header>
 
     <main id="client-project" className="process-main overflow-x-clip w-full max-w-full">
-      <div className="process-notice"><span>{project.sample ? "Sample project" : "Project tracker"}</span><span>Updated {formatDate(project.updated, true)}</span></div>
       <div className="process-title">
         <h1>{project.name}</h1>
-        <Status status={project.status} />
+        <div className="process-title-actions"><Status status={project.status} />{canEdit && <Link className="process-edit-link" href={`/project/manage/${project.id}`}><PencilLine size={14} aria-hidden="true" />Edit project</Link>}</div>
       </div>
 
       <section className="process-progress" aria-labelledby="progress-title">

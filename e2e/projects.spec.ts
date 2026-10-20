@@ -20,6 +20,8 @@ test("internal routes reject anonymous and forged sessions without leaking portf
     expect(await manager!.text()).not.toContain("Reserve a backend pairing session");
     await expect(page.getByRole("button", { name: "Save changes" })).toHaveCount(0);
   }
+  await page.goto(sharedPath);
+  await expect(page.getByRole("link", { name: "Edit project", exact: true })).toHaveCount(0);
 });
 
 test("client can follow the project process and read its activity history", async ({ page }) => {
@@ -29,6 +31,9 @@ test("client can follow the project process and read its activity history", asyn
   expect(html).not.toContain("Reserve a backend pairing session");
   expect(html).not.toContain("Bakso Denny");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Distributor management system");
+  await expect(page.getByText("Sample project", { exact: true })).toHaveCount(0);
+  await expect(page.getByText(/^Updated \d/)).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Edit project", exact: true })).toHaveCount(0);
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   await expect(page.getByRole("progressbar", { name: "Overall development progress" })).toHaveAttribute("aria-valuenow", "68");
   await expect(page.getByRole("heading", { name: "Development", exact: true })).toBeVisible();
@@ -93,7 +98,7 @@ test("shared pages stay mobile-first, readable with reduced motion, and reject u
   expect(missing?.status()).toBe(404);
 });
 
-test("staff can sign in, open the isolated client view, and sign out", async ({ page }) => {
+test("staff can sign in, edit from the client view, and sign out", async ({ page, browser }) => {
   test.skip(!process.env.PROJECTS_E2E_PASSWORD, "Requires a test server with isolated staff credentials.");
   await page.goto("/project");
   await page.getByLabel("Admin password").fill("incorrect");
@@ -107,9 +112,19 @@ test("staff can sign in, open the isolated client view, and sign out", async ({ 
   await page.getByRole("link", { name: "Open client view" }).click();
   await expect(page).toHaveURL(new RegExp(sharedPath + "$"));
   await expect(page.getByRole("heading", { name: "Internal team note" })).toHaveCount(0);
+  const edit = page.getByRole("link", { name: "Edit project", exact: true });
+  await expect(edit).toHaveAttribute("href", "/project/manage/distributor-management-system");
+  const anonymous = await browser.newPage();
+  await anonymous.goto(new URL(sharedPath, page.url()).href);
+  await expect(anonymous.getByRole("link", { name: "Edit project", exact: true })).toHaveCount(0);
+  await anonymous.close();
+  await edit.click();
+  await expect(page.getByRole("heading", { name: "Edit project", exact: true })).toBeVisible();
   await page.goto("/project");
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("heading", { name: "Staff workspace" })).toBeVisible();
+  await page.goto(sharedPath);
+  await expect(page.getByRole("link", { name: "Edit project", exact: true })).toHaveCount(0);
 });
 
 test("staff can create a project, maintain its history, and publish changes to the client tracker", async ({ page, context }) => {
