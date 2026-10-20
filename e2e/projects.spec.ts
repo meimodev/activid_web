@@ -71,7 +71,7 @@ test("client can follow the project process and read its activity history", asyn
   await expect(history).toContainText("Manado warehouse · Operations and ACTIVID");
   await page.locator("summary").filter({ hasText: "User testing" }).click();
   await expect(page.getByText(/Your sales, warehouse, and finance representatives/)).toBeVisible();
-  await expect(page.getByRole("link", { name: "Contact Reza" })).toHaveAttribute("href", /^mailto:hello@activid.id/);
+  await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
 });
 
 test("shared pages stay mobile-first, readable with reduced motion, and reject unknown slugs", async ({ page }) => {
@@ -86,7 +86,7 @@ test("shared pages stay mobile-first, readable with reduced motion, and reject u
     const lines = await page.locator("h1").evaluate((heading) => Math.round(heading.getBoundingClientRect().height / parseFloat(getComputedStyle(heading).lineHeight)));
     expect(lines).toBeLessThanOrEqual(2);
     await page.locator(".process-contact").scrollIntoViewIfNeeded();
-    await expect(page.getByRole("link", { name: "Contact Reza" })).toBeVisible();
+    await expect(page.locator(".process-contact")).toHaveText("Project lead · Reza");
   }
   expect(errors).toEqual([]);
   const missing = await page.goto("/project/not-a-shared-project");

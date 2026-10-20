@@ -1,20 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, Asterisk, Check, ChevronDown, Circle, CircleDot, Mail, MapPin, MessageSquare, PencilLine } from "lucide-react";
+import { Asterisk, Check, ChevronDown, Circle, CircleDot, MapPin, MessageSquare, PencilLine } from "lucide-react";
 import { formatDate, progress } from "../format";
 import { Status } from "../project-ui";
 import type { Project, ProjectUpdate } from "../types";
 import "./client-tracker.css";
 import ProjectCalendar from "./project-calendar";
 
-export default function ClientTracker({ project, updates, contactEmail, today }: { project: Project; updates: ProjectUpdate[]; contactEmail: string; today: string }) {
+export default function ClientTracker({ project, updates, today }: { project: Project; updates: ProjectUpdate[]; today: string }) {
   const software = project.software;
   const completion = progress(project);
   const current = project.milestones.find((milestone) => milestone.state === "current");
   const update = updates[0];
   const importantDates = [...(project.importantDates ?? [])].sort((a, b) => a.date.localeCompare(b.date));
-  const contact = `mailto:${contactEmail}?subject=${encodeURIComponent(`${project.client} — ${project.name}`)}`;
 
   return <div className="process-tracker">
     <a className="projects-skip" href="#client-project">Skip to project</a>
@@ -81,7 +80,7 @@ export default function ClientTracker({ project, updates, contactEmail, today }:
         <h3>{update.title}</h3><p>{update.text}</p><span className="process-update-author">{update.author} · ACTIVID</span>
       </section>}
 
-      <footer className="process-contact"><span>Project lead · {project.owner}</span><a href={contact}><Mail size={16} />Contact {project.owner}<ArrowUpRight size={15} /></a></footer>
+      <footer className="process-contact"><span>Project lead · {project.owner}</span></footer>
     </main>
 
   </div>;

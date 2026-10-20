@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getSharedProject, workspace } from "../data";
+import { getSharedProject } from "../data";
 import { getProject, projectUpdates } from "../store";
 import ClientTracker from "./client-tracker";
 
@@ -16,5 +16,5 @@ export default async function SharedProjectPage({ params }: Props) {
   if (!internal) notFound();
   const project = getSharedProject(internal.id, [internal])!;
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
-  return <ClientTracker project={project} updates={projectUpdates([internal])} contactEmail={workspace.email} today={today} />;
+  return <ClientTracker project={project} updates={projectUpdates([internal])} today={today} />;
 }
