@@ -6,8 +6,9 @@ import { formatDate, progress } from "../format";
 import { Status } from "../project-ui";
 import type { Project, ProjectUpdate } from "../types";
 import "./client-tracker.css";
+import ProjectCalendar from "./project-calendar";
 
-export default function ClientTracker({ project, updates, contactEmail }: { project: Project; updates: ProjectUpdate[]; contactEmail: string }) {
+export default function ClientTracker({ project, updates, contactEmail, today }: { project: Project; updates: ProjectUpdate[]; contactEmail: string; today: string }) {
   const software = project.software;
   const completion = progress(project);
   const current = project.milestones.find((milestone) => milestone.state === "current");
@@ -33,10 +34,13 @@ export default function ClientTracker({ project, updates, contactEmail }: { proj
       </div>
 
       <section className="process-progress" aria-labelledby="progress-title">
+        <div className="process-progress-summary">
         <div className="process-progress-heading"><div><span>Current phase</span><h2 id="progress-title">{current?.name ?? (project.status === "Completed" ? "Completed" : "Awaiting next phase")}</h2></div><strong>{completion}<span>%</span></strong></div>
         <p>{project.focus || software?.sprint.goal || project.summary}</p>
         <div className="project-progress" role="progressbar" aria-label="Overall development progress" aria-valuenow={completion} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${completion}%` }} /></div>
         <div className="process-dates"><div><span>Next checkpoint</span><strong>{current ? formatDate(current.date) : "Complete"}</strong></div><div><span>Target handover</span><strong>{formatDate(project.due)}</strong></div></div>
+        </div>
+        <ProjectCalendar project={project} today={today} />
       </section>
 
       {importantDates.length > 0 && <section className="process-important-dates" aria-labelledby="important-dates-title">
@@ -53,7 +57,7 @@ export default function ClientTracker({ project, updates, contactEmail }: { proj
           {project.milestones.map((milestone) => <li className={`process-milestone milestone-${milestone.state}`} key={milestone.name}>
             <span className="process-milestone-icon" aria-hidden="true">{milestone.state === "done" ? <Check size={16} /> : milestone.state === "current" ? <CircleDot size={16} /> : <Circle size={15} />}</span>
             <details open={milestone.state === "current"}>
-              <summary><span><strong>{milestone.name}</strong><small>{milestone.state === "done" ? "Completed" : milestone.state === "current" ? "Current phase" : "Upcoming"}</small></span><time dateTime={milestone.date}>{formatDate(milestone.date)}</time><ChevronDown size={14} /></summary>
+              <summary><span><strong>{milestone.name}</strong><small>{milestone.state === "done" ? "Completed" : milestone.state === "current" ? "Current phase" : "Upcoming"}</small></span><span className="process-milestone-range">{milestone.start && milestone.start !== milestone.date && <><time dateTime={milestone.start}>{formatDate(milestone.start)}</time><span aria-hidden="true"> – </span></>}<time dateTime={milestone.date}>{formatDate(milestone.date)}</time></span><ChevronDown size={14} /></summary>
               <p>{milestone.description}</p>
             </details>
           </li>)}

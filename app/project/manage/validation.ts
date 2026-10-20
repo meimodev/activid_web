@@ -1,7 +1,7 @@
 import type { InternalProject, Milestone, ProjectDate, ProjectHistoryEntry, ProjectStatus } from "../types";
 
 export type ProjectDraft = Pick<InternalProject, "id" | "name" | "client" | "category" | "status" | "summary" | "completedTasks" | "totalTasks" | "due" | "owner" | "internalNotes" | "milestones"> & {
-  focus: string; history: ProjectHistoryEntry[]; importantDates: ProjectDate[]; updateTitle: string; updateText: string;
+  focus: string; history: ProjectHistoryEntry[]; importantDates: ProjectDate[]; calendarId?: string; updateTitle: string; updateText: string;
 };
 
 export const projectStatuses: ProjectStatus[] = ["In progress", "Needs review", "Completed"];
@@ -36,7 +36,10 @@ export function validateProjectDraft(value: unknown): ProjectDraft {
   const milestones: Milestone[] = raw.milestones.map((item) => {
     const row = record(item);
     if (!["done", "current", "upcoming"].includes(String(row.state))) throw new Error("Select a milestone state.");
-    return { name: text(row.name, "a milestone name"), date: date(row.date, "milestone date"), description: text(row.description, "a milestone description", 2000), state: row.state as Milestone["state"] };
+    const end = date(row.date, "milestone end date");
+    const start = date(row.start ?? end, "milestone start date");
+    if (start > end) throw new Error("A milestone must start on or before its end date.");
+    return { name: text(row.name, "a milestone name"), start, date: end, description: text(row.description, "a milestone description", 2000), state: row.state as Milestone["state"] };
   });
   if (milestones.filter((m) => m.state === "current").length > 1) throw new Error("Only one milestone can be the current phase.");
   if (new Set(milestones.map((m) => m.name)).size !== milestones.length) throw new Error("Give each milestone a unique name.");
@@ -58,7 +61,9 @@ export function validateProjectDraft(value: unknown): ProjectDraft {
   if (new Set(history.map((h) => h.id)).size !== history.length) throw new Error("Activity IDs must be unique.");
   const updateTitle = text(raw.updateTitle, "an update title", 200, false), updateText = text(raw.updateText, "update text", 3000, false);
   if (Boolean(updateTitle) !== Boolean(updateText)) throw new Error("Add both a title and text for the client update, or leave both empty.");
-  return { id, status, completedTasks, totalTasks, due, milestones, importantDates, history, updateTitle, updateText,
+  const calendarId = text(raw.calendarId ?? "", "a Google Calendar ID", 254, false);
+  if (calendarId && !/^[a-z0-9_-]+@group\.calendar\.google\.com$/i.test(calendarId)) throw new Error("Use the ID of a dedicated project calendar, ending in @group.calendar.google.com. Personal calendars cannot be connected.");
+  return { id, status, completedTasks, totalTasks, due, milestones, importantDates, calendarId, history, updateTitle, updateText,
     name: text(raw.name, "a project name"), client: text(raw.client, "a client name"), category: text(raw.category, "a project category"), owner: text(raw.owner, "a project lead"),
     summary: text(raw.summary, "a project summary", 2000), focus: text(raw.focus, "the current focus", 2000), internalNotes: text(raw.internalNotes, "internal notes", 5000, false) };
 }

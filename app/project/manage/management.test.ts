@@ -9,6 +9,7 @@ vi.mock("@/lib/firebase-admin", () => ({ getAdminDb: vi.fn(() => { throw new Err
 vi.mock("@/lib/project-admin-session", () => ({ isProjectAdmin: vi.fn(async () => false) }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("../google-calendar", () => ({ syncProjectCalendar: vi.fn(async (project) => ({ calendarId: project.calendarId || project.calendarSync?.calendarId || "", error: "Google Calendar is unavailable. Save again to retry." })) }));
 
 let directory: string;
 let store: typeof import("../store");
@@ -34,6 +35,9 @@ describe("project management", () => {
     expect(() => validateProjectDraft({ ...draft(), milestones: distributorProject.milestones.map((m) => ({ ...m, state: "current" })) })).toThrow("Only one");
     expect(() => validateProjectDraft({ ...draft(), history: [{ ...draft().history[0], type: "Other" }] })).toThrow("activity type");
     expect(() => validateProjectDraft({ ...draft(), updateText: "" })).toThrow("both");
+    expect(() => validateProjectDraft({ ...draft(), milestones: [{ ...draft().milestones[0], start: "2026-10-01" }] })).toThrow("on or before");
+    expect(() => validateProjectDraft({ ...draft(), calendarId: "primary" })).toThrow("dedicated project calendar");
+    expect(() => validateProjectDraft({ ...draft(), calendarId: "someone@gmail.com" })).toThrow("dedicated project calendar");
   });
   it("validates and sorts important dates while accepting projects without dates", () => {
     const dates = draft().importantDates;
@@ -65,5 +69,18 @@ describe("project management", () => {
     const form = new FormData();
     form.set("project", JSON.stringify(draft()));
     expect(await saveManagedProject(null, null, {}, form)).toEqual({ error: "Your staff session expired. Sign in again before saving." });
+  });
+  it("preserves edits after a sync failure and reserves each calendar for one project", async () => {
+    const input = validateProjectDraft({ ...draft(), id: "calendar-failure", calendarId: "dedicated@group.calendar.google.com" });
+    await store.saveProject(input, null);
+    const saved = await store.getProject(input.id);
+    expect(saved?.importantDates).toEqual(input.importantDates);
+    expect(saved?.calendarSync?.error).toContain("unavailable");
+    expect(getSharedProject(input.id, [saved!])).not.toHaveProperty("calendarSync");
+    expect(getSharedProject(input.id, [saved!])?.calendarId).toBeUndefined();
+    await expect(store.saveProject({ ...input, id: "different-project" }, null)).rejects.toThrow("another project");
+    expect(await store.getProject("different-project")).toBeNull();
+    await store.saveProject({ ...input, focus: "Saved while Google is unavailable" }, 1);
+    expect((await store.getProject(input.id))?.focus).toBe("Saved while Google is unavailable");
   });
 });

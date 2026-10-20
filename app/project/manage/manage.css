@@ -104,3 +104,17 @@ div.manager-empty { text-align: center; padding: 48px 20px; }
   .manager-save-bar > button { width: 100%; }
   .manager-panel input, .manager-panel textarea, .manager-panel select { font-size: 16px; }
 }
+
+.manager-calendar-connection { margin-top: 28px; padding: 22px; background: #f3f5ee; border-radius: 6px; }
+.manager-calendar-connection h3 { font-size: 16px; font-weight: 500; }
+.manager-calendar-connection p, .manager-calendar-setup li { font-size: 13px; line-height: 1.7; margin-top: 8px; overflow-wrap: anywhere; }
+.manager-calendar-connection > a { margin-top: 12px; }
+.manager-calendar-setup { margin-top: 16px; }
+.manager-calendar-setup summary { cursor: pointer; font-size: 13px; min-height: 44px; display: flex; align-items: center; text-decoration: underline; text-underline-offset: 3px; }
+.manager-calendar-setup ol { padding-left: 20px; }
+.manager-calendar-setup a { text-decoration: underline; text-underline-offset: 3px; }
+.manager-calendar-status { color: #286240; }
+.manager-calendar-warning { padding: 16px 20px; background: #faeed3; border-radius: 6px; font-size: 13px; line-height: 1.7; margin-bottom: 20px; }
+@media (max-width: 600px) { .manager-calendar-connection { padding: 16px; } }
+
+@media (min-width: 980px) { .manager-milestone-fields { grid-template-columns: 1.2fr 1fr 1fr .9fr; } }

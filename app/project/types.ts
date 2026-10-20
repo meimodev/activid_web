@@ -1,5 +1,5 @@
 export type ProjectStatus = "In progress" | "Needs review" | "Completed";
-export type Milestone = { name: string; date: string; description: string; state: "done" | "current" | "upcoming" };
+export type Milestone = { name: string; start?: string; date: string; description: string; state: "done" | "current" | "upcoming" };
 export type Project = {
   id: string;
   client: string;
@@ -19,6 +19,7 @@ export type Project = {
   sample?: boolean;
   milestones: Milestone[];
   importantDates?: ProjectDate[];
+  calendarId?: string;
   history?: ProjectHistoryEntry[];
   software?: SoftwareTracking;
 };
@@ -45,4 +46,5 @@ export type SoftwareTracking = {
 };
 
 export type ProjectUpdate = { projectId: string; date: string; author: string; initials: string; title: string; text: string };
-export type InternalProject = Project & { internalNotes: string; revision?: number; latestUpdate?: ProjectUpdate };
+export type CalendarSync = { calendarId: string; syncedAt?: string; error?: string; lockUntil?: number };
+export type InternalProject = Project & { internalNotes: string; revision?: number; latestUpdate?: ProjectUpdate; calendarSync?: CalendarSync };

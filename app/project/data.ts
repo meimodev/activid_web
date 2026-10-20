@@ -42,12 +42,12 @@ export const distributorProject: InternalProject = {
     { id: "approval-flow-change", type: "Change", date: "2026-10-14", title: "Order-approval flow revised", summary: "Updated the draft to include a finance review for orders above credit limits. Final rules remain pending confirmation.", context: "Updated by Reza · Within the agreed scope" },
   ],
   milestones: [
-    { name: "Discovery", date: "2026-09-11", description: "Sales, warehouse, and finance workflows mapped. The release scope and acceptance criteria are agreed.", state: "done" },
-    { name: "Design", date: "2026-09-25", description: "Core screens and the mobile order flow reviewed with your operations team.", state: "done" },
-    { name: "Development", date: "2026-10-30", description: "Building order approvals, stock movement, invoicing, and access roles. Regression checks run alongside development.", state: "current" },
-    { name: "User testing", date: "2026-11-06", description: "Your sales, warehouse, and finance representatives test the agreed scenarios on staging. Findings are triaged with the team.", state: "upcoming" },
-    { name: "Launch", date: "2026-11-13", description: "Target launch after UAT sign-off, opening-stock validation, and the final deployment checklist.", state: "upcoming" },
-    { name: "Handover", date: "2026-11-20", description: "Operations training, admin documentation, and the first week of post-launch support completed.", state: "upcoming" },
+    { name: "Discovery", start: "2026-09-07", date: "2026-09-11", description: "Sales, warehouse, and finance workflows mapped. The release scope and acceptance criteria are agreed.", state: "done" },
+    { name: "Design", start: "2026-09-14", date: "2026-09-25", description: "Core screens and the mobile order flow reviewed with your operations team.", state: "done" },
+    { name: "Development", start: "2026-09-28", date: "2026-10-30", description: "Building order approvals, stock movement, invoicing, and access roles. Regression checks run alongside development.", state: "current" },
+    { name: "User testing", start: "2026-11-02", date: "2026-11-06", description: "Your sales, warehouse, and finance representatives test the agreed scenarios on staging. Findings are triaged with the team.", state: "upcoming" },
+    { name: "Launch", start: "2026-11-09", date: "2026-11-13", description: "Target launch after UAT sign-off, opening-stock validation, and the final deployment checklist.", state: "upcoming" },
+    { name: "Handover", start: "2026-11-16", date: "2026-11-20", description: "Operations training, admin documentation, and the first week of post-launch support completed.", state: "upcoming" },
   ],
   software: {
     reference: "ACT-DMS-2026", started: "2026-09-07",
@@ -130,5 +130,6 @@ export function getSharedProject(slug: string, source = projects): Project | nul
     due: project.due, updated: project.updated, owner: project.owner, initials: project.initials,
     next: project.next, focus: project.focus, sample: project.sample ?? true,
     milestones: project.milestones, importantDates: project.importantDates ?? [], history: project.history ?? [], software: project.software,
+    calendarId: project.calendarId && project.calendarSync?.calendarId === project.calendarId && project.calendarSync.syncedAt ? project.calendarId : undefined,
   };
 }

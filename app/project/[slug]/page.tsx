@@ -15,5 +15,6 @@ export default async function SharedProjectPage({ params }: Props) {
   const internal = await getProject((await params).slug);
   if (!internal) notFound();
   const project = getSharedProject(internal.id, [internal])!;
-  return <ClientTracker project={project} updates={projectUpdates([internal])} contactEmail={workspace.email} />;
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  return <ClientTracker project={project} updates={projectUpdates([internal])} contactEmail={workspace.email} today={today} />;
 }

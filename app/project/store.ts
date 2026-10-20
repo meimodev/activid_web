@@ -2,11 +2,13 @@ import "server-only";
 
 import { mkdir, open, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { cache } from "react";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { projects, updates } from "./data";
 import type { InternalProject, ProjectUpdate } from "./types";
 import { isProjectSlug, type ProjectDraft } from "./manage/validation";
+import { syncProjectCalendar } from "./google-calendar";
 
 const localDirectory = process.env.PROJECTS_LOCAL_DATA_DIR || path.join(process.cwd(), ".local", "projects");
 export function projectStorageMode() {
@@ -39,6 +41,7 @@ export function projectUpdates(source: InternalProject[]): ProjectUpdate[] {
   return [...source.flatMap((p) => p.latestUpdate ? [p.latestUpdate] : []), ...updates.filter((u) => source.some((p) => p.id === u.projectId))].sort((a, b) => b.date.localeCompare(a.date));
 }
 function buildProject(draft: ProjectDraft, existing: InternalProject | null, expectedRevision: number | null): InternalProject {
+  if ((existing?.calendarSync?.lockUntil ?? 0) > Date.now()) throw new Error("Another save is syncing this project calendar. Try again in a moment.");
   if (expectedRevision === null ? existing !== null : !existing || (existing.revision ?? 0) !== expectedRevision) throw new Error("This project changed or the URL is already in use. Reload before saving to avoid overwriting changes.");
   const { updateTitle, updateText, ...fields } = draft;
   const updated = new Date().toISOString();
@@ -52,12 +55,26 @@ export async function saveProject(draft: ProjectDraft, expectedRevision: number 
   const seed = projects.find((project) => project.id === draft.id) ?? null;
   if (mode === "firestore") {
     const db = getAdminDb(), ref = db.collection("clientProjects").doc(draft.id);
-    await db.runTransaction(async (transaction) => {
+    const saved = await db.runTransaction(async (transaction) => {
       const doc = await transaction.get(ref);
       const project = buildProject(draft, doc.exists ? doc.data() as InternalProject : seed, expectedRevision);
+      if (draft.calendarId) {
+        const binding = db.collection("clientProjectCalendars").doc(createHash("sha256").update(draft.calendarId).digest("hex"));
+        const owner = await transaction.get(binding);
+        if (owner.exists && owner.data()?.projectId !== draft.id) throw new Error("This calendar belongs to another project. Create a separate calendar for this project.");
+        transaction.set(binding, { projectId: draft.id });
+      }
+      if (project.calendarId || project.calendarSync?.calendarId) project.calendarSync = { ...project.calendarSync, calendarId: project.calendarSync?.calendarId || project.calendarId || "", lockUntil: Date.now() + 300000 };
       transaction.set(ref, JSON.parse(JSON.stringify(project)));
+      return project;
     });
-    return;
+    if (saved.calendarSync?.lockUntil) {
+      saved.calendarSync = await syncProjectCalendar(saved, async (calendarId) => {
+        await ref.update({ calendarSync: { calendarId, lockUntil: saved.calendarSync!.lockUntil } });
+      });
+      await ref.update({ calendarSync: saved.calendarSync });
+    }
+    return saved;
   }
   await mkdir(localDirectory, { recursive: true, mode: 0o700 });
   const file = path.join(localDirectory, `${draft.id}.json`), lockFile = `${file}.lock`;
@@ -67,7 +84,26 @@ export async function saveProject(draft: ProjectDraft, expectedRevision: number 
   try {
     const project = buildProject(draft, await localProject(draft.id) ?? seed, expectedRevision);
     const temporary = `${file}.${crypto.randomUUID()}.tmp`;
+    if (draft.calendarId) {
+      const binding = path.join(localDirectory, `calendar-${createHash("sha256").update(draft.calendarId).digest("hex")}.binding`);
+      try { await writeFile(binding, draft.id, { flag: "wx", mode: 0o600 }); }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        if (await readFile(binding, "utf8") !== draft.id) throw new Error("This calendar belongs to another project. Create a separate calendar for this project.");
+      }
+    }
+    if (project.calendarId && !project.calendarSync?.calendarId) project.calendarSync = { calendarId: project.calendarId };
+    // Save edits first so a Google outage never loses the user's work.
     await writeFile(temporary, JSON.stringify(project), { mode: 0o600 });
     await rename(temporary, file);
+    if (project.calendarId || project.calendarSync?.calendarId) {
+      project.calendarSync = await syncProjectCalendar(project, async (calendarId) => {
+        await writeFile(temporary, JSON.stringify({ ...project, calendarSync: { calendarId } }), { mode: 0o600 });
+        await rename(temporary, file);
+      });
+      await writeFile(temporary, JSON.stringify(project), { mode: 0o600 });
+      await rename(temporary, file);
+    }
+    return project;
   } finally { await lock.close(); await unlink(lockFile); }
 }

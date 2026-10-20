@@ -17,7 +17,7 @@ export async function saveManagedProject(id: string | null, expectedRevision: nu
   try { await saveProject(draft, expectedRevision); }
   catch (error) {
     const message = (error as Error).message;
-    if (/^This project changed|^Another save|^Project storage is not configured/.test(message)) return { error: message };
+    if (/^This project changed|^Another save|^Project storage is not configured|^This calendar belongs/.test(message)) return { error: message };
     console.error("Project save failed", error);
     return { error: "Could not save the project. Your edits are still here. Try again." };
   }

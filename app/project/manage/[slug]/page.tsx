@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { isProjectAdmin } from "@/lib/project-admin-session";
 import { getProject, projectStorageMode, projectUpdates } from "../../store";
+import { calendarServiceAccount } from "../../google-calendar";
 import ProjectEditor from "../project-editor";
 
 export default async function EditProjectPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ saved?: string }> }) {
@@ -8,5 +9,5 @@ export default async function EditProjectPage({ params, searchParams }: { params
   const { slug } = await params;
   const project = slug === "new" ? null : await getProject(slug);
   if (slug !== "new" && !project) notFound();
-  return <ProjectEditor key={`${slug}-${project?.revision ?? 0}`} project={project} update={project ? projectUpdates([project])[0] : undefined} storage={projectStorageMode()} saved={(await searchParams).saved === "1"} />;
+  return <ProjectEditor key={`${slug}-${project?.revision ?? 0}`} calendarEmail={calendarServiceAccount()} project={project} update={project ? projectUpdates([project])[0] : undefined} storage={projectStorageMode()} saved={(await searchParams).saved === "1"} />;
 }

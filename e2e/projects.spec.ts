@@ -35,6 +35,16 @@ test("client can follow the project process and read its activity history", asyn
   await expect(page.locator(".process-dates")).toContainText("30 Oct");
   await expect(page.locator(".process-dates")).toContainText("20 Nov");
   await expect(page.locator(".process-milestone")).toHaveCount(6);
+  await expect(page.locator(".milestone-current .process-milestone-range")).toHaveText("28 Sept – 30 Oct");
+  const calendar = page.getByRole("group", { name: "Project calendar", exact: true });
+  await calendar.getByRole("button", { name: "22 Oct 2026: Approval rules review", exact: true }).click();
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("Sales and finance leads");
+  await calendar.getByRole("button", { name: "Next month" }).click();
+  await expect(calendar.locator(".project-calendar-heading")).toContainText("November 2026");
+  await calendar.getByRole("button", { name: "4 Nov 2026: Client testing briefing", exact: true }).click();
+  await expect(calendar.locator(".project-calendar-agenda")).toContainText("testing scenarios");
+  await calendar.getByRole("button", { name: "Previous month" }).click();
+  await expect(calendar.locator(".project-calendar-heading")).toContainText("October 2026");
   await expect(page.getByRole("heading", { name: "Orders are connecting to stock." })).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Next step", exact: true })).toHaveCount(0);
@@ -116,7 +126,8 @@ test("staff can create a project, maintain its history, and publish changes to t
   await page.getByRole("button", { name: "Timeline", exact: false }).click();
   await page.getByRole("button", { name: "Add milestone" }).click();
   await page.getByLabel("Milestone name", { exact: true }).fill("Development");
-  await page.getByLabel("Milestone date", { exact: true }).fill("2026-10-30");
+  await page.getByLabel("Milestone start", { exact: true }).fill("2026-10-01");
+  await page.getByLabel("Milestone end", { exact: true }).fill("2026-10-30");
   await page.getByLabel("Phase state").selectOption("current");
   await page.getByLabel("Milestone description").fill("Build the warehouse pilot workflow.");
   await page.getByRole("button", { name: /^Dates/ }).click();
