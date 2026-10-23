@@ -9,9 +9,9 @@ export function nextDate(date: string) {
 }
 
 // Stable keys let Google events survive title, date, and description edits.
-export function projectCalendarEntries(project: Project) {
+export function projectCalendarEntries(project: Project, today?: string) {
   const entries: ProjectCalendarEntry[] = [
-    ...(project.importantDates ?? []).map((entry): ProjectCalendarEntry => ({ key: `date:${entry.id}`, title: entry.title, start: entry.date, end: entry.date, note: entry.note, kind: "important", label: "Important date" })),
+    ...(project.importantDates ?? []).map((entry): ProjectCalendarEntry => ({ key: `date:${entry.id}`, title: entry.title, start: entry.date, end: entry.date, note: entry.note, kind: today && entry.date < today ? "activity" : "important", label: "Important date" })),
     ...(project.history ?? []).map((entry): ProjectCalendarEntry => ({ key: `activity:${entry.id}`, title: entry.title, start: entry.date, end: entry.date, note: [entry.summary, entry.context].filter(Boolean).join("\n"), kind: "activity", label: entry.type })),
     ...project.milestones.map((entry): ProjectCalendarEntry => ({ key: `phase:${entry.name}`, title: entry.name, start: entry.start ?? entry.date, end: entry.date, note: entry.description, kind: "phase", label: "Phase" })),
   ];

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { isProjectAdmin } from "@/lib/project-admin-session";
 import { getSharedProject } from "../data";
 import { getProject, projectUpdates } from "../store";
+import { projectToday } from "../format";
 import ClientTracker from "./client-tracker";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -17,6 +18,6 @@ export default async function SharedProjectPage({ params }: Props) {
   const [internal, canEdit] = await Promise.all([getProject(slug), isProjectAdmin()]);
   if (!internal) notFound();
   const project = getSharedProject(internal.id, [internal])!;
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const today = projectToday();
   return <ClientTracker project={project} updates={projectUpdates([internal])} today={today} canEdit={canEdit} />;
 }

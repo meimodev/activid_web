@@ -1,5 +1,9 @@
 import type { Project } from "./types";
 
+export function projectToday(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
 export function progress(project: Project) {
   return Math.round((project.completedTasks / project.totalTasks) * 100);
 }

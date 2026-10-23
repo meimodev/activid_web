@@ -1,19 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { Asterisk, Check, ChevronDown, Circle, CircleDot, MapPin, MessageSquare, PencilLine } from "lucide-react";
-import { formatDate, progress } from "../format";
+import { useEffect, useState } from "react";
+import { Asterisk, Check, ChevronDown, Circle, CircleDot, PencilLine } from "lucide-react";
+import { formatDate, progress, projectToday } from "../format";
+import { projectActivity } from "../activity";
 import { Status } from "../project-ui";
 import type { Project, ProjectUpdate } from "../types";
 import "./client-tracker.css";
 import ProjectCalendar from "./project-calendar";
+import ProjectHistory from "./project-history";
 
 export default function ClientTracker({ project, updates, today, canEdit }: { project: Project; updates: ProjectUpdate[]; today: string; canEdit: boolean }) {
+  const [currentDay, setCurrentDay] = useState(today);
+  useEffect(() => {
+    const refreshDay = () => setCurrentDay(projectToday());
+    const timer = window.setInterval(refreshDay, 60000);
+    window.addEventListener("focus", refreshDay);
+    document.addEventListener("visibilitychange", refreshDay);
+    return () => { window.clearInterval(timer); window.removeEventListener("focus", refreshDay); document.removeEventListener("visibilitychange", refreshDay); };
+  }, []);
   const software = project.software;
   const completion = progress(project);
   const current = project.milestones.find((milestone) => milestone.state === "current");
   const update = updates[0];
-  const importantDates = [...(project.importantDates ?? [])].sort((a, b) => a.date.localeCompare(b.date));
+  const { importantDates, history } = projectActivity(project, currentDay);
 
   return <div className="process-tracker">
     <a className="projects-skip" href="#client-project">Skip to project</a>
@@ -38,7 +49,7 @@ export default function ClientTracker({ project, updates, today, canEdit }: { pr
         <div className="project-progress" role="progressbar" aria-label="Overall development progress" aria-valuenow={completion} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${completion}%` }} /></div>
         <div className="process-dates"><div><span>Next checkpoint</span><strong>{current ? formatDate(current.date) : "Complete"}</strong></div><div><span>Target handover</span><strong>{formatDate(project.due)}</strong></div></div>
         </div>
-        <ProjectCalendar project={project} today={today} />
+        <ProjectCalendar project={project} today={currentDay} />
       </section>
 
       {importantDates.length > 0 && <section className="process-important-dates" aria-labelledby="important-dates-title">
@@ -63,16 +74,7 @@ export default function ClientTracker({ project, updates, today, canEdit }: { pr
         <p className="process-timeline-note">{software ? "Launch and handover dates depend on your team’s testing and final sign-off." : "Your project lead will confirm delivery after the current phase is approved."}</p>
       </section>
 
-      {project.history && project.history.length > 0 && <section className="process-history" aria-labelledby="history-title">
-        <h2 id="history-title">Activity history</h2>
-        <p className="process-history-intro">Meetings, visits, and project changes.</p>
-        <ol>
-          {project.history.map((entry) => <li className="process-history-entry" key={entry.id}>
-            <div className="process-section-heading"><span className="process-history-type">{entry.type === "Meeting" ? <MessageSquare size={14} /> : entry.type === "Visit" ? <MapPin size={14} /> : <PencilLine size={14} />}{entry.type}</span><time dateTime={entry.date}>{formatDate(entry.date, true)}</time></div>
-            <h3>{entry.title}</h3><p>{entry.summary}</p><span className="process-history-context">{entry.context}</span>
-          </li>)}
-        </ol>
-      </section>}
+      <ProjectHistory entries={history} />
 
       {update && <section className="process-update" aria-labelledby="latest-update-title">
         <div className="process-section-heading"><h2 id="latest-update-title">Latest update</h2><time dateTime={update.date}>{formatDate(update.date)}</time></div>

@@ -30,6 +30,14 @@ production secrets belong in the Vercel environment, followed by a deployment.
 
 ## Behavior and recovery
 
+- Important dates remain upcoming through their scheduled day in `Asia/Makassar`.
+  The next day they appear in client activity history and use the activity marker
+  in the page calendar. An open page checks the date each minute and when returning
+  to the tab. The source date remains editable under **Dates**; rescheduling it
+  into the future returns it to Important dates. No duplicate Google event is created.
+- The client page shows the latest five history entries, including past important
+  dates. **View all activity** opens the complete history in a drawer. The calendar
+  always includes every entry, even when it is older than the history preview.
 - Every save reconciles important dates, timeline phases, activity history, and target handover.
   Events are tagged by project and entry; edits update the existing event.
   Removed entries delete only that project's tagged events. Other events remain.

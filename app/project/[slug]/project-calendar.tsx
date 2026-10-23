@@ -7,7 +7,7 @@ import { formatDate } from "../format";
 import type { Project } from "../types";
 
 export default function ProjectCalendar({ project, today }: { project: Project; today: string }) {
-  const entries = projectCalendarEntries(project);
+  const entries = projectCalendarEntries(project, today);
   const initial = calendarEntriesOnDate(entries, today).length ? today : entries.map((entry) => entry.start).filter((date) => date >= today).sort()[0] ?? entries.at(-1)?.end ?? today;
   const [month, setMonth] = useState(initial.slice(0, 7));
   const [selected, setSelected] = useState(initial);
