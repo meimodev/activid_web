@@ -7,6 +7,8 @@ for (const path of ['/satset', '/rds', '/satset?lang=en', '/rds?lang=en']) {
     const english = path.includes('lang=en');
 
     expect(response?.status()).toBe(200);
+    await expect(page).toHaveTitle("SatSet / Restaurant Display System (RDS)");
+    await expect(page.locator(".satset-hero .satset-eyebrow")).toHaveText("Restaurant Display System (RDS)");
     expect(response?.headers()['cache-control']).not.toContain('no-store');
     await expect(page.locator('h1')).toHaveText(english
       ? 'Keep service moving.'

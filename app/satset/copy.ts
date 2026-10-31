@@ -1,5 +1,6 @@
 // Landing-page copy stays together so the Indonesian and English offers match.
 import { formatRupiah, SATSET_OFFER } from "./offer";
+import { SATSET_PRODUCT_NAME } from "./brand";
 
 const idPrice = formatRupiah(SATSET_OFFER.monthlyPrice, "id");
 const enPrice = formatRupiah(SATSET_OFFER.monthlyPrice, "en");
@@ -17,7 +18,7 @@ export const COPY = {
       switchLanguage: "Switch to English",
     },
     hero: {
-      eyebrow: "SATSET UNTUK RESTORAN",
+      eyebrow: "Restaurant Display System (RDS)",
       title: "Pesanan lancar. Resto tetap jalan.",
       description:
         "Hubungkan pelayan, dapur, dan kasir lewat Wi-Fi lokal. Pakai Android milikmu, tetap jalan saat internet mati.",
@@ -52,21 +53,21 @@ export const COPY = {
     },
     features: {
       title: "Dari meja ke kasir.",
-      description: "Lihat tampilan asli SatSet dari rekaman aplikasi, sebelum mengunduh demo.",
+      description: "Lihat tampilan asli SatSet RDS dari rekaman aplikasi, sebelum mengunduh demo.",
       screenshotLabel: "Tampilan demo aplikasi",
       enlarge: "Perbesar tampilan",
       reports: "Laporan pemilik menampilkan penjualan lunas dan bisa diekspor. Akses staf mengikuti peran masing-masing.",
       screens: {
-        floor: { title: "Pantau meja", description: "Lihat meja kosong, pesanan aktif, dan makanan siap antar.", alt: "Tampilan asli SatSet: meja D2 dan D3 berstatus siap di antara meja kosong." },
-        orders: { title: "Susun pesanan", description: "Pilih menu bergambar, atur jumlah, dan kirim ke dapur.", alt: "Tampilan asli SatSet: katalog menu bergambar dan keranjang pesanan meja D2." },
-        kitchen: { title: "Ikuti antrean dapur", description: "Pantau pesanan, catatan tamu, dan waktu tunggu dalam satu layar.", alt: "Tampilan asli SatSet: antrean persiapan untuk meja D2 dan D3 dengan penghitung waktu." },
-        cashier: { title: "Selesaikan tagihan", description: "Pisahkan tagihan, simpan bukti bayar, dan cetak struk.", alt: "Tampilan asli SatSet: rincian tagihan meja D2 dan pembayaran tunai." },
+        floor: { title: "Pantau meja", description: "Lihat meja kosong, pesanan aktif, dan makanan siap antar.", alt: "Tampilan asli SatSet RDS: meja D2 dan D3 berstatus siap di antara meja kosong." },
+        orders: { title: "Susun pesanan", description: "Pilih menu bergambar, atur jumlah, dan kirim ke dapur.", alt: "Tampilan asli SatSet RDS: katalog menu bergambar dan keranjang pesanan meja D2." },
+        kitchen: { title: "Ikuti antrean dapur", description: "Pantau pesanan, catatan tamu, dan waktu tunggu dalam satu layar.", alt: "Tampilan asli SatSet RDS: antrean persiapan untuk meja D2 dan D3 dengan penghitung waktu." },
+        cashier: { title: "Selesaikan tagihan", description: "Pisahkan tagihan, simpan bukti bayar, dan cetak struk.", alt: "Tampilan asli SatSet RDS: rincian tagihan meja D2 dan pembayaran tunai." },
       },
     },
     pricing: {
       title: "Satu outlet. Satu harga.",
       description:
-        "Promo berlaku untuk paket software SatSet yang sama dengan harga normal. Hubungi kami untuk mengecek ketersediaan bulan ini.",
+        "Promo berlaku untuk paket software SatSet RDS yang sama dengan harga normal. Hubungi kami untuk mengecek ketersediaan bulan ini.",
       regularLabel: "Harga normal",
       promoLabel: "Harga promo",
       period: "per outlet per bulan",
@@ -113,7 +114,7 @@ export const COPY = {
         { question: "Perangkat apa yang dibutuhkan?", answer: "HP atau tablet Android 10 ke atas dan jaringan Wi-Fi lokal. Satu perangkat memakai mode Server; perangkat staf memakai mode Client di jaringan yang sama." },
         { question: "Tetap jalan saat internet mati?", answer: "Pesanan, dapur, dan kasir bekerja lewat Wi-Fi lokal. Login admin awal, verifikasi akun berkala, dan pemantauan jarak jauh membutuhkan internet. Memulai ulang server secara offline dibatasi 7 hari sejak verifikasi akun terakhir." },
         { question: "Bagaimana jika perangkat Server mati?", answer: "Perangkat Server harus tetap menyala dan terhubung ke Wi-Fi selama layanan. Jika mati, nyalakan dan jalankan server kembali agar perangkat staf dapat tersambung lagi." },
-        { question: "Bisa memakai printer sendiri?", answer: "SatSet mendukung printer struk ESC/POS lewat jaringan dan printer Bluetooth yang sudah dipasangkan ke Android. Konfirmasikan model printer lewat WhatsApp sebelum membeli." },
+        { question: "Bisa memakai printer sendiri?", answer: "SatSet RDS mendukung printer struk ESC/POS lewat jaringan dan printer Bluetooth yang sudah dipasangkan ke Android. Konfirmasikan model printer lewat WhatsApp sebelum membeli." },
       ],
       support: "Butuh bantuan memilih perangkat? Tim Activid siap membantu.",
       supportLink: "Kontak Activid",
@@ -123,7 +124,7 @@ export const COPY = {
       contact: "Chat WhatsApp",
     },
     whatsappMessage:
-      `[SatSet] Halo, saya ingin bertanya tentang promo ${idPrice} per outlet per bulan dan ketersediaan kuota bulan ini.`,
+      `[${SATSET_PRODUCT_NAME}] Halo, saya ingin bertanya tentang promo ${idPrice} per outlet per bulan dan ketersediaan kuota bulan ini.`,
   },
   en: {
     nav: {
@@ -137,7 +138,7 @@ export const COPY = {
       switchLanguage: "Ganti ke Bahasa Indonesia",
     },
     hero: {
-      eyebrow: "SATSET FOR RESTAURANTS",
+      eyebrow: "Restaurant Display System (RDS)",
       title: "Keep service moving.",
       description:
         "Orders, kitchen, and payments on Android. Connect over local Wi-Fi, even when the internet drops.",
@@ -172,21 +173,21 @@ export const COPY = {
     },
     features: {
       title: "From table to payment.",
-      description: "Explore real SatSet screens from the app recording before downloading the demo.",
+      description: "Explore real SatSet RDS screens from the app recording before downloading the demo.",
       screenshotLabel: "Demo app screen, shown in Indonesian",
       enlarge: "Enlarge screen",
       reports: "Owner reports show settled sales and can be exported. Staff access follows each person's role.",
       screens: {
-        floor: { title: "See your tables", description: "Spot available tables, active orders, and food ready to serve.", alt: "Actual SatSet table screen: D2 and D3 are ready, alongside available tables." },
-        orders: { title: "Build an order", description: "Choose from a photo menu, adjust quantities, and send to the kitchen.", alt: "Actual SatSet order screen with a photo menu and the cart for table D2." },
-        kitchen: { title: "Follow the kitchen queue", description: "Keep orders, guest notes, and waiting times together.", alt: "Actual SatSet kitchen queue for tables D2 and D3, with order timers." },
-        cashier: { title: "Settle the bill", description: "Split bills, save payment proof, and print receipts.", alt: "Actual SatSet cashier screen showing table D2's bill and cash payment." },
+        floor: { title: "See your tables", description: "Spot available tables, active orders, and food ready to serve.", alt: "Actual SatSet RDS table screen: D2 and D3 are ready, alongside available tables." },
+        orders: { title: "Build an order", description: "Choose from a photo menu, adjust quantities, and send to the kitchen.", alt: "Actual SatSet RDS order screen with a photo menu and the cart for table D2." },
+        kitchen: { title: "Follow the kitchen queue", description: "Keep orders, guest notes, and waiting times together.", alt: "Actual SatSet RDS kitchen queue for tables D2 and D3, with order timers." },
+        cashier: { title: "Settle the bill", description: "Split bills, save payment proof, and print receipts.", alt: "Actual SatSet RDS cashier screen showing table D2's bill and cash payment." },
       },
     },
     pricing: {
       title: "One outlet. One price.",
       description:
-        "The offer covers the same SatSet software plan as the regular price. Contact us to check this month's availability.",
+        "The offer covers the same SatSet RDS software plan as the regular price. Contact us to check this month's availability.",
       regularLabel: "Regular price",
       promoLabel: "Offer price",
       period: "per outlet per month",
@@ -233,7 +234,7 @@ export const COPY = {
         { question: "What devices do I need?", answer: "Android phones or tablets running Android 10 or newer, plus local Wi-Fi. One device runs Server mode; staff devices use Client mode on the same network." },
         { question: "What happens if the internet drops?", answer: "Orders, kitchen service, and payments use local Wi-Fi. Initial admin sign-in, periodic account checks, and remote monitoring need internet. Offline server restarts are limited to 7 days after the last account verification." },
         { question: "What if the Server device turns off?", answer: "Keep the Server device powered on and connected to Wi-Fi throughout service. If it turns off, restart the device and server so staff devices can reconnect." },
-        { question: "Can I use my own printer?", answer: "SatSet supports network ESC/POS receipt printers and Bluetooth printers already paired with Android. Check your printer model with us on WhatsApp before buying." },
+        { question: "Can I use my own printer?", answer: "SatSet RDS supports network ESC/POS receipt printers and Bluetooth printers already paired with Android. Check your printer model with us on WhatsApp before buying." },
       ],
       support: "Need help choosing devices? The Activid team can help.",
       supportLink: "Contact Activid",
@@ -243,7 +244,7 @@ export const COPY = {
       contact: "Chat WhatsApp",
     },
     whatsappMessage:
-      `[SatSet] Hello, I'd like to ask about the ${enPrice} per outlet monthly offer and availability this month.`,
+      `[${SATSET_PRODUCT_NAME}] Hello, I'd like to ask about the ${enPrice} per outlet monthly offer and availability this month.`,
   },
 } as const;
 

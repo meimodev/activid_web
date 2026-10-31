@@ -10,6 +10,7 @@ import { COPY, type Lang } from "./copy";
 import DocumentLanguage from "./DocumentLanguage";
 import MobileNavigation from "./MobileNavigation";
 import { SATSET_SCREENS } from "./screenshots";
+import { SATSET_PRODUCT_NAME } from "./brand";
 import { formatRupiah, SATSET_OFFER } from "./offer";
 
 const APK = "/satset/download";
@@ -34,16 +35,28 @@ function Logo() {
     <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true">
       <defs>
         <linearGradient id="satset-logo-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#BEF264" />
-          <stop offset="1" stopColor="#84CC16" />
+          <stop offset="0" stopColor="#FFD21A" />
+          <stop offset="1" stopColor="#E5A900" />
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="12" fill="url(#satset-logo-gradient)" />
-      <path d="M24 12a13 13 0 0 0-13 13h26a13 13 0 0 0-13-13Z" fill="#151912" />
-      <circle cx="24" cy="11" r="3" fill="#151912" />
-      <rect x="9" y="26" width="30" height="4.6" rx="2.3" fill="#151912" />
-      <path d="M25.5 15 19 25h4.2l-1.4 6 6.7-10h-4.2Z" fill="#BEF264" />
+      <path d="M24 12a13 13 0 0 0-13 13h26a13 13 0 0 0-13-13Z" fill="#17150D" />
+      <circle cx="24" cy="11" r="3" fill="#17150D" />
+      <rect x="9" y="26" width="30" height="4.6" rx="2.3" fill="#17150D" />
+      <path d="M25.5 15 19 25h4.2l-1.4 6 6.7-10h-4.2Z" fill="#FFD21A" />
     </svg>
+  );
+}
+
+function BrandName() {
+  return (
+    <span className="satset-brand-copy">
+      <span>SatSet</span>
+      <span className="satset-brand-description">
+        <span className="satset-brand-description-full">/ Restaurant Display System</span>
+        <span className="satset-brand-description-short">/ RDS</span>
+      </span>
+    </span>
   );
 }
 
@@ -56,9 +69,9 @@ export default function SatsetLanding({ lang }: { lang: Lang }) {
       <DocumentLanguage lang={lang} />
       <header className="satset-header">
         <div className="satset-container satset-header-inner">
-          <a className="satset-brand" href="#top" aria-label="SatSet">
+          <a className="satset-brand" href="#top" aria-label={SATSET_PRODUCT_NAME}>
             <Logo />
-            <span>SatSet</span>
+            <BrandName />
           </a>
 
           <nav className="satset-nav" aria-label={lang === "id" ? "Navigasi utama" : "Main navigation"}>
@@ -89,7 +102,7 @@ export default function SatsetLanding({ lang }: { lang: Lang }) {
         <section className="satset-hero" aria-labelledby="satset-hero-title">
           <div className="satset-hero-visual">
             <Image
-              src="/satset-hero.webp"
+            src="/satset-hero-rds.webp"
               alt={t.hero.imageAlt}
               fill
               preload
@@ -271,7 +284,7 @@ export default function SatsetLanding({ lang }: { lang: Lang }) {
 
       <footer className="satset-footer">
         <div className="satset-container satset-footer-inner">
-          <a className="satset-brand" href="#top"><Logo /><span>SatSet</span></a>
+          <a className="satset-brand" href="#top" aria-label={SATSET_PRODUCT_NAME}><Logo /><BrandName /></a>
           <p>{t.footer.tagline}</p>
           <a href={whatsappHref} target="_blank" rel="noopener noreferrer">{t.footer.contact} <ArrowRight size={16} aria-hidden="true" /></a>
         </div>
