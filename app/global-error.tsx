@@ -12,12 +12,14 @@ const poppins = localFont({
   src: '../public/fonts/poppins-regular.ttf',
   variable: '--font-geist-sans',
   display: 'swap',
+  preload: false,
 });
 
 const garet = localFont({
   src: '../public/fonts/garet-book.ttf',
   variable: '--font-bricolage',
   display: 'swap',
+  preload: false,
 });
 
 const CREAM = '#F8EFDE';

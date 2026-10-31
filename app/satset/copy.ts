@@ -3,39 +3,37 @@ import { formatRupiah, SATSET_OFFER } from "./offer";
 
 const idPrice = formatRupiah(SATSET_OFFER.monthlyPrice, "id");
 const enPrice = formatRupiah(SATSET_OFFER.monthlyPrice, "en");
-const idRegularPrice = formatRupiah(SATSET_OFFER.regularMonthlyPrice, "id");
-const enRegularPrice = formatRupiah(SATSET_OFFER.regularMonthlyPrice, "en");
 
 export const COPY = {
   id: {
     nav: {
+      menu: "Menu",
+      language: "Bahasa",
       how: "Cara kerja",
       features: "Fitur",
       pricing: "Harga",
       demo: "Demo",
-      contact: "Tanya promo",
+      contact: "Chat WhatsApp",
       switchLanguage: "Switch to English",
     },
     hero: {
       eyebrow: "SATSET UNTUK RESTORAN",
       title: "Pesanan lancar. Resto tetap jalan.",
       description:
-        "Hubungkan pelayan, dapur, dan kasir lewat Wi-Fi lokal. Jalankan layanan harian di HP atau tablet Android milikmu, bahkan saat internet mati.",
-      offerLabel: `PROMO UNTUK ${SATSET_OFFER.monthlyOutletLimit} OUTLET BARU SETIAP BULAN`,
+        "Hubungkan pelayan, dapur, dan kasir lewat Wi-Fi lokal. Pakai Android milikmu, tetap jalan saat internet mati.",
+      offerLabel: `Untuk ${SATSET_OFFER.monthlyOutletLimit} outlet baru setiap bulan`,
       price: idPrice,
       period: "/ outlet / bulan",
-      regular: `Harga normal ${idRegularPrice} per outlet per bulan`,
       termsLink: "Lihat ketentuan promo",
-      contact: "Tanya promo via WhatsApp",
+      contact: "Chat WhatsApp",
       demo: "Coba demo Android",
       imageAlt:
         "Ilustrasi pelayan dan dapur restoran yang terhubung melalui Wi-Fi lokal",
     },
     how: {
-      eyebrow: "CARA KERJA",
-      title: "Dari meja ke dapur, tetap jalan saat internet mati.",
+      title: "Satu Wi-Fi. Satu tim.",
       description:
-        "Satu perangkat menyimpan data restoran. Perangkat lain terhubung setelah pengaturan awal, lalu bekerja bersama di jaringan lokal.",
+        "Satu perangkat jadi pusat data. Perangkat staf bergabung di Wi-Fi yang sama.",
       steps: [
         {
           title: "Siapkan server",
@@ -43,7 +41,7 @@ export const COPY = {
         },
         {
           title: "Hubungkan tim",
-          description: "Pasangkan perangkat staf dengan memindai kode QR dari server.",
+          description: "Pilih server yang ditemukan di Wi-Fi lokal, lalu masuk dengan PIN staf.",
         },
         {
           title: "Layani pesanan",
@@ -53,33 +51,20 @@ export const COPY = {
       note: "Operasional di jaringan lokal tetap berjalan tanpa internet. Pemantauan jarak jauh memakai snapshot cloud opsional dan membutuhkan internet.",
     },
     features: {
-      eyebrow: "SATU ALUR UNTUK SATU SHIFT",
-      title: "Yang dibutuhkan tim, di tempat yang tepat.",
-      items: [
-        {
-          title: "Layanan & meja",
-          description:
-            "Kelola reservasi, pindahkan tamu bersama pesanannya, urus takeaway, dan terima pesanan dari menu QR tamu.",
-        },
-        {
-          title: "Pesanan & dapur",
-          description:
-            "Pesanan muncul langsung di layar dapur. Atur menu dan stok, lalu tandai item yang terlambat.",
-        },
-        {
-          title: "Kasir & tim",
-          description:
-            "Pisah tagihan, simpan bukti bayar, cetak struk, dan lacak tindakan staf melalui akses berbasis peran.",
-        },
-        {
-          title: "Laporan pemilik",
-          description: "Lihat penjualan lunas dan ekspor laporan.",
-        },
-      ],
+      title: "Dari meja ke kasir.",
+      description: "Lihat tampilan asli SatSet dari rekaman aplikasi, sebelum mengunduh demo.",
+      screenshotLabel: "Tampilan demo aplikasi",
+      enlarge: "Perbesar tampilan",
+      reports: "Laporan pemilik menampilkan penjualan lunas dan bisa diekspor. Akses staf mengikuti peran masing-masing.",
+      screens: {
+        floor: { title: "Pantau meja", description: "Lihat meja kosong, pesanan aktif, dan makanan siap antar.", alt: "Tampilan asli SatSet: meja D2 dan D3 berstatus siap di antara meja kosong." },
+        orders: { title: "Susun pesanan", description: "Pilih menu bergambar, atur jumlah, dan kirim ke dapur.", alt: "Tampilan asli SatSet: katalog menu bergambar dan keranjang pesanan meja D2." },
+        kitchen: { title: "Ikuti antrean dapur", description: "Pantau pesanan, catatan tamu, dan waktu tunggu dalam satu layar.", alt: "Tampilan asli SatSet: antrean persiapan untuk meja D2 dan D3 dengan penghitung waktu." },
+        cashier: { title: "Selesaikan tagihan", description: "Pisahkan tagihan, simpan bukti bayar, dan cetak struk.", alt: "Tampilan asli SatSet: rincian tagihan meja D2 dan pembayaran tunai." },
+      },
     },
     pricing: {
-      eyebrow: "HARGA SATSET",
-      title: "Harga jelas untuk satu outlet.",
+      title: "Satu outlet. Satu harga.",
       description:
         "Promo berlaku untuk paket software SatSet yang sama dengan harga normal. Hubungi kami untuk mengecek ketersediaan bulan ini.",
       regularLabel: "Harga normal",
@@ -92,14 +77,15 @@ export const COPY = {
       ],
       hardware:
         "Perangkat Android dan printer disediakan oleh masing-masing outlet. Snapshot cloud untuk pemantauan jarak jauh bersifat opsional.",
-      contact: "Tanya ketersediaan promo",
+      contact: "Chat WhatsApp",
     },
     demo: {
       eyebrow: "COBA SEBELUM BERLANGGANAN",
-      title: "Jalankan demo di Android milikmu.",
+      title: "Coba di Android milikmu.",
       description:
-        "Unduh APK publik, masuk dengan akun demo, lalu muat data contoh restoran untuk menjelajahi meja, dapur, dan laporan. Tidak perlu pembayaran untuk mencoba.",
+        "Unduh APK, masuk dengan akun demo, lalu jelajahi data contoh restoran. Tidak perlu pembayaran untuk mencoba.",
       download: "Unduh APK demo",
+      downloadSize: "Sekitar 113 MB · Sebaiknya unduh lewat Wi-Fi.",
       release: "Buka halaman rilis jika unduhan bermasalah",
       requirement: "Memerlukan Android 10 atau lebih baru.",
       stepsTitle: "Mulai dalam tiga langkah",
@@ -119,44 +105,55 @@ export const COPY = {
         "Jika Play Protect menampilkan peringatan keamanan, jangan abaikan. Hubungi kami untuk memverifikasi file dan cara pemasangannya.",
       ],
       secondPhone:
-        "Punya HP kedua? Pasang APK yang sama, pilih Client, dan scan QR dari perangkat Server untuk mencoba alur pesanan lokal.",
+        "Punya HP kedua? Pasang APK yang sama, pilih Client, lalu pilih server di Wi-Fi lokal untuk mencoba bersama.",
+    },
+    faq: {
+      title: "Sebelum mulai.",
+      items: [
+        { question: "Perangkat apa yang dibutuhkan?", answer: "HP atau tablet Android 10 ke atas dan jaringan Wi-Fi lokal. Satu perangkat memakai mode Server; perangkat staf memakai mode Client di jaringan yang sama." },
+        { question: "Tetap jalan saat internet mati?", answer: "Pesanan, dapur, dan kasir bekerja lewat Wi-Fi lokal. Login admin awal, verifikasi akun berkala, dan pemantauan jarak jauh membutuhkan internet. Memulai ulang server secara offline dibatasi 7 hari sejak verifikasi akun terakhir." },
+        { question: "Bagaimana jika perangkat Server mati?", answer: "Perangkat Server harus tetap menyala dan terhubung ke Wi-Fi selama layanan. Jika mati, nyalakan dan jalankan server kembali agar perangkat staf dapat tersambung lagi." },
+        { question: "Bisa memakai printer sendiri?", answer: "SatSet mendukung printer struk ESC/POS lewat jaringan dan printer Bluetooth yang sudah dipasangkan ke Android. Konfirmasikan model printer lewat WhatsApp sebelum membeli." },
+      ],
+      support: "Butuh bantuan memilih perangkat? Tim Activid siap membantu.",
+      supportLink: "Kontak Activid",
     },
     footer: {
       tagline: "Operasional lokal · Koneksi perangkat terenkripsi",
-      contact: "Hubungi kami",
+      contact: "Chat WhatsApp",
     },
     whatsappMessage:
       `[SatSet] Halo, saya ingin bertanya tentang promo ${idPrice} per outlet per bulan dan ketersediaan kuota bulan ini.`,
   },
   en: {
     nav: {
+      menu: "Menu",
+      language: "Language",
       how: "How it works",
       features: "Features",
       pricing: "Pricing",
       demo: "Demo",
-      contact: "Ask about the offer",
+      contact: "Chat WhatsApp",
       switchLanguage: "Ganti ke Bahasa Indonesia",
     },
     hero: {
       eyebrow: "SATSET FOR RESTAURANTS",
-      title: "Keep orders moving. Keep service running.",
+      title: "Keep service moving.",
       description:
-        "Connect your floor, kitchen, and cashier over local Wi-Fi. Run daily service on your own Android phones or tablets, even when the internet goes down.",
-      offerLabel: `OFFER FOR ${SATSET_OFFER.monthlyOutletLimit} NEW OUTLETS EACH MONTH`,
+        "Orders, kitchen, and payments on Android. Connect over local Wi-Fi, even when the internet drops.",
+      offerLabel: `For ${SATSET_OFFER.monthlyOutletLimit} new outlets each month`,
       price: enPrice,
       period: "/ outlet / month",
-      regular: `Regular price ${enRegularPrice} per outlet per month`,
       termsLink: "See offer terms",
-      contact: "Ask about the offer on WhatsApp",
+      contact: "Chat WhatsApp",
       demo: "Try the Android demo",
       imageAlt:
         "Illustration of a restaurant server and kitchen connected over local Wi-Fi",
     },
     how: {
-      eyebrow: "HOW IT WORKS",
-      title: "From table to kitchen, even when the internet is down.",
+      title: "One network. One team.",
       description:
-        "One device stores your restaurant data. After initial setup, the other devices join it and work together on your local network.",
+        "One device holds your restaurant data. Staff devices join it on the same Wi-Fi.",
       steps: [
         {
           title: "Set up a server",
@@ -164,7 +161,7 @@ export const COPY = {
         },
         {
           title: "Connect your team",
-          description: "Pair staff devices by scanning a QR code from the server.",
+          description: "Select the server found on your Wi-Fi, then sign in with a staff PIN.",
         },
         {
           title: "Serve orders",
@@ -174,33 +171,20 @@ export const COPY = {
       note: "Local service continues without internet. Optional cloud snapshots for remote monitoring require an internet connection.",
     },
     features: {
-      eyebrow: "ONE FLOW FOR THE WHOLE SHIFT",
-      title: "What your team needs, where they need it.",
-      items: [
-        {
-          title: "Floor & tables",
-          description:
-            "Manage reservations, move a party with its order, handle takeaway, and review orders from guests' QR menus.",
-        },
-        {
-          title: "Orders & kitchen",
-          description:
-            "Orders appear on the kitchen display right away. Manage menus and stock, and flag overdue items.",
-        },
-        {
-          title: "Cashier & team",
-          description:
-            "Split bills, keep payment proof, print receipts, and trace staff actions with role-based access.",
-        },
-        {
-          title: "Owner reports",
-          description: "See settled sales and export reports.",
-        },
-      ],
+      title: "From table to payment.",
+      description: "Explore real SatSet screens from the app recording before downloading the demo.",
+      screenshotLabel: "Demo app screen, shown in Indonesian",
+      enlarge: "Enlarge screen",
+      reports: "Owner reports show settled sales and can be exported. Staff access follows each person's role.",
+      screens: {
+        floor: { title: "See your tables", description: "Spot available tables, active orders, and food ready to serve.", alt: "Actual SatSet table screen: D2 and D3 are ready, alongside available tables." },
+        orders: { title: "Build an order", description: "Choose from a photo menu, adjust quantities, and send to the kitchen.", alt: "Actual SatSet order screen with a photo menu and the cart for table D2." },
+        kitchen: { title: "Follow the kitchen queue", description: "Keep orders, guest notes, and waiting times together.", alt: "Actual SatSet kitchen queue for tables D2 and D3, with order timers." },
+        cashier: { title: "Settle the bill", description: "Split bills, save payment proof, and print receipts.", alt: "Actual SatSet cashier screen showing table D2's bill and cash payment." },
+      },
     },
     pricing: {
-      eyebrow: "SATSET PRICING",
-      title: "Clear pricing for one outlet.",
+      title: "One outlet. One price.",
       description:
         "The offer covers the same SatSet software plan as the regular price. Contact us to check this month's availability.",
       regularLabel: "Regular price",
@@ -213,14 +197,15 @@ export const COPY = {
       ],
       hardware:
         "Each outlet provides its own Android devices and printers. Cloud snapshots for remote monitoring are optional.",
-      contact: "Ask about offer availability",
+      contact: "Chat WhatsApp",
     },
     demo: {
       eyebrow: "TRY BEFORE SUBSCRIBING",
-      title: "Run the demo on your Android device.",
+      title: "Try it on your Android.",
       description:
-        "Download the public APK, sign in with a demo account, then load sample restaurant data to explore the floor, kitchen, and reports. No payment is needed to try it.",
+        "Download the APK, sign in with a demo account, and explore sample restaurant data. No payment needed.",
       download: "Download demo APK",
+      downloadSize: "About 113 MB · Wi-Fi download recommended.",
       release: "Open the release page if the download stalls",
       requirement: "Requires Android 10 or newer.",
       stepsTitle: "Get started in three steps",
@@ -240,11 +225,22 @@ export const COPY = {
         "If Play Protect shows a security warning, do not dismiss it. Contact us to verify the file and installation steps.",
       ],
       secondPhone:
-        "Have a second phone? Install the same APK, choose Client, and scan the QR code from the Server device to try the local order flow.",
+        "Have a second phone? Install the same APK, choose Client, and select the server on your local Wi-Fi to try it together.",
+    },
+    faq: {
+      title: "Before you start.",
+      items: [
+        { question: "What devices do I need?", answer: "Android phones or tablets running Android 10 or newer, plus local Wi-Fi. One device runs Server mode; staff devices use Client mode on the same network." },
+        { question: "What happens if the internet drops?", answer: "Orders, kitchen service, and payments use local Wi-Fi. Initial admin sign-in, periodic account checks, and remote monitoring need internet. Offline server restarts are limited to 7 days after the last account verification." },
+        { question: "What if the Server device turns off?", answer: "Keep the Server device powered on and connected to Wi-Fi throughout service. If it turns off, restart the device and server so staff devices can reconnect." },
+        { question: "Can I use my own printer?", answer: "SatSet supports network ESC/POS receipt printers and Bluetooth printers already paired with Android. Check your printer model with us on WhatsApp before buying." },
+      ],
+      support: "Need help choosing devices? The Activid team can help.",
+      supportLink: "Contact Activid",
     },
     footer: {
       tagline: "Local operation · Encrypted device connections",
-      contact: "Contact us",
+      contact: "Chat WhatsApp",
     },
     whatsappMessage:
       `[SatSet] Hello, I'd like to ask about the ${enPrice} per outlet monthly offer and availability this month.`,

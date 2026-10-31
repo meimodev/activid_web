@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
+import "./agency.css";
 import SmoothScroll from "@/components/layouts/SmoothScroll";
 import Navigation from "@/components/layouts/Navigation";
 import PageTransition from "@/components/layouts/PageTransition";

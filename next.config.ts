@@ -7,6 +7,23 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/satset",
+          has: [{ type: "query", key: "lang", value: "en" }],
+          destination: "/satset/en",
+        },
+        {
+          source: "/rds",
+          has: [{ type: "query", key: "lang", value: "en" }],
+          destination: "/satset/en",
+        },
+        { source: "/rds", destination: "/satset" },
+      ],
+    };
+  },
   // Keep sharp external so its native libvips binary is traced into the
   // serverless bundle instead of being (mis)bundled by Turbopack — otherwise
   // it fails to dlopen at runtime on Vercel's linux-x64.

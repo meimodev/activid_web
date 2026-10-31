@@ -2,23 +2,15 @@ import localFont from "next/font/local";
 import "./satset.css";
 
 const satsetDisplay = localFont({
-  src: [
-    { path: "../fonts/google/bricolagegrotesque/normal.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/google/bricolagegrotesque/normal.woff2", weight: "600", style: "normal" },
-    { path: "../fonts/google/bricolagegrotesque/normal.woff2", weight: "700", style: "normal" },
-    { path: "../fonts/google/bricolagegrotesque/normal.woff2", weight: "800", style: "normal" },
-  ],
+  src: "./fonts/bricolage-latin.woff2",
+  weight: "700",
   variable: "--font-satset-display",
   display: "swap",
 });
 
 const satsetBody = localFont({
-  src: [
-    { path: "../fonts/google/hankengrotesk/normal.woff2", weight: "400", style: "normal" },
-    { path: "../fonts/google/hankengrotesk/normal.woff2", weight: "500", style: "normal" },
-    { path: "../fonts/google/hankengrotesk/normal.woff2", weight: "600", style: "normal" },
-    { path: "../fonts/google/hankengrotesk/normal.woff2", weight: "700", style: "normal" },
-  ],
+  src: "./fonts/hanken-latin.woff2",
+  weight: "100 900",
   variable: "--font-satset-body",
   display: "swap",
 });
