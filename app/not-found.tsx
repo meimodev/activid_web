@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './not-found.css'; // a private copy of the agency styles: see the file
 import Navigation from '@/components/layouts/Navigation';
 import { PageHero } from '@/components/sections/Hero';
+import { Billboard } from '@/components/sections/Billboard';
 import { Footer } from '@/components/sections/Footer';
 
 // The root layout carries no fonts or theme class (those live in each route
@@ -33,6 +34,7 @@ export default function NotFound() {
         <PageHero title="Page not found" cta={{ text: 'Back to home', href: '/' }} facts={['Error 404']}>
           <p>This link is broken or the page has moved. Head back home, or pick a page below.</p>
         </PageHero>
+        <Billboard lines={[['404'], ['Page not found']]} />
 
         <nav aria-label="Suggested pages" className="wrap pt-10 lg:pt-14">
           <ul className="space-y-2">

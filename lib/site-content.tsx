@@ -1,6 +1,9 @@
 
 import type { SiteContent } from '@/types/site-content.types';
 
+/** The mark, drawn in white on transparent: it needs ink behind it. */
+export const LOGO_WHITE = 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/0_LOGO_WHITE.PNG';
+
 export const siteContent: SiteContent = {
   navigation: [
     { label: 'Home', href: '/' },

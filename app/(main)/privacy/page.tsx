@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { DateTime } from 'luxon';
 import { PageHero } from '@/components/sections/Hero';
 import { Clause } from '@/components/sections/Clause';
+import { Billboard } from '@/components/sections/Billboard';
 import { siteContent } from '@/lib/site-content';
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default function PrivacyPolicyPage() {
             <PageHero title="Privacy Policy" facts={[`Last updated ${DateTime.now().toLocaleString(DateTime.DATE_FULL)}`]}>
                 <p>How we collect, use, and protect your data across Activid, Palakat, and Loit.</p>
             </PageHero>
+            <Billboard lines={[['Privacy Policy'], ['Activid', 'Palakat', 'Loit']]} />
 
             <div className="wrap space-y-10 pt-(--gap-section) lg:space-y-14">
                 <Clause title="1. Introduction">

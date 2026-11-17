@@ -28,7 +28,14 @@ export function CTA() {
 
   return (
     <section id="cta" aria-labelledby="cta-heading" className="wrap pt-(--gap-section)">
-      <div className="on-ink grid gap-x-12 gap-y-8 rounded-(--radius) px-6 py-10 lg:grid-cols-2 lg:p-14">
+      <div className="on-ink relative isolate grid gap-x-12 gap-y-8 overflow-hidden rounded-(--radius) px-6 py-10 lg:grid-cols-2 lg:p-14">
+        {/* Two discs, a shade off the panel, drift behind the words. */}
+        <span aria-hidden className="float absolute -bottom-24 -left-16 -z-10 size-64 rounded-full bg-(--paper)/5" />
+        <span
+          aria-hidden
+          className="float absolute -top-14 right-[12%] -z-10 size-36 rounded-full bg-(--paper)/5"
+          style={{ '--dx': '-1.25rem', '--dy': '1.5rem', animationDelay: '-4s' } as React.CSSProperties}
+        />
         <div>
           <h2 id="cta-heading" data-rise className="t-head">
             {title}
@@ -73,7 +80,7 @@ export function CTA() {
             className="btn group"
           >
             {action}
-            <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+            <span aria-hidden className="nudge transition-transform duration-300 group-hover:translate-x-1">
               →
             </span>
             <span className="sr-only"> (opens in a new tab)</span>

@@ -4,11 +4,9 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { siteContent } from '@/lib/site-content';
+import { siteContent, LOGO_WHITE as LOGO } from '@/lib/site-content';
 import { trackNavigation } from '@/lib/analytics';
 import type { NavigationItem } from '@/types/site-content.types';
-
-const LOGO = 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/0_LOGO_WHITE.PNG';
 
 // The bar carries the site's own pages: Home is the wordmark and Contact is the
 // one action. Everything that leaves the site (our other products, the contact

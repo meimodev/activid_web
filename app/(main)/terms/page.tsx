@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { DateTime } from 'luxon';
 import { PageHero } from '@/components/sections/Hero';
 import { Clause } from '@/components/sections/Clause';
+import { Billboard } from '@/components/sections/Billboard';
 
 export const metadata: Metadata = {
     title: 'Terms of Service | Activid',
@@ -14,6 +15,7 @@ export default function TermsOfServicePage() {
             <PageHero title="Terms of Service" facts={[`Last updated ${DateTime.now().toLocaleString(DateTime.DATE_FULL)}`]}>
                 <p>Please read these terms carefully before using Activid, Palakat, or Loit.</p>
             </PageHero>
+            <Billboard lines={[['Terms of Service'], ['Activid', 'Palakat', 'Loit']]} />
 
             <div className="wrap space-y-10 pt-(--gap-section) lg:space-y-14">
                 <Clause title="1. Agreement to Terms">
