@@ -1,6 +1,15 @@
 packages:
   - '.'
 
+# pnpm 11 reads allowBuilds; pnpm 10 and older read onlyBuiltDependencies below.
+# Keep the two lists saying the same thing.
+allowBuilds:
+  '@firebase/util': true
+  esbuild: true
+  protobufjs: false
+  sharp: false
+  unrs-resolver: false
+
 onlyBuiltDependencies:
   - esbuild
   - '@firebase/util'
