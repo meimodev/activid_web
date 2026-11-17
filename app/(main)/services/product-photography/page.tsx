@@ -23,10 +23,10 @@ export default function ProductPhotographyPage() {
             {projects.map(project => (
                 <div key={project.title}>
                     <Statement title={project.client ?? ''} className="pt-(--gap-section) pb-10">
-                        <p className="font-bold">{project.title}</p>
+                        <p className="font-medium">{project.title}</p>
                         <p>{project.description}</p>
                     </Statement>
-                    <div className="px-(--gutter)">
+                    <div className="wrap">
                         <Wall tiles={workTiles.filter(tile => tile.name === project.client)} linked={false} />
                     </div>
                 </div>

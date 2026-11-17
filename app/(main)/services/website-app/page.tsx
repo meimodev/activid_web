@@ -21,60 +21,59 @@ export default function WebsiteAppPage() {
 
     return (
         <main>
-            <ServiceHero id="website-app" description={opening} media={page.mockups[1]} />
+            <ServiceHero id="website-app" description={opening} media={page.mockups[0]} mediaClassName="object-top" />
 
-            <div className="t-lead grid gap-x-8 gap-y-5 px-(--gutter) pt-10 lg:grid-cols-12 lg:pt-14">
+            <Statement title="How we build" className="pt-(--gap-section)">
                 {story.map((paragraph, i) => (
-                    <p key={i} data-rise style={{ '--i': i } as React.CSSProperties} className={i ? 'lg:col-span-6' : 'lg:col-start-1 lg:col-end-7'}>
-                        {paragraph}
-                    </p>
+                    <p key={i}>{paragraph}</p>
                 ))}
+            </Statement>
+
+            <Statement title="In the hand" className="pt-(--gap-section) pb-10">
+                <p>Aplikasi mobile yang kami rancang dan bangun.</p>
+            </Statement>
+            <div className="wrap">
+                <Wall tiles={workTiles.filter(tile => tile.href === '/services/website-app')} linked={false} cols="columns-3" />
             </div>
 
-            <section aria-labelledby="apps-heading" className="grid gap-x-8 gap-y-6 px-(--gutter) pt-(--gap-section) lg:grid-cols-12">
-                <h2 id="apps-heading" data-rise className="t-head lg:col-span-4">In the hand</h2>
-                <div className="lg:col-start-5 lg:col-end-13">
-                    <Wall
-                        tiles={workTiles.filter(tile => tile.href === '/services/website-app')}
-                        linked={false}
-                        row="[--row:14rem] sm:[--row:24rem] lg:[--row:32rem]"
-                    />
+            <section aria-labelledby="ai-heading" className="wrap pt-(--gap-section)">
+                <div className="on-ink grid gap-x-12 gap-y-4 rounded-(--radius) px-6 py-10 lg:grid-cols-12 lg:p-14">
+                    <h2 id="ai-heading" data-rise className="t-head lg:col-span-4">{aiHighlight.badge}</h2>
+                    <div data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[56ch] space-y-4 lg:col-span-8">
+                        <p className="t-lead font-medium">{aiHighlight.title}</p>
+                        <p className="text-(--soft)">{aiHighlight.description}</p>
+                    </div>
                 </div>
             </section>
 
-            <div className="on-ink mt-(--gap-section) bg-(--ink) py-16 text-(--paper) lg:py-24">
-                <Statement title={aiHighlight.badge}>
-                    <p className="font-bold">{aiHighlight.title}</p>
-                    <p>{aiHighlight.description}</p>
-                </Statement>
-            </div>
-
-            <section aria-labelledby="cases-heading" className="px-(--gutter) pt-(--gap-section)">
-                <h2 id="cases-heading" data-rise className="t-head max-w-[18ch]">{caseStudies.title}</h2>
-                <dl className="mt-10 grid gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
+            <section aria-labelledby="cases-heading" className="wrap pt-(--gap-section)">
+                <h2 id="cases-heading" data-rise className="t-head">{caseStudies.title}</h2>
+                <dl className="mt-8 grid gap-x-12 gap-y-8 md:grid-cols-2 lg:mt-12 lg:grid-cols-3">
                     {caseStudies.items.map((item, i) => (
                         <div key={item.title} data-rise style={{ '--i': i % 3 } as React.CSSProperties}>
-                            <dt className="t-lead font-bold">{item.title}</dt>
-                            <dd className="mt-2 max-w-[44ch]">{item.description}</dd>
+                            <dt className="t-lead font-medium">{item.title}</dt>
+                            <dd className="mt-2 text-(--soft)">{item.description}</dd>
                         </div>
                     ))}
                 </dl>
             </section>
 
-            <section aria-labelledby="stack-heading" className="mt-(--gap-section) bg-(--pop) px-(--gutter) py-16 lg:py-24">
-                <div className="grid gap-x-8 gap-y-4 lg:grid-cols-12">
-                    <h2 id="stack-heading" data-rise className="t-lead font-bold lg:col-span-4">{techStack.title}</h2>
-                    <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[46ch] lg:col-start-5 lg:col-end-13">
-                        {techStack.description}
-                    </p>
+            <section aria-labelledby="stack-heading" className="wrap pt-(--gap-section)">
+                <div className="grid gap-x-12 gap-y-6 rounded-(--radius) bg-(--tone) px-6 py-10 lg:grid-cols-12 lg:p-14">
+                    <div className="lg:col-span-4">
+                        <h2 id="stack-heading" data-rise className="t-head">{techStack.title}</h2>
+                        <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="mt-3 text-(--soft)">
+                            {techStack.description}
+                        </p>
+                    </div>
+                    <ul className="flex flex-wrap content-start gap-2 lg:col-span-8">
+                        {STACK.map((name, i) => (
+                            <li key={name} data-rise style={{ '--i': i % 5 } as React.CSSProperties} className="rounded-full bg-(--paper) px-4 py-2 font-medium">
+                                {name}
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-                <ul className="mt-10 grid grid-cols-2 gap-x-8 gap-y-1 sm:grid-cols-3 lg:grid-cols-5">
-                    {STACK.map((name, i) => (
-                        <li key={name} data-rise style={{ '--i': i % 5 } as React.CSSProperties} className="t-head">
-                            {name}
-                        </li>
-                    ))}
-                </ul>
             </section>
 
             <CTA />

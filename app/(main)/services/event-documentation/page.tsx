@@ -12,8 +12,6 @@ export const metadata: Metadata = {
     description: [page.header.description].flat().join(' '),
 };
 
-const FIELDS = ['ink', 'pop', 'tone'] as const;
-
 export default function EventDocumentationPage() {
     const { header, projects, overview } = page;
 
@@ -21,23 +19,24 @@ export default function EventDocumentationPage() {
         <main>
             <ServiceHero id="event-documentation" description={[header.description].flat()[0]} media={header.image} />
 
-            <Statement title={overview.title} className="py-(--gap-section)">
+            <Statement title={overview.title} className="pt-(--gap-section)">
                 <p>{overview.content}</p>
             </Statement>
 
-            <section aria-labelledby="projects-heading">
-                <h2 id="projects-heading" data-rise className="poster px-(--gutter) pb-8">Projects</h2>
-                {projects.map((project, i) => (
-                    <Split
-                        key={project.title}
-                        media={{ src: project.image ?? '', alt: `${project.title}, event documentation` }}
-                        field={FIELDS[i % FIELDS.length]}
-                        flip={i % 2 === 1}
-                    >
-                        <h3 data-rise className="t-head">{project.title}</h3>
-                        <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[46ch]">{project.description}</p>
-                    </Split>
-                ))}
+            <section aria-labelledby="projects-heading" className="pt-(--gap-section)">
+                <h2 id="projects-heading" data-rise className="t-head wrap pb-8 lg:pb-12">Projects</h2>
+                <div className="space-y-16 lg:space-y-24">
+                    {projects.map((project, i) => (
+                        <Split
+                            key={project.title}
+                            media={{ src: project.image ?? '', alt: `${project.title}, event documentation` }}
+                            flip={i % 2 === 1}
+                        >
+                            <h3 data-rise className="t-lead font-medium">{project.title}</h3>
+                            <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[48ch]">{project.description}</p>
+                        </Split>
+                    ))}
+                </div>
             </section>
 
             <CTA />

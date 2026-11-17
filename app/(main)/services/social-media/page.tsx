@@ -27,46 +27,48 @@ export default function SocialMediaPage() {
         <main>
             <ServiceHero id="social-media" description={[header.description].flat()[0]} media={header.image} />
 
-            <section className="bg-(--pop) px-(--gutter) py-16 lg:py-24">
-                <h2 data-rise className="t-lead font-bold">What is included</h2>
-                <ul className="mt-8 space-y-3">
-                    {INCLUDED.map((item, i) => (
-                        <li key={item} data-rise style={{ '--i': i % 3 } as React.CSSProperties} className="t-head">
-                            {item}
-                        </li>
-                    ))}
-                </ul>
+            <section aria-labelledby="included-heading" className="wrap pt-(--gap-section)">
+                <div className="grid gap-x-12 gap-y-5 rounded-(--radius) bg-(--tone) px-6 py-10 lg:grid-cols-12 lg:p-14">
+                    <h2 id="included-heading" data-rise className="t-head lg:col-span-4">What is included</h2>
+                    <ul className="t-lead grid gap-x-12 gap-y-3 sm:grid-cols-2 lg:col-span-8">
+                        {INCLUDED.map((item, i) => (
+                            <li key={item} data-rise style={{ '--i': i % 2 } as React.CSSProperties}>
+                                {item}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </section>
 
             <Statement title={showcasesTitle} className="pt-(--gap-section) pb-10">
-                <p>{showcasesSubtitle}. Setiap feed berangkat dari palet warna brand itu sendiri.</p>
+                <p>{showcasesSubtitle}.</p>
             </Statement>
-            <div className="px-(--gutter)">
+            <div className="wrap">
                 <Wall
                     tiles={workTiles.filter(tile => tile.href === '/services/social-media')}
                     linked={false}
-                    row="[--row:14rem] sm:[--row:20rem] lg:[--row:30rem]"
+                    cols="columns-2 lg:columns-4"
                 />
             </div>
 
             <Statement title={projectsTitle} className="pt-(--gap-section) pb-10">
                 <p>{projectsSubtitle}.</p>
             </Statement>
-            <ul>
-                {projects.map((project, i) => (
-                    <li key={project.client} className="grid lg:grid-cols-[5fr_7fr]">
-                        <div className="on-ink bg-(--ink) px-(--gutter) py-10 text-(--paper) lg:p-12">
-                            <h3 data-rise className="t-head">{project.client}</h3>
-                            <p className="mt-3 font-bold">{project.service}</p>
+            <ul className="wrap space-y-3 lg:space-y-5">
+                {projects.map(project => (
+                    <li key={project.client} className="grid gap-x-12 gap-y-5 rounded-(--radius) bg-(--tone) p-6 lg:grid-cols-12 lg:p-10">
+                        <div className="lg:col-span-4">
+                            <h3 data-rise className="t-lead font-medium">{project.client}</h3>
+                            <p className="mt-1 text-(--soft)">{project.service}</p>
                             {project.link && (
-                                <a href={project.link} target="_blank" rel="noopener noreferrer" className="link mt-6 inline-block">
-                                    {project.handle} on Instagram ↗
+                                <a href={project.link} target="_blank" rel="noopener noreferrer" className="link t-small mt-4 inline-block font-medium">
+                                    {project.handle} on Instagram <span aria-hidden>↗</span>
                                 </a>
                             )}
                         </div>
-                        <div className={`space-y-5 px-(--gutter) py-10 lg:p-12 ${i % 2 ? 'bg-(--paper)' : 'bg-(--tone)'}`}>
-                            <p data-rise className="max-w-[52ch]">{project.description}</p>
-                            <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="t-lead max-w-[36ch] font-bold">
+                        <div className="space-y-4 lg:col-span-8">
+                            <p data-rise className="max-w-[56ch]">{project.description}</p>
+                            <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[56ch] font-medium">
                                 {project.result}
                             </p>
                         </div>

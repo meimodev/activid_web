@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { siteContent } from '@/lib/site-content';
 import { trackCTA } from '@/lib/analytics';
 
-const { title, lead, verb } = siteContent.ctaSection;
+const { title, lead, action } = siteContent.ctaSection;
 const services = siteContent.services.items;
 const whatsapp = siteContent.contactPage.methods.whatsapp.href;
 
@@ -16,9 +16,8 @@ function briefFor(picked: string[]) {
 
 /**
  * The closing pitch, and the page's one live thing: tick the services you
- * need and the page writes the WhatsApp message for you. The whole accent band
- * is the link; its one word is the button. Without script the band still opens
- * WhatsApp with the plain greeting.
+ * need and the page writes the WhatsApp message for you. Without script the
+ * button still opens WhatsApp with the plain greeting.
  */
 export function CTA() {
   const [picked, setPicked] = useState<string[]>([]);
@@ -28,66 +27,59 @@ export function CTA() {
     setPicked(current => (current.includes(id) ? current.filter(x => x !== id) : [...current, id]));
 
   return (
-    <section id="cta" aria-labelledby="cta-heading" className="pt-(--gap-section)">
-      <div className="grid gap-x-8 gap-y-6 px-(--gutter) pb-10 lg:grid-cols-12">
-        <div className="lg:col-span-4">
+    <section id="cta" aria-labelledby="cta-heading" className="wrap pt-(--gap-section)">
+      <div className="on-ink grid gap-x-12 gap-y-8 rounded-(--radius) px-6 py-10 lg:grid-cols-2 lg:p-14">
+        <div>
           <h2 id="cta-heading" data-rise className="t-head">
             {title}
           </h2>
-          <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="mt-4 max-w-[34ch]">
+          <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="t-lead mt-3 max-w-[32ch] text-(--soft)">
             {lead}
           </p>
         </div>
-        <ul className="flex flex-wrap content-start gap-2 lg:col-start-5 lg:col-end-13">
-          {services.map((service, i) => {
-            const on = picked.includes(service.id);
-            return (
-              <li key={service.id} data-rise style={{ '--i': i % 3 } as React.CSSProperties}>
-                <button
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => toggle(service.id)}
-                  className={`min-h-12 px-5 py-2.5 font-bold transition-[background-color,color,scale] duration-200 active:scale-95 ${
-                    on ? 'bg-(--ink) text-(--paper)' : 'bg-(--tone) hover:bg-(--pop)'
-                  }`}
-                >
-                  {/* The marker lights up when the service is in the brief. */}
-                  <span aria-hidden className={`mr-3 inline-block size-2.5 ${on ? 'bg-(--pop)' : 'bg-(--ink)/25'}`} />
-                  {service.title}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
 
-      <a
-        href={`${whatsapp}?text=${encodeURIComponent(brief)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => trackCTA.ctaSectionClick()}
-        className="group flex min-h-[46svh] flex-col justify-between overflow-hidden bg-(--pop) px-(--gutter) pt-6 transition-colors duration-200 hover:bg-(--ink) hover:text-(--pop) focus-visible:bg-(--ink) focus-visible:text-(--pop) lg:min-h-[60svh]"
-      >
-        <span className="flex items-start justify-between gap-6">
-          <span aria-live="polite" className="t-lead max-w-[30ch] font-medium">
+        <div className="flex flex-col items-start gap-6">
+          <ul className="flex flex-wrap gap-2">
+            {services.map(service => {
+              const on = picked.includes(service.id);
+              return (
+                <li key={service.id}>
+                  <button
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => toggle(service.id)}
+                    className={`flex min-h-11 items-center gap-2.5 rounded-full px-4 py-2 transition-[background-color,color,scale] duration-200 active:scale-95 ${
+                      on ? 'bg-(--paper) text-(--ink)' : 'bg-(--tone) hover:bg-(--paper)/25'
+                    }`}
+                  >
+                    {/* The marker fills in when the service is in the brief. */}
+                    <span aria-hidden className={`size-2 rounded-full ${on ? 'bg-(--ink)' : 'bg-(--paper)/40'}`} />
+                    {service.short}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <p aria-live="polite" className="t-small max-w-[46ch] text-(--soft)">
             “{brief}”
-          </span>
-          <svg
-            aria-hidden
-            viewBox="0 0 48 48"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="5"
-            className="size-8 shrink-0 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 lg:size-12"
+          </p>
+
+          <a
+            href={`${whatsapp}?text=${encodeURIComponent(brief)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackCTA.ctaSectionClick()}
+            className="btn group"
           >
-            <path d="M10 38 38 10M14 10h24v24" />
-          </svg>
-        </span>
-        <span className="poster -mb-[0.06em] block text-[39vw]! leading-[0.8]! lg:text-[32vw]! [font-variation-settings:'wdth'_100]!">
-          {verb}
-          <span className="sr-only"> on WhatsApp (opens in a new tab)</span>
-        </span>
-      </a>
+            {action}
+            <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+              →
+            </span>
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        </div>
+      </div>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import "./agency.css";
-import { bricolage } from "./fonts"; // after the stylesheets: see fonts.ts
+import { sans } from "./fonts"; // after the stylesheets: see fonts.ts
 import Navigation from "@/components/layouts/Navigation";
 import { Footer } from "@/components/sections/Footer";
 
@@ -29,7 +29,7 @@ export default function MainLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className={`agency ${bricolage.variable} min-h-svh font-sans antialiased`}>
+        <div className={`agency ${sans.variable} min-h-svh antialiased`}>
             {/* Skip to main content link for keyboard navigation */}
             <a
                 href="#main-content"

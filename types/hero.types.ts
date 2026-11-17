@@ -1,6 +1,6 @@
 export interface HeroContent {
-  /** One entry per line; two lines at most. */
-  title: string[];
+  /** A few words: it must fit two lines on a phone. */
+  title: string;
   description: string;
   cta: { text: string; href: string };
   /** The agency's own footage, played as a muted loop. */

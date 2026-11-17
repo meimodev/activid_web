@@ -1,30 +1,23 @@
 import { siteContent } from '@/lib/site-content';
 
-/**
- * Name block, quote block: two flat fields butted together per client, the
- * speaker on ink and their words on colour, both starting on one line. On a phone the words come first.
- */
+/** What clients said, in their words: the heading on the left, the quotes in two columns beside it. */
 export function Testimonials() {
   const { title, items } = siteContent.testimonials;
 
   return (
-    <section id="feedback" className="pt-(--gap-section)">
-      <h2 data-rise className="t-head px-(--gutter) pb-8">
+    <section id="feedback" className="wrap grid gap-x-12 gap-y-8 pt-(--gap-section) lg:grid-cols-12">
+      <h2 data-rise className="t-head lg:col-span-4">
         {title}
       </h2>
-      <ul>
+      <ul className="grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:col-span-8">
         {items.map((item, i) => (
-          <li key={item.author} className="grid lg:grid-cols-[5fr_7fr]">
-            <blockquote
-              className={`t-lead px-(--gutter) pt-8 pb-16 font-medium lg:order-2 lg:p-12 lg:pb-24 ${i % 2 ? 'bg-(--paper)' : 'bg-(--pop)'}`}
-            >
-              <p data-rise className="max-w-[34ch] -indent-[0.45em]">
-                “{item.quote}”
-              </p>
-            </blockquote>
-            <p className="bg-(--ink) px-(--gutter) py-6 font-bold text-(--paper) lg:p-12">
-              <span data-rise>{item.author}</span>
-            </p>
+          <li key={item.author} data-rise style={{ '--i': i % 2 } as React.CSSProperties}>
+            <figure>
+              <blockquote>
+                <p>“{item.quote}”</p>
+              </blockquote>
+              <figcaption className="t-small mt-3 font-medium">{item.author}</figcaption>
+            </figure>
           </li>
         ))}
       </ul>

@@ -3,61 +3,62 @@ import { Media } from '@/components/ui/Media';
 import { siteContent } from '@/lib/site-content';
 
 interface PageHeroProps {
-  /** One entry per line; two lines at most, a few words each. */
-  title: string[];
+  /** A few words: it must fit two lines on a phone. */
+  title: string;
   children: React.ReactNode;
   cta?: { text: string; href: string };
-  media?: { src: string; alt: string };
-  fact?: { value: string; label: string };
+  /** A second, quieter way on. */
+  more?: { text: string; href: string };
+  /** `className` is for the crop, e.g. `object-top`. */
+  media?: { src: string; alt: string; className?: string };
+  /** Short facts, set as one small line under the actions. */
+  facts?: string[];
 }
 
 /**
- * Narrow talk, wide headline — the first screen of every page on this site.
- * From lg the sentence and the action stand in a narrow left column while the
- * headline and the picture take the wide right one; on a phone it reads
- * straight down: headline, sentence, action, picture.
+ * The first screen of every page on this site: the title on the left, what it
+ * means and what to do on the right, then the picture across the full column.
+ * The picture is the large thing here, not the type. On a phone it all reads
+ * straight down.
  */
-export function PageHero({ title, children, cta, media, fact }: PageHeroProps) {
+export function PageHero({ title, children, cta, more, media, facts }: PageHeroProps) {
   return (
-    <section
-      className={`grid px-(--gutter) lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 ${media ? 'lg:min-h-[calc(100svh-4rem)]' : 'pb-4'}`}
-    >
-      <h1 className="poster pt-6 lg:col-start-5 lg:col-end-13 lg:pt-8">
-        {title.map((line, i) => (
-          <span key={line} className="line-mask">
-            <span style={{ '--i': i } as React.CSSProperties}>{line}</span>
-          </span>
-        ))}
-      </h1>
+    <section className="wrap pt-8 lg:pt-14">
+      <div className="grid gap-x-12 gap-y-5 lg:grid-cols-2">
+        <h1 className="t-display on-load max-w-[14ch]">{title}</h1>
 
-      <div className="mt-6 flex flex-col items-start gap-7 lg:col-start-1 lg:col-end-5 lg:row-start-1 lg:row-end-3 lg:mt-0 lg:pt-[20svh]">
-        <div className="t-lead on-load max-w-[26ch] space-y-4">{children}</div>
-        {cta && (
-          <Link href={cta.href} className="btn on-load w-full sm:w-auto" style={{ '--i': 1 } as React.CSSProperties}>
-            {cta.text}
-          </Link>
-        )}
-      </div>
-
-      {/* The picture runs off the bottom of the first screen. From lg the fact
-          block bites its top-left corner, and the top margin keeps that block
-          clear of the headline; on a phone it sits in the bottom corner. */}
-      {media && (
-        <div
-          className={`relative -mx-(--gutter) lg:col-start-5 lg:col-end-13 lg:row-start-2 lg:mx-0 mt-10 ${fact ? 'lg:mt-24' : 'lg:mt-12'}`}
-        >
-          <div className="relative aspect-4/3 overflow-hidden bg-(--ink) lg:aspect-auto lg:h-full lg:min-h-[38svh]">
-            <Media src={media.src} alt={media.alt} sizes="(min-width: 1024px) 66vw, 100vw" priority />
+        <div className="flex flex-col items-start gap-6">
+          <div className="t-lead on-load max-w-[44ch] space-y-3" style={{ '--i': 1 } as React.CSSProperties}>
+            {children}
           </div>
-          {fact && (
-            <div
-              className="on-load absolute bottom-0 left-0 w-[62%] bg-(--pop) p-4 sm:w-64 sm:p-5 lg:top-0 lg:bottom-auto lg:-translate-y-1/2"
-              style={{ '--i': 3 } as React.CSSProperties}
-            >
-              <p className="t-head">{fact.value}</p>
-              <p className="t-small mt-1 font-medium">{fact.label}</p>
+          {(cta || more) && (
+            <div className="on-load flex flex-wrap items-center gap-x-7 gap-y-3" style={{ '--i': 2 } as React.CSSProperties}>
+              {cta && (
+                <Link href={cta.href} className="btn">
+                  {cta.text}
+                </Link>
+              )}
+              {more && (
+                <Link href={more.href} className="link font-medium">
+                  {more.text}
+                </Link>
+              )}
             </div>
           )}
+          {facts && (
+            <p className="t-small on-load text-(--soft)" style={{ '--i': 3 } as React.CSSProperties}>
+              {facts.join(' · ')}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {media && (
+        <div
+          className="on-load relative mt-10 aspect-4/3 overflow-hidden rounded-(--radius) bg-(--tone) md:aspect-video lg:mt-12 lg:aspect-2/1"
+          style={{ '--i': 3 } as React.CSSProperties}
+        >
+          <Media src={media.src} alt={media.alt} className={media.className} sizes="(min-width: 1280px) 1152px, 100vw" priority />
         </div>
       )}
     </section>
@@ -66,29 +67,39 @@ export function PageHero({ title, children, cta, media, fact }: PageHeroProps) {
 
 /** The home page's first screen. */
 export function Hero() {
-  const { title, description, cta, video, fact } = siteContent.hero;
+  const { hero, clients, footer } = siteContent;
   return (
     <PageHero
-      title={title}
-      cta={cta}
-      fact={fact}
-      media={{ src: video, alt: 'Footage from an Activid podcast production' }}
+      title={hero.title}
+      cta={hero.cta}
+      more={{ text: 'See our work', href: '/work' }}
+      media={{ src: hero.video, alt: 'Footage from an Activid podcast production' }}
+      facts={[`${hero.fact.label} ${hero.fact.value}`, `${clients.items.length} klien`, `${footer.locations.length} kantor`]}
     >
-      <p>{description}</p>
+      <p>{hero.description}</p>
     </PageHero>
   );
 }
 
-/** First screen of a service page: its poster name, then what it is in full. */
-export function ServiceHero({ id, description, media }: { id: string; description: string; media?: string }) {
+/** First screen of a service page: its name, then what it is. */
+export function ServiceHero({
+  id,
+  description,
+  media,
+  mediaClassName,
+}: {
+  id: string;
+  description: string;
+  media?: string;
+  mediaClassName?: string;
+}) {
   const service = siteContent.services.items.find(item => item.id === id)!;
   return (
     <PageHero
-      title={[service.short]}
+      title={service.title}
       cta={siteContent.hero.cta}
-      media={media ? { src: media, alt: service.imageAlt } : undefined}
+      media={media ? { src: media, alt: service.imageAlt, className: mediaClassName } : undefined}
     >
-      <p className="font-bold">{service.title}</p>
       <p>{description}</p>
     </PageHero>
   );

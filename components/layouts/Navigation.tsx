@@ -10,18 +10,19 @@ import type { NavigationItem } from '@/types/site-content.types';
 
 const LOGO = 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/0_LOGO_WHITE.PNG';
 
-// Home is the wordmark; Contact is the bar's one action.
-const items = siteContent.navigation.filter(item => item.href !== '/');
+// Home is the wordmark; Contact is the bar's one action. Document checking is
+// a utility, so it lives in the menu and the footer, not in the bar.
+const items = siteContent.navigation.filter(item => item.href !== '/' && item.href !== '/verify');
 const isAction = (item: NavigationItem) => item.href === '/contact';
 
 /** The logo is white-on-transparent, so it always rides its own ink disc. */
 export function Wordmark({ onClick }: { onClick?: () => void }) {
   return (
-    <Link href="/" onClick={onClick} className="flex items-center gap-2.5 font-extrabold tracking-tight">
-      <span className="relative block size-10 overflow-hidden rounded-full bg-(--ink)">
-        <Image src={LOGO} alt="" fill sizes="40px" className="object-contain p-0.5" />
+    <Link href="/" onClick={onClick} className="flex items-center gap-2.5 font-semibold tracking-tight">
+      <span className="relative block size-9 overflow-hidden rounded-full bg-(--ink)">
+        <Image src={LOGO} alt="" fill sizes="36px" className="object-contain p-0.5" />
       </span>
-      <span className="text-xl">activid</span>
+      <span className="text-lg">activid</span>
     </Link>
   );
 }
@@ -68,10 +69,10 @@ export default function Navigation() {
 
   return (
     <header className="sticky top-0 z-40 bg-(--paper) text-(--ink)">
-      <nav aria-label="Main" className="flex h-16 items-center justify-between px-(--gutter)">
+      <nav aria-label="Main" className="wrap flex h-16 items-center justify-between">
         <Wordmark onClick={() => trackNavigation.logoClick()} />
 
-        <ul className="t-small hidden items-center gap-7 font-medium lg:flex">
+        <ul className="t-small hidden items-center gap-8 lg:flex">
           {items.map(item => (
             <li key={item.href}>
               <NavLink
@@ -79,8 +80,8 @@ export default function Navigation() {
                 onClick={() => track(item)}
                 className={
                   isAction(item)
-                    ? 'btn min-h-11 px-5 py-2'
-                    : 'link decoration-transparent aria-[current=page]:decoration-current'
+                    ? 'btn min-h-10 px-5 py-2'
+                    : 'link decoration-transparent hover:decoration-current aria-[current=page]:decoration-current'
                 }
               />
             </li>
@@ -91,17 +92,17 @@ export default function Navigation() {
           type="button"
           onClick={open}
           aria-haspopup="dialog"
-          className="-mr-2 min-h-11 px-2 font-bold lg:hidden"
+          className="-mr-2 min-h-11 px-2 font-medium lg:hidden"
         >
           Menu
         </button>
       </nav>
 
-      <dialog ref={menu} aria-label="Menu" className="menu on-ink bg-(--ink) text-(--paper)">
+      <dialog ref={menu} aria-label="Menu" className="menu on-ink">
         <div className="flex min-h-full flex-col px-(--gutter) pb-8">
           <div className="flex h-16 shrink-0 items-center justify-between">
-            <span className="text-xl font-extrabold tracking-tight">activid</span>
-            <button type="button" onClick={close} className="-mr-2 min-h-11 px-2 font-bold">
+            <span className="text-lg font-semibold tracking-tight">activid</span>
+            <button type="button" onClick={close} className="-mr-2 min-h-11 px-2 font-medium">
               Close
             </button>
           </div>
@@ -114,7 +115,7 @@ export default function Navigation() {
                     track(item);
                     close();
                   }}
-                  className="t-head block transition-colors hover:text-(--pop) aria-[current=page]:text-(--pop)"
+                  className="t-head link block decoration-transparent hover:decoration-current aria-[current=page]:decoration-current"
                 />
               </li>
             ))}

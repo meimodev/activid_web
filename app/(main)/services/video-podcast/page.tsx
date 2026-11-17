@@ -19,14 +19,14 @@ export default function VideoPodcastPage() {
 
     return (
         <main>
-            <ServiceHero id="video-podcast" description={[header.description].flat()[0]} media={header.image} />
+            <ServiceHero id="video-podcast" description={[header.description].flat()[0]} media={siteContent.hero.video} />
 
             <section aria-labelledby="project-heading" className="pt-(--gap-section)">
-                <h2 id="project-heading" data-rise className="poster px-(--gutter) pb-8">Project</h2>
-                <Split media={{ src: mainProject.image, alt: `${mainProject.title}, podcast production` }} field="ink">
-                    <h3 data-rise className="t-head">{mainProject.title}</h3>
-                    <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[46ch]">{mainProject.description}</p>
-                    <p data-rise style={{ '--i': 2 } as React.CSSProperties} className="t-lead max-w-[36ch] font-bold text-(--pop)">
+                <h2 id="project-heading" data-rise className="t-head wrap pb-8 lg:pb-12">Project</h2>
+                <Split media={{ src: mainProject.image, alt: `${mainProject.title}, podcast production` }}>
+                    <h3 data-rise className="t-lead font-medium">{mainProject.title}</h3>
+                    <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[48ch]">{mainProject.description}</p>
+                    <p data-rise style={{ '--i': 2 } as React.CSSProperties} className="max-w-[48ch] font-medium">
                         {mainProject.result}
                     </p>
                 </Split>
@@ -35,10 +35,10 @@ export default function VideoPodcastPage() {
             <Statement title="More films" className="pt-(--gap-section) pb-10">
                 <p>Company profile, dokumentasi kampus, dan film pernikahan yang kami produksi dari konsep sampai final rendering.</p>
             </Statement>
-            <div className="px-(--gutter)">
+            <div className="wrap">
                 <Wall
                     tiles={workTiles.filter(tile => tile.href === '/services/event-documentation')}
-                    row="[--row:11rem] sm:[--row:13rem] lg:[--row:15rem]"
+                    cols="sm:columns-3"
                 />
             </div>
 

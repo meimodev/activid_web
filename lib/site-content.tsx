@@ -13,13 +13,12 @@ export const siteContent: SiteContent = {
     { label: 'Contact', href: '/contact' },
   ],
   hero: {
-    // One line per array item: the hero sets each on its own masked line.
-    title: ['Keep brands', 'active.'],
-    description: 'Activid adalah agensi kreatif di Manado & Tondano. Media sosial, video, foto, dan website untuk brand Anda, dikerjakan satu tim.',
+    title: 'Keep your brand active.',
+    description: 'Agensi kreatif di Manado & Tondano. Media sosial, video, foto, dan website untuk brand Anda, dikerjakan satu tim.',
     cta: { text: 'Start a project', href: '/contact' },
     // `#t=` is the second the clip opens on, and the frame its poster shows.
     video: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/video/podcast-production.mp4#t=9',
-    fact: { value: '2017', label: 'Tahun kami mulai. Kini berkantor di Tondano & Manado.' },
+    fact: { value: '2017', label: 'Berdiri' },
   },
   aboutUs: {
     title: 'About us',
@@ -32,8 +31,7 @@ export const siteContent: SiteContent = {
   },
   services: {
     title: 'Our Services',
-    subtitle:
-      'Lima layanan yang saling melengkapi — dari identitas visual sampai platform digital, dikerjakan oleh satu tim yang sama.',
+    subtitle: 'Lima layanan yang saling melengkapi, dikerjakan oleh satu tim.',
     items: [
       {
         id: 'social-media',
@@ -118,7 +116,7 @@ export const siteContent: SiteContent = {
   },
   footer: {
     brand: {
-      title: "Let's build something extraordinary.",
+      title: 'Creative agency in Tondano & Manado.',
       highlight: 'extraordinary.',
     },
     locations: [
@@ -145,13 +143,13 @@ export const siteContent: SiteContent = {
   },
   ctaSection: {
     title: 'Start your project',
-    lead: 'Pilih yang Anda butuhkan, lalu kirim lewat WhatsApp. Pesannya sudah kami tuliskan.',
-    verb: 'Chat',
+    lead: 'Pilih layanan yang Anda butuhkan, lalu kirim lewat WhatsApp.',
+    action: 'Chat on WhatsApp',
   },
   clients: {
     title: 'Our Clients',
     // Follows the number of clients below: "19 brand, lembaga, …".
-    lead: 'brand, lembaga, dan usaha lokal yang sudah mempercayakan ceritanya kepada kami, dari Pertamina Geothermal Energy sampai Bakso Denny.',
+    lead: 'brand, lembaga, dan usaha lokal sudah bekerja bersama kami.',
     items: [
       { name: 'Pertamina Geothermal Energy Lahendong', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/1_PGE%20LAHENDONG.png' },
       { name: 'BRI Peduli', logo: 'https://ik.imagekit.io/geb6bfhmhx/activid%20web/2_BRI_PEDULI.png' },

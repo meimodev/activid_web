@@ -16,10 +16,17 @@ const ARCHIVE = [...FEATURED, ...workTiles.filter(tile => !FEATURED.includes(til
 export default function WorkPage() {
     return (
         <main>
-            <PageHero title={['Our work']} cta={siteContent.hero.cta}>
-                <p>Foto, feed, film, podcast, dan aplikasi yang kami kerjakan untuk brand di Sulawesi Utara. Ketuk satu karya untuk melihat layanannya.</p>
+            <PageHero
+                title="Our work"
+                cta={siteContent.hero.cta}
+                media={{
+                    src: siteContent.servicePages.eventDocumentation.projects[2].image ?? '',
+                    alt: 'A wedding film produced by Activid',
+                }}
+            >
+                <p>Foto, feed, film, podcast, dan aplikasi yang kami kerjakan untuk brand di Sulawesi Utara.</p>
             </PageHero>
-            <div className="px-(--gutter) pt-12 lg:pt-20">
+            <div className="wrap pt-(--gap-section)">
                 <Wall tiles={ARCHIVE} />
             </div>
             <CTA />

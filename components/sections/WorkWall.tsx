@@ -3,75 +3,71 @@ import { Media } from '@/components/ui/Media';
 import { workTiles, type WorkTile } from '@/lib/work';
 
 /**
- * An uneven wall: every row is one height, every tile as wide as its picture,
- * so edges never line up from one row to the next. Each tile's flex-basis is
- * its natural width at the row height and it grows by its own ratio, which
- * fills the row without the tiles trading proportions.
+ * Finished work in columns. Every picture keeps its own shape, so nothing is
+ * cropped, and the columns end where they end. CSS columns do the layout:
+ * no script, and it reflows to any count of pictures or width of screen.
  */
 export function Wall({
   tiles,
   linked = true,
-  row = '[--row:9.5rem] sm:[--row:15rem] lg:[--row:19rem]',
+  cols = 'columns-2 lg:columns-3',
 }: {
   tiles: WorkTile[];
   linked?: boolean;
-  /** Row height, as classes that set --row. A set of a few upright pictures wants a taller row. */
-  row?: string;
+  /** How many columns, as classes. A set of a few like-shaped pictures wants its own count. */
+  cols?: string;
 }) {
   return (
-    <ul className={`group/wall flex flex-wrap gap-2 ${row}`}>
+    <ul className={`gap-3 lg:gap-5 ${cols}`}>
       {tiles.map((tile, i) => {
-        const caption = (
+        const body = (
           <>
-            <span className="relative block h-(--row) overflow-hidden bg-(--ink)">
+            <span
+              className="relative isolate block overflow-hidden rounded-(--radius) bg-(--tone)"
+              style={{ aspectRatio: tile.ratio }}
+            >
               <Media
                 src={tile.src}
                 alt={`${tile.name}, ${tile.kind}`}
-                sizes="(min-width: 1024px) 40vw, 80vw"
-                className="transition-transform duration-500 ease-out group-hover/tile:scale-[1.04]"
+                sizes="(min-width: 1024px) 33vw, 50vw"
+                className="transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               />
             </span>
-            <span className="t-small mt-2 block leading-snug">
-              <span className="block font-bold">{tile.name}</span>
+            <span className="t-small mt-2.5 block">
+              <span className="block font-medium">{tile.name}</span>
               <span className="block text-(--soft)">{tile.kind}</span>
             </span>
           </>
         );
         return (
-          <li
-            key={tile.src}
-            data-rise
-            style={{ '--i': i % 3, flex: `${tile.ratio} 1 calc(${tile.ratio} * var(--row))` } as React.CSSProperties}
-            className="min-w-0 transition-opacity duration-300 group-hover/wall:opacity-60 hover:opacity-100!"
-          >
+          <li key={tile.src} data-rise style={{ '--i': i % 3 } as React.CSSProperties} className="mb-6 break-inside-avoid lg:mb-8">
             {linked ? (
-              <Link href={tile.href} className="group/tile block">
-                {caption}
+              <Link href={tile.href} className="group block">
+                {body}
               </Link>
             ) : (
-              <div className="group/tile">{caption}</div>
+              <div className="group">{body}</div>
             )}
           </li>
         );
       })}
-      {/* Soaks up the spare width of the last row so its tiles keep their shape. */}
-      <li aria-hidden className="grow-[100]" />
     </ul>
   );
 }
 
-// A cut across every kind of work: property, feed, podcast, food, app, film.
-export const FEATURED = [6, 11, 18, 3, 19, 0, 16, 13, 8, 21, 4].map(i => workTiles[i]);
+// One piece from each kind of work, ordered so the columns come out even at
+// both counts: property, app, podcast, food, feed, event film.
+export const FEATURED = [6, 19, 18, 3, 11, 15].map(i => workTiles[i]);
 
-/** Giant title, uneven wall. */
+/** The home page's cut of the work. */
 export function WorkWall() {
   return (
-    <section id="work" className="px-(--gutter) pt-(--gap-section)">
-      <div className="mb-8 flex items-baseline justify-between gap-6">
-        <h2 data-rise className="poster">
-          Work
+    <section id="work" className="wrap pt-(--gap-section)">
+      <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 lg:mb-12">
+        <h2 data-rise className="t-head">
+          Selected work
         </h2>
-        <Link href="/work" className="link shrink-0 font-bold">
+        <Link href="/work" className="link font-medium">
           See all work
         </Link>
       </div>

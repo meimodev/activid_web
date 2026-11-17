@@ -18,7 +18,7 @@ export default function Contact() {
   return (
     <main>
       <PageHero
-        title={[header.title]}
+        title={header.title}
         cta={{ text: 'Chat on WhatsApp', href: methods.whatsapp.href }}
         media={{ src: siteContent.servicePages.videoPodcast.mainProject.image, alt: 'A conversation being recorded on an Activid podcast set' }}
       >
@@ -26,9 +26,7 @@ export default function Contact() {
       </PageHero>
       <ContactMethods />
       <ContactCards />
-      <div className="pt-(--gap-section)">
-        <OurClients />
-      </div>
+      <OurClients />
       <CTA />
     </main>
   );

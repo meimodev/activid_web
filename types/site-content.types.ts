@@ -75,8 +75,8 @@ export interface FooterContent {
 export interface CtaSectionContent {
     title: string;
     lead: string;
-    /** The one word that is the button. Four to six letters or it will not fit a phone. */
-    verb: string;
+    /** The button's words. */
+    action: string;
 }
 
 export interface ClientItem {

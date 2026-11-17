@@ -1,30 +1,44 @@
 /* ACTIVID agency site — the whole design system for app/(main).
-   Flat poster: three colours, one variable grotesk, no gradients, no shadows.
+   Quiet and regular: the two brand colours, one calm sans, soft corners.
+   No third colour, no gradients, no shadows, no rules.
    Scoped to .agency so nothing leaks into the other surfaces in this app. */
 
 .agency {
-  --ink: #1a1a3e; /* brand navy */
+  --ink: #1a1a3e; /* brand purple */
   --paper: #f8efde; /* brand cream */
-  --pop: #ffc629; /* the one accent */
-  --soft: #55557a; /* secondary notes on paper */
-  --tone: #eee3cb; /* one step down from paper, for resting surfaces */
-  --gutter: clamp(1.25rem, 2.2vw, 2rem);
-  --gap-section: clamp(5rem, 11vw, 10rem);
+  /* Every other tone is one brand colour mixed into the other. */
+  --soft: color-mix(in srgb, var(--ink) 70%, var(--paper)); /* secondary notes */
+  --tone: color-mix(in srgb, var(--ink) 7%, var(--paper)); /* resting surfaces */
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --gap-section: clamp(5.5rem, 9vw, 8rem);
+  --radius: 1.25rem;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 
   background: var(--paper);
   color: var(--ink);
-  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
-  line-height: 1.5;
+  font-family: var(--font-agency), sans-serif;
+  font-size: clamp(1rem, 0.97rem + 0.15vw, 1.0625rem);
+  line-height: 1.6;
+}
+
+/* An ink panel: the same two tokens, the other way round. */
+.agency .on-ink {
+  --soft: color-mix(in srgb, var(--paper) 74%, var(--ink));
+  --tone: color-mix(in srgb, var(--paper) 10%, var(--ink));
 }
 
 .agency ::selection {
-  background: var(--pop);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.agency .on-ink ::selection {
+  background: var(--paper);
   color: var(--ink);
 }
 
 .agency :focus-visible {
-  outline: 3px solid currentColor;
+  outline: 2px solid currentColor;
   outline-offset: 3px;
 }
 
@@ -36,44 +50,45 @@ body:has(.agency) {
 /* Everything below sits in Tailwind's components layer, so a utility on the
    element still wins over these classes. */
 @layer components {
-  /* ── Type: five steps ─────────────────────────────────────────────── */
+  /* The page's one content column, with the same margin on both sides. */
+  .agency .wrap {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
 
-  /* Display: Bricolage at its heaviest and narrowest, capitals, stacked tight. */
-  .agency .poster {
-    font-weight: 800;
-    font-variation-settings: "wdth" 75;
-    text-transform: uppercase;
-    line-height: 0.88;
-    letter-spacing: -0.015em;
-    font-size: 15vw;
+  .agency .on-ink {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* ── Type: five steps, none of them loud ──────────────────────────── */
+
+  .agency .t-display {
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-size: clamp(2.125rem, 1.5rem + 2.6vw, 3.5rem);
     text-wrap: balance;
   }
 
-  /* The two-column layouts start at lg; until then the poster has the full width. */
-  @media (min-width: 1024px) {
-    .agency .poster {
-      font-size: clamp(5.5rem, 9.8vw, 9.5rem);
-    }
-  }
-
   .agency .t-head {
-    font-weight: 800;
-    font-variation-settings: "wdth" 75;
-    text-transform: uppercase;
-    line-height: 0.95;
-    letter-spacing: -0.01em;
-    font-size: clamp(2.25rem, 1.3rem + 3.6vw, 4.25rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.625rem, 1.3rem + 1.3vw, 2.25rem);
     text-wrap: balance;
   }
 
   .agency .t-lead {
-    font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
-    line-height: 1.35;
+    font-size: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem);
+    line-height: 1.45;
   }
 
   .agency .t-small {
     font-size: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
-    line-height: 1.45;
+    line-height: 1.5;
   }
 
   /* ── Controls ─────────────────────────────────────────────────────── */
@@ -82,47 +97,66 @@ body:has(.agency) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6em;
-    min-height: 3.25rem;
-    padding: 0.85em 1.5em;
+    gap: 0.5em;
+    min-height: 3rem;
+    padding: 0.7em 1.5em;
+    border-radius: 999px;
     background: var(--ink);
     color: var(--paper);
-    font-weight: 700;
+    font-weight: 500;
     transition:
       background-color 0.2s ease,
-      color 0.2s ease,
       transform 0.2s var(--ease);
   }
 
   .agency .btn:hover {
-    background: var(--pop);
-    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 84%, var(--paper));
   }
 
   .agency .btn:active {
     transform: scale(0.97);
   }
 
-  /* On an ink panel the button is the accent. */
   .agency .on-ink .btn {
-    background: var(--pop);
+    background: var(--paper);
     color: var(--ink);
   }
 
   .agency .on-ink .btn:hover {
-    background: var(--paper);
+    background: color-mix(in srgb, var(--paper) 86%, var(--ink));
   }
 
-  /* A text link that answers the pointer: the underline is the ink itself. */
+  /* A text link: underlined, and the underline thickens under the pointer. */
   .agency .link {
     text-decoration-line: underline;
-    text-decoration-thickness: 0.12em;
-    text-underline-offset: 0.2em;
-    transition: text-decoration-color 0.2s ease;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-thickness 0.2s ease;
   }
 
   .agency .link:hover {
-    text-decoration-color: var(--pop);
+    text-decoration-thickness: 0.12em;
+  }
+
+  /* A whole-row link on a resting surface; it turns to ink under the pointer. */
+  .agency .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.1rem 1.5rem;
+    border-radius: var(--radius);
+    background: var(--tone);
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .agency .row:hover,
+  .agency .row:focus-visible {
+    --soft: var(--paper);
+    background: var(--ink);
+    color: var(--paper);
   }
 
   /* ── Motion ───────────────────────────────────────────────────────────
@@ -133,19 +167,13 @@ body:has(.agency) {
   @keyframes ag-rise {
     from {
       opacity: 0;
-      transform: translateY(1.75rem);
-    }
-  }
-
-  @keyframes ag-line {
-    from {
-      transform: translateY(105%);
+      transform: translateY(1.25rem);
     }
   }
 
   @keyframes ag-settle {
     from {
-      transform: scale(1.12);
+      transform: scale(1.06);
     }
   }
 
@@ -155,43 +183,15 @@ body:has(.agency) {
     }
   }
 
-  @keyframes ag-drift {
-    to {
-      transform: scale(1.08);
-    }
-  }
-
-  /* Clip for the hero's masked lines. The padding keeps the cap tops inside the
-     clip at this leading; the negative margin gives the space back. */
-  .agency .line-mask {
-    display: block;
-    overflow: hidden;
-    padding-top: 0.06em;
-    margin-top: -0.06em;
-  }
-
-  .agency .line-mask > span {
-    display: block;
-  }
-
   @media (prefers-reduced-motion: no-preference) {
-    /* Load: the headline rises out of its own baseline, then the rest follows. */
-    .agency .line-mask > span {
-      animation: ag-line 0.9s var(--ease) both;
-      animation-delay: calc(var(--i, 0) * 110ms);
-    }
-
+    /* Load: the first screen arrives in order, top to bottom. */
     .agency .on-load {
       animation: ag-rise 0.7s var(--ease) both;
-      animation-delay: calc(0.35s + var(--i, 0) * 80ms);
+      animation-delay: calc(var(--i, 0) * 80ms);
     }
 
     .agency .marquee {
-      animation: ag-marquee 60s linear infinite;
-    }
-
-    .agency .drift {
-      animation: ag-drift 14s ease-in-out infinite alternate;
+      animation: ag-marquee 70s linear infinite;
     }
 
     /* Scroll: parts of a section arrive as it enters the viewport, tied to the
@@ -201,13 +201,13 @@ body:has(.agency) {
       .agency [data-rise] {
         animation: ag-rise linear both;
         animation-timeline: view();
-        animation-range: entry calc(var(--i, 0) * 7%) cover calc(18% + var(--i, 0) * 5%);
+        animation-range: entry calc(var(--i, 0) * 7%) cover calc(16% + var(--i, 0) * 5%);
       }
 
       .agency [data-settle] {
         animation: ag-settle linear both;
         animation-timeline: view();
-        animation-range: entry 0% cover 45%;
+        animation-range: entry 0% cover 40%;
       }
     }
   }
