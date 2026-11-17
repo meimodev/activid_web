@@ -1,4 +1,5 @@
 // Landing-page copy stays together so the Indonesian and English offers match.
+// Indonesian is the source: it follows the campaign copy document section by section.
 import { formatRupiah, SATSET_OFFER } from "./offer";
 import { SATSET_PRODUCT_NAME } from "./brand";
 
@@ -10,78 +11,121 @@ export const COPY = {
     nav: {
       menu: "Menu",
       language: "Bahasa",
-      how: "Cara kerja",
       features: "Fitur",
+      how: "Cara kerja",
       pricing: "Harga",
-      demo: "Demo",
+      faq: "FAQ",
       contact: "Chat WhatsApp",
       switchLanguage: "Switch to English",
     },
     hero: {
-      eyebrow: "Restaurant Display System (RDS)",
-      title: "Pesanan lancar. Resto tetap jalan.",
+      // Two authored lines: they animate in one after the other.
+      title: ["Restoran Ramai Seharusnya Jadi Kabar Baik,", "Bukan Awal Kekacauan."],
       description:
-        "Hubungkan pelayan, dapur, dan kasir lewat Wi-Fi lokal. Pakai Android milikmu, tetap jalan saat internet mati.",
-      offerLabel: `Untuk ${SATSET_OFFER.monthlyOutletLimit} outlet baru setiap bulan`,
-      price: idPrice,
-      period: "/ outlet / bulan",
-      termsLink: "Lihat ketentuan promo",
-      contact: "Chat WhatsApp",
-      demo: "Coba demo Android",
+        "SatSet RDS menghubungkan pelayan, dapur, dan kasir dalam satu sistem. Pantau meja, pesanan, antrean dapur, hingga pembayaran melalui perangkat Android.",
+      contact: "Konsultasi via WhatsApp",
+      demo: "Lihat Demo Aplikasi",
+      note: "Gunakan perangkat Android milik Anda. Tidak perlu bergantung pada koneksi internet untuk operasional lokal.",
       imageAlt:
-        "Ilustrasi pelayan dan dapur restoran yang terhubung melalui Wi-Fi lokal",
+        "SatSet RDS di tablet dan ponsel Android: menu pesanan untuk meja D1 dan denah meja restoran",
     },
-    how: {
-      title: "Satu Wi-Fi. Satu tim.",
+    problem: {
+      title: "Operasional Restoran Masih Ribet?",
       description:
-        "Satu perangkat jadi pusat data. Perangkat staf bergabung di Wi-Fi yang sama.",
-      steps: [
-        {
-          title: "Siapkan server",
-          description: "Pilih satu HP atau tablet Android sebagai pusat data outlet.",
-        },
-        {
-          title: "Hubungkan tim",
-          description: "Pilih server yang ditemukan di Wi-Fi lokal, lalu masuk dengan PIN staf.",
-        },
-        {
-          title: "Layani pesanan",
-          description: "Pesanan sampai ke dapur dan statusnya terlihat langsung oleh tim.",
-        },
+        "Pesanan tidak terkoordinasi dengan baik bisa membuat pekerjaan tim semakin rumit.",
+      items: [
+        { role: "Pelayan", text: "harus menyampaikan pesanan secara manual." },
+        { role: "Dapur", text: "kesulitan memantau antrean pesanan." },
+        { role: "Kasir", text: "harus memastikan kembali pesanan yang masuk." },
+        { role: "Pemilik", text: "sulit memantau aktivitas operasional." },
       ],
-      note: "Operasional di jaringan lokal tetap berjalan tanpa internet. Pemantauan jarak jauh memakai snapshot cloud opsional dan membutuhkan internet.",
+      turn: "Saatnya kelola semuanya dalam satu sistem.",
+    },
+    solution: {
+      title: "Kenalkan SatSet RDS",
+      lead: "Satu sistem untuk menghubungkan seluruh proses pemesanan restoran.",
+      body: [
+        "Dengan SatSet RDS, pelayan, dapur, dan kasir dapat bekerja dalam satu alur yang terintegrasi.",
+        "Tidak perlu lagi mengandalkan pencatatan yang terpisah.",
+      ],
+      cta: "Lihat Cara Kerja SatSet",
+      flow: ["Pelayan", "Dapur", "Kasir"],
     },
     features: {
-      title: "Dari meja ke kasir.",
-      description: "Lihat tampilan asli SatSet RDS dari rekaman aplikasi, sebelum mengunduh demo.",
-      screenshotLabel: "Tampilan demo aplikasi",
-      enlarge: "Perbesar tampilan",
-      reports: "Laporan pemilik menampilkan penjualan lunas dan bisa diekspor. Akses staf mengikuti peran masing-masing.",
-      screens: {
-        floor: { title: "Pantau meja", description: "Lihat meja kosong, pesanan aktif, dan makanan siap antar.", alt: "Tampilan asli SatSet RDS: meja D2 dan D3 berstatus siap di antara meja kosong." },
-        orders: { title: "Susun pesanan", description: "Pilih menu bergambar, atur jumlah, dan kirim ke dapur.", alt: "Tampilan asli SatSet RDS: katalog menu bergambar dan keranjang pesanan meja D2." },
-        kitchen: { title: "Ikuti antrean dapur", description: "Pantau pesanan, catatan tamu, dan waktu tunggu dalam satu layar.", alt: "Tampilan asli SatSet RDS: antrean persiapan untuk meja D2 dan D3 dengan penghitung waktu." },
-        cashier: { title: "Selesaikan tagihan", description: "Pisahkan tagihan, simpan bukti bayar, dan cetak struk.", alt: "Tampilan asli SatSet RDS: rincian tagihan meja D2 dan pembayaran tunai." },
+      title: "Lihat Langsung Cara Kerja SatSet RDS",
+      description: "Semua Kebutuhan Operasional dalam Satu Aplikasi",
+      items: {
+        tables: { title: "Manajemen Meja", description: "Pantau meja dan kelola pesanan pelanggan dengan lebih teratur.", alt: "Rekaman SatSet RDS: denah meja per area dengan status tiap meja." },
+        ordering: { title: "Pemesanan Menu", description: "Catat pesanan pelanggan langsung melalui perangkat Android.", alt: "Rekaman SatSet RDS: memilih menu bergambar dan mengirim pesanan ke dapur." },
+        kitchen: { title: "Kitchen Display", description: "Pantau antrean pesanan dan status pengerjaan di dapur.", alt: "Rekaman SatSet RDS: antrean persiapan dapur dengan penghitung waktu." },
+        cashier: { title: "Sistem Kasir", description: "Kelola tagihan dan proses pembayaran pelanggan.", alt: "Rekaman SatSet RDS: daftar tagihan meja dan proses pembayaran." },
+        reports: { title: "Laporan Penjualan", description: "Pantau laporan penjualan yang sudah lunas melalui sistem.", alt: "Rekaman SatSet RDS: laporan penjualan per shift." },
+      },
+      pause: "Jeda video",
+      play: "Putar video",
+      contact: "Konsultasi via WhatsApp",
+      demo: "Coba Demo Aplikasi",
+    },
+    offline: {
+      title: "Internet Mati? Operasional Tetap Jalan!",
+      description: [
+        "Tidak perlu khawatir ketika koneksi internet terputus.",
+        "SatSet RDS menggunakan jaringan Wi-Fi lokal untuk menghubungkan perangkat dalam satu outlet.",
+      ],
+      listTitle: "Keunggulannya:",
+      items: [
+        "Operasional lokal tetap berjalan tanpa internet.",
+        "Perangkat terhubung melalui jaringan Wi-Fi lokal.",
+        "Tidak harus menggunakan perangkat khusus yang mahal.",
+        "Bisa memanfaatkan perangkat Android milik outlet.",
+      ],
+      note: "Catatan: Login admin awal, verifikasi berkala, dan pemantauan jarak jauh tetap memerlukan koneksi internet.",
+      demo: {
+        internet: "Internet",
+        on: "Tersambung",
+        off: "Terputus",
+        router: "Wi-Fi lokal outlet",
+        devices: ["Pelayan", "Dapur", "Kasir"],
+        captionOn: "Internet tersambung. Coba matikan.",
+        captionOff: "Internet terputus. Pesanan tetap sampai ke dapur dan kasir.",
       },
     },
-    pricing: {
-      title: "Satu outlet. Satu harga.",
-      description:
-        "Promo berlaku untuk paket software SatSet RDS yang sama dengan harga normal. Hubungi kami untuk mengecek ketersediaan bulan ini.",
-      regularLabel: "Harga normal",
-      promoLabel: "Harga promo",
-      period: "per outlet per bulan",
-      benefits: [
-        `Untuk ${SATSET_OFFER.monthlyOutletLimit} outlet baru pertama yang mulai berlangganan setiap bulan kalender.`,
-        `Harga promo tetap ${idPrice} per outlet per bulan selama langganan outlet aktif.`,
-        "Tanpa biaya setup wajib atau biaya cloud terpisah untuk operasional lokal.",
+    how: {
+      title: "Mudah Digunakan, Mudah Dikoordinasikan",
+      steps: [
+        { title: "Hubungkan Perangkat", description: "Siapkan perangkat Android dan hubungkan ke jaringan Wi-Fi lokal yang sama." },
+        { title: "Pesanan Masuk ke Sistem", description: "Pelayan mencatat pesanan melalui aplikasi." },
+        { title: "Dapur dan Kasir Memproses", description: "Pesanan dapat dipantau oleh dapur dan kasir dalam satu sistem." },
       ],
+      closing: "Sederhana untuk digunakan, lebih terorganisir untuk operasional restoran.",
+    },
+    pricing: {
+      title: `Kelola Operasional Restoran Mulai dari ${idPrice}/Bulan`,
+      description:
+        "Nikmati sistem pengelolaan restoran yang menghubungkan pelayan, dapur, dan kasir dalam satu aplikasi.",
+      regularLabel: "Harga Normal",
+      promoLabel: "Harga Promo",
+      period: "/ outlet / bulan",
+      includesTitle: "Yang Anda dapatkan:",
+      includes: ["Manajemen meja.", "Sistem pemesanan.", "Kitchen Display.", "Sistem kasir.", "Laporan penjualan."],
       hardware:
-        "Perangkat Android dan printer disediakan oleh masing-masing outlet. Snapshot cloud untuk pemantauan jarak jauh bersifat opsional.",
-      contact: "Chat WhatsApp",
+        "Gunakan perangkat Android milik outlet dan mulai kelola operasional restoran melalui satu sistem.",
+      contact: "Konsultasi Sekarang via WhatsApp",
+    },
+    trial: {
+      title: "Masih Ragu Sebelum Berlangganan? Coba Dulu, Baru Bayar!",
+      offer: "Gratis 7 Hari Tanpa Bayar di Awal",
+      description:
+        "Kami ingin Anda yakin sebelum berlangganan. Karena itu, nikmati SatSet RDS secara gratis selama 7 hari dan rasakan langsung bagaimana sistem ini membantu operasional restoran Anda.",
+      points: [
+        "Coba langsung fitur SatSet RDS.",
+        "Lihat bagaimana pesanan terhubung ke dapur dan kasir.",
+        "Pastikan sistem cocok dengan kebutuhan restoran Anda.",
+      ],
+      contact: "Konsultasi via WhatsApp",
+      demo: "Coba Demo Gratis",
     },
     demo: {
-      eyebrow: "COBA SEBELUM BERLANGGANAN",
       title: "Coba di Android milikmu.",
       description:
         "Unduh APK, masuk dengan akun demo, lalu jelajahi data contoh restoran. Tidak perlu pembayaran untuk mencoba.",
@@ -109,99 +153,150 @@ export const COPY = {
         "Punya HP kedua? Pasang APK yang sama, pilih Client, lalu pilih server di Wi-Fi lokal untuk mencoba bersama.",
     },
     faq: {
-      title: "Sebelum mulai.",
+      title: "Masih Ada yang Ingin Ditanyakan?",
       items: [
-        { question: "Perangkat apa yang dibutuhkan?", answer: "HP atau tablet Android 10 ke atas dan jaringan Wi-Fi lokal. Satu perangkat memakai mode Server; perangkat staf memakai mode Client di jaringan yang sama." },
-        { question: "Tetap jalan saat internet mati?", answer: "Pesanan, dapur, dan kasir bekerja lewat Wi-Fi lokal. Login admin awal, verifikasi akun berkala, dan pemantauan jarak jauh membutuhkan internet. Memulai ulang server secara offline dibatasi 7 hari sejak verifikasi akun terakhir." },
-        { question: "Bagaimana jika perangkat Server mati?", answer: "Perangkat Server harus tetap menyala dan terhubung ke Wi-Fi selama layanan. Jika mati, nyalakan dan jalankan server kembali agar perangkat staf dapat tersambung lagi." },
-        { question: "Bisa memakai printer sendiri?", answer: "SatSet RDS mendukung printer struk ESC/POS lewat jaringan dan printer Bluetooth yang sudah dipasangkan ke Android. Konfirmasikan model printer lewat WhatsApp sebelum membeli." },
+        { question: "Apakah SatSet RDS membutuhkan internet?", answer: "Tidak selalu. Operasional lokal dapat berjalan melalui jaringan Wi-Fi lokal meskipun internet mati. Namun, beberapa fungsi seperti login admin awal dan verifikasi berkala tetap membutuhkan internet." },
+        { question: "Apakah harus membeli perangkat baru?", answer: "Tidak harus. SatSet RDS dapat menggunakan perangkat Android milik outlet selama memenuhi spesifikasi aplikasi." },
+        { question: "Apakah bisa digunakan oleh pelayan, dapur, dan kasir sekaligus?", answer: "Ya. Perangkat yang terhubung dalam jaringan Wi-Fi lokal dapat digunakan sesuai peran dan pengaturan sistem." },
+        { question: "Apakah bisa mencoba sebelum berlangganan?", answer: "Ya. Anda dapat mencoba demo aplikasi untuk melihat cara kerja SatSet RDS." },
+        { question: "Berapa biaya berlangganannya?", answer: `Harga promo ${idPrice} per outlet per bulan. Silakan hubungi tim kami untuk informasi paket dan ketentuan berlangganan.` },
+        { question: "Bagaimana jika mengalami kendala saat instalasi?", answer: "Hubungi tim Activid untuk mendapatkan informasi bantuan instalasi dan penggunaan." },
       ],
-      support: "Butuh bantuan memilih perangkat? Tim Activid siap membantu.",
-      supportLink: "Kontak Activid",
+    },
+    final: {
+      title: "Siap Mengelola Restoran dengan Lebih Teratur?",
+      description: [
+        "SatSet RDS membantu menghubungkan pelayan, dapur, dan kasir dalam satu sistem.",
+        "Lihat demonya, konsultasikan kebutuhan restoran Anda, dan temukan solusi yang tepat untuk operasional bisnis Anda.",
+      ],
+      contact: "Konsultasi Gratis via WhatsApp",
+      note: "Tim kami siap membantu menjelaskan cara kerja dan kebutuhan perangkat SatSet RDS.",
     },
     footer: {
-      tagline: "Operasional lokal · Koneksi perangkat terenkripsi",
-      contact: "Chat WhatsApp",
+      tagline: "Sistem restoran untuk pelayan, dapur, dan kasir.",
+      maker: "Dibuat oleh Activid",
     },
     whatsappMessage:
-      `[${SATSET_PRODUCT_NAME}] Halo, saya ingin bertanya tentang promo ${idPrice} per outlet per bulan dan ketersediaan kuota bulan ini.`,
+      `[${SATSET_PRODUCT_NAME}] Halo, saya ingin konsultasi tentang SatSet RDS untuk restoran saya.`,
   },
   en: {
     nav: {
       menu: "Menu",
       language: "Language",
-      how: "How it works",
       features: "Features",
+      how: "How it works",
       pricing: "Pricing",
-      demo: "Demo",
+      faq: "FAQ",
       contact: "Chat WhatsApp",
       switchLanguage: "Ganti ke Bahasa Indonesia",
     },
     hero: {
-      eyebrow: "Restaurant Display System (RDS)",
-      title: "Keep service moving.",
+      title: ["A Busy Restaurant Should Be Good News,", "Not the Start of Chaos."],
       description:
-        "Orders, kitchen, and payments on Android. Connect over local Wi-Fi, even when the internet drops.",
-      offerLabel: `For ${SATSET_OFFER.monthlyOutletLimit} new outlets each month`,
-      price: enPrice,
-      period: "/ outlet / month",
-      termsLink: "See offer terms",
-      contact: "Chat WhatsApp",
-      demo: "Try the Android demo",
+        "SatSet RDS connects servers, kitchen, and cashier in one system. Track tables, orders, the kitchen queue, and payments from Android devices.",
+      contact: "Consult on WhatsApp",
+      demo: "See the App Demo",
+      note: "Use the Android devices you already own. Local service does not depend on an internet connection.",
       imageAlt:
-        "Illustration of a restaurant server and kitchen connected over local Wi-Fi",
+        "SatSet RDS on an Android tablet and phone: the order menu for table D1 and the restaurant floor plan",
     },
-    how: {
-      title: "One network. One team.",
+    problem: {
+      title: "Is Running the Restaurant Still a Hassle?",
       description:
-        "One device holds your restaurant data. Staff devices join it on the same Wi-Fi.",
-      steps: [
-        {
-          title: "Set up a server",
-          description: "Choose one Android phone or tablet as your outlet's data hub.",
-        },
-        {
-          title: "Connect your team",
-          description: "Select the server found on your Wi-Fi, then sign in with a staff PIN.",
-        },
-        {
-          title: "Serve orders",
-          description: "Orders reach the kitchen and their status stays visible to the team.",
-        },
+        "Orders that are not well coordinated make the whole team's work harder.",
+      items: [
+        { role: "Servers", text: "have to pass orders along by hand." },
+        { role: "The kitchen", text: "struggles to keep track of the order queue." },
+        { role: "The cashier", text: "has to double-check every incoming order." },
+        { role: "The owner", text: "finds it hard to follow daily operations." },
       ],
-      note: "Local service continues without internet. Optional cloud snapshots for remote monitoring require an internet connection.",
+      turn: "It is time to run it all in one system.",
+    },
+    solution: {
+      title: "Meet SatSet RDS",
+      lead: "One system that connects the whole ordering process of your restaurant.",
+      body: [
+        "With SatSet RDS, servers, kitchen, and cashier work in one integrated flow.",
+        "No more relying on separate notes.",
+      ],
+      cta: "See How SatSet Works",
+      flow: ["Server", "Kitchen", "Cashier"],
     },
     features: {
-      title: "From table to payment.",
-      description: "Explore real SatSet RDS screens from the app recording before downloading the demo.",
-      screenshotLabel: "Demo app screen, shown in Indonesian",
-      enlarge: "Enlarge screen",
-      reports: "Owner reports show settled sales and can be exported. Staff access follows each person's role.",
-      screens: {
-        floor: { title: "See your tables", description: "Spot available tables, active orders, and food ready to serve.", alt: "Actual SatSet RDS table screen: D2 and D3 are ready, alongside available tables." },
-        orders: { title: "Build an order", description: "Choose from a photo menu, adjust quantities, and send to the kitchen.", alt: "Actual SatSet RDS order screen with a photo menu and the cart for table D2." },
-        kitchen: { title: "Follow the kitchen queue", description: "Keep orders, guest notes, and waiting times together.", alt: "Actual SatSet RDS kitchen queue for tables D2 and D3, with order timers." },
-        cashier: { title: "Settle the bill", description: "Split bills, save payment proof, and print receipts.", alt: "Actual SatSet RDS cashier screen showing table D2's bill and cash payment." },
+      title: "See SatSet RDS at Work",
+      description: "Everything Your Operation Needs in One App",
+      items: {
+        tables: { title: "Table Management", description: "Watch your tables and manage customer orders in an orderly way.", alt: "SatSet RDS recording: the floor plan by area with each table's status. The app is shown in Indonesian." },
+        ordering: { title: "Menu Ordering", description: "Take customer orders directly on an Android device.", alt: "SatSet RDS recording: choosing from a photo menu and sending the order to the kitchen. The app is shown in Indonesian." },
+        kitchen: { title: "Kitchen Display", description: "Follow the order queue and preparation status in the kitchen.", alt: "SatSet RDS recording: the kitchen preparation queue with order timers. The app is shown in Indonesian." },
+        cashier: { title: "Cashier System", description: "Manage bills and process customer payments.", alt: "SatSet RDS recording: the list of table bills and the payment flow. The app is shown in Indonesian." },
+        reports: { title: "Sales Reports", description: "Review reports of settled sales in the system.", alt: "SatSet RDS recording: the per-shift sales report. The app is shown in Indonesian." },
+      },
+      pause: "Pause video",
+      play: "Play video",
+      contact: "Consult on WhatsApp",
+      demo: "Try the App Demo",
+    },
+    offline: {
+      title: "Internet Down? Service Keeps Running!",
+      description: [
+        "No need to worry when the internet connection drops.",
+        "SatSet RDS uses your local Wi-Fi network to connect the devices in one outlet.",
+      ],
+      listTitle: "The advantages:",
+      items: [
+        "Local service keeps running without internet.",
+        "Devices connect over the local Wi-Fi network.",
+        "No expensive dedicated hardware required.",
+        "Works with the Android devices your outlet already has.",
+      ],
+      note: "Note: the first admin sign-in, periodic verification, and remote monitoring still require an internet connection.",
+      demo: {
+        internet: "Internet",
+        on: "Connected",
+        off: "Disconnected",
+        router: "Outlet local Wi-Fi",
+        devices: ["Server", "Kitchen", "Cashier"],
+        captionOn: "Internet is connected. Try switching it off.",
+        captionOff: "Internet is down. Orders still reach the kitchen and cashier.",
       },
     },
-    pricing: {
-      title: "One outlet. One price.",
-      description:
-        "The offer covers the same SatSet RDS software plan as the regular price. Contact us to check this month's availability.",
-      regularLabel: "Regular price",
-      promoLabel: "Offer price",
-      period: "per outlet per month",
-      benefits: [
-        `For the first ${SATSET_OFFER.monthlyOutletLimit} new outlets whose paid subscription starts each calendar month.`,
-        `The ${enPrice} per outlet per month rate continues while that outlet's subscription stays active.`,
-        "No mandatory setup fee or separate cloud fee for local operation.",
+    how: {
+      title: "Easy to Use, Easy to Coordinate",
+      steps: [
+        { title: "Connect the Devices", description: "Prepare your Android devices and join them to the same local Wi-Fi network." },
+        { title: "Orders Enter the System", description: "Servers record orders in the app." },
+        { title: "Kitchen and Cashier Process", description: "The kitchen and cashier follow each order in one system." },
       ],
+      closing: "Simple to use, better organized for restaurant operations.",
+    },
+    pricing: {
+      title: `Run Your Restaurant from ${enPrice}/Month`,
+      description:
+        "A restaurant management system that connects servers, kitchen, and cashier in one app.",
+      regularLabel: "Regular Price",
+      promoLabel: "Offer Price",
+      period: "/ outlet / month",
+      includesTitle: "What you get:",
+      includes: ["Table management.", "Ordering system.", "Kitchen Display.", "Cashier system.", "Sales reports."],
       hardware:
-        "Each outlet provides its own Android devices and printers. Cloud snapshots for remote monitoring are optional.",
-      contact: "Chat WhatsApp",
+        "Use your outlet's own Android devices and start running the restaurant in one system.",
+      contact: "Consult Now on WhatsApp",
+    },
+    trial: {
+      title: "Not Sure About Subscribing Yet? Try First, Pay Later!",
+      offer: "Free for 7 Days, Nothing to Pay Upfront",
+      description:
+        "We want you to be sure before you subscribe. So use SatSet RDS free for 7 days and see for yourself how it helps your restaurant run.",
+      points: [
+        "Try the SatSet RDS features hands-on.",
+        "See how orders reach the kitchen and cashier.",
+        "Make sure the system fits your restaurant's needs.",
+      ],
+      contact: "Consult on WhatsApp",
+      demo: "Try the Free Demo",
     },
     demo: {
-      eyebrow: "TRY BEFORE SUBSCRIBING",
       title: "Try it on your Android.",
       description:
         "Download the APK, sign in with a demo account, and explore sample restaurant data. No payment needed.",
@@ -229,22 +324,31 @@ export const COPY = {
         "Have a second phone? Install the same APK, choose Client, and select the server on your local Wi-Fi to try it together.",
     },
     faq: {
-      title: "Before you start.",
+      title: "Still Have Questions?",
       items: [
-        { question: "What devices do I need?", answer: "Android phones or tablets running Android 10 or newer, plus local Wi-Fi. One device runs Server mode; staff devices use Client mode on the same network." },
-        { question: "What happens if the internet drops?", answer: "Orders, kitchen service, and payments use local Wi-Fi. Initial admin sign-in, periodic account checks, and remote monitoring need internet. Offline server restarts are limited to 7 days after the last account verification." },
-        { question: "What if the Server device turns off?", answer: "Keep the Server device powered on and connected to Wi-Fi throughout service. If it turns off, restart the device and server so staff devices can reconnect." },
-        { question: "Can I use my own printer?", answer: "SatSet RDS supports network ESC/POS receipt printers and Bluetooth printers already paired with Android. Check your printer model with us on WhatsApp before buying." },
+        { question: "Does SatSet RDS need the internet?", answer: "Not always. Local service runs over your local Wi-Fi network even when the internet is down. Some functions, such as the first admin sign-in and periodic verification, still need internet." },
+        { question: "Do I have to buy new devices?", answer: "No. SatSet RDS can run on the Android devices your outlet already has, as long as they meet the app's requirements." },
+        { question: "Can servers, kitchen, and cashier use it at the same time?", answer: "Yes. Devices connected to the local Wi-Fi network are used according to each role and your system settings." },
+        { question: "Can I try it before subscribing?", answer: "Yes. You can try the app demo to see how SatSet RDS works." },
+        { question: "How much is the subscription?", answer: `The offer price is ${enPrice} per outlet per month. Please contact our team for plan details and subscription terms.` },
+        { question: "What if I run into trouble during installation?", answer: "Contact the Activid team for help with installation and use." },
       ],
-      support: "Need help choosing devices? The Activid team can help.",
-      supportLink: "Contact Activid",
+    },
+    final: {
+      title: "Ready to Run a Better-Organized Restaurant?",
+      description: [
+        "SatSet RDS helps connect servers, kitchen, and cashier in one system.",
+        "See the demo, talk through your restaurant's needs, and find the right fit for your operation.",
+      ],
+      contact: "Free Consultation on WhatsApp",
+      note: "Our team is ready to explain how SatSet RDS works and which devices you need.",
     },
     footer: {
-      tagline: "Local operation · Encrypted device connections",
-      contact: "Chat WhatsApp",
+      tagline: "The restaurant system for servers, kitchen, and cashier.",
+      maker: "Made by Activid",
     },
     whatsappMessage:
-      `[${SATSET_PRODUCT_NAME}] Hello, I'd like to ask about the ${enPrice} per outlet monthly offer and availability this month.`,
+      `[${SATSET_PRODUCT_NAME}] Hello, I'd like a consultation about SatSet RDS for my restaurant.`,
   },
 } as const;
 

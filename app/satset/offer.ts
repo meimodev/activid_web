@@ -1,7 +1,6 @@
 export const SATSET_OFFER = {
-  monthlyPrice: 400_000,
-  regularMonthlyPrice: 1_000_000,
-  monthlyOutletLimit: 10,
+  monthlyPrice: 399_000,
+  regularMonthlyPrice: 1_200_000,
 } as const;
 
 export function formatRupiah(amount: number, lang: "id" | "en") {

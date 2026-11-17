@@ -8,11 +8,10 @@ for (const path of ['/satset', '/rds', '/satset?lang=en', '/rds?lang=en']) {
 
     expect(response?.status()).toBe(200);
     await expect(page).toHaveTitle("SatSet / Restaurant Display System (RDS)");
-    await expect(page.locator(".satset-hero .satset-eyebrow")).toHaveText("Restaurant Display System (RDS)");
     expect(response?.headers()['cache-control']).not.toContain('no-store');
     await expect(page.locator('h1')).toHaveText(english
-      ? 'Keep service moving.'
-      : 'Pesanan lancar. Resto tetap jalan.');
+      ? 'A Busy Restaurant Should Be Good News, Not the Start of Chaos.'
+      : 'Restoran Ramai Seharusnya Jadi Kabar Baik, Bukan Awal Kekacauan.');
     await expect(page.locator('html')).toHaveAttribute('lang', english ? 'en' : 'id');
 
     const contact = page.locator('.satset-header-actions a[href*="wa.me"]');
@@ -22,14 +21,10 @@ for (const path of ['/satset', '/rds', '/satset?lang=en', '/rds?lang=en']) {
     expect((await contact.boundingBox())?.height).toBeLessThanOrEqual(48);
     await expect(page.locator('.satset-actions a').first()).toBeInViewport({ ratio: 1 });
     await expect(page.locator('#satset-download-size')).toContainText('113 MB');
-    await expect(page.locator('link[rel="preload"][as="image"]')).toHaveAttribute('imagesizes', '100vw');
+    await expect(page.locator('link[rel="preload"][as="image"]')).toHaveAttribute('imagesizes', '(max-width: 899px) 100vw, 58vw');
     expect(await page.locator('link[rel="preload"][as="font"]').count()).toBe(2);
 
-    expect(await page.evaluate(() => ({
-      overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      blur: getComputedStyle(document.querySelector('.satset-header')!).backdropFilter,
-      imagePosition: getComputedStyle(document.querySelector('.satset-hero-visual')!).position,
-    }))).toEqual({ overflow: false, blur: 'none', imagePosition: 'absolute' });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
 
     const menu = page.locator('.satset-mobile-menu');
     await menu.locator('summary').click();
@@ -38,21 +33,34 @@ for (const path of ['/satset', '/rds', '/satset?lang=en', '/rds?lang=en']) {
     await expect(menu).not.toHaveAttribute('open', '');
     await expect(page.locator('#pricing h2')).toBeInViewport();
 
-    const screens = page.locator('.satset-screen');
-    await expect(screens).toHaveCount(4);
-    await screens.nth(2).locator('summary').click();
-    await expect(screens.nth(2)).toHaveAttribute('open', '');
-    await expect(screens.first()).not.toHaveAttribute('open', '');
-    await expect(screens.nth(2).locator('img')).toHaveAttribute('src', '/satset/screens/kitchen.webp');
+    // The price counts down from the regular figure and must settle on the offer.
+    const price = page.locator('.satset-price-promo strong');
+    await price.scrollIntoViewIfNeeded();
+    await expect(price).toHaveText(english ? 'Rp399,000' : 'Rp399.000');
 
-    const faq = page.locator('#faq details').first();
-    await faq.locator('summary').click();
-    await expect(faq.locator('p')).toBeVisible();
+    // Feature recordings must not download until they are on screen.
+    const videos = page.locator('.satset-stage video');
+    await expect(videos).toHaveCount(5);
+    for (const video of await videos.all()) await expect(video).toHaveAttribute('preload', 'none');
+
+    // The internet cuts itself once in view; the switch brings it back.
+    const network = page.locator('.satset-net');
+    await network.scrollIntoViewIfNeeded();
+    await expect(network).toHaveAttribute('data-online', 'false');
+    await network.getByRole('switch').click();
+    await expect(network).toHaveAttribute('data-online', 'true');
+
+    const faq = page.locator('#faq details');
+    await expect(faq).toHaveCount(6);
+    await faq.nth(0).locator('summary').click();
+    await expect(faq.nth(0).locator('p')).toBeVisible();
+    await faq.nth(1).locator('summary').click();
+    await expect(faq.nth(0)).not.toHaveAttribute('open', '');
 
     await menu.locator('summary').click();
     await menu.locator('.satset-menu-language').click();
     await expect(page.locator('h1')).toHaveText(english
-      ? 'Pesanan lancar. Resto tetap jalan.'
-      : 'Keep service moving.');
+      ? 'Restoran Ramai Seharusnya Jadi Kabar Baik, Bukan Awal Kekacauan.'
+      : 'A Busy Restaurant Should Be Good News, Not the Start of Chaos.');
   });
 }

@@ -7,8 +7,8 @@ export function getSatsetMetadata(lang: Lang): Metadata {
   const price = formatRupiah(SATSET_OFFER.monthlyPrice, lang);
   const title = SATSET_PRODUCT_NAME;
   const description = lang === "id"
-    ? `${SATSET_PRODUCT_NAME} untuk pesanan, dapur, dan kasir lewat Wi-Fi lokal. Promo ${price}/outlet/bulan untuk ${SATSET_OFFER.monthlyOutletLimit} outlet baru pertama setiap bulan.`
-    : `${SATSET_PRODUCT_NAME} connects orders, kitchen, and payments over local Wi-Fi. ${price}/outlet/month for the first ${SATSET_OFFER.monthlyOutletLimit} new outlets each month.`;
+    ? `${SATSET_PRODUCT_NAME} menghubungkan pelayan, dapur, dan kasir dalam satu sistem lewat Wi-Fi lokal. Mulai dari ${price}/outlet/bulan, gratis 7 hari.`
+    : `${SATSET_PRODUCT_NAME} connects servers, kitchen, and cashier in one system over local Wi-Fi. From ${price}/outlet/month, free for 7 days.`;
 
   return {
     title,

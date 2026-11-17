@@ -26,10 +26,10 @@ export default function MobileNavigation({ lang, labels }: { lang: Lang; labels:
         <X className="satset-menu-close-icon" size={20} aria-hidden="true" />
       </summary>
       <nav aria-label={t.menu} onClick={close}>
-        <a href="#how">{t.how}</a>
         <a href="#features">{t.features}</a>
+        <a href="#how">{t.how}</a>
         <a href="#pricing">{t.pricing}</a>
-        <a href="#demo">{t.demo}</a>
+        <a href="#faq">{t.faq}</a>
         <a className="satset-menu-language" href={lang === "id" ? "/satset?lang=en" : "/satset"}>
           <span>{t.language}</span>
           <span>{lang === "id" ? "English" : "Bahasa Indonesia"}</span>
