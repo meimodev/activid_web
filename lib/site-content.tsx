@@ -9,6 +9,9 @@ export const siteContent: SiteContent = {
     { label: 'About', href: '/about' },
     { label: 'Invitation', href: 'https://invitation.activid.id', external: true },
     { label: 'KenanganKita', href: 'https://kenangan.activid.id', external: true },
+    // Served by this app, but their own products with their own look: listed with the other two.
+    { label: 'SatSet', href: '/satset', external: true },
+    { label: 'LOIT', href: '/loit', external: true },
     { label: 'Verify documents', href: '/verify' },
     { label: 'Contact', href: '/contact' },
   ],

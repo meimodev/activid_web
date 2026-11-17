@@ -1,0 +1,8 @@
+/* The global 404 wears the agency look, but it is part of every route in this
+   app. Importing (main)/agency.css from the page itself made that stylesheet
+   shared by every surface, and the bundler then merged the agency font's
+   @font-face into it, so /satset, /loit and the rest preloaded a font they
+   never use. Tailwind's PostCSS plugin inlines this @import, which gives the
+   404 a private copy and leaves (main)'s own stylesheet alone. e2e/satset
+   counts preloaded fonts and catches it if this regresses. */
+@import './(main)/agency.css';
