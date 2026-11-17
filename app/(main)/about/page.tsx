@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
-import { AboutUs } from '@/components/sections/AboutUs';
+import { PageHero } from '@/components/sections/Hero';
+import { AboutBody } from '@/components/sections/AboutUs';
+import { OurClients } from '@/components/sections/OurClients';
+import { ServicesList } from '@/components/sections/ServicesList';
+import { CTA } from '@/components/sections/CTA';
+import { siteContent } from '@/lib/site-content';
 
 export const metadata: Metadata = {
     title: 'About Us | ACTIVID',
@@ -7,9 +12,19 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+    const { title, lead } = siteContent.aboutUs;
+
     return (
-        <main className="min-h-screen pt-20">
-            <AboutUs className="bg-transparent" />
+        <main>
+            <PageHero title={[title]} cta={siteContent.hero.cta}>
+                <p>{lead}</p>
+            </PageHero>
+            <div className="px-(--gutter) pt-12 pb-(--gap-section) lg:pt-20">
+                <AboutBody />
+            </div>
+            <OurClients />
+            <ServicesList />
+            <CTA />
         </main>
     );
 }

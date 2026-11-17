@@ -1,89 +1,40 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { trackContact } from '@/lib/analytics';
 import { siteContent } from '@/lib/site-content';
 
-/**
- * ContactCards - Interactive expandable office location cards
- * Click or hover to expand and see full details
- */
+const FIELDS = ['bg-(--pop)', 'bg-(--tone)'];
+
+/** The two offices as flat blocks; each one is a link to its map. */
 export default function ContactCards() {
-  const [expandedCard, setExpandedCard] = useState<number | null>(null);
-  const { offices } = siteContent.contactPage;
+    const { officesTitle, offices } = siteContent.contactPage;
 
-  const handleCardClick = (index: number, mapsUrl: string) => {
-    // Toggle expansion
-    setExpandedCard(expandedCard === index ? null : index);
-    // Open Google Maps in new tab
-    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  return (
-    <div className="container mx-auto max-w-7xl mt-16">
-      <div className="flex gap-4 h-[500px]">
-        {offices.map((office, index) => {
-          const isExpanded = expandedCard === index;
-          const addressLines = Array.isArray(office.address) ? office.address : [office.address];
-
-          return (
-            <div
-              key={office.city}
-              className={`group relative rounded-xl overflow-hidden transition-all duration-500 ease-out cursor-pointer ${isExpanded ? 'flex-2' : 'flex-1 hover:flex-2'
-                }`}
-              onClick={() => handleCardClick(index, office.mapLink)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleCardClick(index, office.mapLink);
-                }
-              }}
-            >
-              <Image
-                src={office.image}
-                alt={`${office.city} ${office.type} workspace`}
-                fill
-                sizes="(max-width: 1024px) 100vw, 1200px"
-                className={`object-cover transition-transform duration-700 ease-out ${isExpanded ? 'scale-105' : 'group-hover:scale-105'
-                  }`}
-              />
-              <div
-                className="absolute inset-0 transition-all duration-700 ease-out"
-                style={{
-                  background: 'linear-gradient(to top, rgba(26, 26, 62, 0.85) 0%, rgba(26, 26, 62, 0.5) 50%, transparent 100%)',
-                }}
-              />
-              <div
-                className={`absolute inset-0 transition-opacity duration-700 ease-out ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                  }`}
-                style={{
-                  background: 'linear-gradient(to top, rgba(26, 26, 62, 0.95) 0%, rgba(26, 26, 62, 0.7) 60%, rgba(26, 26, 62, 0.3) 100%)',
-                }}
-              />
-              <div className="absolute bottom-8 left-8 right-8 text-white z-10">
-                <h3 className={`text-3xl md:text-4xl lg:text-5xl font-black mb-2 transition-all duration-700 ease-out leading-tight ${isExpanded ? 'translate-y-[-4px] text-2xl' : 'group-hover:translate-y-[-4px] group-hover:text-2xl'
-                  }`}>
-                  {office.city}<span className={`transition-opacity duration-700 ease-out ${isExpanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}><br />{office.type}</span>
-                </h3>
-                <div className="overflow-hidden">
-                  <p className={`text-sm transition-all duration-700 ease-out delay-100 transform ${isExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0'
-                    }`}>
-                    {addressLines.map((line, i) => (
-                      <span key={i}>
-                        {line}
-                        {i < addressLines.length - 1 && <br />}
-                      </span>
-                    ))}
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+    return (
+        <section aria-labelledby="offices-heading" className="pt-(--gap-section)">
+            <h2 id="offices-heading" data-rise className="t-head px-(--gutter) pb-8">
+                {officesTitle}
+            </h2>
+            <ul className="grid lg:grid-cols-2">
+                {offices.map((office, i) => (
+                    <li key={office.city}>
+                        <a
+                            href={office.mapLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => trackContact.officeLocationClick(office.city)}
+                            className={`group flex h-full min-h-[22rem] flex-col justify-between gap-10 px-(--gutter) py-10 lg:p-12 ${FIELDS[i % FIELDS.length]}`}
+                        >
+                            <span>
+                                <span className="poster block transition-transform duration-300 group-hover:translate-x-2">{office.city}</span>
+                                <span className="link mt-3 inline-block font-bold">Open in Maps ↗</span>
+                            </span>
+                            <span className="block whitespace-pre-line">
+                                {(Array.isArray(office.address) ? office.address : [office.address]).join('\n')}
+                            </span>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </section>
+    );
 }

@@ -63,7 +63,7 @@ Detects `invitation.*` subdomains and rewrites to `/invitation/...` paths; maps 
 - **Tailwind v4** — `@import "tailwindcss"` + `@theme inline {}` in `globals.css`; PostCSS uses `@tailwindcss/postcss`. No `@tailwind` directives.
 - **`@next/next/no-img-element` is off** for `app/(invitation)/` and `components/templates/` — templates use raw `<img>` intentionally.
 - **All template/invitation images** come from ImageKit base `https://ik.imagekit.io/geb6bfhmhx/`.
-- **Navigation is imported per-page**, not in a shared layout.
+- **The agency site's navigation and footer are rendered once** by `app/(main)/layout.tsx`; pages under `(main)` do not import their own. Its whole design system (tokens, type steps, motion) is `app/(main)/agency.css`, scoped to `.agency`.
 - Reserved template slugs (`flow`, `saturn`, …) at `/invitation/[slug]` 404 — only `*-demo` suffixes or user-created slugs resolve.
 - Admin affiliate ID is `000000000000` (`ADMIN_INVITATION_AFFILIATE_ID` in `types/invitation.ts`).
 

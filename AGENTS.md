@@ -73,7 +73,7 @@ Files marked `import "server-only"` and must never be imported in client compone
 - **Tailwind v4**: Uses `@import "tailwindcss"` syntax (not `@tailwind` directives) and `@theme inline {}` block in `globals.css`. PostCSS uses `@tailwindcss/postcss` plugin.
 - **React Compiler**: Enabled via `reactCompiler: true` in `next.config.ts` & `babel-plugin-react-compiler`. Code must follow Rules of React or the compiler will bail out.
 - **`next.config.ts`**: Uses `optimizePackageImports` for `framer-motion`, `luxon`, `firebase/firestore` to reduce barrel parse overhead. Bundle analyzer wraps the config via `withBundleAnalyzer`.
-- **Navigation component is imported per-page**: `(main)/layout.tsx` imports `<Navigation isGlobal={true} />` — not in a shared layout. Individual pages also import their own nav (e.g., `(main)/page.tsx`).
+- **Agency navigation and footer render once**, in `(main)/layout.tsx`. Pages under `(main)` do not import their own nav. The surface's design system (tokens, type steps, CSS-only motion) lives in `app/(main)/agency.css`, scoped to `.agency`.
 - **All images from ImageKit**: The `DEMO_*` constants and live invitation images use `https://ik.imagekit.io/geb6bfhmhx/` as base URL.
 - **Invitation CSS variables**: Theme colors are injected as `--invitation-*` CSS custom properties via `getInvitationThemeStyle()` — templates reference these variables, not hardcoded colors.
 - **Invitation shell**: Pages render inside `.invitation-mobile-shell` with `.invitation-mobile-frame` at max-width 430px (mobile-first).

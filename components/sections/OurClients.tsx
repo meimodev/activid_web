@@ -1,94 +1,40 @@
-'use client';
-
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
 import Image from 'next/image';
 import { siteContent } from '@/lib/site-content';
-import type { ClientItem } from '@/types/site-content.types';
-
-export interface OurClientsProps {
-  className?: string;
-}
-
-function LogoTile({ client }: { client: ClientItem }) {
-  return (
-    <div className="mx-4 w-32 shrink-0 opacity-50 md:w-48">
-      {/* No backdrop-blur here: at 30% effective opacity it buys nothing
-          visible, and it cost one compositing layer per tile. */}
-      <div className="relative flex h-16 w-full items-center justify-center overflow-hidden rounded-lg border border-white/5 bg-white/5 md:h-24">
-        <Image
-          src={client.logo}
-          alt={client.name}
-          fill
-          quality={50}
-          className="object-contain p-2"
-          sizes="(max-width: 768px) 128px, 192px"
-        />
-      </div>
-    </div>
-  );
-}
 
 /**
- * One marquee lane. The track holds the logos twice and slides by exactly half
- * its width, so the second copy is under the cursor the moment the first
- * scrolls out — seamless with 2x the logos, where the old two-track
- * (`marquee` + `marquee2`) version needed 4x.
+ * Names running off the edges: one line of client logos on an ink band,
+ * cropped by both sides of the screen and drifting left. The track holds the
+ * logos twice and slides by half its width, so the loop has no seam.
  */
-function MarqueeRow({ clients, animation }: { clients: readonly ClientItem[]; animation: string }) {
-  return (
-    <div className="relative flex overflow-x-hidden">
-      <div className={`flex whitespace-nowrap ${animation}`}>
-        {[...clients, ...clients].map((client, index) => (
-          <LogoTile key={`${client.name}-${index}`} client={client} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function OurClients({ className = '' }: OurClientsProps) {
-  const { items: clients, title, subtitlePart1 } = siteContent.clients;
-  const containerRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], [-100, 100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.9, 1], [0, 1, 1, 0]);
-
-  // toReversed, not reverse: `clients` is siteContent's module-level array, and
-  // reversing it in place mutated shared data during render.
-  const reversedClients = clients.toReversed();
+export function OurClients() {
+  const { title, lead, items } = siteContent.clients;
 
   return (
-    <section id="clients" ref={containerRef} className={`relative min-h-[600px] overflow-hidden flex items-center justify-center ${className}`}>
-      {/* Carousel Layer (Background) */}
-      <div className="absolute inset-0 flex flex-col justify-center gap-8 z-0 opacity-60">
-        <MarqueeRow clients={clients} animation="animate-marquee" />
-        <MarqueeRow clients={clients} animation="animate-marquee-reverse" />
-        <MarqueeRow clients={reversedClients} animation="animate-marquee-slow" />
+    <section id="clients">
+      <div className="overflow-hidden bg-(--ink) py-[clamp(2.5rem,6vw,5rem)]">
+        <div className="marquee flex w-max">
+          {[false, true].map(copy => (
+            <ul key={String(copy)} aria-hidden={copy} className="flex shrink-0 items-center">
+              {items.map(client => (
+                <li
+                  key={client.name}
+                  className="relative mx-[clamp(1.25rem,3vw,3rem)] h-[clamp(4.5rem,9vw,8rem)] w-[clamp(7.5rem,15vw,13rem)]"
+                >
+                  <Image src={client.logo} alt={copy ? '' : client.name} fill sizes="208px" className="object-contain" />
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
       </div>
 
-      {/* Overlay Layer */}
-      <div className="absolute inset-0 bg-[#1a1d3a]/10 z-10" />
-
-      {/* Text Content Layer (Foreground) */}
-      <div className="container relative mx-auto px-4 z-20">
-        <motion.div
-          style={{ y, opacity }}
-          className="text-center"
-        >
-          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-[#F8EFDE] mb-6 font-sans drop-shadow-lg">
-            {title}
-          </h2>
-
-          <p className="text-2xl text-[#F8EFDE] mb-6 font-sans drop-shadow-lg">
-            <span className="font-black">{clients.length}</span> {subtitlePart1}
-          </p>
-
-        </motion.div>
+      <div className="grid gap-4 px-(--gutter) pt-8 lg:grid-cols-12 lg:gap-x-8">
+        <h2 data-rise className="t-head lg:col-span-4">
+          {title}
+        </h2>
+        <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="t-lead max-w-[38ch] lg:col-start-5 lg:col-end-13">
+          {items.length} {lead}
+        </p>
       </div>
     </section>
   );

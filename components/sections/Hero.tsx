@@ -1,153 +1,95 @@
-'use client';
+import Link from 'next/link';
+import { Media } from '@/components/ui/Media';
+import { siteContent } from '@/lib/site-content';
 
-import { useRef } from 'react';
-import Image from 'next/image';
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
-import type { HeroContent } from '@/types/hero.types';
-import { DateTime } from 'luxon';
-
-export interface HeroProps {
-  content: HeroContent;
-  className?: string;
+interface PageHeroProps {
+  /** One entry per line; two lines at most, a few words each. */
+  title: string[];
+  children: React.ReactNode;
+  cta?: { text: string; href: string };
+  media?: { src: string; alt: string };
+  fact?: { value: string; label: string };
 }
 
 /**
- * Hero section component with portfolio-style design.
- * Features:
- * - Large centered title
- * - Gradient background (navy to purple/red)
- * - Logo in top left
- * - Bottom info section with company name and year
+ * Narrow talk, wide headline — the first screen of every page on this site.
+ * From lg the sentence and the action stand in a narrow left column while the
+ * headline and the picture take the wide right one; on a phone it reads
+ * straight down: headline, sentence, action, picture.
  */
-export function Hero({ content, className = '' }: HeroProps) {
-  const { subtitle, backgroundVideo } = content;
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
-
-  const prng = (seed: number) => {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  };
-
-  // Parallax effect setup
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"]
-  });
-
-  // Transform scroll progress to parallax values
-  const logoScale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
-  const logoOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-
+export function PageHero({ title, children, cta, media, fact }: PageHeroProps) {
   return (
     <section
-      ref={sectionRef}
-      className={`relative min-h-screen flex flex-col items-center justify-center overflow-hidden ${className}`}
+      className={`grid px-(--gutter) lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-x-8 ${media ? 'lg:min-h-[calc(100svh-4rem)]' : 'pb-4'}`}
     >
-      {/* Animated Radial Gradient Orbs */}
-      {!reduceMotion && content.gradientOrbs && content.gradientOrbs.count > 0 && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: content.gradientOrbs.count }).map((_, i) => (
-            (() => {
-              const seed = i + 1;
-              const left = prng(seed * 12.9898) * 100;
-              const top = prng(seed * 78.233) * 100;
-              const dx = prng(seed * 39.346) * 100 - 50;
-              const dy = prng(seed * 11.135) * 100 - 50;
-              const duration = 10 + prng(seed * 4.321) * 10;
+      <h1 className="poster pt-6 lg:col-start-5 lg:col-end-13 lg:pt-8">
+        {title.map((line, i) => (
+          <span key={line} className="line-mask">
+            <span style={{ '--i': i } as React.CSSProperties}>{line}</span>
+          </span>
+        ))}
+      </h1>
 
-              return (
-            <motion.div
-              key={i}
-              className="absolute rounded-full mix-blend-screen blur-3xl opacity-30"
-              style={{
-                background: `radial-gradient(circle, ${content.gradientOrbs?.colors[i % content.gradientOrbs.colors.length]} 0%, transparent 70%)`,
-                left: `${left}%`,
-                top: `${top}%`,
-                width: '40vw',
-                height: '40vw',
-              }}
-              animate={{
-                x: [0, dx, 0],
-                y: [0, dy, 0],
-              }}
-              transition={{
-                duration,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            />
-              );
-            })()
-          ))}
-        </div>
-      )}
+      <div className="mt-6 flex flex-col items-start gap-7 lg:col-start-1 lg:col-end-5 lg:row-start-1 lg:row-end-3 lg:mt-0 lg:pt-[20svh]">
+        <div className="t-lead on-load max-w-[26ch] space-y-4">{children}</div>
+        {cta && (
+          <Link href={cta.href} className="btn on-load w-full sm:w-auto" style={{ '--i': 1 } as React.CSSProperties}>
+            {cta.text}
+          </Link>
+        )}
+      </div>
 
-      {/* Background - Video or Gradient */}
-      {backgroundVideo ? (
-        <div className="absolute inset-0 z-0 bg-[#1a1a3e]">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-contain md:object-cover"
-          >
-            <source src={backgroundVideo} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-purple-900/20 to-[#1a1a3e]/90 mix-blend-multiply" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a3e]/80 via-transparent to-transparent" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a3e] to-[#2d1b4e]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
-        </div>
-      )}
-
-      {/* Logo with Parallax */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        style={{ scale: logoScale, opacity: logoOpacity }}
-        className="absolute top-6 left-6 sm:top-10 sm:left-10 md:top-20 md:left-20 lg:top-24 lg:left-24 z-20"
-      >
-        <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 relative">
-          <Image
-            src="https://ik.imagekit.io/geb6bfhmhx/activid%20web/0_LOGO_WHITE.PNG"
-            alt="Activid Logo"
-            fill
-            className="object-contain"
-            priority
-          />
-        </div>
-      </motion.div>
-
-      {/* Bottom Info Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="relative z-10 bg-[#F8EFDE] py-8 px-8 mt-auto"
-      >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div className="flex items-center gap-6">
-            <div className="text-4xl md:text-6xl font-black text-[#1a1a3e] font-sans">
-              {DateTime.now().year}
-            </div>
-            <div>
-              <h2 className="text-xl md:text-2xl font-bold text-[#1a1a3e] mb-1 font-sans">
-                {subtitle}
-              </h2>
-              <p className="text-sm md:text-base text-[#1a1a3e]/70 font-sans">
-                Creative Agency | Manado - Tondano
-              </p>
-            </div>
+      {/* The picture runs off the bottom of the first screen. From lg the fact
+          block bites its top-left corner, and the top margin keeps that block
+          clear of the headline; on a phone it sits in the bottom corner. */}
+      {media && (
+        <div
+          className={`relative -mx-(--gutter) lg:col-start-5 lg:col-end-13 lg:row-start-2 lg:mx-0 mt-10 ${fact ? 'lg:mt-24' : 'lg:mt-12'}`}
+        >
+          <div className="relative aspect-4/3 overflow-hidden bg-(--ink) lg:aspect-auto lg:h-full lg:min-h-[38svh]">
+            <Media src={media.src} alt={media.alt} sizes="(min-width: 1024px) 66vw, 100vw" priority />
           </div>
+          {fact && (
+            <div
+              className="on-load absolute bottom-0 left-0 w-[62%] bg-(--pop) p-4 sm:w-64 sm:p-5 lg:top-0 lg:bottom-auto lg:-translate-y-1/2"
+              style={{ '--i': 3 } as React.CSSProperties}
+            >
+              <p className="t-head">{fact.value}</p>
+              <p className="t-small mt-1 font-medium">{fact.label}</p>
+            </div>
+          )}
         </div>
-      </motion.div>
+      )}
     </section>
+  );
+}
 
+/** The home page's first screen. */
+export function Hero() {
+  const { title, description, cta, video, fact } = siteContent.hero;
+  return (
+    <PageHero
+      title={title}
+      cta={cta}
+      fact={fact}
+      media={{ src: video, alt: 'Footage from an Activid podcast production' }}
+    >
+      <p>{description}</p>
+    </PageHero>
+  );
+}
+
+/** First screen of a service page: its poster name, then what it is in full. */
+export function ServiceHero({ id, description, media }: { id: string; description: string; media?: string }) {
+  const service = siteContent.services.items.find(item => item.id === id)!;
+  return (
+    <PageHero
+      title={[service.short]}
+      cta={siteContent.hero.cta}
+      media={media ? { src: media, alt: service.imageAlt } : undefined}
+    >
+      <p className="font-bold">{service.title}</p>
+      <p>{description}</p>
+    </PageHero>
   );
 }

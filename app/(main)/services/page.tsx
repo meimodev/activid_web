@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
-import { ScrollExpandableCards } from '@/components/sections/ScrollExpandableCards';
+import Link from 'next/link';
+import { PageHero } from '@/components/sections/Hero';
+import { Split } from '@/components/sections/Split';
+import { CTA } from '@/components/sections/CTA';
 import { siteContent } from '@/lib/site-content';
 
 export const metadata: Metadata = {
@@ -7,73 +10,37 @@ export const metadata: Metadata = {
     description: 'Explore our range of creative services from branding and social media to video production and web development.',
 };
 
+const FIELDS = ['ink', 'pop', 'tone'] as const;
+
 export default function ServicesPage() {
-    const { services: servicesData } = siteContent;
-
-    const getServiceIcon = (id: string) => {
-        const props = {
-            xmlns: "http://www.w3.org/2000/svg",
-            width: "24",
-            height: "24",
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "2",
-            strokeLinecap: "round" as const,
-            strokeLinejoin: "round" as const,
-        };
-
-        switch (id) {
-            case 'social-media':
-                return (
-                    <svg {...props}>
-                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                        <path d="M2 17l10 5 10-5" />
-                        <path d="M2 12l10 5 10-5" />
-                    </svg>
-                );
-            case 'event-documentation':
-                return (
-                    <svg {...props}>
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                        <circle cx="12" cy="13" r="4" />
-                    </svg>
-                );
-            case 'video-podcast':
-                return (
-                    <svg {...props}>
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                );
-            case 'website-app':
-                return (
-                    <svg {...props}>
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="2" y1="12" x2="22" y2="12" />
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                );
-            case 'product-photography':
-                return (
-                    <svg {...props}>
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                    </svg>
-                );
-            default:
-                return null;
-        }
-    };
-
-    const expandableCards = servicesData.items.map(service => ({
-        ...service,
-        icon: getServiceIcon(service.id),
-    }));
+    const { title, subtitle, items } = siteContent.services;
 
     return (
-        <main className="min-h-screen pt-20 bg-[#1a1a3e]">
-            <ScrollExpandableCards cards={expandableCards} title={servicesData.title} />
+        <main>
+            <PageHero title={[title]} cta={siteContent.hero.cta}>
+                <p>{subtitle}</p>
+            </PageHero>
+
+            <div className="mt-12 lg:mt-20">
+                {items.map((service, i) => (
+                    <Split
+                        key={service.id}
+                        media={{ src: service.image, alt: service.imageAlt }}
+                        field={FIELDS[i % FIELDS.length]}
+                        flip={i % 2 === 1}
+                    >
+                        <h2 data-rise className="t-head">{service.title}</h2>
+                        <p data-rise style={{ '--i': 1 } as React.CSSProperties} className="max-w-[46ch]">
+                            {service.description}
+                        </p>
+                        <Link href={service.buttonLink} className="btn mt-2">
+                            See {service.short.toLowerCase()} work
+                        </Link>
+                    </Split>
+                ))}
+            </div>
+
+            <CTA />
         </main>
     );
 }

@@ -21,11 +21,14 @@ export interface AboutUsContent {
 export interface ServiceItem {
   id: string;
   title: string;
+  /** The poster name: short enough to fill one line at display size. */
+  short: string;
+  /** One line of what it covers, set beside the poster name. */
+  detail: string;
   description: string;
+  /** A photograph, or an .mp4 that plays as a muted loop. */
   image: string;
   imageAlt: string;
-  color: string;
-  buttonText: string;
   buttonLink: string;
 }
 
@@ -71,8 +74,9 @@ export interface FooterContent {
 
 export interface CtaSectionContent {
     title: string;
-    buttonText: string;
-    buttonLink: string;
+    lead: string;
+    /** The one word that is the button. Four to six letters or it will not fit a phone. */
+    verb: string;
 }
 
 export interface ClientItem {
@@ -82,7 +86,7 @@ export interface ClientItem {
 
 export interface ClientsContent {
     title: string;
-    subtitlePart1: string;
+    lead: string;
     items: ClientItem[];
 }
 
@@ -104,7 +108,6 @@ export interface ProjectItem {
     result?: string;
     image?: string;
     images?: string[];
-    color?: string;
     link?: string;
     handle?: string;
 }
@@ -193,7 +196,6 @@ export interface OfficeLocation {
     type: string;
     address: string | string[];
     mapLink: string;
-    image: string;
 }
 
 export interface ContactPageContent {
