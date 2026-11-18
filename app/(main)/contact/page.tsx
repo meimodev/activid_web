@@ -22,7 +22,7 @@ export default function Contact() {
         cta={{ text: 'Chat on WhatsApp', href: methods.whatsapp.href }}
         media={{ src: siteContent.servicePages.videoPodcast.mainProject.image, alt: 'A conversation being recorded on an Activid podcast set' }}
       >
-        <p>Ceritakan proyek Anda lewat WhatsApp, email, atau Instagram, atau mampir ke kantor kami di Tondano dan Manado.</p>
+        <p>Ceritakan proyek Anda lewat WhatsApp atau Instagram, atau mampir ke kantor kami di Tondano dan Manado.</p>
       </PageHero>
       <ContactMethods />
       <ContactCards />

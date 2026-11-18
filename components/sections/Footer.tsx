@@ -9,7 +9,7 @@ import { trackFooter } from '@/lib/analytics';
 /** The close of every page: who this is, then the whole site in four short lists. */
 export function Footer() {
   const { footer, navigation, services, contactPage } = siteContent;
-  const { whatsapp, email, instagram } = contactPage.methods;
+  const { whatsapp, instagram } = contactPage.methods;
   const legal = [
     ['privacy', footer.legal.privacy],
     ['terms', footer.legal.terms],
@@ -71,7 +71,7 @@ export function Footer() {
           <div>
             <h2 className="mb-3 font-medium">Contact</h2>
             <ul className="space-y-2">
-              {[whatsapp, email, instagram].map(method => (
+              {[whatsapp, instagram].map(method => (
                 <li key={method.label}>
                   <a href={method.href} target="_blank" rel="noopener noreferrer" className={quiet}>
                     {method.value}

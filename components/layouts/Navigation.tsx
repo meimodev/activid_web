@@ -15,7 +15,7 @@ const pages = siteContent.navigation.filter(item => !item.external);
 const products = siteContent.navigation.filter(item => item.external);
 const barLinks = pages.filter(item => !['/', '/verify', '/contact'].includes(item.href));
 const contact = pages.find(item => item.href === '/contact')!;
-const { whatsapp, email, instagram } = siteContent.contactPage.methods;
+const { whatsapp, instagram } = siteContent.contactPage.methods;
 const quiet = 'link decoration-transparent hover:decoration-current aria-[current=page]:decoration-current';
 
 /** The logo is white-on-transparent, so it always rides its own ink disc. */
@@ -126,7 +126,7 @@ export default function Navigation() {
                 ))}
               </ul>
               <ul aria-label="Contact" className="flex flex-col gap-2 text-(--soft)">
-                {[whatsapp, email, instagram].map((method, i) => (
+                {[whatsapp, instagram].map((method, i) => (
                   <li key={method.label} style={{ '--i': pages.length + products.length + i } as React.CSSProperties}>
                     <a href={method.href} target="_blank" rel="noopener noreferrer" onClick={close} className={quiet}>
                       {method.label}: {method.value}

@@ -3,12 +3,11 @@
 import { trackContact } from '@/lib/analytics';
 import { siteContent } from '@/lib/site-content';
 
-/** The three ways in, one per row: the channel on the left, its address on the right. */
+/** The ways in, one per row: the channel on the left, its address on the right. */
 export function ContactMethods() {
-    const { whatsapp, email, instagram } = siteContent.contactPage.methods;
+    const { whatsapp, instagram } = siteContent.contactPage.methods;
     const methods = [
         { ...whatsapp, track: trackContact.whatsappClick },
-        { ...email, track: trackContact.emailClick },
         { ...instagram, track: trackContact.instagramClick },
     ];
 
