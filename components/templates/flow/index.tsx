@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { Hero } from "./Hero";
 import { Countdown } from "./Countdown";
 import { QuoteSection } from "./QuoteSection";
@@ -12,8 +12,6 @@ import { MusicPlayer } from "@/components/invitation/MusicPlayer";
 import { BackgroundSlideshow } from "@/components/invitation/BackgroundSlideshow";
 import {
   FloatingFlowers,
-  FloatingSparkles,
-  FloatingHearts,
   GoldenRings,
 } from "./graphics";
 import { StorySection } from "./StorySection";
@@ -51,20 +49,22 @@ export function Flow({ config }: FlowProps) {
   );
 
   return (
+    <MotionConfig reducedMotion="user">
     <main className="relative min-h-screen overflow-x-hidden">
       <div className="absolute inset-0 pointer-events-none z-0">
         <div className="sticky top-0 w-full h-[100dvh] overflow-hidden">
           <BackgroundSlideshow
             photos={derivedPhotos}
             className="absolute inset-0 w-full h-full"
+            showAurora={false}
+            intervalMs={6500}
+            transitionDuration={1.4}
           />
         </div>
       </div>
 
       <GoldenRings />
-      <FloatingFlowers />
-      <FloatingSparkles />
-      <FloatingHearts />
+      {isOpen ? <FloatingFlowers /> : null}
       <MusicPlayer shouldStart={isOpen} audioUrl={music.url} />
 
       {/* Hero / Cover Section - Fixed Overlay until opened */}
@@ -181,6 +181,7 @@ export function Flow({ config }: FlowProps) {
         </div>
       </div>
     </main>
+    </MotionConfig>
   );
 }
 
@@ -219,13 +220,12 @@ function SpaceFooter({
 
   const stars = useMemo(() => {
     const rand = mulberry32(fnv1a32(seedKey || "0"));
-    return Array.from({ length: 50 }).map((_, i) => ({
+    return Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       top: `${rand() * 100}%`,
       left: `${rand() * 100}%`,
-      size: rand() * 3 + 1,
-      duration: rand() * 3 + 2,
-      delay: rand() * 2,
+      size: rand() * 2.5 + 1,
+      opacity: 0.25 + rand() * 0.55,
     }));
   }, [seedKey]);
 
@@ -234,24 +234,15 @@ function SpaceFooter({
       {/* Space Background & Stars */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {stars.map((star) => (
-          <motion.div
+          <div
             key={star.id}
-            className="absolute rounded-full bg-wedding-on-dark opacity-80"
+            className="absolute rounded-full bg-wedding-on-dark"
             style={{
               top: star.top,
               left: star.left,
               width: star.size,
               height: star.size,
-            }}
-            animate={{
-              opacity: [0.2, 1, 0.2],
-              scale: [0.8, 1.2, 0.8],
-            }}
-            transition={{
-              duration: star.duration,
-              repeat: Infinity,
-              delay: star.delay,
-              ease: "easeInOut",
+              opacity: star.opacity,
             }}
           />
         ))}
@@ -259,7 +250,7 @@ function SpaceFooter({
 
       {/* Content */}
       <div className="relative z-10 px-4">
-        <RevealOnScroll direction="up" delay={0.1} width="100%">
+        <RevealOnScroll direction="up" delay={0.1} duration={0.55} once width="100%">
           <div>
             <h2 className="font-brittany-signature text-5xl text-transparent bg-clip-text bg-linear-to-r from-wedding-accent-2-light via-wedding-on-dark to-wedding-accent-light mb-8 drop-shadow-[0_0_10px_color-mix(in_srgb,var(--invitation-on-dark)_55%,transparent)] leading-[1.08] py-8">
               {displayNames}
@@ -272,15 +263,14 @@ function SpaceFooter({
         </RevealOnScroll>
 
         {/* CTA Button */}
-        <RevealOnScroll direction="up" delay={0.3} width="100%">
+        <RevealOnScroll direction="up" delay={0.2} duration={0.55} once width="100%">
           <Link
             href="/"
-            className="group relative inline-flex items-center gap-3 px-8 py-2 bg-wedding-on-dark/5 backdrop-blur-sm border border-wedding-on-dark/20 rounded-full overflow-hidden hover:bg-wedding-on-dark/10 transition-all duration-500 hover:border-wedding-on-dark/40 hover:scale-105 hover:shadow-[0_0_20px_color-mix(in_srgb,var(--invitation-accent-2-light)_35%,transparent)]"
+            className="group relative inline-flex items-center gap-3 px-8 py-2 bg-wedding-on-dark/5 sm:backdrop-blur-sm border border-wedding-on-dark/20 rounded-full overflow-hidden hover:bg-wedding-on-dark/10 transition-colors duration-300 hover:border-wedding-on-dark/40"
           >
             <span className="relative z-10 font-garet-book text-xs uppercase tracking-[0.2em] text-wedding-on-dark group-hover:text-wedding-accent-2-light transition-colors">
               🚀 Kembali Pulang ✨
             </span>
-            <motion.div className="absolute inset-0 bg-linear-to-r from-transparent via-wedding-on-dark/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
           </Link>
         </RevealOnScroll>
 

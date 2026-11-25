@@ -130,6 +130,31 @@
   50% { transform: translateY(-10px); }
 }
 
+@keyframes flow-wave-forward {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes flow-wave-reverse {
+  0% { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.flow-wave-track-a {
+  animation: flow-wave-forward 9s linear infinite;
+}
+
+.flow-wave-track-b {
+  animation: flow-wave-reverse 13s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-wave-track-a,
+  .flow-wave-track-b {
+    animation: none;
+  }
+}
+
 .font-script { font-family: 'Brittany Signature', 'Tan Mon Cheri', 'Brown Sugar', cursive !important; }
 .font-tan-mon-cheri { font-family: 'Tan Mon Cheri', 'Brown Sugar', cursive !important; }
 .font-heading { font-family: var(--font-heading); }

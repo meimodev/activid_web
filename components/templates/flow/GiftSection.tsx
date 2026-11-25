@@ -36,11 +36,11 @@ export function GiftSection({ bankAccounts, heading, description }: GiftSectionP
   };
 
   return (
-    <section className="section-curved py-24 bg-wedding-bg/90 backdrop-blur-md text-center relative">
+    <section className="section-curved py-24 bg-wedding-bg/95 sm:bg-wedding-bg/90 sm:backdrop-blur-md text-center relative">
       <GoldLeafBorder position="top" />
 
       <div className="max-w-2xl mx-auto px-4">
-        <RevealOnScroll direction="down" width="100%">
+        <RevealOnScroll direction="down" duration={0.55} once width="100%">
           <div className="flex flex-col items-center">
             <DiamondAccent />
             <h2 className="font-script text-4xl text-gold-gradient mb-4 mt-4  py-5">
@@ -50,13 +50,13 @@ export function GiftSection({ bankAccounts, heading, description }: GiftSectionP
           </div>
         </RevealOnScroll>
 
-        <RevealOnScroll delay={0.2} width="100%">
+        <RevealOnScroll delay={0.1} duration={0.55} once width="100%">
           <p className="font-garet-book text-wedding-text-light mb-16 italic leading-relaxed whitespace-pre-line">{description}</p>
         </RevealOnScroll>
 
         <div className="grid gap-8 font-garet-book">
           {bankAccounts.map((account, index) => (
-            <RevealOnScroll key={index} direction="up" delay={0.3 + (index * 0.1)} width="100%">
+            <RevealOnScroll key={index} direction="up" delay={0.15 + (index * 0.08)} duration={0.55} once width="100%">
               <div className="p-10 border border-wedding-accent/30 rounded-sm relative group hover:shadow-lg transition-shadow duration-300 h-full">
                 <div className="absolute top-2 right-2 opacity-10">
                   <BankBuildingIcon />

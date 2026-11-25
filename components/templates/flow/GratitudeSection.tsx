@@ -13,11 +13,11 @@ export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
   const names = `${hosts[0]?.firstName ?? ""}${hosts[1]?.firstName ? ` & ${hosts[1]?.firstName}` : ""}`;
 
   return (
-    <section className="section-curved py-24 bg-wedding-bg/60 backdrop-blur-sm text-center relative border-b border-wedding-accent/30 overflow-hidden">
+    <section className="section-curved py-24 bg-wedding-bg/90 sm:bg-wedding-bg/60 sm:backdrop-blur-sm text-center relative border-b border-wedding-accent/30 overflow-hidden">
       <GoldLeafBorder position="top" />
 
       <div className="container mx-auto px-4 max-w-2xl relative z-10">
-        <RevealOnScroll direction="down" width="100%">
+        <RevealOnScroll direction="down" duration={0.55} once width="100%">
           <div className="flex flex-col items-center mb-10">
             <DiamondAccent />
             <h2 className="font-brittany-signature text-5xl text-gold-gradient mb-4 mt-4 leading-[1.08] py-1">
@@ -27,9 +27,8 @@ export function GratitudeSection({ hosts, message }: GratitudeSectionProps) {
           </div>
         </RevealOnScroll>
 
-        <RevealOnScroll delay={0.18} width="100%">
+        <RevealOnScroll delay={0.1} duration={0.55} once width="100%">
           <div className="bg-wedding-bg p-8 rounded-sm shadow-xl border border-wedding-accent/20 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-40 h-40 bg-wedding-accent/5 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
 
             <p className="font-garet-book text-wedding-text-light italic leading-relaxed whitespace-pre-line">
               {message?.trim() ||

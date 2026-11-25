@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import type { Host } from "@/types/invitation";
-import { SectionOrnament, DiamondAccent } from "./graphics/ornaments";
+import { SectionOrnament, DiamondAccent, HeroWaveDecorations } from "./graphics/ornaments";
 
 // Using a placeholder image with a more elegant, warm tone
 // const HERO_IMAGE = "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop";
@@ -23,33 +23,32 @@ const containerVariants: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3,
-      delayChildren: 0.2,
+      staggerChildren: 0.14,
+      delayChildren: 0.1,
     },
   },
   exit: {
     opacity: 0,
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.06,
       staggerDirection: -1,
       when: "afterChildren",
-      duration: 0.5,
+      duration: 0.4,
     },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
+    transition: { duration: 0.55, ease: "easeOut" },
   },
   exit: {
     opacity: 0,
-    y: -30,
-    scale: 0.95,
-    transition: { duration: 0.5, ease: "easeIn" },
+    y: -20,
+    transition: { duration: 0.4, ease: "easeIn" },
   },
 };
 
@@ -74,26 +73,32 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName, isO
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-wedding-dark">
-      {/* Background Image with animated scale */}
+      {/* Background Image with subtle initial settle */}
       <AnimatePresence>
         {!isExiting && (
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${coverImage})` }}
-            initial={{ scale: 1, opacity: 0 }}
-            animate={{ scale: 1.2, opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.2, transition: { duration: 1.5, ease: "easeInOut" } }}
-            transition={{
-              scale: {
-                duration: 20,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "linear",
-              },
-              opacity: { duration: 1 }
-            }}
+            initial={{ scale: 1.05, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
+            transition={{ duration: 1.1, ease: "easeOut" }}
           >
             <div className="absolute inset-0 bg-wedding-dark/45" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {!isExiting && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-[5]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <HeroWaveDecorations />
           </motion.div>
         )}
       </AnimatePresence>
@@ -129,7 +134,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName, isO
               </motion.div>
               
               <motion.div variants={itemVariants}>
-                <p className="font-garet-book font-bold text-xl tracking-[0.2em] text-wedding-accent-light border-y border-wedding-on-dark/20 py-4 inline-block px-12 backdrop-blur-xs bg-black/10">
+                <p className="font-garet-book font-bold text-xl tracking-[0.2em] text-wedding-accent-light border-y border-wedding-on-dark/20 py-4 inline-block px-12 bg-black/20 sm:backdrop-blur-xs">
                   {date}
                 </p>
               </motion.div>
@@ -140,7 +145,7 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName, isO
                     <p className="font-stoic text-sm tracking-[0.1em] text-wedding-on-dark/60 mb-2">
                       Kepada Yth.
                     </p>
-                    <p className="font-poppins-bold text-lg tracking-widest text-wedding-on-dark px-8 py-2 border border-wedding-on-dark/20 rounded-sm bg-wedding-on-dark/5 backdrop-blur-sm">
+                    <p className="font-poppins-bold text-lg tracking-widest text-wedding-on-dark px-8 py-2 border border-wedding-on-dark/20 rounded-sm bg-wedding-on-dark/10 sm:backdrop-blur-sm">
                       {guestName}
                     </p>
                   </div>
@@ -150,24 +155,13 @@ export function Hero({ onOpen, hosts, date, subtitle, coverImage, guestName, isO
 
             <motion.button
               variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
               onClick={handleOpen}
-              className="mt-4 px-12 py-4 border border-wedding-on-dark/30 bg-wedding-on-dark/5 backdrop-blur-md rounded-sm 
+              className="mt-4 px-12 py-4 border border-wedding-on-dark/30 bg-wedding-on-dark/10 sm:backdrop-blur-md rounded-sm 
       font-garet-book uppercase tracking-[0.3em] text-xs text-wedding-on-dark/90 hover:bg-wedding-on-dark hover:text-wedding-dark 
-      transition-colors duration-700 group relative overflow-hidden"
+      transition-colors duration-500 group relative overflow-hidden"
             >
-              <motion.div 
-                className="absolute inset-0 bg-wedding-on-dark/10"
-                animate={{ 
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
               <span className="relative z-10 group-hover:mr-2 transition-all">
                 Buka Undangan
               </span>

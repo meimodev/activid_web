@@ -45,26 +45,19 @@ export function Gallery({ photos, heading }: GalleryProps) {
     () => false,
   );
 
-  useEffect(() => {
-    photos.forEach((photo, index) => {
-      const img = new Image();
-      img.src = photo;
-      img.onload = () => {
-        const ratio = img.width / img.height;
-        let spanClass = "col-span-1 row-span-1";
+  const handleImageLoad = useCallback((index: number, img: HTMLImageElement) => {
+    if (!img.naturalWidth || !img.naturalHeight) return;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    let spanClass = "col-span-1 row-span-1";
 
-        if (ratio > 1.4) {
-          // Landscape
-          spanClass = "col-span-2 row-span-1";
-        } else if (ratio < 0.6) {
-          // Portrait
-          spanClass = "col-span-1 row-span-2";
-        }
+    if (ratio > 1.4) {
+      spanClass = "col-span-2 row-span-1";
+    } else if (ratio < 0.6) {
+      spanClass = "col-span-1 row-span-2";
+    }
 
-        setSpans((prev) => ({ ...prev, [index]: spanClass }));
-      };
-    });
-  }, [photos]);
+    setSpans((prev) => (prev[index] === spanClass ? prev : { ...prev, [index]: spanClass }));
+  }, []);
 
   const handleDownload = async (e: React.MouseEvent, url: string, index: number) => {
     e.stopPropagation();
@@ -117,9 +110,9 @@ export function Gallery({ photos, heading }: GalleryProps) {
   }, [selectedIndex, showNext, showPrev]);
 
   return (
-    <section className="py-24 px-4 bg-wedding-bg/30 backdrop-blur-sm relative border-b border-wedding-accent/30 pointer-events-auto">
+    <section className="py-24 px-4 bg-wedding-bg/85 sm:bg-wedding-bg/30 sm:backdrop-blur-sm relative border-b border-wedding-accent/30 pointer-events-auto">
       <GoldLeafBorder position="top" />
-      <RevealOnScroll direction="down" width="100%">
+      <RevealOnScroll direction="down" duration={0.55} once width="100%">
         <div className="flex flex-col items-center">
           <DiamondAccent />
           <h2 className="text-center font-script text-4xl text-gold-gradient mb-4 mt-4 py-5">
@@ -131,7 +124,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
 
       <div className="relative z-20 grid grid-cols-2 gap-2 max-w-6xl mx-auto auto-rows-[250px] p-2 bg-wedding-bg shadow-2xl border border-wedding-accent/10 mt-12 grid-flow-dense rounded-xl">
         {photos.map((photo, i) => (
-          <RevealOnScroll key={i} delay={i * 0.1} width="100%" className={spans[i] || "col-span-1 row-span-1"} fullHeight={true}>
+          <RevealOnScroll key={i} delay={Math.min(i * 0.05, 0.25)} duration={0.5} once width="100%" className={spans[i] || "col-span-1 row-span-1"} fullHeight={true}>
             <button
               type="button"
               className="group relative block w-full h-full overflow-hidden rounded-lg bg-wedding-bg pointer-events-auto"
@@ -144,9 +137,11 @@ export function Gallery({ photos, heading }: GalleryProps) {
                 src={photo} 
                 alt={`Gallery photo ${i + 1}`} 
                 loading="lazy"
-                className="block w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                decoding="async"
+                onLoad={(e) => handleImageLoad(i, e.currentTarget)}
+                className="block w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
               />
-              <div className="absolute inset-0 bg-wedding-accent/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+              <div className="absolute inset-0 bg-wedding-accent/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
             </button>
           </RevealOnScroll>
         ))}
@@ -160,18 +155,18 @@ export function Gallery({ photos, heading }: GalleryProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-[99999] bg-wedding-dark/95 flex flex-col items-center justify-center p-4 backdrop-blur-md"
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-[99999] bg-wedding-dark/95 flex flex-col items-center justify-center p-4 sm:backdrop-blur-md"
               onClick={() => setSelectedIndex(null)}
             >
               {/* Top Bar: Counter & Close */}
               <div className="absolute top-0 inset-x-0 p-6 flex justify-between items-center text-wedding-on-dark z-[100000] pointer-events-none">
-                <div className="font-garet-book text-sm tracking-[0.2em] bg-black/40 px-4 py-2 rounded-full backdrop-blur-md pointer-events-auto">
+                <div className="font-garet-book text-sm tracking-[0.2em] bg-black/55 px-4 py-2 rounded-full sm:backdrop-blur-md pointer-events-auto">
                   {selectedIndex + 1} / {photos.length}
                 </div>
                 <div className="flex items-center gap-4 pointer-events-auto">
                   <button
-                    className="p-2 hover:text-wedding-accent-light transition-colors bg-black/40 rounded-full backdrop-blur-md group"
+                    className="p-2 hover:text-wedding-accent-light transition-colors bg-black/55 rounded-full sm:backdrop-blur-md group"
                     onClick={(e) => handleDownload(e, photos[selectedIndex], selectedIndex)}
                     title="Download Photo"
                   >
@@ -182,7 +177,7 @@ export function Gallery({ photos, heading }: GalleryProps) {
                     </svg>
                   </button>
                   <button
-                    className="p-2 hover:text-wedding-accent-light transition-colors bg-black/40 rounded-full backdrop-blur-md group"
+                    className="p-2 hover:text-wedding-accent-light transition-colors bg-black/55 rounded-full sm:backdrop-blur-md group"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedIndex(null);
@@ -201,13 +196,13 @@ export function Gallery({ photos, heading }: GalleryProps) {
               {photos.length > 1 && (
                 <>
                   <button
-                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-wedding-on-dark hover:text-wedding-accent-light transition-colors bg-black/40 rounded-full backdrop-blur-md z-[100000] pointer-events-auto"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-wedding-on-dark hover:text-wedding-accent-light transition-colors bg-black/55 rounded-full sm:backdrop-blur-md z-[100000] pointer-events-auto"
                     onClick={showPrev}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                   </button>
                   <button
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-wedding-on-dark hover:text-wedding-accent-light transition-colors bg-black/40 rounded-full backdrop-blur-md z-[100000] pointer-events-auto"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-wedding-on-dark hover:text-wedding-accent-light transition-colors bg-black/55 rounded-full sm:backdrop-blur-md z-[100000] pointer-events-auto"
                     onClick={showNext}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>

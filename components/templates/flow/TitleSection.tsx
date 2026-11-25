@@ -28,21 +28,21 @@ const getVariants = (delay: number, direction: "up" | "down" | "left" | "right" 
   return {
     hidden: {
       ...hidden,
-      transition: { duration: 0.6, ease: "easeIn" }
+      transition: { duration: 0.4, ease: "easeIn" }
     },
     visible: {
       opacity: 1,
       x: 0,
       y: 0,
       scale: 1,
-      transition: { duration: 1.2, delay, ease: [0.2, 0.65, 0.3, 0.9] },
+      transition: { duration: 0.65, delay, ease: [0.2, 0.65, 0.3, 0.9] },
     },
   };
 };
 
 export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSectionProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: false, margin: "-15%" });
+  const isInView = useInView(ref, { once: true, margin: "-10%" });
   const shouldShow = isOpen && isInView;
 
   return (
@@ -56,7 +56,7 @@ export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSect
 
       <div className="relative z-10 w-full flex flex-col items-center text-center pb-24 px-4">
         <motion.div
-          variants={getVariants(0.2, "down")}
+          variants={getVariants(0.1, "down")}
           initial="hidden"
           animate={shouldShow ? "visible" : "hidden"}
         >
@@ -68,7 +68,7 @@ export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSect
         <div className="font-brittany-signature text-7xl text-wedding-dark mb-8 leading-[1.08] py-1 text-center drop-shadow-lg">
           <div className="flex flex-col gap-4">
             <motion.div
-              variants={getVariants(0.4, "left")}
+              variants={getVariants(0.2, "left")}
               initial="hidden"
               animate={shouldShow ? "visible" : "hidden"}
             >
@@ -78,7 +78,7 @@ export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSect
             {hosts.length > 1 && (
               <>
                 <motion.div
-                  variants={getVariants(0.6, "scale")}
+                  variants={getVariants(0.3, "scale")}
                   initial="hidden"
                   animate={shouldShow ? "visible" : "hidden"}
                 >
@@ -88,7 +88,7 @@ export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSect
                 </motion.div>
                 
                 <motion.div
-                  variants={getVariants(0.8, "right")}
+                  variants={getVariants(0.4, "right")}
                   initial="hidden"
                   animate={shouldShow ? "visible" : "hidden"}
                 >
@@ -101,7 +101,7 @@ export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSect
 
         <motion.div
           className="relative"
-          variants={getVariants(1.0, "up")}
+          variants={getVariants(0.5, "up")}
           initial="hidden"
           animate={shouldShow ? "visible" : "hidden"}
         >
@@ -114,7 +114,7 @@ export function TitleSection({ hosts, date, heading, isOpen = false }: TitleSect
 
       <motion.div
         className="absolute bottom-4 w-full pb-4"
-        variants={getVariants(1.2, "up")}
+        variants={getVariants(0.6, "up")}
         initial="hidden"
         animate={shouldShow ? "visible" : "hidden"}
       >

@@ -8,22 +8,28 @@ import { AuroraLayer } from "../templates/neptune/graphics";
 interface BackgroundSlideshowProps {
   photos: string[];
   className?: string;
+  showAurora?: boolean;
+  intervalMs?: number;
+  transitionDuration?: number;
 }
 
 export function BackgroundSlideshow({
   photos,
   className,
+  showAurora = true,
+  intervalMs = 4000,
+  transitionDuration = 3,
 }: BackgroundSlideshowProps) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    if (photos.length === 0) return;
+    if (photos.length <= 1) return;
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % photos.length);
-    }, 4000); // Change image every 4 seconds
+    }, intervalMs);
 
     return () => clearInterval(timer);
-  }, [photos.length]);
+  }, [intervalMs, photos.length]);
 
   if (photos.length === 0) return null;
 
@@ -38,14 +44,14 @@ export function BackgroundSlideshow({
       <div className="absolute inset-0 bg-wedding-bg/70" />
       <div className="absolute inset-0 bg-linear-to-b from-wedding-bg/80 via-wedding-bg/55 to-wedding-bg/90" />
 
-      <AuroraLayer />
+      {showAurora ? <AuroraLayer /> : null}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={photos[safeIndex]}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 3, ease: "easeInOut" }}
+          transition={{ duration: transitionDuration, ease: "easeInOut" }}
           className="absolute inset-0 w-full h-full bg-black"
         >
           <Image

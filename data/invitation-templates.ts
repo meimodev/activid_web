@@ -54,6 +54,14 @@ export const INVITATION_TEMPLATE_THEMES: Record<string, InvitationTemplateTheme[
       accent2Color: "#C5A059",
       darkColor: "#0F2A22",
     },
+    {
+      id: "sapphire",
+      title: "Sapphire",
+      mainColor: "#F9F7F2",
+      accentColor: "#1D4E89",
+      accent2Color: "#C5A059",
+      darkColor: "#0F1E33",
+    },
   ],
   saturn: [
     {

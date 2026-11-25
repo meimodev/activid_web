@@ -14,11 +14,11 @@ export function StorySection({ stories, heading }: StorySectionProps) {
     if (!stories || stories.length === 0) return null;
 
     return (
-        <section className="section-curved py-24 bg-wedding-bg-alt/30 backdrop-blur-sm text-center relative border-b border-wedding-accent/30">
+        <section className="section-curved py-24 bg-wedding-bg-alt/85 sm:bg-wedding-bg-alt/30 sm:backdrop-blur-sm text-center relative border-b border-wedding-accent/30">
             <GoldLeafBorder position="top" />
 
             <div className="container mx-auto px-4 max-w-3xl">
-                <RevealOnScroll direction="down" width="100%">
+                <RevealOnScroll direction="down" duration={0.55} once width="100%">
                     <div className="flex flex-col items-center mb-12">
                         <DiamondAccent />
                         <h2 className="font-script text-3xl text-wedding-accent mb-4 mt-4 py-5">{heading}</h2>
@@ -35,14 +35,15 @@ export function StorySection({ stories, heading }: StorySectionProps) {
                             <div key={index} className="relative z-10">
                                 <RevealOnScroll
                                     direction="up"
-                                    delay={index * 0.15}
+                                    delay={Math.min(index * 0.08, 0.25)}
+                                    duration={0.55}
+                                    once
                                     width="100%"
                                 >
                                         <div className="flex flex-col items-center gap-6">
                                             {/* Date Badge */}
                                             <div className="relative">
-                                                <div className="absolute inset-0 bg-wedding-bg blur-md rounded-full" />
-                                                <span className="relative z-10 inline-block py-2 px-8 border border-wedding-accent/40 rounded-full font-poppins-bold text-sm tracking-[0.15em] bg-wedding-bg/80 backdrop-blur-sm shadow-sm text-wedding-accent uppercase">
+                                                <span className="relative z-10 inline-block py-2 px-8 border border-wedding-accent/40 rounded-full font-poppins-bold text-sm tracking-[0.15em] bg-wedding-bg/95 shadow-sm text-wedding-accent uppercase">
                                                     {formatInvitationMonthYear(story.date)}
                                                 </span>
                                             </div>
@@ -52,7 +53,6 @@ export function StorySection({ stories, heading }: StorySectionProps) {
 
                                             {/* Content */}
                                             <div className="max-w-md mx-auto relative px-4 py-2">
-                                                <div className="absolute inset-0 bg-wedding-bg/40 blur-xl rounded-full -z-10" />
                                                 <p className="font-garet-book text-wedding-text text-lg leading-relaxed italic">
                                                     &quot;{story.description}&quot;
                                                 </p>

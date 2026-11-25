@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,7 +14,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getFirestore(app);
-const auth = getAuth(app);
+// Skip eager getAuth() when NEXT_PUBLIC_FIREBASE_API_KEY is unset (e.g. local demo runs)
+// so SSR/client imports of `db` don't fail with auth/invalid-api-key.
+const auth: Auth = firebaseConfig.apiKey
+  ? getAuth(app)
+  : (undefined as unknown as Auth);
 const googleProvider = new GoogleAuthProvider();
 
 export { app, db, auth, googleProvider };

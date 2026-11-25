@@ -16,10 +16,10 @@ export function EventSection({ events, heading }: EventSectionProps) {
   const cards = events;
 
   return (
-    <section className="section-curved py-24 bg-wedding-bg/90 backdrop-blur-md text-center relative border-b border-wedding-accent/30">
+    <section className="section-curved py-24 bg-wedding-bg/95 sm:bg-wedding-bg/90 sm:backdrop-blur-md text-center relative border-b border-wedding-accent/30">
       <GoldLeafBorder position="top" />
 
-      <RevealOnScroll direction="down" width="100%">
+      <RevealOnScroll direction="down" duration={0.55} once width="100%">
         <div className="flex flex-col items-center">
           <DiamondAccent />
           <h2 className="font-script text-3xl text-wedding-accent mb-4 mt-4 py-5">
@@ -34,7 +34,9 @@ export function EventSection({ events, heading }: EventSectionProps) {
           <RevealOnScroll
             key={`${e.title}-${idx}`}
             direction={idx % 2 === 0 ? "right" : "left"}
-            delay={0.2 + idx * 0.2}
+            delay={0.1 + idx * 0.1}
+            duration={0.55}
+            once
             width="100%"
           >
             <div className="bg-wedding-bg p-12 rounded-sm shadow-xl border border-wedding-accent/20 relative overflow-hidden group hover:-translate-y-2 transition-transform duration-500 h-full">

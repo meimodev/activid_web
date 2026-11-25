@@ -14,18 +14,18 @@ export function QuoteSection({ quote }: QuoteSectionProps) {
   if (!quote || !quote.text) return null;
 
   return (
-  <section className="section-curved relative py-24 bg-wedding-bg/60 backdrop-blur-sm flex flex-col items-center justify-center text-center overflow-hidden border-b border-wedding-accent/30">
+  <section className="section-curved relative py-24 bg-wedding-bg/85 sm:bg-wedding-bg/60 sm:backdrop-blur-sm flex flex-col items-center justify-center text-center overflow-hidden border-b border-wedding-accent/30">
   {/* Top Decoration */}
   <GoldLeafBorder position="top" />
 
   <div className="container mx-auto px-6 max-w-3xl relative z-10">
-  <RevealOnScroll direction="down" width="100%">
+  <RevealOnScroll direction="down" duration={0.55} once width="100%">
   <div className="flex flex-col items-center mb-10">
   <DiamondAccent />
   </div>
   </RevealOnScroll>
 
-  <RevealOnScroll delay={0.2} width="100%">
+  <RevealOnScroll delay={0.1} duration={0.55} once width="100%">
   <div className="relative p-8">
   {/* Decorative Quote Marks */}
   <span className="absolute -top-4 -left-2 font-serif text-8xl text-wedding-accent/10 pointer-events-none">“</span>
@@ -38,7 +38,7 @@ export function QuoteSection({ quote }: QuoteSectionProps) {
   </div>
   </RevealOnScroll>
 
-  <RevealOnScroll delay={0.4} direction="up" width="100%">
+  <RevealOnScroll delay={0.2} duration={0.55} direction="up" once width="100%">
   <div className="mt-12 flex flex-col items-center">
   <div className="w-12 h-px bg-wedding-accent/50 mb-4"></div>
   <p className="font-poppins-bold text-xs uppercase tracking-[0.3em] text-wedding-text-light font-semibold">

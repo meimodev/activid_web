@@ -16,7 +16,6 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { formatRelativeToNow } from "@/lib/date-time";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   SectionDivider,
   GoldLeafBorder,
@@ -321,10 +320,10 @@ export function Wishes({
   };
 
   return (
-    <section className="section-curved py-24 bg-wedding-bg/30 backdrop-blur-sm relative border-b border-wedding-accent/30">
+    <section className="section-curved py-24 bg-wedding-bg/90 sm:bg-wedding-bg/30 sm:backdrop-blur-sm relative border-b border-wedding-accent/30">
       <GoldLeafBorder position="top" />
       <div className="container mx-auto px-4 max-w-4xl">
-        <RevealOnScroll direction="down" width="100%">
+        <RevealOnScroll direction="down" duration={0.55} once width="100%">
           <div className="flex flex-col items-center">
             <DiamondAccent />
             <h2 className="text-center font-script text-4xl text-gold-gradient mb-4 mt-4 py-5 ">
@@ -335,9 +334,8 @@ export function Wishes({
         </RevealOnScroll>
 
         {/* Input Form */}
-        <RevealOnScroll delay={0.2} width="100%">
+        <RevealOnScroll delay={0.1} duration={0.55} once width="100%">
           <div className="bg-wedding-bg p-8 rounded-sm shadow-xl border border-wedding-accent/20 mb-16 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-wedding-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
             {!effectiveInviteeName ? (
               <div className="text-center font-garet-book text-wedding-text-light italic">
@@ -391,36 +389,31 @@ export function Wishes({
         </RevealOnScroll>
 
         {/* Wishes List */}
-        <RevealOnScroll delay={0.4} width="100%">
+        <RevealOnScroll delay={0.15} duration={0.55} once width="100%">
           <div
             ref={listContainerRef}
             className="space-y-6 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"
           >
-            <AnimatePresence>
-              {visibleWishes.map((wish) => (
-                <motion.div
-                  key={wish.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-wedding-bg p-6 rounded-sm shadow-sm border-l-4 border-wedding-accent/40"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-garet-book font-bold text-wedding-dark text-sm uppercase tracking-wider">
-                      {wish.name}
-                    </h4>
-                    <span className="text-[10px] text-wedding-text-light uppercase tracking-widest font-garet-book">
-                      {wish.createdAt
-                        ? formatRelativeToNow(wish.createdAt) || "Just now"
-                        : "Just now"}
-                    </span>
-                  </div>
-                  <p className="font-poppins text-wedding-text leading-relaxed">
-                    {wish.message}
-                  </p>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {visibleWishes.map((wish) => (
+              <div
+                key={wish.id}
+                className="bg-wedding-bg p-6 rounded-sm shadow-sm border-l-4 border-wedding-accent/40"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-garet-book font-bold text-wedding-dark text-sm uppercase tracking-wider">
+                    {wish.name}
+                  </h4>
+                  <span className="text-[10px] text-wedding-text-light uppercase tracking-widest font-garet-book">
+                    {wish.createdAt
+                      ? formatRelativeToNow(wish.createdAt) || "Just now"
+                      : "Just now"}
+                  </span>
+                </div>
+                <p className="font-poppins text-wedding-text leading-relaxed">
+                  {wish.message}
+                </p>
+              </div>
+            ))}
             {wishes.length === 0 && (
               <div className="text-center font-garet-book text-wedding-text-light italic py-12">
                 Be the first to wish them well.
